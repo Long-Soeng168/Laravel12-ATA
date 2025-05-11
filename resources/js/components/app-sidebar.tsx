@@ -211,12 +211,12 @@ export function AppSidebar() {
                     url: '/admin/messages',
                     icon: MailsIcon,
                 },
-                {
-                    title: t('Message Inquiries'),
-                    permission: 'message view',
-                    url: '/admin/message_inquiries',
-                    icon: MessageCircleQuestionIcon,
-                },
+                // {
+                //     title: t('Message Inquiries'),
+                //     permission: 'message view',
+                //     url: '/admin/message_inquiries',
+                //     icon: MessageCircleQuestionIcon,
+                // },
             ],
         },
         {

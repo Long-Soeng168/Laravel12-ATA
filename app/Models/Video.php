@@ -13,7 +13,7 @@ class Video extends Model
 
     public function playlist()
     {
-        return $this->belongsTo(VideoPlaylist::class, 'playlist_code', 'code');
+        return $this->belongsTo(VideoPlayList::class, 'playlist_code', 'code');
     }
     public function created_by()
     {
