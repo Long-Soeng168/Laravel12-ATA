@@ -1,12 +1,12 @@
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
-import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import useTranslation from '@/hooks/use-translation';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookmarkCheckIcon, FilePenLineIcon, Layers2Icon, LayoutDashboardIcon, ListTodoIcon, ShapesIcon, TagsIcon, Tally5Icon } from 'lucide-react';
+import { FilePenLineIcon, LayoutDashboardIcon, ListTodoIcon } from 'lucide-react';
+import { NavMain } from './nav-main';
 
 export function AppSidebar() {
     const { t, currentLocale } = useTranslation();
@@ -19,47 +19,15 @@ export function AppSidebar() {
         },
         {
             title: t('Items'),
-            permission: 'item view',
-            url: '/admin/items',
+            permission: 'Shop',
+            url: '/user-items',
             icon: ListTodoIcon,
-            subItems: [
-                {
-                    title: t('Items'),
-                    permission: 'item view',
-                    icon: ListTodoIcon,
-                    url: '/admin/items',
-                },
-                {
-                    title: t('Categories'),
-                    permission: 'item view',
-                    icon: Layers2Icon,
-                    url: '/admin/item_categories',
-                },
-                {
-                    title: t('Brands'),
-                    permission: 'item view',
-                    icon: TagsIcon,
-                    url: '/admin/item_brands',
-                },
-                {
-                    title: t('Models'),
-                    permission: 'item view',
-                    icon: BookmarkCheckIcon,
-                    url: '/admin/item_models',
-                },
-                {
-                    title: t('Body Types'),
-                    permission: 'item view',
-                    icon: ShapesIcon,
-                    url: '/admin/item_body_types',
-                },
-                {
-                    title: t('View Counts'),
-                    permission: 'item view',
-                    icon: Tally5Icon,
-                    url: '/admin/item_view_counts',
-                },
-            ],
+        },
+        {
+            title: t('Garage Posts'),
+            permission: 'Shop',
+            icon: FilePenLineIcon,
+            url: '/user-garage_posts',
         },
     ];
 

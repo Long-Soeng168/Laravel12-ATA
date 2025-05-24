@@ -5,44 +5,7 @@ import React from 'react';
 import NokorTechLayout from '../layouts/nokor-tech-layout';
 import CartItemFormCheckout from './components/CartItemFormCheckout';
 import CartItemSummary from './components/CartItemSummary';
-
-// Types
-type Product = {
-    id: number;
-    name: string;
-    image: string;
-    price: number;
-    quantity: number;
-    total: number;
-};
-
-type Option = { value: string; label: string };
-
-// Example products
-const products: Product[] = [
-    {
-        id: 1,
-        name: 'Gaming PC with Intel i7',
-        image: 'https://via.placeholder.com/100',
-        price: 4349.0,
-        quantity: 1,
-        total: 4349.0,
-    },
-    {
-        id: 2,
-        name: 'MSI MEG Trident X 10SD',
-        image: 'https://via.placeholder.com/100',
-        price: 4349.0,
-        quantity: 1,
-        total: 4349.0,
-    },
-];
-
-// Components
-
 const CheckoutPage: React.FC = () => {
-    
-
     return (
         <NokorTechLayout>
             <div className="mx-auto my-10 max-w-screen-xl px-4">

@@ -9,9 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ProgressWithValue } from '@/components/ui/progress-with-value';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useTranslation from '@/hooks/use-translation';
-import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
-import MyCkeditor5 from '@/pages/plugins/ckeditor5/my-ckeditor5';
 import { BreadcrumbItem } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm as inertiaUseForm, usePage } from '@inertiajs/react';
@@ -20,6 +18,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
+import UserDashboardAppLayout from '../layouts/app-layout';
 
 const formSchema = z.object({
     name: z.string().min(1).max(255),
@@ -92,7 +91,7 @@ export default function Create() {
             }));
 
             if (editData?.id) {
-                post(`/admin/items/${editData?.id}/update`, {
+                post(`/user-items/${editData?.id}/update`, {
                     preserveScroll: true,
                     onSuccess: (page) => {
                         setFiles(null);
@@ -114,7 +113,7 @@ export default function Create() {
                     },
                 });
             } else {
-                post('/admin/items', {
+                post('/user-items', {
                     preserveScroll: true,
                     onSuccess: (page) => {
                         form.reset();
@@ -149,7 +148,7 @@ export default function Create() {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: t('Items'),
-            href: '/admin/items',
+            href: '/user-items',
         },
         {
             title: currentBreadcrumb,
@@ -158,7 +157,7 @@ export default function Create() {
     ];
     // ===== End Our Code =====
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <UserDashboardAppLayout breadcrumbs={breadcrumbs}>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-5">
                     <div className="grid grid-cols-12 gap-4">
@@ -220,7 +219,7 @@ export default function Create() {
                                 )}
                             />
                         </div>
-                        <div className="col-span-6">
+                        <div className="col-span-6 hidden">
                             <FormField
                                 control={form.control}
                                 name="shop_id"
@@ -233,7 +232,7 @@ export default function Create() {
                                                     <Button
                                                         variant="outline"
                                                         role="combobox"
-                                                        className={cn('w-full justify-between', !field.value && 'text-muted-foreground')}
+                                                        className={cn('w-full justify-between opacity-40', !field.value && 'text-muted-foreground')}
                                                     >
                                                         {field.value
                                                             ? (() => {
@@ -241,58 +240,10 @@ export default function Create() {
                                                                   return shop ? `${shop.name}` : '';
                                                               })()
                                                             : t('Select shop')}
-
-                                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                     </Button>
                                                 </FormControl>
                                             </PopoverTrigger>
-                                            <PopoverContent className="p-0">
-                                                <Command>
-                                                    <CommandInput placeholder="Search shop..." />
-                                                    <CommandList>
-                                                        <CommandEmpty>{t('No data')}</CommandEmpty>
-                                                        <CommandGroup>
-                                                            <CommandItem
-                                                                value=""
-                                                                onSelect={() => {
-                                                                    form.setValue('shop_id', '');
-                                                                }}
-                                                            >
-                                                                <Check
-                                                                    className={cn('mr-2 h-4 w-4', '' == field.value ? 'opacity-100' : 'opacity-0')}
-                                                                />
-                                                                {t('Select shop')}
-                                                            </CommandItem>
-                                                            {shops?.map((shop) => (
-                                                                <CommandItem
-                                                                    value={shop.name}
-                                                                    key={shop.id}
-                                                                    onSelect={() => {
-                                                                        form.setValue('shop_id', shop.id);
-                                                                    }}
-                                                                >
-                                                                    <Check
-                                                                        className={cn(
-                                                                            'mr-2 h-4 w-4',
-                                                                            shop.id === field.value ? 'opacity-100' : 'opacity-0',
-                                                                        )}
-                                                                    />
-                                                                    {shop.logo && (
-                                                                        <img
-                                                                            className="size-6 object-contain"
-                                                                            src={`/assets/images/shops/thumb/${shop.logo}`}
-                                                                        />
-                                                                    )}
-                                                                    {shop.name}
-                                                                    {/* {shop.name_kh && `(${shop.name_kh})`} */}
-                                                                </CommandItem>
-                                                            ))}
-                                                        </CommandGroup>
-                                                    </CommandList>
-                                                </Command>
-                                            </PopoverContent>
                                         </Popover>
-                                        <FormDescription>{t('Select the shop where this item belong to.')}</FormDescription>
                                         <FormMessage>{errors.shop_id && <div>{errors.shop_id}</div>}</FormMessage>
                                     </FormItem>
                                 )}
@@ -665,7 +616,7 @@ export default function Create() {
                                                                             src={`/assets/images/item_body_types/thumb/${bodyType.image}`}
                                                                         />
                                                                     )}
-                                                                    {bodyType.name} 
+                                                                    {bodyType.name}
                                                                     {/* {bodyType.name_kh && `(${bodyType.name_kh})`} */}
                                                                 </CommandItem>
                                                             ))}
@@ -761,7 +712,7 @@ export default function Create() {
                                                 className="h-full w-full object-contain"
                                             />
                                             <span className="absolute top-1 right-1 group-hover:opacity-100 lg:opacity-0">
-                                                <DeleteButton deletePath="/admin/items/images/" id={imageObject.id} />
+                                                <DeleteButton deletePath="/user-items/images/" id={imageObject.id} />
                                             </span>
                                         </span>
                                     </>
@@ -796,6 +747,6 @@ export default function Create() {
                     )}
                 </form>
             </Form>
-        </AppLayout>
+        </UserDashboardAppLayout>
     );
 }

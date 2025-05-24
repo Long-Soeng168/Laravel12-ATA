@@ -1,7 +1,7 @@
 import useTranslation from '@/hooks/use-translation';
 import { BreadcrumbItem } from '@/types';
-import SectionCards from './components/SectionCards';
-import AppLayout from './layouts/app-layout';
+import SectionCards from './components/SectionCards'; 
+import UserDashboardAppLayout from './layouts/app-layout';
 
 const Index = () => {
     const { t } = useTranslation();
@@ -12,11 +12,11 @@ const Index = () => {
         },
     ];
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <UserDashboardAppLayout breadcrumbs={breadcrumbs}>
             <div className="p-4">
                 <SectionCards />
             </div>
-        </AppLayout>
+        </UserDashboardAppLayout>
     );
 };
 

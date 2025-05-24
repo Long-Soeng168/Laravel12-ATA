@@ -7,6 +7,7 @@ use App\Http\Controllers\CareerController;
 use App\Http\Controllers\CareerSubmitController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentPathController;
 use App\Http\Controllers\GarageController;
 use App\Http\Controllers\GaragePostController;
 use App\Http\Controllers\DtcController;
@@ -87,6 +88,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('admin/links', LinkController::class);
     Route::post('admin/links/{link}/update', [LinkController::class, 'update']);
     Route::post('admin/links/{link}/update_status', [LinkController::class, 'update_status']);
+
+    // Document Paths Route
+    Route::resource('admin/document_paths', DocumentPathController::class);
+    Route::post('admin/document_paths/{document_path}/update', [DocumentPathController::class, 'update']);
+    Route::post('admin/document_paths/{document_path}/update_status', [DocumentPathController::class, 'update_status']);
 
     // Partners Route
     Route::resource('admin/partners', PartnerController::class);

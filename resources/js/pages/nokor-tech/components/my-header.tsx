@@ -1,7 +1,10 @@
 import MySelectLanguageSwitch from '@/components/my-select-language-switch';
 import ToggleModeSwitch from '@/components/toggle-mode-switch';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { useInitials } from '@/hooks/use-initials';
+import useRole from '@/hooks/use-role';
 import useTranslation from '@/hooks/use-translation';
 import { Link, usePage } from '@inertiajs/react';
 import { Menu, Search, User2Icon } from 'lucide-react';
@@ -22,6 +25,9 @@ const MyHeader = () => {
         { label: t('About'), href: '/about-us' },
         { label: t('Contact'), href: '/contact-us' },
     ];
+    const { auth } = usePage().props;
+    const hasRole = useRole();
+    const getInitials = useInitials();
 
     const renderNavLink = ({ label, href }) => {
         const isActive = window.location.pathname === href;
@@ -123,7 +129,7 @@ const MyHeader = () => {
                         </div>
 
                         {/* Actions */}
-                        <div className="flex shrink-0 gap-4 px-4">
+                        <div className="flex shrink-0 items-center gap-4 px-4">
                             <Sheet>
                                 <SheetTrigger asChild>
                                     <Button size="icon" variant="ghost" className="text-primary">
@@ -140,11 +146,23 @@ const MyHeader = () => {
                             <Link prefetch href="/shopping-cart">
                                 <CartButton />
                             </Link>
-                            <Link prefetch href="/login">
-                                <Button size="icon" variant="ghost" className="text-primary">
-                                    <User2Icon />
-                                </Button>
-                            </Link>
+                            {auth?.user ? (
+                                <Link prefetch href={hasRole('User') || hasRole('Garage') || hasRole('Shop') ? '/user-dashboard' : '/dashboard'}>
+                                    <Avatar className="h-8 w-8 overflow-hidden rounded-full">
+                                        <AvatarImage src={`/assets/images/users/thumb/${auth?.user?.image}`} alt={auth?.user?.name} />
+
+                                        <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                            {getInitials(auth?.user?.name)}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                </Link>
+                            ) : (
+                                <Link prefetch href="/login">
+                                    <Button size="icon" variant="ghost" className="text-primary">
+                                        <User2Icon />
+                                    </Button>
+                                </Link>
+                            )}
                             <MySelectLanguageSwitch />
                             <ToggleModeSwitch />
                         </div>

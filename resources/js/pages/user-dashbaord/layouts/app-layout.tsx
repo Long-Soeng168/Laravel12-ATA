@@ -9,7 +9,7 @@ interface AppLayoutProps {
     breadcrumbs?: BreadcrumbItem[];
 }
 
-const AppLayout = ({ children, breadcrumbs, ...props }: AppLayoutProps) => {
+const UserDashboardAppLayout = ({ children, breadcrumbs, ...props }: AppLayoutProps) => {
     const { currentLocale } = useTranslation();
     return (
         <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
@@ -19,4 +19,4 @@ const AppLayout = ({ children, breadcrumbs, ...props }: AppLayoutProps) => {
     );
 };
 
-export default AppLayout;
+export default UserDashboardAppLayout;

@@ -106,6 +106,9 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'video delete']);
         // Document
         Permission::firstOrCreate(['name' => 'document view']);
+        Permission::firstOrCreate(['name' => 'document create']);
+        Permission::firstOrCreate(['name' => 'document update']);
+        Permission::firstOrCreate(['name' => 'document delete']);
         // Partner
         Permission::firstOrCreate(['name' => 'partner view']);
         Permission::firstOrCreate(['name' => 'partner create']);

@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useCart } from '@/contexts/cart-contexts';
 import useTranslation from '@/hooks/use-translation';
-import { Link, router, useForm } from '@inertiajs/react';
+import { Link, router, useForm, usePage } from '@inertiajs/react';
 import { Loader } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -21,6 +21,7 @@ const FormField: React.FC<{
 
 const CartItemFormCheckout = () => {
     const { t } = useTranslation();
+    const { auth } = usePage().props;
     const { cartItems, clearCart } = useCart();
     const cartItemTotals =
         cartItems?.map((item) => {
@@ -43,8 +44,8 @@ const CartItemFormCheckout = () => {
     const orderTotal = cartItemTotals.reduce((sum, item) => sum + item.total, 0);
 
     const { data, setData, post, processing, errors } = useForm({
-        name: '',
-        phone: '',
+        name: auth?.user?.name || '',
+        phone: auth?.user?.phone || '',
         note: '',
         total: orderTotal,
         items: cartItemTotals,
@@ -86,6 +87,7 @@ const CartItemFormCheckout = () => {
                         autoComplete="name"
                         name="name"
                         required
+                        disabled
                         value={data.name}
                         onChange={(e) => setData('name', e.target.value)}
                         className="bg-muted w-full rounded-md border px-4 py-2"
@@ -99,6 +101,7 @@ const CartItemFormCheckout = () => {
                         autoComplete="phone"
                         name="phone"
                         required
+                        disabled
                         value={data.phone}
                         onChange={(e) => setData('phone', e.target.value)}
                         className="bg-muted w-full rounded-md border px-4 py-2"
