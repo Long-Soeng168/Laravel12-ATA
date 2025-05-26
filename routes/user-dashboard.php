@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\UserDashboard\UserDashboardController;
+use App\Http\Controllers\UserDashboard\UserGaragePostController;
 use App\Http\Controllers\UserDashboard\UserItemController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,4 +13,10 @@ Route::middleware('auth')->group(function () {
     Route::post('user-items/{user_item}/update_status', [UserItemController::class, 'update_status']);
     Route::delete('user-items/images/{image}', [UserItemController::class, 'destroy_image']);
     Route::get('admin/item_view_counts', [UserItemController::class, 'item_view_counts']);
+
+    // Garage Post Route
+    Route::resource('user-garage_posts', UserGaragePostController::class);
+    Route::post('user-garage_posts/{user_garage_post}/update', [UserGaragePostController::class, 'update']);
+    Route::post('user-garage_posts/{user_garage_post}/update_status', [UserGaragePostController::class, 'update_status']);
+    Route::delete('user-garage_posts/images/{image}', [UserGaragePostController::class, 'destroy_image']);
 });

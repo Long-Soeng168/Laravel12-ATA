@@ -26,7 +26,7 @@ require __DIR__ . '/nokor_tech.php';
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
 
-require __DIR__ . '/user-dashbaord.php';
+require __DIR__ . '/user-dashboard.php';
 require __DIR__ . '/admin.php';
 
 require __DIR__ . '/file_manager.php';

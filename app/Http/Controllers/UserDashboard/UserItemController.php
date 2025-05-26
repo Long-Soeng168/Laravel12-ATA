@@ -64,7 +64,7 @@ class UserItemController extends Controller implements HasMiddleware
 
         $tableData = $query->paginate(perPage: 10)->onEachSide(1);
 
-        return Inertia::render('user-dashbaord/items/Index', [
+        return Inertia::render('user-dashboard/items/Index', [
             'tableData' => $tableData,
         ]);
     }
@@ -74,7 +74,7 @@ class UserItemController extends Controller implements HasMiddleware
      */
     public function create(Request $request)
     {
-        return Inertia::render('user-dashbaord/items/Create', [
+        return Inertia::render('user-dashboard/items/Create', [
             'itemCategories' => ItemCategory::where('status', 'active')->orderBy('name')->get(),
             'itemBrands' => ItemBrand::where('status', 'active')->orderBy('name')->get(),
             'itemModels' => ItemModel::where('status', 'active')->orderBy('name')->get(),
@@ -156,7 +156,7 @@ class UserItemController extends Controller implements HasMiddleware
         if ($user_item->shop_id != Auth::user()->shop_id) {
             abort(404);
         }
-        return Inertia::render('user-dashbaord/items/Create', [
+        return Inertia::render('user-dashboard/items/Create', [
             'editData' => $user_item->load('images'),
             'readOnly' => true,
             'itemCategories' => ItemCategory::where('status', 'active')->orderBy('name')->get(),
@@ -176,7 +176,7 @@ class UserItemController extends Controller implements HasMiddleware
         if ($user_item->shop_id != Auth::user()->shop_id) {
             abort(404);
         }
-        return Inertia::render('user-dashbaord/items/Create', [
+        return Inertia::render('user-dashboard/items/Create', [
             'editData' => $user_item->load('images'),
             'itemCategories' => ItemCategory::where('status', 'active')->orderBy('name')->get(),
             'itemBrands' => ItemBrand::where('status', 'active')->orderBy('name')->get(),
@@ -339,7 +339,7 @@ class UserItemController extends Controller implements HasMiddleware
 
         $tableData = $query->paginate(perPage: 10)->onEachSide(1);
 
-        return Inertia::render('user-dashbaord/items/ItemViewCount', [
+        return Inertia::render('user-dashboard/items/ItemViewCount', [
             'tableData' => $tableData,
             'totalViews' => $totalViews,
             'from_date' => $from_date,

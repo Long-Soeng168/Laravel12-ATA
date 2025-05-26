@@ -10,6 +10,6 @@ class UserDashboardController extends Controller
 {
     public function index()
     {
-        return Inertia::render("user-dashbaord/Dashboard");
+        return Inertia::render("user-dashboard/Dashboard");
     }
 }
