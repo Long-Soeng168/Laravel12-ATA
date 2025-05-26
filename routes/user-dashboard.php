@@ -3,6 +3,7 @@
 use App\Http\Controllers\UserDashboard\UserDashboardController;
 use App\Http\Controllers\UserDashboard\UserGaragePostController;
 use App\Http\Controllers\UserDashboard\UserItemController;
+use App\Http\Controllers\UserDashboard\UserShopController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
@@ -19,4 +20,8 @@ Route::middleware('auth')->group(function () {
     Route::post('user-garage_posts/{user_garage_post}/update', [UserGaragePostController::class, 'update']);
     Route::post('user-garage_posts/{user_garage_post}/update_status', [UserGaragePostController::class, 'update_status']);
     Route::delete('user-garage_posts/images/{image}', [UserGaragePostController::class, 'destroy_image']);
+
+    // Shop Route
+    Route::get('user-shops/update', [UserShopController::class, 'edit']);
+    Route::post('user-shops/{admin_shop}/update', [UserShopController::class, 'update']);
 });

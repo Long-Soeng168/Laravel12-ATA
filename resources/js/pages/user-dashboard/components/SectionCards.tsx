@@ -1,8 +1,9 @@
 import useRole from '@/hooks/use-role';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { CarIcon, PackageIcon, StoreIcon, UserIcon } from 'lucide-react';
 
 const SectionCards = () => {
+    const { item_counts } = usePage().props;
     const features = [
         {
             icon: UserIcon,
@@ -14,13 +15,21 @@ const SectionCards = () => {
             icon: StoreIcon,
             role: 'Shop',
             title: 'Shop Settings',
-            link: '/shop/settings',
+            link: '/user-shops/update',
+            stats: [
+                { label: 'Items', value: item_counts, link: '/user-items' },
+                // { label: 'Total Views', value: 421 },
+            ],
         },
         {
             icon: CarIcon,
             role: 'Garage',
             title: 'Garage Settings',
             link: '/garage/settings',
+            stats: [
+                { label: 'Posts', value: item_counts, link: '/user-garage_posts' },
+                // { label: 'Total Views', value: 421 },
+            ],
         },
         {
             icon: PackageIcon,
@@ -47,7 +56,26 @@ const SectionCards = () => {
                                 <feature.icon className="stroke-primary aspect-square size-7 object-contain" />
                             </div>
                             <div className="flex flex-col items-start">
-                                <span className="text-lg font-bold">{feature.title}</span>
+                                <span className="text-lg font-bold underline-offset-4 hover:underline">{feature.title}</span>
+
+                                {/* Optional stats display */}
+                                {feature.stats && (
+                                    <div className="mt-1 space-y-1 text-sm text-gray-500">
+                                        {feature.stats.map((stat, idx) => (
+                                            <div key={idx}>
+                                                {stat.link ? (
+                                                    <Link href={stat.link} className="text-primary hover:underline hover:underline-offset-4">
+                                                        {stat.label}: {stat.value}
+                                                    </Link>
+                                                ) : (
+                                                    <span>
+                                                        {stat.label}: {stat.value}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </Link>
                     ) : null,

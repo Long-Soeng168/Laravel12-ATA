@@ -5,7 +5,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import useTranslation from '@/hooks/use-translation';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { FilePenLineIcon, LayoutDashboardIcon, ListTodoIcon } from 'lucide-react';
+import { CarIcon, FilePenLineIcon, LayoutDashboardIcon, ListTodoIcon, StoreIcon } from 'lucide-react';
 import { NavMain } from './nav-main';
 
 export function AppSidebar() {
@@ -18,16 +18,44 @@ export function AppSidebar() {
             icon: LayoutDashboardIcon,
         },
         {
-            title: t('Items'),
+            title: t('Your Shop'),
             permission: 'Shop',
-            url: '/user-items',
-            icon: ListTodoIcon,
+            url: '/user-shops/update',
+            icon: StoreIcon,
+            subItems: [
+                {
+                    title: t('Shop Settings'),
+                    permission: 'Shop',
+                    url: '/user-shops/update',
+                    icon: StoreIcon,
+                },
+                {
+                    title: t('Items'),
+                    permission: 'Shop',
+                    url: '/user-items',
+                    icon: ListTodoIcon,
+                },
+            ],
         },
         {
-            title: t('Garage Posts'),
-            permission: 'Shop',
-            icon: FilePenLineIcon,
-            url: '/user-garage_posts',
+            title: t('Your Garage'),
+            permission: 'Garage',
+            url: '/user-garages/update',
+            icon: CarIcon,
+            subItems: [
+                {
+                    title: t('Garage Settings'),
+                    permission: 'Garage',
+                    url: '/user-garages/update',
+                    icon: CarIcon,
+                },
+                {
+                    title: t('Posts'),
+                    permission: 'Garage',
+                    icon: FilePenLineIcon,
+                    url: '/user-garage_posts',
+                },
+            ],
         },
     ];
 
