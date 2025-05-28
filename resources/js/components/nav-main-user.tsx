@@ -1,3 +1,4 @@
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
     SidebarGroup,
     SidebarGroupLabel,
@@ -8,12 +9,11 @@ import {
     SidebarMenuSubButton,
     SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
+import useRole from '@/hooks/use-role';
 import useTranslation from '@/hooks/use-translation';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import useRole from '@/hooks/use-role';
 
 export function NavMainUser({ items = [] }: { items: NavItem[] }) {
     const { t } = useTranslation();
@@ -21,7 +21,7 @@ export function NavMainUser({ items = [] }: { items: NavItem[] }) {
     const hasRole = useRole();
     return (
         <SidebarGroup className="px-2 py-0">
-            <SidebarGroupLabel>{t('Menu')}</SidebarGroupLabel>
+            {/* <SidebarGroupLabel>{t('User Menu')}</SidebarGroupLabel> */}
             <SidebarMenu>
                 {items.map((item) => {
                     if (item.permission && !hasRole(item.permission)) return null;

@@ -14,7 +14,6 @@ import useTranslation from '@/hooks/use-translation';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { Loader2Icon } from 'lucide-react';
-import { AppHeader } from '@/components/app-header';
 
 interface ProfileForm {
     name: string;
@@ -53,12 +52,12 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <AppHeader />
+            {/* <AppHeader /> */}
             <Head title="Profile settings" />
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title={t("Profile information")} description={t("Update your name and email address")} />
+                    <HeadingSmall title={t('Profile information')} description={t('Update your name and email address')} />
 
                     <form onSubmit={submit} className="space-y-6">
                         <div className="grid gap-2">

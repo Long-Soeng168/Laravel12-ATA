@@ -2,6 +2,7 @@ import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import useRole from '@/hooks/use-role';
 import useTranslation from '@/hooks/use-translation';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
@@ -40,9 +41,12 @@ import {
     WarehouseIcon,
 } from 'lucide-react';
 import AppLogo from './app-logo';
+import { NavMainUser } from './nav-main-user';
 
 export function AppSidebar() {
     const { t, currentLocale } = useTranslation();
+    const hasRole = useRole();
+
     const mainNavItems: NavItem[] = [
         {
             title: t('Dashboard'),
@@ -387,6 +391,54 @@ export function AppSidebar() {
         //     icon: Folder,
         // },
     ];
+    const userNavItems: NavItem[] = [
+        // {
+        //     title: t('Dashboard'),
+        //     permission: '',
+        //     url: '/dashboard',
+        //     icon: LayoutDashboardIcon,
+        // },
+        {
+            title: t('Your Shop'),
+            permission: 'Shop',
+            url: '/user-shops/update',
+            icon: StoreIcon,
+            subItems: [
+                {
+                    title: t('Shop Settings'),
+                    permission: 'Shop',
+                    url: '/user-shops/update',
+                    icon: StoreIcon,
+                },
+                {
+                    title: t('Items'),
+                    permission: 'Shop',
+                    url: '/user-items',
+                    icon: ListTodoIcon,
+                },
+            ],
+        },
+        {
+            title: t('Your Garage'),
+            permission: 'Garage',
+            url: '/user-garages/update',
+            icon: CarIcon,
+            subItems: [
+                {
+                    title: t('Garage Settings'),
+                    permission: 'Garage',
+                    url: '/user-garages/update',
+                    icon: CarIcon,
+                },
+                {
+                    title: t('Posts'),
+                    permission: 'Garage',
+                    icon: FilePenLineIcon,
+                    url: '/user-garage_posts',
+                },
+            ],
+        },
+    ];
     return (
         <Sidebar collapsible="icon" variant="inset" className={`${currentLocale == 'kh' ? 'font-siemreap-regular' : 'font-poppins-regular'}`}>
             <SidebarHeader>
@@ -403,6 +455,7 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
+                <NavMainUser items={userNavItems} />
             </SidebarContent>
 
             <SidebarFooter>

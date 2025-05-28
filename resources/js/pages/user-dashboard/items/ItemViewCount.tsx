@@ -4,12 +4,12 @@ import { MySearchTableData } from '@/components/my-search-table-data';
 import { Button } from '@/components/ui/button';
 import { CalendarDatePicker } from '@/components/ui/calendar-date-picker';
 import useTranslation from '@/hooks/use-translation';
+import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { useForm as inertiaUseForm, usePage } from '@inertiajs/react';
 import { EyeIcon, FileUpIcon } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import UserDashboardAppLayout from '../layouts/app-layout';
 import ViewCountMyTableData from './components/view-count-my-table-data';
 
 const ItemViewCount = () => {
@@ -64,7 +64,7 @@ const ItemViewCount = () => {
     }
 
     return (
-        <UserDashboardAppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <div className="flex max-w-[100vw] flex-wrap items-center justify-end gap-2">
                 <div className="flex max-w-[100vw] flex-wrap items-center justify-start gap-2 max-lg:w-full lg:flex-1">
                     <MySearchTableData />
@@ -108,7 +108,7 @@ const ItemViewCount = () => {
             <div className="h-2" />
             <ViewCountMyTableData />
             <MyPagination />
-        </UserDashboardAppLayout>
+        </AppLayout>
     );
 };
 

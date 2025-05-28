@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ProgressWithValue } from '@/components/ui/progress-with-value';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useTranslation from '@/hooks/use-translation';
+import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,7 +20,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
-import UserDashboardAppLayout from '../layouts/app-layout';
 
 const formSchema = z.object({
     title: z.string().min(1).max(255),
@@ -159,7 +159,7 @@ export default function Create() {
     ];
     // ===== End Our Code =====
     return (
-        <UserDashboardAppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-5">
                     <div className="grid grid-cols-12 gap-4">
@@ -580,6 +580,6 @@ export default function Create() {
                     )}
                 </form>
             </Form>
-        </UserDashboardAppLayout>
+        </AppLayout>
     );
 }
