@@ -114,7 +114,7 @@ export default function Create() {
                     },
                 });
             } else {
-                post('/admin/garage_posts', {
+                post('/user-garage_posts', {
                     preserveScroll: true,
                     onSuccess: (page) => {
                         form.reset();

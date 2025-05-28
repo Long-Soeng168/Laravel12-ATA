@@ -14,6 +14,7 @@ import useTranslation from '@/hooks/use-translation';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { Loader2Icon } from 'lucide-react';
+import { AppHeader } from '@/components/app-header';
 
 interface ProfileForm {
     name: string;
@@ -52,6 +53,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            <AppHeader />
             <Head title="Profile settings" />
 
             <SettingsLayout>

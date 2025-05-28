@@ -92,7 +92,7 @@ export default function Create({
                 banner: filesBanner ? filesBanner[0] : null,
             }));
             if (editData?.id) {
-                post('/user-shops/' + editData?.id + '/update', {
+                post('/user-garages/' + editData?.id + '/update', {
                     preserveScroll: true,
                     onSuccess: (page) => {
                         setFiles(null);
@@ -119,7 +119,7 @@ export default function Create({
     }
     // ===== End Our Code =====
 
-    const currentBreadcrumb = readOnly ? t('Show') : editData ? t('Edit Shop') : t('Create');
+    const currentBreadcrumb = readOnly ? t('Show') : editData ? t('Edit Garage') : t('Create');
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: t('Dashboard'),
@@ -266,7 +266,7 @@ export default function Create({
                                                             {all_users?.map((item) => {
                                                                 return (
                                                                     <CommandItem
-                                                                        value={item.name + item.id + item.email}
+                                                                        value={item.name + item.id}
                                                                         key={item.id}
                                                                         onSelect={() => {
                                                                             form.setValue('owner_user_id', item.id.toString());
@@ -368,7 +368,7 @@ export default function Create({
                                                 className="group bg-background relative aspect-video h-auto w-full overflow-hidden rounded-md border p-0"
                                             >
                                                 <img
-                                                    src={'/assets/images/shops/thumb/' + editData?.logo}
+                                                    src={'/assets/images/garages/thumb/' + editData?.logo}
                                                     alt={editData?.logo}
                                                     className="h-full w-full object-contain"
                                                 />
@@ -425,7 +425,7 @@ export default function Create({
                                                 className="group bg-background relative aspect-video h-auto w-full overflow-hidden rounded-md border p-0"
                                             >
                                                 <img
-                                                    src={'/assets/images/shops/thumb/' + editData?.banner}
+                                                    src={'/assets/images/garages/thumb/' + editData?.banner}
                                                     alt={editData?.banner}
                                                     className="h-full w-full object-contain"
                                                 />

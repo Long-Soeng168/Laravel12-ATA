@@ -18,6 +18,7 @@ const MyHeader = () => {
     const navItems1 = [
         { label: t('Products'), href: '/products' },
         { label: t('Online Trainings'), href: '/online_trainings' },
+        { label: t('Documents'), href: '/documents' },
     ];
 
     const navItems2 = [

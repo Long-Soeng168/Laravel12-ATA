@@ -4,7 +4,7 @@ namespace App\Http\Controllers\UserDashboard;
 
 use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
-use App\Models\Shop;
+use App\Models\Garage;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,42 +13,39 @@ use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Support\Facades\Auth;
 
-class UserShopController extends Controller implements HasMiddleware
+class UserGarageController extends Controller implements HasMiddleware
 {
     public static function middleware(): array
     {
         return [
-            new Middleware('role:Shop', only: ['edit', 'update', 'update_status']),
+            new Middleware('permission:garage view', only: ['index', 'show', 'all_garages']),
+            new Middleware('permission:garage create', only: ['create', 'store']),
+            new Middleware('role:Garage', only: ['edit', 'update', 'update_status']),
+            new Middleware('permission:garage delete', only: ['destroy', 'destroy_image']),
         ];
     }
-    /**
-     * Display a listing of the resource.
-     */
     public function edit()
     {
+
         $all_users = User::orderBy('id', 'desc')
-            ->where('shop_id', null)
+            ->where('garage_id', null)
             ->get();
-        $user_shop = Shop::findOrFail(Auth::user()->shop_id);
-        if ($user_shop->id != Auth::user()->shop_id) {
+        // return ($all_users);
+        $user_garage = Garage::where('id', Auth::user()->garage_id)->first();
+        if ($user_garage->id != Auth::user()->garage_id) {
             abort(404);
         }
-        // return ($all_users);
-        return Inertia::render('user-dashboard/shops/Create', [
-            'editData' => $user_shop->load('owner'),
+        return Inertia::render('user-dashboard/garages/Create', [
+            'editData' => $user_garage->load('owner'),
             'all_users' => $all_users,
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Shop $user_shop)
+    public function update(Request $request, Garage $user_garage)
     {
-        if ($user_shop->id != Auth::user()->shop_id) {
+        if ($user_garage->id != Auth::user()->garage_id) {
             abort(404);
         }
-
         $validated = $request->validate([
             'owner_user_id' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
@@ -65,9 +62,9 @@ class UserShopController extends Controller implements HasMiddleware
 
         $validated['updated_by'] = $request->user()->id;
 
-        if ($validated['owner_user_id'] != $user_shop->owner_user_id) {
-            User::where('id', $user_shop->owner_user_id)->update([
-                'shop_id' => null,
+        if ($validated['owner_user_id'] != $user_garage->owner_user_id) {
+            User::where('id', $user_garage->owner_user_id)->update([
+                'garage_id' => null,
             ]);
         }
 
@@ -84,11 +81,11 @@ class UserShopController extends Controller implements HasMiddleware
 
         if ($image_file) {
             try {
-                $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/shops', 600);
+                $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/garages', 600);
                 $validated['logo'] = $created_image_name;
 
-                if ($user_shop->logo && $created_image_name) {
-                    ImageHelper::deleteImage($user_shop->logo, 'assets/images/shops');
+                if ($user_garage->logo && $created_image_name) {
+                    ImageHelper::deleteImage($user_garage->logo, 'assets/images/garages');
                 }
             } catch (\Exception $e) {
                 return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
@@ -96,38 +93,38 @@ class UserShopController extends Controller implements HasMiddleware
         }
         if ($banner_file) {
             try {
-                $created_image_name = ImageHelper::uploadAndResizeImageWebp($banner_file, 'assets/images/shops', 1200);
+                $created_image_name = ImageHelper::uploadAndResizeImageWebp($banner_file, 'assets/images/garages', 900);
                 $validated['banner'] = $created_image_name;
 
-                if ($user_shop->banner && $created_image_name) {
-                    ImageHelper::deleteImage($user_shop->banner, 'assets/images/shops');
+                if ($user_garage->banner && $created_image_name) {
+                    ImageHelper::deleteImage($user_garage->banner, 'assets/images/garages');
                 }
             } catch (\Exception $e) {
                 return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
             }
         }
 
-        $updated_success = $user_shop->update($validated);
+        $updated_success = $user_garage->update($validated);
 
         if ($updated_success) {
-            $user = User::where('id', $validated['owner_user_id'])->where('shop_id', null)->first();
+            $user = User::where('id', $validated['owner_user_id'])->where('garage_id', null)->first();
             if ($user)
                 $user->update([
-                    'shop_id' => $user_shop->id,
+                    'garage_id' => $user_garage->id,
                 ]);
         }
 
 
-        return redirect()->back()->with('success', 'Shop updated successfully!');
+        return redirect()->back()->with('success', 'Garage updated successfully!');
     }
 
 
-    public function update_status(Request $request, Shop $user_shop)
+    public function update_status(Request $request, Garage $user_garage)
     {
         $request->validate([
             'status' => 'required|string|in:active,inactive',
         ]);
-        $user_shop->update([
+        $user_garage->update([
             'status' => $request->status,
         ]);
 
@@ -137,15 +134,15 @@ class UserShopController extends Controller implements HasMiddleware
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Shop $user_shop)
+    public function destroy(Garage $user_garage)
     {
-        if ($user_shop->logo) {
-            ImageHelper::deleteImage($user_shop->logo, 'assets/images/shops');
+        if ($user_garage->logo) {
+            ImageHelper::deleteImage($user_garage->logo, 'assets/images/garages');
         }
-        if ($user_shop->banner) {
-            ImageHelper::deleteImage($user_shop->banner, 'assets/images/shops');
+        if ($user_garage->banner) {
+            ImageHelper::deleteImage($user_garage->banner, 'assets/images/garages');
         }
-        $user_shop->delete();
-        return redirect()->back()->with('success', 'Shop deleted successfully.');
+        $user_garage->delete();
+        return redirect()->back()->with('success', 'Garage deleted successfully.');
     }
 }

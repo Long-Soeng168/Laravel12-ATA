@@ -3,7 +3,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { CarIcon, PackageIcon, StoreIcon, UserIcon } from 'lucide-react';
 
 const SectionCards = () => {
-    const { item_counts } = usePage().props;
+    const { item_counts, garage_post_counts } = usePage().props;
     const features = [
         {
             icon: UserIcon,
@@ -25,9 +25,9 @@ const SectionCards = () => {
             icon: CarIcon,
             role: 'Garage',
             title: 'Garage Settings',
-            link: '/garage/settings',
+            link: '/user-garages/update',
             stats: [
-                { label: 'Posts', value: item_counts, link: '/user-garage_posts' },
+                { label: 'Posts', value: garage_post_counts, link: '/user-garage_posts' },
                 // { label: 'Total Views', value: 421 },
             ],
         },

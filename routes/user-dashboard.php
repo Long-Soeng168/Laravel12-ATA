@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\UserDashboard\UserDashboardController;
+use App\Http\Controllers\UserDashboard\UserGarageController;
 use App\Http\Controllers\UserDashboard\UserGaragePostController;
 use App\Http\Controllers\UserDashboard\UserItemController;
 use App\Http\Controllers\UserDashboard\UserShopController;
@@ -23,5 +24,9 @@ Route::middleware('auth')->group(function () {
 
     // Shop Route
     Route::get('user-shops/update', [UserShopController::class, 'edit']);
-    Route::post('user-shops/{admin_shop}/update', [UserShopController::class, 'update']);
+    Route::post('user-shops/{user_shop}/update', [UserShopController::class, 'update']);
+
+    // Garage Route
+    Route::get('user-garages/update', [UserGarageController::class, 'edit']);
+    Route::post('user-garages/{user_garage}/update', [UserGarageController::class, 'update']);
 });
