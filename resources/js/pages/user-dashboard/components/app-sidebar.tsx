@@ -6,7 +6,6 @@ import useTranslation from '@/hooks/use-translation';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { CarIcon, FilePenLineIcon, LayoutDashboardIcon, ListTodoIcon, StoreIcon } from 'lucide-react';
-import { NavMain } from './nav-main';
 
 export function AppSidebar() {
     const { t, currentLocale } = useTranslation();
