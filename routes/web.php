@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\StreamFileController;
 use Illuminate\Support\Facades\Route;
 
 // Default Homepage
@@ -16,6 +17,9 @@ Route::get('/lang/{locale}', function ($locale) {
    session(['locale' => $locale]);
    return redirect()->back();
 });
+
+// Stream File
+Route::get('show_pdf_file/{path}', [StreamFileController::class, 'streamPdf'])->where('path', '.*');
 
 // ========= Client =========
 require __DIR__ . '/nokor_tech.php';
