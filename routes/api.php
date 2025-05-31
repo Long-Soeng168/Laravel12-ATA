@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\BannerController;
+use App\Http\Controllers\Api\DtcController;
 use App\Http\Controllers\Api\FileExploreController;
 use App\Http\Controllers\Api\LinkController;
 use App\Http\Controllers\Api\PageController;
@@ -23,3 +24,6 @@ Route::get('/post_categories', [PostController::class, 'post_categories']);
 
 // Documents Route
 Route::get('/file-explorer/folder/{path}', [FileExploreController::class, 'folder']);
+
+// DTC Route
+Route::resource('dtcs', DtcController::class);
