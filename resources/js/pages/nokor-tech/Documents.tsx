@@ -25,7 +25,7 @@ const Documents = () => {
             price: 9,
             isRecommended: true,
             isPopular: true,
-            description: 'Enjoy a full year of unlimited access to every car brand’s documents, with priority support and updates.',
+            description: 'Enjoy a full year of unlimited access to every car brand`s documents, with priority support and updates.',
             features: [
                 { title: 'Access to all car brands' },
                 { title: 'Unlimited document downloads' },
