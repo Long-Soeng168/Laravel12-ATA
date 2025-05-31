@@ -11,7 +11,6 @@ import { ArrowUpDown } from 'lucide-react';
 import { useState } from 'react';
 import EditButton from './edit-button';
 import ViewButton from './view-button';
-import { formatDate } from '@/components/my-date-formart';
 
 const MyTableData = () => {
     const hasPermission = usePermission();
@@ -34,7 +33,6 @@ const MyTableData = () => {
         }
         router.get(currentPath + '?' + queryParams?.toString());
     };
-
 
     const [selectedImages, setSelectedImages] = useState([]);
     const [isOpenViewImages, setIsOpenViewImages] = useState(false);
@@ -84,7 +82,7 @@ const MyTableData = () => {
                                 </span>
                             </TableHead>
 
-                            <TableHead onClick={() => handleSort('start_at')}>
+                            {/* <TableHead onClick={() => handleSort('start_at')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Start Date')}
                                 </span>
@@ -94,7 +92,7 @@ const MyTableData = () => {
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('End Date')}
                                 </span>
-                            </TableHead>
+                            </TableHead> */}
 
                             <TableHead onClick={() => handleSort('status')}>
                                 <span className="flex cursor-pointer items-center">
@@ -152,8 +150,8 @@ const MyTableData = () => {
                                     <TableCell>{item.price ? `$${item.price}` : '---'}</TableCell>
                                     <TableCell>{item.short_description || '---'}</TableCell>
                                     <TableCell>{item.short_description_kh || '---'}</TableCell>
-                                    <TableCell>{item.start_at ? formatDate(item.start_at) : '---'}</TableCell>
-                                    <TableCell>{item.end_at ? formatDate(item.end_at) : '---'}</TableCell>
+                                    {/* <TableCell>{item.start_at ? formatDate(item.start_at) : '---'}</TableCell>
+                                    <TableCell>{item.end_at ? formatDate(item.end_at) : '---'}</TableCell> */}
 
                                     {/* <TableCell>{item.image || '---'}</TableCell> */}
                                     <TableCell>
@@ -172,19 +170,19 @@ const MyTableData = () => {
                                     <TableCell>
                                         {item.created_at
                                             ? new Date(item.created_at).toLocaleDateString('en-UK', {
-                                                year: 'numeric',
-                                                month: 'long',
-                                                day: 'numeric',
-                                            })
+                                                  year: 'numeric',
+                                                  month: 'long',
+                                                  day: 'numeric',
+                                              })
                                             : '---'}
                                     </TableCell>
                                     <TableCell>
                                         {item.updated_at
                                             ? new Date(item.updated_at).toLocaleDateString('en-UK', {
-                                                year: 'numeric',
-                                                month: 'long',
-                                                day: 'numeric',
-                                            })
+                                                  year: 'numeric',
+                                                  month: 'long',
+                                                  day: 'numeric',
+                                              })
                                             : '---'}
                                     </TableCell>
                                 </TableRow>

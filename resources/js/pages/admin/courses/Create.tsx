@@ -129,7 +129,7 @@ export default function Create({
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 pt-10">
                 <div className="grid grid-cols-12 gap-4">
                     {/* Title */}
-                    <div className="col-span-6">
+                    <div className="col-span-12">
                         <FormField
                             control={form.control}
                             name="title"
@@ -146,7 +146,7 @@ export default function Create({
                     </div>
 
                     {/* Title Khmer */}
-                    <div className="col-span-6">
+                    <div className="col-span-12">
                         <FormField
                             control={form.control}
                             name="title_kh"
