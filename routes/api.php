@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\BannerController;
+use App\Http\Controllers\Api\FileExploreController;
 use App\Http\Controllers\Api\LinkController;
 use App\Http\Controllers\Api\PageController;
 use App\Http\Controllers\Api\PostController;
@@ -19,3 +20,6 @@ Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts_most_views', [PostController::class, 'posts_most_views']);
 Route::get('/posts/{post}', [PostController::class, 'show']);
 Route::get('/post_categories', [PostController::class, 'post_categories']);
+
+// Documents Route
+Route::get('/file-explorer/folder/{path}', [FileExploreController::class, 'folder']);

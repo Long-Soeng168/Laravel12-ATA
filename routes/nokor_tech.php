@@ -29,3 +29,5 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout', [NokorTechController::class, 'checkout']);
 });
 Route::get('/checkout_success', [NokorTechController::class, 'success']);
+
+Route::get('/documents', [NokorTechController::class, 'documents']);

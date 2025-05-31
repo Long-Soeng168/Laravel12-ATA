@@ -37,6 +37,13 @@ return [
             'throw' => false,
             'report' => false,
         ],
+        'real_storage' => [
+            'driver' => 'local',
+            'root' => storage_path(''),
+            'serve' => true,
+            'throw' => false,
+            'report' => false,
+        ],
 
         'real_public' => [
             'driver' => 'local',

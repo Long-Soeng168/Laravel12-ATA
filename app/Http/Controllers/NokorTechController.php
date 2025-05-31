@@ -406,4 +406,8 @@ class NokorTechController extends Controller
             "contactPage" => $contactPage
         ]);
     }
+    public function documents()
+    {
+        return Inertia::render("nokor-tech/Documents");
+    }
 }
