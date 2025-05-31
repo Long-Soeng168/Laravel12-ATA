@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\BannerController;
+use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\DtcController;
 use App\Http\Controllers\Api\FileExploreController;
 use App\Http\Controllers\Api\LinkController;
@@ -27,3 +28,6 @@ Route::get('/file-explorer/folder/{path}', [FileExploreController::class, 'folde
 
 // DTC Route
 Route::resource('dtcs', DtcController::class);
+
+// Course Route
+Route::resource('courses', CourseController::class);
