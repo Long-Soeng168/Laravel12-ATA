@@ -14,7 +14,7 @@ class DtcController extends Controller
         $dtc = Dtc::where('code', $dtc_code)->first();
 
         if (!$dtc) {
-            return response()->json([]);
+            return response()->json($dtc);
         }
 
         return response()->json([
