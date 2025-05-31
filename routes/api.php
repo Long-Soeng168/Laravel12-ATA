@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\LinkController;
 use App\Http\Controllers\Api\PageController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\SlideController;
+use App\Http\Controllers\Api\VideoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,5 +34,9 @@ Route::resource('dtcs', DtcController::class);
 // Course Route
 Route::resource('courses', CourseController::class);
 
-// Slide Controller
+// Slide Route
 Route::resource('slides', SlideController::class);
+
+// Video Route
+Route::resource('videos', VideoController::class);
+Route::get('videos_playlists', [VideoController::class, 'video_playlists']);
