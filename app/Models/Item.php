@@ -27,6 +27,10 @@ class Item extends Model
     {
         return $this->belongsTo(ItemModel::class, 'model_code', 'code');
     }
+    public function brand_model()
+    {
+        return $this->belongsTo(ItemModel::class, 'model_code', 'code');
+    }
     public function body_type()
     {
         return $this->belongsTo(ItemBodyType::class, 'body_type_code', 'code');
