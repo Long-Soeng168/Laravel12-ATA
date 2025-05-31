@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\FileExploreController;
 use App\Http\Controllers\Api\LinkController;
 use App\Http\Controllers\Api\PageController;
 use App\Http\Controllers\Api\PostController;
+use App\Http\Controllers\Api\SlideController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -31,3 +32,6 @@ Route::resource('dtcs', DtcController::class);
 
 // Course Route
 Route::resource('courses', CourseController::class);
+
+// Slide Controller
+Route::resource('slides', SlideController::class);
