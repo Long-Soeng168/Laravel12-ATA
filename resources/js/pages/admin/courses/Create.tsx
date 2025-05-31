@@ -4,7 +4,6 @@ import { FileInput, FileUploader, FileUploaderContent, FileUploaderItem } from '
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { ProgressWithValue } from '@/components/ui/progress-with-value';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import useTranslation from '@/hooks/use-translation';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -20,8 +19,8 @@ const formSchema = z.object({
     title_kh: z.string().max(255).optional(),
     image: z.string().optional(), // you might validate as URL if needed
     price: z.coerce.number().nonnegative().default(0), // accept string from input and turn to number
-    short_description: z.string().max(255).optional(),
-    short_description_kh: z.string().max(255).optional(),
+    short_description: z.string().max(1000).optional(),
+    short_description_kh: z.string().max(1000).optional(),
     status: z.string().optional(),
     start_at: z.string().optional(), // could validate more if you want valid datetime
     end_at: z.string().optional(),
@@ -64,7 +63,6 @@ export default function Create({
             start_at: editData?.start_at || '',
             end_at: editData?.end_at || '',
         },
-
     });
 
     const { post, progress, processing, transform, errors } = inertiaUseForm();
@@ -181,9 +179,8 @@ export default function Create({
                     />
                 </div>
                 <div className="grid grid-cols-12 gap-4">
-
                     {/* Short Description */}
-                    <div className="col-span-6">
+                    <div className="col-span-12">
                         <FormField
                             control={form.control}
                             name="short_description"
@@ -200,7 +197,7 @@ export default function Create({
                     </div>
 
                     {/* Short Description Khmer */}
-                    <div className="col-span-6">
+                    <div className="col-span-12">
                         <FormField
                             control={form.control}
                             name="short_description_kh"
@@ -216,7 +213,7 @@ export default function Create({
                         />
                     </div>
                     {/* Start Date */}
-                    <div className="col-span-6">
+                    {/* <div className="col-span-6">
                         <FormField
                             control={form.control}
                             name="start_at"
@@ -230,10 +227,10 @@ export default function Create({
                                 </FormItem>
                             )}
                         />
-                    </div>
+                    </div> */}
 
                     {/* End Date */}
-                    <div className="col-span-6">
+                    {/* <div className="col-span-6">
                         <FormField
                             control={form.control}
                             name="end_at"
@@ -247,7 +244,7 @@ export default function Create({
                                 </FormItem>
                             )}
                         />
-                    </div>
+                    </div> */}
                 </div>
 
                 <FormField
