@@ -25,11 +25,11 @@ class CourseController extends Controller
             return [
                 'id' => $item->id,
                 'title' => $item->title,
-                'title_kh' => $item->title_kh ?? '',,
-                'image' => $item->image ?? '',,
-                'description' => $item->short_description ?? '',, // or null if you want
-                'description_kh' => $item->short_description_kh ?? '',, // or null if you want
-                'price' => $item->price ?? '',,
+                'title_kh' => $item->title_kh ?? '',
+                'image' => $item->image ?? '',
+                'description' => $item->short_description ?? '', // or null if you want
+                'description_kh' => $item->short_description_kh ?? '', // or null if you want
+                'price' => $item->price ?? '',
                 'start' => $item->start_at ?? '',
                 'end' => $item->end_at ?? '',
                 'created_at' => $item->created_at,
@@ -47,11 +47,11 @@ class CourseController extends Controller
         $data = [
             'id' => $item->id,
             'title' => $item->title,
-            'title_kh' => $item->title_kh ?? '',,
-            'image' => $item->image ?? '',,
-            'description' => $item->short_description ?? '',, // or null if you want
-            'description_kh' => $item->short_description_kh ?? '',, // or null if you want
-            'price' => $item->price ?? '',,
+            'title_kh' => $item->title_kh ?? '',
+            'image' => $item->image ?? '',
+            'description' => $item->short_description ?? '', // or null if you want
+            'description_kh' => $item->short_description_kh ?? '', // or null if you want
+            'price' => $item->price ?? '',
             'start' => $item->start_at ?? '',
             'end' => $item->end_at ?? '',
             'created_at' => $item->created_at,
