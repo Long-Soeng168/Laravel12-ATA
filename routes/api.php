@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\LinkController;
 use App\Http\Controllers\Api\PageController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ShopController;
 use App\Http\Controllers\Api\SlideController;
 use App\Http\Controllers\Api\VideoController;
 use Illuminate\Http\Request;
@@ -48,6 +49,7 @@ Route::get('videos_playlists', [VideoController::class, 'video_playlists']);
 // Product Route
 Route::resource('products', ProductController::class);
 Route::get('related_products/{id}', [ProductController::class, 'relatedProducts']);
+Route::resource('shops', ShopController::class);
 // Route::get('get_products_by_shop/{shop_id}', [ProductController::class, 'getProductsByShop']);
 // Route::get('get_products_by_category/{category_id}', [ProductController::class, 'getProductsByCategory']);
 // Route::get('get_products_by_body_type/{body_type_id}', [ProductController::class, 'getProductsByBodyType']);

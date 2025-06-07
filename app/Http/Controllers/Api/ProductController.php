@@ -198,6 +198,7 @@ class ProductController extends Controller
             'body_type'       => $item->body_type,
             'brand'       => $item->brand,
             'brand_model'       => $item->brand_model,
+            'shop_id' => $item->shop_id,
             'images'           => $item->images->skip(1)->map(function ($image) {
                 return [
                     'id'         => $image->id,
