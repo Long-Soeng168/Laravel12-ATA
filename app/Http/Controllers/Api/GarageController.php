@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Garage;
+use App\Models\ItemBrand;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -26,12 +27,15 @@ class GarageController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'LIKE', "%$search%")
                     ->orWhere('address', 'LIKE', "%$search%")
-                    ->orWhere('bio', 'LIKE', "%$search%");
+                    ->orWhere('description', 'LIKE', "%$search%");
             });
         }
 
         if ($expertId) {
-            $query->where('brand_id', $expertId);
+            $brand = ItemBrand::where('id', $expertId);
+            if ($brand) {
+                $query->where('brand_code', $brand->code);
+            }
         }
 
         $query->where('status', 'active');
