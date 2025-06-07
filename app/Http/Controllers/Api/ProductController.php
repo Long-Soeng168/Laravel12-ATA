@@ -33,6 +33,8 @@ class ProductController extends Controller
         // Start building the query
         $query = Item::query();
 
+        $query->where('status', 'active');
+
         // Apply search filter
         if (!empty($search)) {
             $query->where('name', 'LIKE', "%{$search}%");
@@ -69,6 +71,26 @@ class ProductController extends Controller
         // $query->select('id', 'name', 'image', 'price', 'is_instock', 'category_id');
 
         $products = $query->paginate($perPage);
+
+        $products->getCollection()->transform(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'name_kh' => $item->name_kh,
+                'code' => $item->code,
+                'short_description' => $item->short_description,
+                'price' => $item->price,
+                'category_id' => optional($item->category)->id,
+                'brand_id' => optional($item->brand)->id,
+                'model_id' => optional($item->model)->id,
+                'body_type_id' => optional($item->body_type)->id,
+                'shop_id' => $item->shop_id,
+                'status' => $item->status,
+                'created_at' => $item->created_at,
+                'updated_at' => $item->updated_at,
+                // add more fields if needed
+            ];
+        });
 
         return response()->json($products);
     }
