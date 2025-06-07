@@ -47,8 +47,8 @@ Route::get('videos_playlists', [VideoController::class, 'video_playlists']);
 
 // Product Route
 Route::resource('products', ProductController::class);
+Route::get('related_products/{id}', [ProductController::class, 'relatedProducts']);
 // Route::get('get_products_by_shop/{shop_id}', [ProductController::class, 'getProductsByShop']);
-// Route::get('related_products/{id}', [ProductController::class, 'relatedProducts']);
 // Route::get('get_products_by_category/{category_id}', [ProductController::class, 'getProductsByCategory']);
 // Route::get('get_products_by_body_type/{body_type_id}', [ProductController::class, 'getProductsByBodyType']);
 // Route::get('get_products_by_brand/{brand_id}', [ProductController::class, 'getProductsByBrand']);
