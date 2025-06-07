@@ -32,7 +32,7 @@ class GarageController extends Controller
         }
 
         if ($expertId) {
-            $brand = ItemBrand::find('id', $expertId);
+            $brand = ItemBrand::find($expertId);
             if ($brand) {
                 $query->where('brand_code', $brand->code);
             }
