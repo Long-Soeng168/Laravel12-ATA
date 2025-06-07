@@ -22,7 +22,7 @@ class ModelController extends Controller
         if (!empty($brandId)) {
             $brand = ItemBrand::find($brandId);
             if ($brand) {
-                $query->where('brand_code', $brand->id);
+                $query->where('brand_code', $brand->code);
             }
         }
 
