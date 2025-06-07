@@ -21,6 +21,7 @@ class GaragePostController extends Controller
 
         // Start building the query using query()
         $query = GaragePost::query();
+        $query->with('images');
 
         // Apply search filter if search term is provided
         if ($search) {
