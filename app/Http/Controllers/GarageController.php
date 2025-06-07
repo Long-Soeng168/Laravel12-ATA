@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ImageHelper;
 use App\Models\Garage;
+use App\Models\ItemBrand;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -75,11 +76,15 @@ class GarageController extends Controller implements HasMiddleware
         $all_users = User::orderBy('id', 'desc')
             ->where('garage_id', null)
             ->get();
+        $all_brands = ItemBrand::orderBy('name')
+            ->where('status', 'active')
+            ->get();
         // return ($all_users);
         // return $garage->load('owner');
         return Inertia::render('admin/garages/Create', [
             'editData' => $garage->load('owner'),
             'all_users' => $all_users,
+            'all_brands' => $all_brands,
             'readOnly' => true,
         ]);
     }
@@ -88,10 +93,14 @@ class GarageController extends Controller implements HasMiddleware
         $all_users = User::orderBy('id', 'desc')
             ->where('garage_id', null)
             ->get();
+        $all_brands = ItemBrand::orderBy('name')
+            ->where('status', 'active')
+            ->get();
         // return ($all_users);
         return Inertia::render('admin/garages/Create', [
             'editData' => $garage->load('owner'),
             'all_users' => $all_users,
+            'all_brands' => $all_brands,
         ]);
     }
 
@@ -100,9 +109,13 @@ class GarageController extends Controller implements HasMiddleware
         $all_users = User::orderBy('id', 'desc')
             ->where('garage_id', null)
             ->get();
+        $all_brands = ItemBrand::orderBy('name')
+            ->where('status', 'active')
+            ->get();
         // return ($all_users);
         return Inertia::render('admin/garages/Create', [
             'all_users' => $all_users,
+            'all_brands' => $all_brands,
         ]);
     }
 
@@ -120,6 +133,7 @@ class GarageController extends Controller implements HasMiddleware
             'short_description' => 'nullable|string|max:500',
             'short_description_kh' => 'nullable|string|max:500',
             'parent_code' => 'nullable|string|max:255',
+            'brand_code' => 'nullable|string|max:255',
             'order_index' => 'nullable|numeric|max:255',
             'status' => 'nullable|string|in:active,inactive',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
@@ -135,10 +149,10 @@ class GarageController extends Controller implements HasMiddleware
         unset($validated['banner']);
 
         foreach ($validated as $key => $value) {
-    if ($value === '') {
-        $validated[$key] = null;
-    }
-}
+            if ($value === '') {
+                $validated[$key] = null;
+            }
+        }
 
 
         if ($image_file) {
@@ -184,6 +198,7 @@ class GarageController extends Controller implements HasMiddleware
             'short_description' => 'nullable|string|max:500',
             'short_description_kh' => 'nullable|string|max:500',
             'parent_code' => 'nullable|string|max:255',
+            'brand_code' => 'nullable|string|max:255',
             'order_index' => 'nullable|numeric|max:255',
             'status' => 'nullable|string|in:active,inactive',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
@@ -204,10 +219,10 @@ class GarageController extends Controller implements HasMiddleware
         unset($validated['banner']);
 
         foreach ($validated as $key => $value) {
-    if ($value === '') {
-        $validated[$key] = null;
-    }
-}
+            if ($value === '') {
+                $validated[$key] = null;
+            }
+        }
 
         if ($image_file) {
             try {

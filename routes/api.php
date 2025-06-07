@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\DtcController;
 use App\Http\Controllers\Api\FileExploreController;
+use App\Http\Controllers\Api\GarageController;
 use App\Http\Controllers\Api\LinkController;
 use App\Http\Controllers\Api\ModelController;
 use App\Http\Controllers\Api\PageController;
@@ -48,12 +49,15 @@ Route::resource('videos', VideoController::class);
 Route::get('videos_playlists', [VideoController::class, 'video_playlists']);
 
 // Shop Route
-// Route::resource('shops', ShopController::class);
+Route::resource('shops', ShopController::class);
+
+// Garage Route
+Route::resource('garages', GarageController::class);
+
 
 // Product Route
 Route::resource('products', ProductController::class);
 Route::get('related_products/{id}', [ProductController::class, 'relatedProducts']);
-Route::resource('shops', ShopController::class);
 Route::resource('categories', CategoryController::class);
 Route::resource('body_types', BodyTypeController::class);
 Route::resource('brands', BrandController::class);
@@ -66,3 +70,5 @@ Route::resource('models', ModelController::class);
 // 
 // 
 // Route::get('get_models_by_brand/{brand_id}', [ModelController::class, 'getModelsByBrand']);
+
+// 

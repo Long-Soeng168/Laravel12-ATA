@@ -22,4 +22,8 @@ class Garage extends Model
     {
         return $this->belongsTo(User::class, 'owner_user_id', 'id');
     }
+    public function expert()
+    {
+        return $this->belongsTo(ItemBrand::class, 'brand_code', 'code');
+    }
 }

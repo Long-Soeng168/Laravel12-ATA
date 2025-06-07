@@ -31,6 +31,7 @@ const formSchema = z.object({
     short_description_kh: z.string().max(500).optional(),
     logo: z.string().optional(),
     banner: z.string().optional(),
+    brand_code: z.string().optional(),
 });
 
 export default function Create({
@@ -71,11 +72,12 @@ export default function Create({
             owner_user_id: editData?.owner_user_id?.toString() || '',
             logo: '',
             banner: '',
+            brand_code: editData?.brand_code || '',
         },
     });
 
     const [error, setError] = useState(null);
-    const { all_users } = usePage().props;
+    const { all_users, all_brands } = usePage().props;
 
     const { post, data, progress, processing, transform, errors } = inertiaUseForm();
 
@@ -308,6 +310,74 @@ export default function Create({
                                         </Popover>
                                         <FormDescription>{t('Select shop owner.')}</FormDescription>
                                         <FormMessage>{errors.owner_user_id && <div>{errors.owner_user_id}</div>}</FormMessage>
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                        <div className="col-span-6">
+                            <FormField
+                                control={form.control}
+                                name="brand_code"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col" key={field.value}>
+                                        <FormLabel>{t('Brand Expert')}</FormLabel>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <FormControl>
+                                                    <Button
+                                                        variant="outline"
+                                                        role="combobox"
+                                                        className={cn('w-full justify-between', !field.value && 'text-muted-foreground')}
+                                                    >
+                                                        {field.value || t('Select')}
+                                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                    </Button>
+                                                </FormControl>
+                                            </PopoverTrigger>
+
+                                            <PopoverContent className="w-[350px] p-0">
+                                                <Command>
+                                                    <CommandInput placeholder={t('Search')} />
+                                                    <CommandList>
+                                                        <CommandEmpty>{t('No data')}</CommandEmpty>
+                                                        <CommandGroup>
+                                                            <CommandItem
+                                                                value=""
+                                                                onSelect={() => {
+                                                                    form.setValue('brand_code', '');
+                                                                }}
+                                                            >
+                                                                <Check
+                                                                    className={cn('mr-2 h-4 w-4', '' == field.value ? 'opacity-100' : 'opacity-0')}
+                                                                />
+                                                                {t('Select')}
+                                                            </CommandItem>
+                                                            {all_brands?.map((item) => {
+                                                                return (
+                                                                    <CommandItem
+                                                                        value={item.name + item.code}
+                                                                        key={item.code}
+                                                                        onSelect={() => {
+                                                                            form.setValue('brand_code', item.code.toString());
+                                                                        }}
+                                                                    >
+                                                                        <Check
+                                                                            className={cn(
+                                                                                'mr-2 h-4 w-4',
+                                                                                item.code == field.value ? 'opacity-100' : 'opacity-0',
+                                                                            )}
+                                                                        />
+                                                                        {item.name}
+                                                                    </CommandItem>
+                                                                );
+                                                            })}
+                                                        </CommandGroup>
+                                                    </CommandList>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
+                                        <FormDescription>{t('Select Brand Expert.')}</FormDescription>
+                                        <FormMessage>{errors.brand_code && <div>{errors.brand_code}</div>}</FormMessage>
                                     </FormItem>
                                 )}
                             />
