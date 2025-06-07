@@ -69,7 +69,7 @@ class ProductController extends Controller
 
         // Paginate the results
         // $query->select('id', 'name', 'image', 'price', 'is_instock', 'category_id');
-
+        $query->with(['images', 'category', 'brand', 'model', 'body_type']);
         $products = $query->paginate($perPage);
 
         $products->getCollection()->transform(function ($item) {
@@ -88,6 +88,7 @@ class ProductController extends Controller
                 'status' => $item->status,
                 'created_at' => $item->created_at,
                 'updated_at' => $item->updated_at,
+                 'image' => optional($item->images->first())->image,
                 // add more fields if needed
             ];
         });
