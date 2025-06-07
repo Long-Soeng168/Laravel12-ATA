@@ -171,6 +171,10 @@ class ProductController extends Controller
             'status'           => $item->status === 'active' ? 1 : 0,
             'create_by_user_id' => $item->created_by,
             'updated_by'       => $item->updated_by,
+            'category'       => $item->category,
+            'body_type'       => $item->body_type,
+            'brand'       => $item->brand,
+            'brand_model'       => $item->brand_model,
             'images'           => $item->images->map(function ($image) {
                 return [
                     'id'         => $image->id,
