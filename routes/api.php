@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\DtcController;
 use App\Http\Controllers\Api\FileExploreController;
 use App\Http\Controllers\Api\GarageController;
+use App\Http\Controllers\Api\GaragePostController;
 use App\Http\Controllers\Api\LinkController;
 use App\Http\Controllers\Api\ModelController;
 use App\Http\Controllers\Api\PageController;
@@ -53,6 +54,7 @@ Route::resource('shops', ShopController::class);
 
 // Garage Route
 Route::resource('garages', GarageController::class);
+Route::resource('garages_posts', GaragePostController::class);
 
 
 // Product Route
