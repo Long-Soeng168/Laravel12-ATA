@@ -1,3 +1,4 @@
+import { UserIconAnimated } from '@/components/animated-icons/User';
 import MySelectLanguageSwitch from '@/components/my-select-language-switch';
 import ToggleModeSwitch from '@/components/toggle-mode-switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -7,7 +8,7 @@ import { useInitials } from '@/hooks/use-initials';
 import useRole from '@/hooks/use-role';
 import useTranslation from '@/hooks/use-translation';
 import { Link, usePage } from '@inertiajs/react';
-import { Menu, Search, User2Icon } from 'lucide-react';
+import { Menu, Search } from 'lucide-react';
 import CartButton from './cart-button';
 import { MyCategoriesNav } from './my-categories-nav';
 import { MySearchProducts } from './my-search-products';
@@ -159,8 +160,9 @@ const MyHeader = () => {
                                 </Link>
                             ) : (
                                 <Link prefetch href="/login">
-                                    <Button size="icon" variant="ghost" className="text-primary">
-                                        <User2Icon />
+                                    <Button size="icon" variant="outline" className="text-primary">
+                                        {/* <User2Icon /> */}
+                                        <UserIconAnimated stroke='#0471c1' />
                                     </Button>
                                 </Link>
                             )}
