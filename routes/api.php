@@ -1,10 +1,14 @@
 <?php
 
 use App\Http\Controllers\Api\BannerController;
+use App\Http\Controllers\Api\BodyTypeController;
+use App\Http\Controllers\Api\BrandController;
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\DtcController;
 use App\Http\Controllers\Api\FileExploreController;
 use App\Http\Controllers\Api\LinkController;
+use App\Http\Controllers\Api\ModelController;
 use App\Http\Controllers\Api\PageController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\ProductController;
@@ -50,13 +54,15 @@ Route::get('videos_playlists', [VideoController::class, 'video_playlists']);
 Route::resource('products', ProductController::class);
 Route::get('related_products/{id}', [ProductController::class, 'relatedProducts']);
 Route::resource('shops', ShopController::class);
+Route::resource('categories', CategoryController::class);
+Route::resource('body_types', BodyTypeController::class);
+Route::resource('brands', BrandController::class);
+Route::resource('models', ModelController::class);
 // Route::get('get_products_by_shop/{shop_id}', [ProductController::class, 'getProductsByShop']);
 // Route::get('get_products_by_category/{category_id}', [ProductController::class, 'getProductsByCategory']);
 // Route::get('get_products_by_body_type/{body_type_id}', [ProductController::class, 'getProductsByBodyType']);
 // Route::get('get_products_by_brand/{brand_id}', [ProductController::class, 'getProductsByBrand']);
 // Route::get('get_products_by_model/{model_id}', [ProductController::class, 'getProductsByModel']);
-// Route::resource('categories', CategoryController::class);
-// Route::resource('body_types', BodyTypeController::class);
-// Route::resource('brands', BrandController::class);
-// Route::resource('models', ModelController::class);
+// 
+// 
 // Route::get('get_models_by_brand/{brand_id}', [ModelController::class, 'getModelsByBrand']);
