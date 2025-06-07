@@ -109,7 +109,30 @@ class ProductController extends Controller
             ->orderBy('id', 'desc');
 
         // Select the necessary columns and paginate
+        $query->with(['images']);
+
         $products = $query->paginate($perPage);
+
+        $products->getCollection()->transform(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'name_kh' => $item->name_kh,
+                'code' => $item->code,
+                'short_description' => $item->short_description,
+                'price' => $item->price,
+                'category_id' => optional($item->category)->id,
+                'brand_id' => optional($item->brand)->id,
+                'model_id' => optional($item->model)->id,
+                'body_type_id' => optional($item->body_type)->id,
+                'shop_id' => $item->shop_id,
+                'status' => $item->status,
+                'created_at' => $item->created_at,
+                'updated_at' => $item->updated_at,
+                'image' => optional($item->images->first())->image,
+                // add more fields if needed
+            ];
+        });
 
         // Return the paginated products as a JSON response
         return response()->json($products);
