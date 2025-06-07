@@ -28,8 +28,24 @@ class ModelController extends Controller
 
         $models = $query->orderBy('name')->where('status', 'active')->get();
 
-        return response()->json($models);
+        // Convert to old key structure
+        $convertedModels = $models->map(function ($model) {
+            return [
+                'id'                => $model->id,
+                'create_by_user_id' => $model->created_by,
+                'name'              => $model->name,
+                'name_kh'           => $model->name_kh,
+                'brand_id'          => $model->brand_code, // map brand_code to old brand_id
+                'image'             => $model->image,
+                'status'            => $model->status === 'active' ? 1 : 0,
+                'created_at'        => $model->created_at,
+                'updated_at'        => $model->updated_at,
+            ];
+        });
+
+        return response()->json($convertedModels);
     }
+
 
     // public function getModelsByBrand(String $brand_id){
     //     $models = BrandModel::where('brand_id', $brand_id)->latest()->get();
