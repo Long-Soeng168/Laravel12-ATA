@@ -88,7 +88,7 @@ class ProductController extends Controller
                 'status' => $item->status,
                 'created_at' => $item->created_at,
                 'updated_at' => $item->updated_at,
-                 'image' => optional($item->images->first())->image,
+                'image' => optional($item->images->first())->image,
                 // add more fields if needed
             ];
         });
@@ -152,7 +152,36 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        $product = Item::with('category', 'body_type', 'brand', 'brand_model', 'images')->find($id);
+        $item = Item::with('category', 'body_type', 'brand', 'brand_model', 'images')->find($id);
+
+        if (!$item) {
+            return response()->json(['message' => 'Item not found'], 404);
+        }
+
+        // Convert to old key structure
+        $product = [
+            'product_id'       => $item->id,
+            'name'             => $item->name,
+            'price'            => (float)$item->price,
+            'description'      => $item->long_description,
+            'category_id'      => $item->category ? $item->category->id : null,
+            'brand_id'         => $item->brand ? $item->brand->id : null,
+            'model_id'         => $item->brand_model ? $item->brand_model->id : null,
+            'body_type_id'     => $item->body_type ? $item->body_type->id : null,
+            'status'           => $item->status === 'active' ? 1 : 0,
+            'create_by_user_id' => $item->created_by,
+            'updated_by'       => $item->updated_by,
+            'images'           => $item->images->map(function ($image) {
+                return [
+                    'id'         => $image->id,
+                    'image'      => $image->image,
+                    'product_id' => $image->item_id, // keep it product_id for old key
+                ];
+            }),
+            'created_at'       => $item->created_at,
+            'updated_at'       => $item->updated_at,
+        ];
+
         return response()->json($product);
     }
 }
