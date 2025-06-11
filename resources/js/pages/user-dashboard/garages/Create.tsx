@@ -1,11 +1,10 @@
 import MyDialogCancelButton from '@/components/my-dialog-cancel-button';
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea';
 import { Button } from '@/components/ui/button';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { FileInput, FileUploader, FileUploaderContent, FileUploaderItem } from '@/components/ui/file-upload';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Popover, PopoverTrigger } from '@/components/ui/popover';
 import { ProgressWithValue } from '@/components/ui/progress-with-value';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useTranslation from '@/hooks/use-translation';
@@ -14,7 +13,7 @@ import { cn } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm as inertiaUseForm, usePage } from '@inertiajs/react';
-import { Check, ChevronsUpDown, CloudUpload, Loader, Paperclip } from 'lucide-react';
+import { CloudUpload, Loader, Paperclip } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -190,7 +189,7 @@ export default function Create({
                                 )}
                             />
                         </div>
-                        <div className="col-span-6">
+                        {/* <div className="col-span-6">
                             <FormField
                                 control={form.control}
                                 name="status"
@@ -212,23 +211,7 @@ export default function Create({
                                     </FormItem>
                                 )}
                             />
-                        </div>
-                        <div className="col-span-6">
-                            <FormField
-                                control={form.control}
-                                name="order_index"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t('Order Index')}</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="ex: 1" type="text" {...field} />
-                                        </FormControl>
-                                        <FormDescription>{t('Lower number is priority')}</FormDescription>
-                                        <FormMessage>{errors.order_index && <div>{errors.order_index}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
+                        </div> */}
 
                         <div className="col-span-6">
                             <FormField
@@ -249,12 +232,12 @@ export default function Create({
                                                         {editData && editData?.owner_user_id != field.value && ', -> '}
                                                         {field.value && all_users.find((item) => item.id == field.value)?.name}
                                                         {!editData && !field.value && t('Select')}
-                                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                        {/* <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" /> */}
                                                     </Button>
                                                 </FormControl>
                                             </PopoverTrigger>
 
-                                            <PopoverContent className="w-[350px] p-0">
+                                            {/* <PopoverContent className="w-[350px] p-0">
                                                 <Command>
                                                     <CommandInput placeholder={t('Search')} />
                                                     <CommandList>
@@ -293,9 +276,9 @@ export default function Create({
                                                         </CommandGroup>
                                                     </CommandList>
                                                 </Command>
-                                            </PopoverContent>
+                                            </PopoverContent> */}
                                         </Popover>
-                                        <FormDescription>{t('Select shop owner.')}</FormDescription>
+                                        {/* <FormDescription>{t('Select shop owner.')}</FormDescription> */}
                                         <FormMessage>{errors.owner_user_id && <div>{errors.owner_user_id}</div>}</FormMessage>
                                     </FormItem>
                                 )}
