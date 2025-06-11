@@ -23,6 +23,8 @@ const MyHeader = () => {
     ];
 
     const navItems2 = [
+        { label: t('Home'), href: '/' },
+        { label: t('Shops'), href: '/shops' },
         { label: t('Privacy'), href: '/privacy' },
         { label: t('About'), href: '/about-us' },
         { label: t('Contact'), href: '/contact-us' },
@@ -91,7 +93,7 @@ const MyHeader = () => {
             </nav>
 
             {/* Main Header */}
-            <div className="bg-background sticky top-0 z-50">
+            <div className="sticky top-0 z-50 border-b border-white/20 bg-background/50 backdrop-blur-md">
                 <header>
                     <div className="mx-auto flex max-w-screen-xl items-center justify-between py-2 lg:py-4">
                         {/* Mobile Menu */}
@@ -107,9 +109,7 @@ const MyHeader = () => {
                                     <ul className="flex flex-col gap-6 font-semibold text-gray-600">
                                         <hr />
                                         {navItems1.map(renderNavLink)}
-                                        {post_counts > 0 && renderNavLink({ label: 'Blogs', href: '/blogs' })}
-                                        {renderNavLink({ label: 'Contact', href: '/contact-us' })}
-                                        {renderNavLink({ label: 'About', href: '/about-us' })}
+                                        {navItems2.map(renderNavLink)}
                                     </ul>
                                 </SheetContent>
                             </Sheet>
@@ -125,7 +125,6 @@ const MyHeader = () => {
                                 )}
                                 {navItems1.map(renderNavLink)}
                                 <li className="border-primary/5 bg-primary/50 h-6 border" />
-                                {renderNavLink({ label: t('Home'), href: '/' })}
                                 {navItems2.map(renderNavLink)}
                             </ul>
                         </div>
@@ -162,7 +161,7 @@ const MyHeader = () => {
                                 <Link prefetch href="/login">
                                     <Button size="icon" variant="outline" className="text-primary">
                                         {/* <User2Icon /> */}
-                                        <UserIconAnimated stroke='#0471c1' />
+                                        <UserIconAnimated stroke="#0471c1" />
                                     </Button>
                                 </Link>
                             )}

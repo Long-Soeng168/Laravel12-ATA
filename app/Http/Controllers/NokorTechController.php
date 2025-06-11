@@ -90,6 +90,33 @@ class NokorTechController extends Controller
             'bodyTypes' => $bodyTypes,
         ]);
     }
+    public function shops(Request $request)
+    {
+        $search = $request->input('search', '');
+        $perPage = $request->input('perPage', 24);
+        $sortBy = $request->input('sortBy', 'id');
+        $sortDirection = $request->input('sortDirection', 'desc');
+
+        $query = Shop::query();
+        $query->with('created_by', 'updated_by');
+
+        if ($search) {
+            $query->where(function ($sub_query) use ($search) {
+                return $sub_query->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('phone', 'LIKE', "%{$search}%")
+                    ->orWhere('address', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $query->orderBy($sortBy, $sortDirection);
+        $query->where('status', 'active');
+
+        $tableData = $query->paginate(perPage: $perPage)->onEachSide(1);
+
+        return Inertia::render('nokor-tech/shops/Index', [
+            'tableData' => $tableData,
+        ]);
+    }
 
 
 

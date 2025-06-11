@@ -6,6 +6,9 @@ import useRole from '@/hooks/use-role';
 import useTranslation from '@/hooks/use-translation';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
+import { usePage } from '@inertiajs/react';
+import ContactUsButton from '../components/contact-us-button';
+import UserSuspended from '../shops/components/user-suspended';
 import { MyFilterButton } from './components/my-filter-button';
 import MyTableData from './components/my-table-data';
 
@@ -18,8 +21,15 @@ const Index = () => {
             href: '/user-items',
         },
     ];
+    const { tableData } = usePage().props;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            {tableData?.data[0]?.shop?.status == 'inactive' && (
+                <UserSuspended
+                    title={t('Shop Suspended!')}
+                    subTitle={t('Your shop has been temporarily suspended. Please contact our support team to resolve this issue.')}
+                />
+            )}
             <div className="flex max-w-[100vw] flex-wrap items-center justify-end gap-2">
                 <div className="flex max-w-[100vw] flex-wrap items-center justify-start gap-2 max-lg:w-full lg:flex-1">
                     <MySearchTableData />
@@ -28,7 +38,14 @@ const Index = () => {
                     <span className="flex-1"></span>
                     {/* <MyExportButton />
                     <MyImportButton /> */}
-                    {hasRole('Shop') && <MyAddNewButton url="/admin/items/create" type="link" />}
+                    {tableData?.data[0]?.shop?.status == 'active' ? (
+                        <>{hasRole('Shop') && <MyAddNewButton url="/admin/items/create" type="link" />}</>
+                    ) : (
+                        <>
+                            <p className="text-red-400">{t('Shop Suspended!')}</p>
+                            <ContactUsButton />
+                        </>
+                    )}
                 </div>
             </div>
             <div className="h-2" />

@@ -1,11 +1,11 @@
 const ShopProfileHeader = ({ shop }) => {
     return (
-        <div className="mb-8 md:mb-28 w-full px-4">
+        <div className="mb-8 w-full px-4 md:mb-28">
             {/* Banner */}
             <div className="relative">
                 <img src={`/assets/images/shops/${shop.banner}`} alt="Shop Banner" className="max-h-[500px] w-full object-cover" />
                 {/* Logo */}
-                <div className="bg-background/80 -bottom-16 left-0 flex max-w-[600px] items-center space-x-4 rounded-2xl p-4 shadow-md backdrop-blur md:absolute md:left-6">
+                <div className="bg-background/80 -bottom-16 left-0 flex max-w-[600px] items-center space-x-4 rounded-2xl border p-4 shadow-md backdrop-blur md:absolute md:left-6">
                     <img
                         src={`/assets/images/shops/${shop.logo}`}
                         alt="Shop Logo"

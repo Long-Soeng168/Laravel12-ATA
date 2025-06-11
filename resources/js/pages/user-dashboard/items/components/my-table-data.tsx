@@ -3,7 +3,6 @@ import MyImageGallery from '@/components/my-image-gallery';
 import MyNoData from '@/components/my-no-data';
 import { MyTooltipButton } from '@/components/my-tooltip-button';
 import MyUpdateStatusButton from '@/components/my-update-status-button';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import useRole from '@/hooks/use-role';
@@ -51,7 +50,11 @@ const MyTableData = () => {
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[50px]">{t('ID')}</TableHead>
-                            <TableHead className="text-left">{t('Action')}</TableHead>
+                            {tableData?.data[0]?.shop?.status == 'active' && (
+                                <>
+                                    <TableHead className="text-left">{t('Action')}</TableHead>
+                                </>
+                            )}
                             <TableHead>{t('Image')}</TableHead>
                             {/* <TableHead>{t('Link')}</TableHead> */}
                             <TableHead onClick={() => handleSort('code')}>
@@ -133,23 +136,28 @@ const MyTableData = () => {
                                     {item.id}
                                     {/* {tableData?.current_page > 1 ? tableData?.per_page * (tableData?.current_page - 1) + index + 1 : index + 1} */}
                                 </TableCell>
-                                <TableCell>
-                                    <span className="flex h-full items-center justify-start">
-                                        <Link href={`/user-items/${item.id}`}>
-                                            <MyTooltipButton title={t('Show')} side="bottom" variant="ghost">
-                                                <ScanEyeIcon />
-                                            </MyTooltipButton>
-                                        </Link>
-                                        {hasRole('Shop') && <DeleteButton deletePath="/user-items/" id={item.id} />}
-                                        {hasRole('Shop') && (
-                                            <Link href={`/user-items/${item.id}/edit`}>
-                                                <MyTooltipButton title={t('Edit')} side="bottom" variant="ghost">
-                                                    <EditIcon />
-                                                </MyTooltipButton>
-                                            </Link>
-                                        )}
-                                    </span>
-                                </TableCell>
+                                {tableData?.data[0]?.shop?.status == 'active' && (
+                                    <>
+                                        <TableCell>
+                                            <span className="flex h-full items-center justify-start">
+                                                <Link href={`/user-items/${item.id}`}>
+                                                    <MyTooltipButton title={t('Show')} side="bottom" variant="ghost">
+                                                        <ScanEyeIcon />
+                                                    </MyTooltipButton>
+                                                </Link>
+                                                {hasRole('Shop') && <DeleteButton deletePath="/user-items/" id={item.id} />}
+                                                {hasRole('Shop') && (
+                                                    <Link href={`/user-items/${item.id}/edit`}>
+                                                        <MyTooltipButton title={t('Edit')} side="bottom" variant="ghost">
+                                                            <EditIcon />
+                                                        </MyTooltipButton>
+                                                    </Link>
+                                                )}
+                                            </span>
+                                        </TableCell>
+                                    </>
+                                )}
+
                                 <TableCell>
                                     {item.images[0] ? (
                                         <button

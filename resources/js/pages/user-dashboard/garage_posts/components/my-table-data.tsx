@@ -50,7 +50,11 @@ const MyTableData = () => {
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[50px]">{t('No')}</TableHead>
-                            <TableHead className="text-left">{t('Action')}</TableHead>
+                            {tableData?.data[0]?.garage?.status == 'active' && (
+                                <>
+                                    <TableHead className="text-left">{t('Action')}</TableHead>
+                                </>
+                            )}
                             <TableHead>{t('Image')}</TableHead>
                             {/* <TableHead>{t('Link')}</TableHead> */}
                             <TableHead onClick={() => handleSort('title')}>
@@ -126,23 +130,26 @@ const MyTableData = () => {
                                 <TableCell className="font-medium">
                                     {tableData?.current_page > 1 ? tableData?.per_page * (tableData?.current_page - 1) + index + 1 : index + 1}
                                 </TableCell>
-                                <TableCell>
-                                    <span className="flex h-full items-center justify-start">
-                                        <Link href={`/user-garage_posts/${item.id}`}>
-                                            <MyTooltipButton title={t('Show')} side="bottom" variant="ghost">
-                                                <ScanEyeIcon />
-                                            </MyTooltipButton>
-                                        </Link>
-                                        {hasRole('Garage') && <DeleteButton deletePath="/user-garage_posts/" id={item.id} />}
-                                        {hasRole('Garage') && (
-                                            <Link href={`/user-garage_posts/${item.id}/edit`}>
-                                                <MyTooltipButton title={t('Edit')} side="bottom" variant="ghost">
-                                                    <EditIcon />
+                                {tableData?.data[0]?.shop?.status == 'active' && (
+                                    <TableCell>
+                                        <span className="flex h-full items-center justify-start">
+                                            <Link href={`/user-garage_posts/${item.id}`}>
+                                                <MyTooltipButton title={t('Show')} side="bottom" variant="ghost">
+                                                    <ScanEyeIcon />
                                                 </MyTooltipButton>
                                             </Link>
-                                        )}
-                                    </span>
-                                </TableCell>
+                                            {hasRole('Garage') && <DeleteButton deletePath="/user-garage_posts/" id={item.id} />}
+                                            {hasRole('Garage') && (
+                                                <Link href={`/user-garage_posts/${item.id}/edit`}>
+                                                    <MyTooltipButton title={t('Edit')} side="bottom" variant="ghost">
+                                                        <EditIcon />
+                                                    </MyTooltipButton>
+                                                </Link>
+                                            )}
+                                        </span>
+                                    </TableCell>
+                                )}
+
                                 <TableCell>
                                     {item.images[0] ? (
                                         <button

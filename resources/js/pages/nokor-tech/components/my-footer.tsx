@@ -1,4 +1,3 @@
-import BackgroundAnimated from '@/components/background-animated';
 import { Link, usePage } from '@inertiajs/react';
 
 // components/Footer.js
@@ -6,8 +5,8 @@ export default function MyFooter() {
     const { application_info, links } = usePage().props;
     // console.log(application_info);
     return (
-        <footer className="relative border-t border-white/50">
-            <BackgroundAnimated />
+        <footer className="relative border-t bg-primary dark:bg-black border-white/50">
+            {/* <BackgroundAnimated /> */}
             <div className="relative z-10 mx-auto max-w-7xl px-4 pt-12 text-white sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
                     <div className="justify-self-center">
@@ -18,9 +17,9 @@ export default function MyFooter() {
                                     height={65}
                                     src={`/assets/images/application_info/thumb/${application_info?.image}`}
                                     alt={`${application_info?.name}'s logo`}
-                                    className="hover:cursor-pointer rounded-full"
+                                    className="rounded-full hover:cursor-pointer"
                                 />
-                                <p className="text-2xl mt-2 font-bold">{application_info?.name}</p>
+                                <p className="mt-2 text-2xl font-bold">{application_info?.name}</p>
                             </div>
                         )}
                     </div>

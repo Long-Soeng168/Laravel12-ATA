@@ -19,6 +19,8 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
+import ContactUsButton from '../components/contact-us-button';
+import UserSuspended from './components/user-suspended';
 
 const formSchema = z.object({
     owner_user_id: z.string(),
@@ -133,6 +135,12 @@ export default function Create({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            {editData?.status == 'inactive' && (
+                <UserSuspended
+                    title={t('Shop Suspended!')}
+                    subTitle="Your shop has been temporarily suspended. Please contact our support team to resolve this issue."
+                />
+            )}
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-4">
                     <div className="grid grid-cols-12 gap-4">
@@ -439,15 +447,24 @@ export default function Create({
                     {progress && <ProgressWithValue value={progress.percentage} position="start" />}
                     {setIsOpen && <MyDialogCancelButton onClick={() => setIsOpen(false)} />}
 
-                    {!readOnly && (
-                        <Button disabled={processing} type="submit">
-                            {processing && (
-                                <span className="size-6 animate-spin">
-                                    <Loader />
-                                </span>
+                    {editData?.status == 'active' ? (
+                        <>
+                            {!readOnly && (
+                                <Button disabled={processing} type="submit">
+                                    {processing && (
+                                        <span className="size-6 animate-spin">
+                                            <Loader />
+                                        </span>
+                                    )}
+                                    {processing ? t('Submitting') : t('Submit')}
+                                </Button>
                             )}
-                            {processing ? t('Submitting') : t('Submit')}
-                        </Button>
+                        </>
+                    ) : (
+                        <>
+                            <p className="text-red-400">{t('Shop Suspended!')}</p>
+                            <ContactUsButton />
+                        </>
                     )}
                 </form>
             </Form>

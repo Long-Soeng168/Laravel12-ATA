@@ -17,17 +17,18 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ShopController;
 use App\Http\Controllers\Api\SlideController;
 use App\Http\Controllers\Api\VideoController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+use App\Models\Garage;
+use App\Models\Shop;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 Route::get('/links', [LinkController::class, 'index']);
 Route::get('/banners', [BannerController::class, 'index']);
 Route::get('/pages', [PageController::class, 'index']);
 
+// Post Route
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts_most_views', [PostController::class, 'posts_most_views']);
 Route::get('/posts/{post}', [PostController::class, 'show']);
@@ -56,7 +57,6 @@ Route::resource('shops', ShopController::class);
 Route::resource('garages', GarageController::class);
 Route::resource('garages_posts', GaragePostController::class);
 
-
 // Product Route
 Route::resource('products', ProductController::class);
 Route::get('related_products/{id}', [ProductController::class, 'relatedProducts']);
@@ -64,13 +64,29 @@ Route::resource('categories', CategoryController::class);
 Route::resource('body_types', BodyTypeController::class);
 Route::resource('brands', BrandController::class);
 Route::resource('models', ModelController::class);
-// Route::get('get_products_by_shop/{shop_id}', [ProductController::class, 'getProductsByShop']);
-// Route::get('get_products_by_category/{category_id}', [ProductController::class, 'getProductsByCategory']);
-// Route::get('get_products_by_body_type/{body_type_id}', [ProductController::class, 'getProductsByBodyType']);
-// Route::get('get_products_by_brand/{brand_id}', [ProductController::class, 'getProductsByBrand']);
-// Route::get('get_products_by_model/{model_id}', [ProductController::class, 'getProductsByModel']);
-// 
-// 
-// Route::get('get_models_by_brand/{brand_id}', [ModelController::class, 'getModelsByBrand']);
 
-// 
+
+Route::middleware(['auth:sanctum'])->group(function () {
+
+    Route::get('/user_shop', function (Request $request) {
+        $user = Auth::user();
+        $shop = Shop::where('id', $user->shop_id)->first();
+        if (!$shop) {
+            return response()->json(['message' => 'No shop found for this user'], 404);
+        }
+        return response()->json($shop);
+    });
+
+    Route::get('/user_garage', function (Request $request) {
+        $user = Auth::user();
+        $garage = Garage::where('id', $user->garage_id)->with('expert')->first();
+        if (!$garage) {
+            return response()->json(['message' => 'No garage found for this user'], 404);
+        }
+        return response()->json($garage);
+    });
+});
+
+
+// Auth API Route
+require __DIR__ . '/api_auth.php';
