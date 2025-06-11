@@ -162,7 +162,7 @@ export default function Create() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-5">
-                    <div className="grid grid-cols-12 gap-4">
+                    <div className="grid md:grid-cols-12 gap-4">
                         <div className="col-span-6 hidden">
                             <FormField
                                 control={form.control}
@@ -238,7 +238,7 @@ export default function Create() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-12 gap-4">
+                    <div className="grid md:grid-cols-12 gap-4">
                         <div className="col-span-12">
                             <FormField
                                 control={form.control}

@@ -127,7 +127,7 @@ export default function Create({
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 pt-10">
-                <div className="grid grid-cols-12 gap-4">
+                <div className="grid md:grid-cols-12 gap-4">
                     {/* Title */}
                     <div className="col-span-12">
                         <FormField
@@ -178,7 +178,7 @@ export default function Create({
                         )}
                     />
                 </div>
-                <div className="grid grid-cols-12 gap-4">
+                <div className="grid md:grid-cols-12 gap-4">
                     {/* Short Description */}
                     <div className="col-span-12">
                         <FormField

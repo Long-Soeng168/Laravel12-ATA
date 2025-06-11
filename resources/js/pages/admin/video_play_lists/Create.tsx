@@ -141,7 +141,7 @@ export default function Create({
                         )}
                     />
                 </div>
-                <div className="grid grid-cols-12 gap-4">
+                <div className="grid md:grid-cols-12 gap-4">
                     {/* Title Khmer */}
                     <div className="col-span-6">
                         <FormField
@@ -190,7 +190,7 @@ export default function Create({
                         )}
                     />
                 </div>
-                <div className="grid grid-cols-12 gap-4">
+                <div className="grid md:grid-cols-12 gap-4">
                     {/* Short Description */}
                     <div className="col-span-12">
                         <FormField

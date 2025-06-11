@@ -142,7 +142,7 @@ export default function Create({
             )}
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-4">
-                    <div className="grid grid-cols-12 gap-4">
+                    <div className="grid md:grid-cols-12 gap-4">
                         <div className="col-span-6">
                             <FormField
                                 control={form.control}

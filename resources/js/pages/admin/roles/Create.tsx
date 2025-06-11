@@ -134,7 +134,7 @@ export default function Create() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="p-4">
-                    <div className="grid grid-cols-12 gap-4">
+                    <div className="grid md:grid-cols-12 gap-4">
                         <div className="col-span-12">
                             <FormField
                                 control={form.control}

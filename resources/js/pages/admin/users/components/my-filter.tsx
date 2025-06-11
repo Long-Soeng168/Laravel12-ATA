@@ -66,7 +66,7 @@ export default function MyFilter() {
                  <FormLabel className="flex items-center gap-2">
                     <FilterIcon /> {t('Filter')}
                 </FormLabel>
-                <div className="grid grid-cols-12 gap-4">
+                <div className="grid md:grid-cols-12 gap-4">
                     <div className="col-span-6">
                         <FormField
                             control={form.control}
