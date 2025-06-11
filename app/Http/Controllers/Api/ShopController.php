@@ -2,7 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
+use App\Models\Item;
+use App\Models\ItemBodyType;
+use App\Models\ItemBrand;
+use App\Models\ItemCategory;
+use App\Models\ItemImage;
+use App\Models\ItemModel;
 use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -10,6 +17,9 @@ use Illuminate\Support\Facades\Validator;
 use Image;
 use App\Models\Product;
 use Exception;
+use Illuminate\Support\Facades\Auth;
+
+use function PHPUnit\Framework\isEmpty;
 
 class ShopController extends Controller
 {
@@ -20,6 +30,15 @@ class ShopController extends Controller
         return response()->json($shops);
     }
 
+    public function user_shop(Request $request)
+    {
+        $user = Auth::user();
+        $shop = Shop::where('id', $user->shop_id)->first();
+        if (!$shop) {
+            return response()->json(['message' => 'No shop found for this user'], 404);
+        }
+        return response()->json($shop);
+    }
     public function store(Request $request)
     {
         // Validate incoming request  
@@ -42,26 +61,13 @@ class ShopController extends Controller
         $userId = $request->user()->id;
 
         try {
-            // Store images if they are provided 
-            // Create shop in the database
             $logoName = null;
-            if ($request->hasFile('logo')) {
-                $image = $request->file('logo');
-                $fileName = time() . '_' . $image->getClientOriginalName();
-                $imagePath = public_path('assets/images/shops/logo/' . $fileName);
-                $thumbPath = public_path('assets/images/shops/logo/thumb/' . $fileName);
-
+            $image_file = $request->file('logo');
+            if ($image_file) {
                 try {
-                    // Create an image instance and save the original image
-                    $uploadedImage = Image::make($image->getRealPath())->save($imagePath);
-
-                    $uploadedImage->resize(500, null, function ($constraint) {
-                        $constraint->aspectRatio();
-                    })->save($thumbPath);
-
-                    // Store the filename in the category
-                    $logoName = $fileName;
-                } catch (Exception $e) {
+                    $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/shops', 600);
+                    $logoName = $created_image_name;
+                } catch (\Exception $e) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Fail to Save Image.',
@@ -70,22 +76,12 @@ class ShopController extends Controller
             }
 
             $bannerName = null;
-            if ($request->hasFile('banner')) {
-                $image = $request->file('banner');
-                $fileName = time() . '_' . $image->getClientOriginalName();
-                $imagePath = public_path('assets/images/shops/banner/' . $fileName);
-                $thumbPath = public_path('assets/images/shops/banner/thumb/' . $fileName);
-
+            $banner_file = $request->file('banner');
+            if ($banner_file) {
                 try {
-                    // Create an image instance and save the original image
-                    $uploadedImage = Image::make($image->getRealPath())->save($imagePath);
-                    $uploadedImage->resize(800, null, function ($constraint) {
-                        $constraint->aspectRatio();
-                    })->save($thumbPath);
-
-                    // Store the filename in the category
-                    $banner = $fileName;
-                } catch (Exception $e) {
+                    $created_image_name = ImageHelper::uploadAndResizeImageWebp($banner_file, 'assets/images/shops', 1200);
+                    $bannerName = $created_image_name;
+                } catch (\Exception $e) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Fail to Save Image.',
@@ -95,11 +91,12 @@ class ShopController extends Controller
 
             $shop = Shop::create([
                 'name' => $request->input('name'),
-                'description' => $request->input('description'),
+                'short_description' => $request->input('description'),
                 'address' => $request->input('address'),
                 'phone' => $request->input('phone'),
-                'logo' => $logoName, // Save the relative path
-                'banner' => $banner, // Save the relative path
+                'logo' => $logoName,
+                'banner' => $bannerName,
+                'status' => 'active',
                 'owner_user_id' => $userId,
             ]);
 
@@ -115,7 +112,6 @@ class ShopController extends Controller
                 'shop' => $shop
             ], 200);
         } catch (\Exception $e) {
-            // Handle any error that occurs during the process
             return response()->json([
                 'success' => false,
                 'message' => 'Error creating shop: ' . $e->getMessage()
@@ -202,55 +198,48 @@ class ShopController extends Controller
             // Find the shop
             $shop = Shop::findOrFail($id);
 
-            // Update images if provided
-            if ($request->hasFile('logo')) {
-                // Delete old logo if it exists
-                if ($shop->logo && file_exists(public_path('assets/images/shops/logo/' . $shop->logo))) {
-                    unlink(public_path('assets/images/shops/logo/' . $shop->logo));
-                    unlink(public_path('assets/images/shops/logo/thumb/' . $shop->logo));
+            $logoName = null;
+            $image_file = $request->file('logo');
+            if ($image_file) {
+                try {
+                    $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/shops', 600);
+                    $logoName = $created_image_name;
+                    if ($shop->logo && $created_image_name) {
+                        ImageHelper::deleteImage($shop->logo, 'assets/images/shops');
+                    }
+                } catch (\Exception $e) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Fail to Save Image.',
+                    ], 500);
                 }
-
-                // Save new logo
-                $logo = $request->file('logo');
-                $logoFileName = time() . '_' . $logo->getClientOriginalName();
-                $logoPath = public_path('assets/images/shops/logo/' . $logoFileName);
-                $logoThumbPath = public_path('assets/images/shops/logo/thumb/' . $logoFileName);
-
-                $uploadedLogo = Image::make($logo->getRealPath())->save($logoPath);
-                $uploadedLogo->resize(500, null, function ($constraint) {
-                    $constraint->aspectRatio();
-                })->save($logoThumbPath);
-
-                $shop->logo = $logoFileName;
             }
 
-            if ($request->hasFile('banner')) {
-                // Delete old banner if it exists
-                if ($shop->banner && file_exists(public_path('assets/images/shops/banner/' . $shop->banner))) {
-                    unlink(public_path('assets/images/shops/banner/' . $shop->banner));
-                    unlink(public_path('assets/images/shops/banner/thumb/' . $shop->banner));
+            $bannerName = null;
+            $banner_file = $request->file('banner');
+            if ($banner_file) {
+                try {
+                    $created_image_name = ImageHelper::uploadAndResizeImageWebp($banner_file, 'assets/images/shops', 1200);
+                    $bannerName = $created_image_name;
+                    if ($shop->banner && $created_image_name) {
+                        ImageHelper::deleteImage($shop->banner, 'assets/images/shops');
+                    }
+                } catch (\Exception $e) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Fail to Save Image.',
+                    ], 500);
                 }
-
-                // Save new banner
-                $banner = $request->file('banner');
-                $bannerFileName = time() . '_' . $banner->getClientOriginalName();
-                $bannerPath = public_path('assets/images/shops/banner/' . $bannerFileName);
-                $bannerThumbPath = public_path('assets/images/shops/banner/thumb/' . $bannerFileName);
-
-                $uploadedBanner = Image::make($banner->getRealPath())->save($bannerPath);
-                $uploadedBanner->resize(800, null, function ($constraint) {
-                    $constraint->aspectRatio();
-                })->save($bannerThumbPath);
-
-                $shop->banner = $bannerFileName;
             }
 
             // Update other shop details
             $shop->update([
                 'name' => $request->input('name'),
-                'description' => $request->input('description'),
+                'short_description' => $request->input('description'),
                 'address' => $request->input('address'),
                 'phone' => $request->input('phone'),
+                'logo' => $logoName,
+                'banner' => $bannerName,
             ]);
 
             return response()->json([
@@ -259,7 +248,6 @@ class ShopController extends Controller
                 'shop' => $shop
             ], 200);
         } catch (\Exception $e) {
-            // Handle any error that occurs during the process
             return response()->json([
                 'success' => false,
                 'message' => 'Error updating shop: ' . $e->getMessage()
@@ -279,15 +267,14 @@ class ShopController extends Controller
 
     public function storeProduct(Request $request)
     {
-        // Validate incoming request  
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'price' => 'required',
             'categoryId' => 'required',
-            'bodyTypeId' => 'required',
-            'brandId' => 'required',
-            'brandModelId' => 'required',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000',
+            'bodyTypeId' => 'nullable|required',
+            'brandId' => 'nullable|required',
+            'brandModelId' => 'nullable|required',
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:4000',
             'description' => 'required|string',
         ]);
 
@@ -298,28 +285,53 @@ class ShopController extends Controller
             ], 400);
         }
 
-        $userId = $request->user()->id;
-
         try {
-            // Store images if they are provided  
-            $imageName;
-            if ($request->hasFile('image')) {
-                $image = $request->file('image');
-                $fileName = time() . '_' . $image->getClientOriginalName();
-                $imagePath = public_path('assets/images/products/' . $fileName);
-                $thumbPath = public_path('assets/images/products/thumb/' . $fileName);
+            $category_code = ItemCategory::find($request->input('categoryId')) ?? null;
+            $brand_code = ItemBrand::find($request->input('brandId')) ?? null;
+            $body_type_code = ItemBodyType::find($request->input('bodyTypeId')) ?? null;
+            $model_code = ItemModel::find($request->input('brandModelId')) ?? null;
 
+            $created_product = Item::create([
+                'name' => $request->input('name'),
+                'price' => $request->input('price'),
+                'short_description' => $request->input('description'),
+                'category_code' => $category_code,
+                'body_type_code' => $body_type_code,
+                'brand_code' => $brand_code,
+                'model_code' => $model_code,
+                'created_by' =>  $request->user()->id,
+                'updated_by' => $request->user()->id,
+                'shop_id' => $request->user()->shop_id,
+            ]);
+
+            // Multiple Images
+            $image_files = $request->file('images');
+            if ($image_files) {
                 try {
-                    // Create an image instance and save the original image
-                    $uploadedImage = Image::make($image->getRealPath())->save($imagePath);
-
-                    $uploadedImage->resize(500, null, function ($constraint) {
-                        $constraint->aspectRatio();
-                    })->save($thumbPath);
-
-                    // Store the filename in the category
-                    $imageName = $fileName;
-                } catch (Exception $e) {
+                    foreach ($image_files as $image) {
+                        $created_image_name = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/items', 600);
+                        ItemImage::create([
+                            'image' => $created_image_name,
+                            'item_id' => $created_product->id,
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Fail to Save Image.',
+                    ], 500);
+                }
+            }
+            // Single Image
+            $image_file = $request->file('image');
+            if ($image_file) {
+                try {
+                    $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/items', 600);
+                    ItemImage::create([
+                        'image' => $created_image_name,
+                        'item_id' => $created_product->id,
+                    ]);
+                } catch (\Exception $e) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Fail to Save Image.',
@@ -327,31 +339,12 @@ class ShopController extends Controller
                 }
             }
 
-
-
-            $product = Product::create([
-                'name' => $request->input('name'),
-                'price' => $request->input('price'),
-                'description' => $request->input('description'),
-                'category_id' => $request->input('categoryId'),
-                'body_type_id' => $request->input('bodyTypeId'),
-                'brand_id' => $request->input('brandId'),
-                'model_id' => $request->input('brandModelId'),
-                'image' => $imageName,
-            ]);
-
-            $product->update([
-                'create_by_user_id' => $request->user()->id,
-                'shop_id' => $request->user()->shop_id,
-            ]);
-
             return response()->json([
                 'success' => true,
                 'message' => 'Product created successfully',
-                'product' => $product
+                'product' => $created_product
             ], 200);
         } catch (\Exception $e) {
-            // Handle any error that occurs during the process
             return response()->json([
                 'success' => false,
                 'message' => 'Error creating Product: ' . $e->getMessage()
@@ -361,15 +354,14 @@ class ShopController extends Controller
 
     public function updateProduct(Request $request, $id)
     {
-        // Validate incoming request  
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'price' => 'required',
             'categoryId' => 'required',
-            'bodyTypeId' => 'required',
-            'brandId' => 'required',
-            'brandModelId' => 'required',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20048',
+            'bodyTypeId' => 'nullable|required',
+            'brandId' => 'nullable|required',
+            'brandModelId' => 'nullable|required',
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:4000',
             'description' => 'required|string',
         ]);
 
@@ -381,45 +373,63 @@ class ShopController extends Controller
         }
 
         try {
-            $product = Product::findOrFail($id);
-            $imageName = $product->image;
+            $category_code = ItemCategory::find($request->input('categoryId')) ?? null;
+            $brand_code = ItemBrand::find($request->input('brandId')) ?? null;
+            $body_type_code = ItemBodyType::find($request->input('bodyTypeId')) ?? null;
+            $model_code = ItemModel::find($request->input('brandModelId')) ?? null;
 
-            // Store new image if provided  
-            if ($request->hasFile('image')) {
-                $image = $request->file('image');
-                $fileName = time() . '_' . $image->getClientOriginalName();
-                $imagePath = public_path('assets/images/products/' . $fileName);
-                $thumbPath = public_path('assets/images/products/thumb/' . $fileName);
+            $product = Item::find($id);
+            if (isEmpty($product)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Product Not Found',
+                ], 404);
+            }
+            $product->update([
+                'name' => $request->input('name'),
+                'price' => $request->input('price'),
+                'short_description' => $request->input('description'),
+                'category_code' => $category_code,
+                'body_type_code' => $body_type_code,
+                'brand_code' => $brand_code,
+                'model_code' => $model_code,
+                'updated_by' => $request->user()->id,
+            ]);
 
+            // Multiple Images
+            $image_files = $request->file('images');
+            if ($image_files) {
                 try {
-                    // Save the new image
-                    $uploadedImage = Image::make($image->getRealPath())->save($imagePath);
-
-                    $uploadedImage->resize(500, null, function ($constraint) {
-                        $constraint->aspectRatio();
-                    })->save($thumbPath);
-
-                    // Update the image name
-                    $imageName = $fileName;
-                } catch (Exception $e) {
+                    foreach ($image_files as $image) {
+                        $created_image_name = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/items', 600);
+                        ItemImage::create([
+                            'image' => $created_image_name,
+                            'item_id' => $product->id,
+                        ]);
+                    }
+                } catch (\Exception $e) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Fail to Save Image.',
                     ], 500);
                 }
             }
-
-            // Update product fields
-            $product->update([
-                'name' => $request->input('name'),
-                'price' => $request->input('price'),
-                'description' => $request->input('description'),
-                'category_id' => $request->input('categoryId'),
-                'body_type_id' => $request->input('bodyTypeId'),
-                'brand_id' => $request->input('brandId'),
-                'model_id' => $request->input('brandModelId'),
-                'image' => $imageName,
-            ]);
+            // Single Image
+            $image_file = $request->file('image');
+            if ($image_file) {
+                try {
+                    $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/items', 600);
+                    ItemImage::create([
+                        'image' => $created_image_name,
+                        'item_id' => $product->id,
+                    ]);
+                } catch (\Exception $e) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Fail to Save Image.',
+                    ], 500);
+                }
+            }
 
             return response()->json([
                 'success' => true,
@@ -437,26 +447,13 @@ class ShopController extends Controller
     public function deleteProduct($id)
     {
         try {
-            // Find the product by ID
-            $product = Product::findOrFail($id);
-
-            // Delete the associated image files if they exist
-            if ($product->image) {
-                $imagePath = public_path('assets/images/products/' . $product->image);
-                $thumbPath = public_path('assets/images/products/thumb/' . $product->image);
-
-                if (file_exists($imagePath)) {
-                    unlink($imagePath); // Delete the original image
-                }
-
-                if (file_exists($thumbPath)) {
-                    unlink($thumbPath); // Delete the thumbnail image
+            $product = Item::findOrFail($id);
+            if (count($product->images) > 0) {
+                foreach ($product->images as $image) {
+                    ImageHelper::deleteImage($image->image, 'assets/images/items');
                 }
             }
-
-            // Delete the product
             $product->delete();
-
             return response()->json([
                 'success' => true,
                 'message' => 'Product deleted successfully'

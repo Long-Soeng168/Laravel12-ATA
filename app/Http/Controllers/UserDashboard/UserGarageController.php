@@ -18,10 +18,7 @@ class UserGarageController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:garage view', only: ['index', 'show', 'all_garages']),
-            new Middleware('permission:garage create', only: ['create', 'store']),
             new Middleware('role:Garage', only: ['edit', 'update', 'update_status']),
-            new Middleware('permission:garage delete', only: ['destroy', 'destroy_image']),
         ];
     }
     public function edit()
@@ -37,6 +34,22 @@ class UserGarageController extends Controller implements HasMiddleware
         }
         return Inertia::render('user-dashboard/garages/Create', [
             'editData' => $user_garage->load('owner'),
+            'all_users' => $all_users,
+        ]);
+    }
+    public function create()
+    {
+
+        $all_users = User::orderBy('id', 'desc')
+            ->where('garage_id', null)
+            ->get();
+        // return ($all_users);
+        $user_garage = Garage::where('id', Auth::user()->garage_id)->first();
+        if ($user_garage) {
+            abort(404);
+        }
+
+        return Inertia::render('user-dashboard/garages/Create', [
             'all_users' => $all_users,
         ]);
     }

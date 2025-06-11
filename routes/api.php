@@ -68,15 +68,6 @@ Route::resource('models', ModelController::class);
 
 Route::middleware(['auth:sanctum'])->group(function () {
 
-    Route::get('/user_shop', function (Request $request) {
-        $user = Auth::user();
-        $shop = Shop::where('id', $user->shop_id)->first();
-        if (!$shop) {
-            return response()->json(['message' => 'No shop found for this user'], 404);
-        }
-        return response()->json($shop);
-    });
-
     Route::get('/user_garage', function (Request $request) {
         $user = Auth::user();
         $garage = Garage::where('id', $user->garage_id)->with('expert')->first();
@@ -85,6 +76,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
         }
         return response()->json($garage);
     });
+
+    Route::post('user_shop', [ShopController::class, 'user_shop']);
+    Route::post('shops', [ShopController::class, 'store']);
+    Route::post('shops/{id}', [ShopController::class, 'update']);
+    Route::post('products', [ShopController::class, 'storeProduct']);
+    Route::post('products/{id}', [ShopController::class, 'updateProduct']);
+    Route::get('products/{id}/delete', [ShopController::class, 'deleteProduct']);
 });
 
 

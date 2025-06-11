@@ -6,7 +6,6 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverTrigger } from '@/components/ui/popover';
 import { ProgressWithValue } from '@/components/ui/progress-with-value';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useTranslation from '@/hooks/use-translation';
 import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
@@ -120,7 +119,7 @@ export default function Create({
     }
     // ===== End Our Code =====
 
-    const currentBreadcrumb = readOnly ? t('Show') : editData ? t('Edit Garage') : t('Create');
+    const currentBreadcrumb = readOnly ? t('Show') : editData ? t('Edit Garage') : t('Register Garage');
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: t('Dashboard'),
@@ -142,7 +141,7 @@ export default function Create({
             )}
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-4">
-                    <div className="grid md:grid-cols-12 gap-4">
+                    <div className="grid gap-4 md:grid-cols-12">
                         <div className="col-span-6">
                             <FormField
                                 control={form.control}

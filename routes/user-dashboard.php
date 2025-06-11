@@ -24,9 +24,11 @@ Route::middleware('auth')->group(function () {
 
     // Shop Route
     Route::get('user-shops/update', [UserShopController::class, 'edit']);
+    Route::get('user-shops/create', [UserShopController::class, 'create']);
     Route::post('user-shops/{user_shop}/update', [UserShopController::class, 'update']);
 
     // Garage Route
     Route::get('user-garages/update', [UserGarageController::class, 'edit']);
+    Route::get('user-garages/create', [UserGarageController::class, 'create']);
     Route::post('user-garages/{user_garage}/update', [UserGarageController::class, 'update']);
 });

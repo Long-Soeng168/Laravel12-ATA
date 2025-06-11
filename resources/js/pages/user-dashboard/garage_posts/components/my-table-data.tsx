@@ -130,7 +130,7 @@ const MyTableData = () => {
                                 <TableCell className="font-medium">
                                     {tableData?.current_page > 1 ? tableData?.per_page * (tableData?.current_page - 1) + index + 1 : index + 1}
                                 </TableCell>
-                                {tableData?.data[0]?.shop?.status == 'active' && (
+                                {tableData?.data[0]?.garage?.status == 'active' && (
                                     <TableCell>
                                         <span className="flex h-full items-center justify-start">
                                             <Link href={`/user-garage_posts/${item.id}`}>

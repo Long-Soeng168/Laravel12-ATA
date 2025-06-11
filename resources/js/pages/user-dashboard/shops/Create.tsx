@@ -119,7 +119,7 @@ export default function Create({
     }
     // ===== End Our Code =====
 
-    const currentBreadcrumb = readOnly ? t('Show') : editData ? t('Edit Shop') : t('Create');
+    const currentBreadcrumb = readOnly ? t('Show') : editData ? t('Edit Shop') : t('Register Shop');
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: t('Dashboard'),
@@ -141,7 +141,7 @@ export default function Create({
             )}
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-4">
-                    <div className="grid md:grid-cols-12 gap-4">
+                    <div className="grid gap-4 md:grid-cols-12">
                         <div className="col-span-6">
                             <FormField
                                 control={form.control}

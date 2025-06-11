@@ -39,7 +39,7 @@ const Index = () => {
                     {/* <MyExportButton />
                     <MyImportButton /> */}
                     {tableData?.data[0]?.shop?.status == 'active' ? (
-                        <>{hasRole('Shop') && <MyAddNewButton url="/admin/items/create" type="link" />}</>
+                        <>{hasRole('Shop') && <MyAddNewButton url="/user-items/create" type="link" />}</>
                     ) : (
                         <>
                             <p className="text-red-400">{t('Shop Suspended!')}</p>

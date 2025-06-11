@@ -39,6 +39,20 @@ class UserShopController extends Controller implements HasMiddleware
             'all_users' => $all_users,
         ]);
     }
+    public function create()
+    {
+        $all_users = User::orderBy('id', 'desc')
+            ->where('shop_id', null)
+            ->get();
+        $user_shop = Shop::find(Auth::user()->shop_id);
+        if ($user_shop) {
+            abort(404);
+        }
+        // return ($all_users);
+        return Inertia::render('user-dashboard/shops/Create', [
+            'all_users' => $all_users,
+        ]);
+    }
 
     /**
      * Update the specified resource in storage.
