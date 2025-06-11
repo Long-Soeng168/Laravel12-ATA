@@ -19,11 +19,6 @@ use App\Http\Controllers\Api\SlideController;
 use App\Http\Controllers\Api\VideoController;
 use Illuminate\Support\Facades\Route;
 
-use App\Models\Garage;
-use App\Models\Shop;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
-
 Route::get('/links', [LinkController::class, 'index']);
 Route::get('/banners', [BannerController::class, 'index']);
 Route::get('/pages', [PageController::class, 'index']);
@@ -67,22 +62,21 @@ Route::resource('models', ModelController::class);
 
 
 Route::middleware(['auth:sanctum'])->group(function () {
-
-    Route::get('/user_garage', function (Request $request) {
-        $user = Auth::user();
-        $garage = Garage::where('id', $user->garage_id)->with('expert')->first();
-        if (!$garage) {
-            return response()->json(['message' => 'No garage found for this user'], 404);
-        }
-        return response()->json($garage);
-    });
-
+    // Shop Route
     Route::post('user_shop', [ShopController::class, 'user_shop']);
     Route::post('shops', [ShopController::class, 'store']);
     Route::post('shops/{id}', [ShopController::class, 'update']);
     Route::post('products', [ShopController::class, 'storeProduct']);
     Route::post('products/{id}', [ShopController::class, 'updateProduct']);
     Route::get('products/{id}/delete', [ShopController::class, 'deleteProduct']);
+
+    // Garage Route
+    Route::post('user_garage', [GarageController::class, 'user_garage']);
+    // Route::post('garages', [GarageController::class, 'store']);
+    // Route::post('garages/{id}', [GarageController::class, 'update']);
+    // Route::post('garages_posts', [GaragePostController::class, 'store']);
+    // Route::post('garages_posts/{id}', [GaragePostController::class, 'update']);
+    // Route::get('garages_posts/{id}/delete', [GaragePostController::class, 'destroy']);
 });
 
 

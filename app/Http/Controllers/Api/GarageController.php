@@ -7,6 +7,7 @@ use App\Models\Garage;
 use App\Models\ItemBrand;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 use Image;
@@ -84,6 +85,15 @@ class GarageController extends Controller
     public function create()
     {
         //
+    }
+    public function user_garage(Request $request)
+    {
+        $user = Auth::user();
+        $garage = Garage::where('id', $user->garage_id)->with('expert')->first();
+        if (!$garage) {
+            return response()->json(['message' => 'No garage found for this user'], 404);
+        }
+        return response()->json($garage);
     }
 
     /**
