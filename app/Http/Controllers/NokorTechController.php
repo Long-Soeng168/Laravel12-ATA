@@ -94,7 +94,7 @@ class NokorTechController extends Controller
     {
         $search = $request->input('search', '');
         $perPage = $request->input('perPage', 24);
-        $sortBy = $request->input('sortBy', 'id');
+        $sortBy = $request->input('sortBy', 'order_index');
         $sortDirection = $request->input('sortDirection', 'desc');
 
         $query = Shop::query();
@@ -109,6 +109,8 @@ class NokorTechController extends Controller
         }
 
         $query->orderBy($sortBy, $sortDirection);
+        $query->orderBy('id', 'desc');
+        $query->orderBy('name');
         $query->where('status', 'active');
 
         $tableData = $query->paginate(perPage: $perPage)->onEachSide(1);

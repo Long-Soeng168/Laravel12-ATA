@@ -45,7 +45,7 @@ const Index = () => {
                 <div className="flex-1 px-4">
                     {/* start list products */}
                     <div>{tableData?.data?.length == 0 && <MyNoData />}</div>
-                    <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
+                    <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
                         {tableData?.data?.map((shop) => <MyShopCard key={shop.id} shop={shop} />)}
                     </div>
                     {/* end list products */}

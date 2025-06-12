@@ -3,9 +3,11 @@
 namespace App\Http\Middleware;
 
 use App\Models\ApplicationInfo;
+use App\Models\Garage;
 use App\Models\ItemCategory;
 use App\Models\Link;
 use App\Models\Post;
+use App\Models\Shop;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -51,6 +53,8 @@ class HandleInertiaRequests extends Middleware
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
                 'user' => $request->user(),
+                'shop' => Shop::find($request->user()->shop_id) ?? null,
+                'garage' => Garage::find($request->user()->garage_id) ?? null,
                 'roles' => $request->user() ? $request->user()->getRoleNames() : [],
                 'permissions' => $request->user() ? $request->user()->getAllPermissions()->pluck('name') : [],
             ],

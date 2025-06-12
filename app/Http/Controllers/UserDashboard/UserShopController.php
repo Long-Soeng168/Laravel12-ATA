@@ -46,12 +46,80 @@ class UserShopController extends Controller implements HasMiddleware
             ->get();
         $user_shop = Shop::find(Auth::user()->shop_id);
         if ($user_shop) {
-            abort(404);
+            abort(403);
         }
         // return ($all_users);
         return Inertia::render('user-dashboard/shops/Create', [
             'all_users' => $all_users,
         ]);
+    }
+
+    public function store(Request $request)
+    {
+        // dd($request->all());
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'address' => 'nullable|string|max:255',
+            'phone' => 'nullable|string',
+            'short_description' => 'nullable|string|max:500',
+            'short_description_kh' => 'nullable|string|max:500',
+            'parent_code' => 'nullable|string|max:255',
+            'order_index' => 'nullable|numeric|max:255',
+            'status' => 'nullable|string|in:active,inactive',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
+            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
+        ]);
+
+        $user_shop = Shop::find(Auth::user()->shop_id);
+        if ($user_shop) {
+            abort(403);
+        }
+
+        $validated['owner_user_id'] = $request->user()->id;
+        $validated['created_by'] = $request->user()->id;
+        $validated['updated_by'] = $request->user()->id;
+
+        $image_file = $request->file('logo');
+        $banner_file = $request->file('banner');
+        unset($validated['logo']);
+        unset($validated['banner']);
+
+        foreach ($validated as $key => $value) {
+            if ($value === '') {
+                $validated[$key] = null;
+            }
+        }
+
+
+        if ($image_file) {
+            try {
+                $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/shops', 600);
+                $validated['logo'] = $created_image_name;
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
+            }
+        }
+        if ($banner_file) {
+            try {
+                $created_image_name = ImageHelper::uploadAndResizeImageWebp($banner_file, 'assets/images/shops', 1200);
+                $validated['banner'] = $created_image_name;
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
+            }
+        }
+
+        $shop = Shop::create($validated);
+
+        if ($shop) {
+            $user = User::where('id', Auth::user()->id)->where('shop_id', null)->first();
+            $user->assignRole('Shop');
+            if ($user)
+                $user->update([
+                    'shop_id' => $shop->id,
+                ]);
+        }
+
+        return redirect('/user-dashboard');
     }
 
     /**

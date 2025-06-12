@@ -4,7 +4,7 @@ const ShopCard = ({ shop }) => {
     return (
         <Link
             href={`/shops/${shop.id}`}
-            className="w-full max-w-sm overflow-hidden bg-white shadow-sm transition-all duration-300 hover:scale-105 hover:rounded-2xl hover:shadow-lg"
+            className="w-full max-w-full overflow-hidden bg-white shadow-sm transition-all duration-300 hover:scale-105 hover:rounded-2xl hover:shadow-lg"
         >
             {/* Banner */}
             <div>

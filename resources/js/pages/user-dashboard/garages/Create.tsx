@@ -58,6 +58,9 @@ export default function Create({
             'image/webp': ['.webp'],
         },
     };
+
+    const { all_users, auth } = usePage().props;
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -68,14 +71,13 @@ export default function Create({
             short_description: editData?.short_description || '',
             short_description_kh: editData?.short_description_kh || '',
             order_index: editData?.order_index?.toString() || '',
-            owner_user_id: editData?.owner_user_id?.toString() || '',
+            owner_user_id: auth?.user?.id?.toString() || '',
             logo: '',
             banner: '',
         },
     });
 
     const [error, setError] = useState(null);
-    const { all_users } = usePage().props;
 
     const { post, data, progress, processing, transform, errors } = inertiaUseForm();
 
@@ -106,6 +108,25 @@ export default function Create({
                     onError: (e) => {
                         toast.error('Error', {
                             description: 'Failed to update.' + JSON.stringify(e, null, 2),
+                        });
+                    },
+                });
+            } else {
+                post('/user-garages', {
+                    preserveScroll: true,
+                    onSuccess: (page) => {
+                        form.reset();
+                        setFiles(null);
+                        setFilesBanner(null);
+                        if (page.props.flash?.success) {
+                            toast.success('Success', {
+                                description: page.props.flash.success,
+                            });
+                        }
+                    },
+                    onError: (e) => {
+                        toast.error('Error', {
+                            description: 'Failed to create.' + JSON.stringify(e, null, 2),
                         });
                     },
                 });
@@ -429,7 +450,7 @@ export default function Create({
                     {progress && <ProgressWithValue value={progress.percentage} position="start" />}
                     {setIsOpen && <MyDialogCancelButton onClick={() => setIsOpen(false)} />}
 
-                    {editData?.status == 'active' ? (
+                    {!editData || editData?.status == 'active' ? (
                         <>
                             {!readOnly && (
                                 <Button disabled={processing} type="submit">

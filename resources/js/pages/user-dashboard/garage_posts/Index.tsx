@@ -21,10 +21,10 @@ const Index = () => {
             href: '/admin/user-garage_posts',
         },
     ];
-    const { tableData } = usePage().props;
+    const { auth } = usePage().props;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            {tableData?.data[0]?.garage?.status == 'inactive' && (
+            {auth?.garage?.status == 'inactive' && (
                 <UserSuspended
                     title={t('Garage Suspended!')}
                     subTitle="Your garage has been temporarily suspended. Please contact our support team to resolve this issue."
@@ -38,7 +38,7 @@ const Index = () => {
                     <span className="flex-1"></span>
                     {/* <MyExportButton />
                     <MyImportButton /> */}
-                    {tableData?.data[0]?.garage?.status == 'active' ? (
+                    {auth?.garage?.status == 'active' ? (
                         <> {hasRole('Garage') && <MyAddNewButton url="/user-garage_posts/create" type="link" />}</>
                     ) : (
                         <>

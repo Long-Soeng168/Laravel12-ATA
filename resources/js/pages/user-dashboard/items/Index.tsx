@@ -21,10 +21,10 @@ const Index = () => {
             href: '/user-items',
         },
     ];
-    const { tableData } = usePage().props;
+    const { tableData, auth } = usePage().props;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            {tableData?.data[0]?.shop?.status == 'inactive' && (
+            {auth?.shop?.status == 'inactive' && (
                 <UserSuspended
                     title={t('Shop Suspended!')}
                     subTitle={t('Your shop has been temporarily suspended. Please contact our support team to resolve this issue.')}
@@ -38,7 +38,7 @@ const Index = () => {
                     <span className="flex-1"></span>
                     {/* <MyExportButton />
                     <MyImportButton /> */}
-                    {tableData?.data[0]?.shop?.status == 'active' ? (
+                    {auth?.shop?.status == 'active' ? (
                         <>{hasRole('Shop') && <MyAddNewButton url="/user-items/create" type="link" />}</>
                     ) : (
                         <>

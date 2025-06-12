@@ -39,7 +39,6 @@ class UserGarageController extends Controller implements HasMiddleware
     }
     public function create()
     {
-
         $all_users = User::orderBy('id', 'desc')
             ->where('garage_id', null)
             ->get();
@@ -52,6 +51,70 @@ class UserGarageController extends Controller implements HasMiddleware
         return Inertia::render('user-dashboard/garages/Create', [
             'all_users' => $all_users,
         ]);
+    }
+
+    public function store(Request $request)
+    {
+        // dd($request->all());
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'address' => 'nullable|string|max:255',
+            'phone' => 'nullable|string',
+            'short_description' => 'nullable|string|max:500',
+            'short_description_kh' => 'nullable|string|max:500',
+            'parent_code' => 'nullable|string|max:255',
+            'brand_code' => 'nullable|string|max:255',
+            'order_index' => 'nullable|numeric|max:255',
+            'status' => 'nullable|string|in:active,inactive',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
+            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
+        ]);
+
+        $validated['created_by'] = $request->user()->id;
+        $validated['updated_by'] = $request->user()->id;
+        $validated['owner_user_id'] = $request->user()->id;
+
+        $image_file = $request->file('logo');
+        $banner_file = $request->file('banner');
+        unset($validated['logo']);
+        unset($validated['banner']);
+
+        foreach ($validated as $key => $value) {
+            if ($value === '') {
+                $validated[$key] = null;
+            }
+        }
+
+
+        if ($image_file) {
+            try {
+                $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/garages', 600);
+                $validated['logo'] = $created_image_name;
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
+            }
+        }
+        if ($banner_file) {
+            try {
+                $created_image_name = ImageHelper::uploadAndResizeImageWebp($banner_file, 'assets/images/garages', 900);
+                $validated['banner'] = $created_image_name;
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
+            }
+        }
+
+        $garage = Garage::create($validated);
+
+        if ($garage) {
+            $user = User::where('id', Auth::user()->id)->where('garage_id', null)->first();
+            $user->assignRole('Garage');
+            if ($user)
+                $user->update([
+                    'garage_id' => $garage->id,
+                ]);
+        }
+
+        return redirect('/user-dashboard');
     }
 
     public function update(Request $request, Garage $user_garage)
