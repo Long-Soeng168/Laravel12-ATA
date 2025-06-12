@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Garage;
 use App\Models\ItemBrand;
@@ -104,7 +105,7 @@ class GarageController extends Controller
         // Validate incoming request  
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'description' => 'required|string|max:1000',
+            'description' => 'nullable|string|max:1000',
             'address' => 'required|string|max:255',
             'phone' => 'required|string|max:15',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000', // Validate logo image
@@ -124,39 +125,25 @@ class GarageController extends Controller
             $logoName = null;
             $bannerName = null;
 
-            // Process logo image
-            if ($request->hasFile('logo')) {
-                $logo = $request->file('logo');
-                $logoName = time() . '_' . $logo->getClientOriginalName();
-                $logoPath = public_path('assets/images/garages/logo/' . $logoName);
-                $logoThumbPath = public_path('assets/images/garages/thumb/logo/' . $logoName);
+            $image_file = $request->file('logo');
+            $banner_file = $request->file('banner');
 
+            if ($image_file) {
                 try {
-                    $uploadedLogo = Image::make($logo->getRealPath())->save($logoPath);
-                    $uploadedLogo->resize(500, null, function ($constraint) {
-                        $constraint->aspectRatio();
-                    })->save($logoThumbPath);
-                } catch (Exception $e) {
+                    $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/garages', 600);
+                    $logoName = $created_image_name;
+                } catch (\Exception $e) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Failed to save logo image.',
                     ], 500);
                 }
             }
-
-            // Process banner image
-            if ($request->hasFile('banner')) {
-                $banner = $request->file('banner');
-                $bannerName = time() . '_' . $banner->getClientOriginalName();
-                $bannerPath = public_path('assets/images/garages/banner/' . $bannerName);
-                $bannerThumbPath = public_path('assets/images/garages/thumb/banner/' . $bannerName);
-
+            if ($banner_file) {
                 try {
-                    $uploadedBanner = Image::make($banner->getRealPath())->save($bannerPath);
-                    $uploadedBanner->resize(800, null, function ($constraint) {
-                        $constraint->aspectRatio();
-                    })->save($bannerThumbPath);
-                } catch (Exception $e) {
+                    $created_image_name = ImageHelper::uploadAndResizeImageWebp($banner_file, 'assets/images/garages', 900);
+                    $bannerName = $created_image_name;
+                } catch (\Exception $e) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Failed to save banner image.',
@@ -167,18 +154,21 @@ class GarageController extends Controller
             // Create garage record in the database
             $garage = Garage::create([
                 'name' => $request->input('name'),
-                'description' => $request->input('description'),
+                'short_description' => $request->input('description'),
                 'address' => $request->input('address'),
                 'phone' => $request->input('phone'),
                 'logo' => $logoName,
                 'banner' => $bannerName,
-                'user_id' => $userId,
+                'owner_user_id' => $request->user()->id,
+                'created_by' => $request->user()->id,
+                'updated_by' => $request->user()->id,
+                "status" => 'active',
             ]);
 
             // Update user details and assign role
             $user = User::find($userId);
             $user->update(['garage_id' => $garage->id]);
-            $user->assignRole('garage');
+            $user->assignRole('Garage');
 
             return response()->json([
                 'success' => true,
@@ -220,11 +210,11 @@ class GarageController extends Controller
         // Validate incoming request  
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'description' => 'required|string|max:1000',
+            'description' => 'nullable|string|max:1000',
             'address' => 'required|string|max:255',
             'phone' => 'required|string|max:15',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000', // Validate logo image
-            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000', // Validate banner image
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000',
+            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000',
         ]);
 
         if ($validator->fails()) {
@@ -235,57 +225,44 @@ class GarageController extends Controller
         }
 
         try {
-            $garage = Garage::findOrFail($id); // Find the existing garage by ID
-            $logoName = $garage->logo; // Keep existing logo name if no new logo uploaded
-            $bannerName = $garage->banner; // Keep existing banner name if no new banner uploaded
+            $garage = Garage::findOrFail($id);
+            if ($garage->id != $request->user()->garage_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorize!'
+                ], 401);
+            }
 
-            // Process logo image if uploaded
-            if ($request->hasFile('logo')) {
-                // Delete the old logo if it exists
-                if ($logoName) {
-                    unlink(public_path('assets/images/garages/logo/' . $logoName));
-                    unlink(public_path('assets/images/garages/thumb/logo/' . $logoName));
-                }
+            $logoName = $garage->logo;
+            $bannerName = $garage->banner;
 
-                // Save new logo
-                $logo = $request->file('logo');
-                $logoName = time() . '_' . $logo->getClientOriginalName();
-                $logoPath = public_path('assets/images/garages/logo/' . $logoName);
-                $logoThumbPath = public_path('assets/images/garages/thumb/logo/' . $logoName);
+            $image_file = $request->file('logo');
+            $banner_file = $request->file('banner');
 
+            if ($image_file) {
                 try {
-                    $uploadedLogo = Image::make($logo->getRealPath())->save($logoPath);
-                    $uploadedLogo->resize(500, null, function ($constraint) {
-                        $constraint->aspectRatio();
-                    })->save($logoThumbPath);
-                } catch (Exception $e) {
+                    $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/garages', 600);
+                    $logoName = $created_image_name;
+
+                    if ($garage->logo && $created_image_name) {
+                        ImageHelper::deleteImage($garage->logo, 'assets/images/garages');
+                    }
+                } catch (\Exception $e) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Failed to save logo image.',
                     ], 500);
                 }
             }
-
-            // Process banner image if uploaded
-            if ($request->hasFile('banner')) {
-                // Delete the old banner if it exists
-                if ($bannerName) {
-                    unlink(public_path('assets/images/garages/banner/' . $bannerName));
-                    unlink(public_path('assets/images/garages/thumb/banner/' . $bannerName));
-                }
-
-                // Save new banner
-                $banner = $request->file('banner');
-                $bannerName = time() . '_' . $banner->getClientOriginalName();
-                $bannerPath = public_path('assets/images/garages/banner/' . $bannerName);
-                $bannerThumbPath = public_path('assets/images/garages/thumb/banner/' . $bannerName);
-
+            if ($banner_file) {
                 try {
-                    $uploadedBanner = Image::make($banner->getRealPath())->save($bannerPath);
-                    $uploadedBanner->resize(800, null, function ($constraint) {
-                        $constraint->aspectRatio();
-                    })->save($bannerThumbPath);
-                } catch (Exception $e) {
+                    $created_image_name = ImageHelper::uploadAndResizeImageWebp($banner_file, 'assets/images/garages', 900);
+                    $bannerName = $created_image_name;
+
+                    if ($garage->banner && $created_image_name) {
+                        ImageHelper::deleteImage($garage->banner, 'assets/images/garages');
+                    }
+                } catch (\Exception $e) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Failed to save banner image.',
@@ -293,23 +270,15 @@ class GarageController extends Controller
                 }
             }
 
-            // Update the garage record
             $garage->update([
                 'name' => $request->input('name'),
-                'description' => $request->input('description'),
+                'short_description' => $request->input('description'),
                 'address' => $request->input('address'),
                 'phone' => $request->input('phone'),
                 'logo' => $logoName,
                 'banner' => $bannerName,
+                'updated_by' => $request->user()->id,
             ]);
-
-            // Update user details if needed
-            $user = User::find($garage->user_id);
-            if ($user) {
-                $user->update(['garage_id' => $garage->id]);
-                // You can update the role here if needed, for example:
-                // $user->assignRole('garage'); 
-            }
 
             return response()->json([
                 'success' => true,

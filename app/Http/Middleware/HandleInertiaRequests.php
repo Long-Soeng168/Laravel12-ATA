@@ -53,8 +53,8 @@ class HandleInertiaRequests extends Middleware
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
                 'user' => $request->user(),
-                'shop' => Shop::find($request->user()->shop_id) ?? null,
-                'garage' => Garage::find($request->user()->garage_id) ?? null,
+                'shop' => Shop::find($request->user()?->shop_id) ?? null,
+                'garage' => Garage::find($request->user()?->garage_id) ?? null,
                 'roles' => $request->user() ? $request->user()->getRoleNames() : [],
                 'permissions' => $request->user() ? $request->user()->getAllPermissions()->pluck('name') : [],
             ],

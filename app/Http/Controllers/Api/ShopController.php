@@ -98,13 +98,15 @@ class ShopController extends Controller
                 'banner' => $bannerName,
                 'status' => 'active',
                 'owner_user_id' => $userId,
+                'created_by' => $request->user()->id,
+                'updated_by' => $request->user()->id,
             ]);
 
             $user = User::find($userId);
             $user->update([
                 'shop_id' => $shop->id,
             ]);
-            $user->assignRole('shop');
+            $user->assignRole('Shop');
 
             return response()->json([
                 'success' => true,
@@ -197,6 +199,12 @@ class ShopController extends Controller
         try {
             // Find the shop
             $shop = Shop::findOrFail($id);
+            if ($shop->id != $request->user()->shop_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorize!'
+                ], 401);
+            }
 
             $logoName = null;
             $image_file = $request->file('logo');
@@ -240,6 +248,7 @@ class ShopController extends Controller
                 'phone' => $request->input('phone'),
                 'logo' => $logoName,
                 'banner' => $bannerName,
+                'updated_by' => $request->user()->id,
             ]);
 
             return response()->json([
@@ -274,8 +283,10 @@ class ShopController extends Controller
             'bodyTypeId' => 'nullable|required',
             'brandId' => 'nullable|required',
             'brandModelId' => 'nullable|required',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:4000',
             'description' => 'required|string',
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:4000',
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:4048',
         ]);
 
         if ($validator->fails()) {
@@ -302,6 +313,7 @@ class ShopController extends Controller
                 'created_by' =>  $request->user()->id,
                 'updated_by' => $request->user()->id,
                 'shop_id' => $request->user()->shop_id,
+                "status" => 'active',
             ]);
 
             // Multiple Images
@@ -361,8 +373,10 @@ class ShopController extends Controller
             'bodyTypeId' => 'nullable|required',
             'brandId' => 'nullable|required',
             'brandModelId' => 'nullable|required',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:4000',
             'description' => 'required|string',
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:4000',
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:4048',
         ]);
 
         if ($validator->fails()) {
@@ -379,12 +393,13 @@ class ShopController extends Controller
             $model_code = ItemModel::find($request->input('brandModelId')) ?? null;
 
             $product = Item::find($id);
-            if (isEmpty($product)) {
+            if ($product->shop_id != $request->user()->shop_id) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Product Not Found',
-                ], 404);
+                    'message' => 'Unauthorize!'
+                ], 401);
             }
+            
             $product->update([
                 'name' => $request->input('name'),
                 'price' => $request->input('price'),

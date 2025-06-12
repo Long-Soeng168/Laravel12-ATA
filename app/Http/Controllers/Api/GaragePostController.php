@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
 use App\Models\GaragePost;
+use App\Models\GaragePostImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -52,8 +54,11 @@ class GaragePostController extends Controller
     {
         // Validate incoming request
         $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
             'description' => 'required|string|max:1000',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:4000',
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:4048',
         ]);
 
         // return $request->all();
@@ -69,26 +74,45 @@ class GaragePostController extends Controller
         $garageId = $request->user()->garage_id;
 
         try {
-            // Store the image if provided
-            $imageName = null;
-            if ($request->hasFile('image')) {
-                $image = $request->file('image');
-                $fileName = time() . '_' . $image->getClientOriginalName();
-                $imagePath = public_path('assets/images/garageposts/' . $fileName);
-                $thumbPath = public_path('assets/images/garageposts/thumb/' . $fileName);
 
+            $created_post = GaragePost::create([
+                'title' => $request->input('title'),
+                'short_description' => $request->input('description'),
+                'garage_id' => $garageId,
+                'create_by_user_id' => $userId,
+                "created_by" => $userId,
+                "post_date" => $userId,
+                "status" => 'active',
+            ]);
+
+            $image_files = $request->file('images');
+            $image_file = $request->file('image');
+            // Multi Image
+            if ($image_files) {
                 try {
-                    // Create an image instance and save the original image
-                    $uploadedImage = Image::make($image->getRealPath())->save($imagePath);
-
-                    // Resize image to create a thumbnail
-                    $uploadedImage->resize(500, null, function ($constraint) {
-                        $constraint->aspectRatio();
-                    })->save($thumbPath);
-
-                    // Store the filename
-                    $imageName = $fileName;
-                } catch (Exception $e) {
+                    foreach ($image_files as $image) {
+                        $created_image_name = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/garage_posts', 600);
+                        GaragePostImage::create([
+                            'image' => $created_image_name,
+                            'post_id' => $created_post->id,
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Failed to save image.',
+                    ], 500);
+                }
+            }
+            // Single Image
+            if ($image_file) {
+                try {
+                    $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/garage_posts', 600);
+                    GaragePostImage::create([
+                        'image' => $created_image_name,
+                        'post_id' => $created_post->id,
+                    ]);
+                } catch (\Exception $e) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Failed to save image.',
@@ -96,18 +120,11 @@ class GaragePostController extends Controller
                 }
             }
 
-            // Create a post entry in the database
-            $post = GaragePost::create([
-                'description' => $request->input('description'),
-                'image' => $imageName, // Save the image filename
-                'garage_id' => $garageId, // Garage ID
-                'create_by_user_id' => $userId, // Associated user
-            ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Post created successfully',
-                'post' => $post
+                'post' => $created_post
             ], 200);
         } catch (\Exception $e) {
             // Handle any error during the process
@@ -125,8 +142,11 @@ class GaragePostController extends Controller
     {
         // Validate incoming request 
         $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
             'description' => 'required|string|max:1000',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000', // Image is optional for updates
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:4000',
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:4048',
         ]);
 
         if ($validator->fails()) {
@@ -139,6 +159,12 @@ class GaragePostController extends Controller
         try {
             // Find the post by ID
             $post = GaragePost::findOrFail($id);
+            if ($post->garage_id != $request->user()->garage_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorize!'
+                ], 401);
+            }
 
             // Only authorized users can update the post
             if ($request->user()->garage_id !== $post->garage_id) {

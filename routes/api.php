@@ -72,10 +72,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Garage Route
     Route::post('user_garage', [GarageController::class, 'user_garage']);
-    // Route::post('garages', [GarageController::class, 'store']);
-    // Route::post('garages/{id}', [GarageController::class, 'update']);
-    // Route::post('garages_posts', [GaragePostController::class, 'store']);
-    // Route::post('garages_posts/{id}', [GaragePostController::class, 'update']);
+    Route::post('garages', [GarageController::class, 'store']);
+    Route::post('garages/{id}', [GarageController::class, 'update']);
+    Route::post('garages_posts', [GaragePostController::class, 'store']);
+    Route::post('garages_posts/{id}', [GaragePostController::class, 'update']);
     // Route::get('garages_posts/{id}/delete', [GaragePostController::class, 'destroy']);
 });
 

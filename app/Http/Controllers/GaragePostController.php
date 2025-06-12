@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Helpers\ImageHelper;
 use App\Models\Garage;
 use App\Models\Link;
-use App\Models\GaragePost; 
-use App\Models\PostCategory; 
+use App\Models\GaragePost;
+use App\Models\PostCategory;
 use App\Models\GaragePostImage;
 use App\Models\Type;
 use Carbon\Carbon;
@@ -104,10 +104,10 @@ class GaragePostController extends Controller implements HasMiddleware
         unset($validated['images']);
 
         foreach ($validated as $key => $value) {
-    if ($value === '') {
-        $validated[$key] = null;
-    }
-}
+            if ($value === '') {
+                $validated[$key] = null;
+            }
+        }
 
         $created_post = GaragePost::create($validated);
 
@@ -188,10 +188,10 @@ class GaragePostController extends Controller implements HasMiddleware
         unset($validated['images']);
 
         foreach ($validated as $key => $value) {
-    if ($value === '') {
-        $validated[$key] = null;
-    }
-}
+            if ($value === '') {
+                $validated[$key] = null;
+            }
+        }
 
         $garage_post->update($validated);
 
