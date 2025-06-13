@@ -266,6 +266,12 @@ class ShopController extends Controller implements HasMiddleware
      */
     public function destroy(Shop $shop)
     {
+        $owner = User::where('id', $shop->owner_user_id)->first();
+        if ($owner) {
+            $owner->update([
+                'shop_id' => null,
+            ]);
+        }
         if ($shop->logo) {
             ImageHelper::deleteImage($shop->logo, 'assets/images/shops');
         }
