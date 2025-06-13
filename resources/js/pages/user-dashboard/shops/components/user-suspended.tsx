@@ -1,5 +1,3 @@
-'use client';
-
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import useTranslation from '@/hooks/use-translation';
 import { Ban } from 'lucide-react';

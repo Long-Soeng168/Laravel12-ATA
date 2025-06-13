@@ -19,7 +19,7 @@ const MyHeader = () => {
     const navItems1 = [
         { label: t('Products'), href: '/products' },
         { label: t('Online Trainings'), href: '/online_trainings' },
-        { label: t('Documents'), href: '/documents' },
+        // { label: t('Documents'), href: '/documents' },
     ];
 
     const navItems2 = [
@@ -93,7 +93,7 @@ const MyHeader = () => {
             </nav>
 
             {/* Main Header */}
-            <div className="sticky top-0 z-50 border-b border-white/20 bg-background/50 backdrop-blur-md">
+            <div className="bg-background/50 sticky top-0 z-50 border-b border-white/20 backdrop-blur-md">
                 <header>
                     <div className="mx-auto flex max-w-screen-xl items-center justify-between py-2 lg:py-4">
                         {/* Mobile Menu */}

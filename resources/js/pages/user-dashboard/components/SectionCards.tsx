@@ -53,7 +53,7 @@ const SectionCards = () => {
                 {hasRole('Garage') && (
                     <Link
                         prefetch
-                        href={`${auth?.shop?.id ? '/user-garages/update' : '/user-garages/create'}`}
+                        href={`${auth?.garage?.id ? '/user-garages/update' : '/user-garages/create'}`}
                         className="border-primary/20 flex flex-1 flex-col items-center justify-start gap-4 rounded-xl border px-5 py-6 transition-all duration-300 hover:-translate-1.5 hover:rounded hover:shadow-[5px_5px_rgba(104,_96,_255,_0.4),_10px_10px_rgba(104,_96,_255,_0.3),_15px_15px_rgba(104,_96,_255,_0.2),_20px_20px_rgba(104,_96,_255,_0.1),_25px_25px_rgba(104,_96,_255,_0.05)]"
                     >
                         <div className="bg-primary/10 flex aspect-square h-16 items-center justify-center rounded-full">

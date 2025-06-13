@@ -281,12 +281,7 @@ class GarageController extends Controller implements HasMiddleware
      */
     public function destroy(Garage $garage)
     {
-        $owner = User::where('id', $garage->owner_user_id)->first();
-        if ($owner) {
-            $owner->update([
-                'garage_id' => null,
-            ]);
-        }
+
         if ($garage->logo) {
             ImageHelper::deleteImage($garage->logo, 'assets/images/garages');
         }
@@ -294,6 +289,13 @@ class GarageController extends Controller implements HasMiddleware
             ImageHelper::deleteImage($garage->banner, 'assets/images/garages');
         }
         $garage->delete();
+        $owner = User::where('id', $garage->owner_user_id)->first();
+        if ($owner) {
+            $owner->removeRole('Garage');
+            $owner->update([
+                'garage_id' => null,
+            ]);
+        }
         return redirect()->back()->with('success', 'Garage deleted successfully.');
     }
 }

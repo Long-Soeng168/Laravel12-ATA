@@ -1,3 +1,5 @@
+import MyNoData from '@/components/my-no-data';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 const ShopProfileHeader = ({ shop }) => {
     return (
         <div className="mb-8 w-full px-4 md:mb-28">
@@ -24,6 +26,17 @@ const ShopProfileHeader = ({ shop }) => {
                                     <span className="font-semibold">Phone:</span> {shop.phone}
                                 </p>
                             )}
+                            <div className="absolute right-1 bottom-1">
+                                <Dialog>
+                                    <DialogTrigger className='text-primary hover:underline cursor-pointer bg-background/50 backdrop-blur-md rounded-lg p-1 px-2'>About</DialogTrigger>
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle>{shop.name}</DialogTitle>
+                                            <DialogDescription className='whitespace-pre-line'>{shop.short_description || <MyNoData />}</DialogDescription>
+                                        </DialogHeader>
+                                    </DialogContent>
+                                </Dialog>
+                            </div>
                         </div>
                     </div>
                 </div>

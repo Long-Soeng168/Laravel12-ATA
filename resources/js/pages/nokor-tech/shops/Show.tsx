@@ -14,6 +14,7 @@ const Show = () => {
         <NokorTechLayout>
             <div className="mx-auto mb-8 max-w-screen-xl">
                 <ShopProfileHeader shop={shop} />
+
                 <div className="flex">
                     {/* start left side */}
                     {/* <div className="hidden w-64 lg:block">

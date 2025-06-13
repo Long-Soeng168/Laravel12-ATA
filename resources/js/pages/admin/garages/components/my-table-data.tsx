@@ -79,11 +79,11 @@ const MyTableData = () => {
                                     <ArrowUpDown size={16} /> {t('Short Description')}
                                 </span>
                             </TableHead>
-                            <TableHead onClick={() => handleSort('short_description_kh')}>
+                            {/* <TableHead onClick={() => handleSort('short_description_kh')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Short Description Khmer')}
                                 </span>
-                            </TableHead>
+                            </TableHead> */}
                             <TableHead onClick={() => handleSort('owner_user_id')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Owner')}
@@ -208,7 +208,7 @@ const MyTableData = () => {
                                 <TableCell>{item.phone || '---'}</TableCell>
                                 <TableCell>{item.address || '---'}</TableCell>
                                 <TableCell>{item.short_description || '---'}</TableCell>
-                                <TableCell>{item.short_description_kh || '---'}</TableCell>
+                                {/* <TableCell>{item.short_description_kh || '---'}</TableCell> */}
                                 {/* <TableCell>{item.owner_user_id || '---'}</TableCell> */}
                                 <TableCell>
                                     <div className="space-y-2">

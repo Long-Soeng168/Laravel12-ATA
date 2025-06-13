@@ -119,7 +119,7 @@ class UserShopController extends Controller implements HasMiddleware
                 ]);
         }
 
-        return redirect('/user-dashboard');
+        return redirect('/user-dashboard')->with('success', 'Shop register successfully!');
     }
 
     /**

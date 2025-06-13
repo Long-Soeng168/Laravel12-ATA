@@ -45,7 +45,7 @@ class UserGarageController extends Controller implements HasMiddleware
         // return ($all_users);
         $user_garage = Garage::where('id', Auth::user()->garage_id)->first();
         if ($user_garage) {
-            abort(404);
+            abort(403);
         }
 
         return Inertia::render('user-dashboard/garages/Create', [
@@ -114,7 +114,7 @@ class UserGarageController extends Controller implements HasMiddleware
                 ]);
         }
 
-        return redirect('/user-dashboard');
+        return redirect('/user-dashboard')->with('success', 'Garage register successfully!');
     }
 
     public function update(Request $request, Garage $user_garage)

@@ -266,12 +266,7 @@ class ShopController extends Controller implements HasMiddleware
      */
     public function destroy(Shop $shop)
     {
-        $owner = User::where('id', $shop->owner_user_id)->first();
-        if ($owner) {
-            $owner->update([
-                'shop_id' => null,
-            ]);
-        }
+
         if ($shop->logo) {
             ImageHelper::deleteImage($shop->logo, 'assets/images/shops');
         }
@@ -279,6 +274,13 @@ class ShopController extends Controller implements HasMiddleware
             ImageHelper::deleteImage($shop->banner, 'assets/images/shops');
         }
         $shop->delete();
+        $owner = User::where('id', $shop->owner_user_id)->first();
+        if ($owner) {
+            $owner->removeRole('Shop');
+            $owner->update([
+                'shop_id' => null,
+            ]);
+        }
         return redirect()->back()->with('success', 'Shop deleted successfully.');
     }
 }

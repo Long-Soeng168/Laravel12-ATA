@@ -137,15 +137,15 @@ class UserItemController extends Controller implements HasMiddleware
                 return redirect()->back()->with('error', 'Failed to upload images: ' . $e->getMessage());
             }
         }
-        $result = TelegramHelper::sendItemToTelegram($created_item->id);
+        // $result = TelegramHelper::sendItemToTelegram($created_item->id);
 
-        if (!$result['success']) {
-            session()->flash('error', $result['message']);
-            session()->flash('success', 'Item Created Successfully!.');
-        } else {
-            session()->flash('success', 'Item Created Successfully!.');
-        }
-        return redirect()->back();
+        // if (!$result['success']) {
+        //     session()->flash('error', $result['message']);
+        //     session()->flash('success', 'Item Created Successfully!.');
+        // } else {
+        //     session()->flash('success', 'Item Created Successfully!.');
+        // }
+        return redirect()->back()->with('success', 'Item Created Successfully!.');
     }
 
     /**
