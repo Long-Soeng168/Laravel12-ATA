@@ -63,12 +63,10 @@ class AuthController extends Controller
             $userRoles = $user->getRoleNames();
             // $userPermissions = $user->getPermissionsViaRoles()->pluck('name');
             unset($user['roles']);
-            $shop = Shop::where('id', $user->shop_id)->first();
-            $garage = Garage::where('id', $user->garage_id)->with('expert')->first();
+            // $shop = Shop::where('id', $user->shop_id)->first();
+            // $garage = Garage::where('id', $user->garage_id)->with('expert')->first();
             return response()->json([
                 'user' => $user,
-                'shop' => $shop,
-                'garage' => $garage,
                 'userRoles' => $userRoles,
                 // 'userPermissions' => $userPermissions
             ], 200);
