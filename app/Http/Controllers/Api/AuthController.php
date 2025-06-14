@@ -115,7 +115,7 @@ class AuthController extends Controller
             'password'          => 'nullable|string|min:6|max:255|confirmed',
             'phone'             => 'nullable|numeric',
             'gender'            => 'nullable|string|in:male,female,other',
-            'image'             => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
+            'image'             => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4048',
         ]);
 
         try {
