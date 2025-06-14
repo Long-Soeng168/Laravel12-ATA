@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Garage;
 use App\Models\Shop;
@@ -105,40 +106,80 @@ class AuthController extends Controller
         return response()->json(['token' => $token, 'user' => $user,  'userRoles' => ['User']], 200);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, User $user)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $id,
-            'phone' => 'required|unique:users,phone,' . $id,
-            'password' => 'nullable|string',
+        $validated = $request->validate([
+            'name'              => 'required|string|max:255',
+            'email'             => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'current_password'  => 'nullable|string|min:6|max:255',
+            'password'          => 'nullable|string|min:6|max:255|confirmed',
+            'phone'             => 'nullable|numeric',
+            'gender'            => 'nullable|string|in:male,female,other',
+            'image'             => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+        try {
+            $validated['updated_by'] = $request->user()->id;
+
+            // Check if new password is provided
+            if (!empty($validated['password'])) {
+                // Require current_password to be provided
+                if (empty($validated['current_password'])) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Current password is required to change your password.'
+                    ], 422);
+                }
+
+                // Verify current password
+                if (!Hash::check($validated['current_password'], $user->password)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Current password is incorrect.'
+                    ], 422);
+                }
+
+                // Hash and store new password
+                $validated['password'] = Hash::make($validated['password']);
+            } else {
+                unset($validated['password']); // Don't update password if not provided
+            }
+            $imageFile = $request->file('image');
+
+            if ($imageFile) {
+                $imageName = ImageHelper::uploadAndResizeImageWebp($imageFile, 'assets/images/users', 600);
+                $validated['image'] = $imageName;
+                if ($imageName && $user->image) {
+                    ImageHelper::deleteImage($user->image, 'assets/images/users');
+                }
+            }
+
+            // Clean out empty values
+            foreach ($validated as $key => $value) {
+                if ($value === null || $value === '') {
+                    unset($validated[$key]);
+                }
+            }
+
+            $user->update($validated);
+
+            if (!empty($roles)) {
+                $user->syncRoles($roles);
+            } else {
+                $user->syncRoles('User');
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User updated successfully!',
+                'user'    => $user->fresh()
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update user: ' . $e->getMessage()
+            ], 500);
         }
-
-        $input = $request->all();
-
-        if ($request->filled('password')) {
-            $input['password'] = Hash::make($request->password);
-        }
-
-        $user = User::findOrFail($id);
-
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $filename = time() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('images/users/'), $filename);
-            $input['image'] = $filename;
-        }
-
-        $user->update($input);
-
-        return response()->json([
-            'message' => 'User updated successfully',
-            'user' => $user,
-        ], 200);
     }
 
     public function logout()
