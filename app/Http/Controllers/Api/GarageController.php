@@ -151,6 +151,7 @@ class GarageController extends Controller
                 }
             }
 
+            $brand = ItemBrand::where('id', $request->brand_id)->first();
             // Create garage record in the database
             $garage = Garage::create([
                 'name' => $request->input('name'),
@@ -162,6 +163,7 @@ class GarageController extends Controller
                 'owner_user_id' => $request->user()->id,
                 'created_by' => $request->user()->id,
                 'updated_by' => $request->user()->id,
+                'brand_code' => $brand->code ?? null,
                 "status" => 'active',
             ]);
 
@@ -270,6 +272,8 @@ class GarageController extends Controller
                 }
             }
 
+            $brand = ItemBrand::where('id', $request->brand_id)->first();
+
             $garage->update([
                 'name' => $request->input('name'),
                 'short_description' => $request->input('description'),
@@ -277,6 +281,7 @@ class GarageController extends Controller
                 'phone' => $request->input('phone'),
                 'logo' => $logoName,
                 'banner' => $bannerName,
+                'brand_code' => $brand->code ?? null,
                 'updated_by' => $request->user()->id,
             ]);
 
