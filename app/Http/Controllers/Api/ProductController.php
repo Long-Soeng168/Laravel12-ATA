@@ -69,7 +69,15 @@ class ProductController extends Controller
 
         // Paginate the results
         // $query->select('id', 'name', 'image', 'price', 'is_instock', 'category_id');
-        $query->with(['images', 'category', 'brand', 'model', 'body_type']);
+        $query->with([
+            'images' => function ($q) {
+                $q->orderBy('id', 'desc');
+            },
+            'category',
+            'brand',
+            'model',
+            'body_type'
+        ]);
         $products = $query->paginate($perPage);
 
         $products->getCollection()->transform(function ($item) {
@@ -109,7 +117,11 @@ class ProductController extends Controller
             ->orderBy('id', 'desc');
 
         // Select the necessary columns and paginate
-        $query->with(['images']);
+        $query->with([
+            'images' => function ($q) {
+                $q->orderBy('id', 'desc');
+            },
+        ]);
 
         $products = $query->paginate($perPage);
 
@@ -175,7 +187,15 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        $item = Item::with('category', 'body_type', 'brand', 'brand_model', 'images')->find($id);
+        $item = Item::with([
+            'images' => function ($q) {
+                $q->orderBy('id', 'desc')->skip(1);
+            },
+            'category',
+            'brand',
+            'model',
+            'body_type'
+        ])->find($id);
 
         if (!$item) {
             return response()->json(['message' => 'Item not found'], 404);
@@ -199,13 +219,7 @@ class ProductController extends Controller
             'brand'       => $item->brand,
             'brand_model'       => $item->brand_model,
             'shop_id' => $item->shop_id,
-            'images'           => $item->images->skip(1)->map(function ($image) {
-                return [
-                    'id'         => $image->id,
-                    'image'      => $image->image,
-                    'product_id' => $image->item_id, // keep it product_id for old key
-                ];
-            }),
+            'images'           => $item->images,
             'created_at'       => $item->created_at,
             'updated_at'       => $item->updated_at,
         ];
