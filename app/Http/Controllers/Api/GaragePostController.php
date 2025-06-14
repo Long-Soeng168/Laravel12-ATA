@@ -214,6 +214,7 @@ class GaragePostController extends Controller
             }
 
             // Update the description
+            $post->title = $request->input('title') ?? 'N/A';
             $post->short_description = $request->input('description');
             $post->updated_by = $request->user()->id;
             $post->save();
