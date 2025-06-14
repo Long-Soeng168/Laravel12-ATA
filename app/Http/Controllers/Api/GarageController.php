@@ -175,7 +175,7 @@ class GarageController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Garage created successfully',
-                'garage' => $garage
+                'garage' => $garage->load('expert'),
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -288,7 +288,7 @@ class GarageController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Garage updated successfully',
-                'garage' => $garage
+                'garage' => $garage->load('expert'),
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
