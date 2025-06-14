@@ -284,7 +284,7 @@ class ShopController extends Controller
             'brandId' => 'nullable|required',
             'brandModelId' => 'nullable|required',
             'description' => 'required|string',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:4000',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:4000',
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:4048',
         ]);
@@ -374,7 +374,7 @@ class ShopController extends Controller
             'brandId' => 'nullable|required',
             'brandModelId' => 'nullable|required',
             'description' => 'required|string',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:4000',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:4000',
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:4048',
         ]);
