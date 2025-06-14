@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Garage;
+use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -61,8 +63,12 @@ class AuthController extends Controller
             $userRoles = $user->getRoleNames();
             // $userPermissions = $user->getPermissionsViaRoles()->pluck('name');
             unset($user['roles']);
+            $shop = Shop::where('id', $user->shop_id)->first();
+            $garage = Garage::where('id', $user->garage_id)->with('expert')->first();
             return response()->json([
                 'user' => $user,
+                'shop' => $shop,
+                'garage' => $garage,
                 'userRoles' => $userRoles,
                 // 'userPermissions' => $userPermissions
             ], 200);
