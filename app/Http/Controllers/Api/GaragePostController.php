@@ -269,6 +269,8 @@ class GaragePostController extends Controller
         // Find the post by ID
         $post = GaragePost::find($id);
 
+
+
         // Check if post exists
         if (!$post) {
             return response()->json([
@@ -278,21 +280,11 @@ class GaragePostController extends Controller
         }
 
         try {
-            // Optionally delete the image if it exists
-            if ($post->image) {
-                $imagePath = public_path('assets/images/garageposts/' . $post->image);
-                $thumbPath = public_path('assets/images/garageposts/thumb/' . $post->image);
-
-                // Delete image and thumbnail from server
-                if (file_exists($imagePath)) {
-                    unlink($imagePath);
-                }
-                if (file_exists($thumbPath)) {
-                    unlink($thumbPath);
+            if (count($post->images) > 0) {
+                foreach ($post->images as $image) {
+                    ImageHelper::deleteImage($image->image, 'assets/images/garage_posts');
                 }
             }
-
-            // Delete the post
             $post->delete();
 
             // Return a success response
