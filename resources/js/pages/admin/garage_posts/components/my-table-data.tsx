@@ -54,11 +54,11 @@ const MyTableData = () => {
                             <TableHead className="text-left">{t('Action')}</TableHead>
                             <TableHead>{t('Image')}</TableHead>
                             {/* <TableHead>{t('Link')}</TableHead> */}
-                            <TableHead onClick={() => handleSort('title')}>
+                            {/* <TableHead onClick={() => handleSort('title')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Title')}
                                 </span>
-                            </TableHead>
+                            </TableHead> */}
                             {/* <TableHead onClick={() => handleSort('title_kh')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Title Khmer')}
@@ -94,7 +94,7 @@ const MyTableData = () => {
                                     <ArrowUpDown size={16} /> {t('Type')}
                                 </span>
                             </TableHead> */}
-                            <TableHead onClick={() => handleSort('total_view_counts')}>
+                            {/* <TableHead onClick={() => handleSort('total_view_counts')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Total View')}
                                 </span>
@@ -103,7 +103,7 @@ const MyTableData = () => {
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Post Date')}
                                 </span>
-                            </TableHead>
+                            </TableHead> */}
                             <TableHead onClick={() => handleSort('created_at')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Created at')}
@@ -197,7 +197,7 @@ const MyTableData = () => {
                                         '---'
                                     )}
                                 </TableCell> */}
-                                <TableCell>{item.title || '---'}</TableCell>
+                                {/* <TableCell>{item.title || '---'}</TableCell> */}
                                 {/* <TableCell>{item.title_kh || '---'}</TableCell> */}
                                 <TableCell>{item.short_description || '---'}</TableCell>
                                 {/* <TableCell>{item.short_description_kh || '---'}</TableCell> */}
@@ -223,10 +223,10 @@ const MyTableData = () => {
                                 </TableCell>
                                 {/* <TableCell>{item.category_code || '---'}</TableCell> */}
                                 {/* <TableCell>{item.type || '---'}</TableCell> */}
-                                <TableCell>
+                                {/* <TableCell>
                                     {item.total_view_counts ? <span className="flex items-center gap-1">{item.total_view_counts}</span> : '---'}
-                                </TableCell>
-                                <TableCell className="whitespace-nowrap">
+                                </TableCell> */}
+                                {/* <TableCell className="whitespace-nowrap">
                                     {item.post_date
                                         ? new Date(item.post_date).toLocaleDateString('en-UK', {
                                               year: 'numeric',
@@ -234,7 +234,7 @@ const MyTableData = () => {
                                               day: 'numeric',
                                           })
                                         : '---'}
-                                </TableCell>
+                                </TableCell> */}
                                 <TableCell className="whitespace-nowrap">
                                     {item.created_at
                                         ? new Date(item.created_at).toLocaleDateString('en-UK', {

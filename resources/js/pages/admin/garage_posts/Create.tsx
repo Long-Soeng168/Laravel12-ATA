@@ -1,11 +1,9 @@
 import DeleteButton from '@/components/delete-button';
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { FileInput, FileUploader, FileUploaderContent, FileUploaderItem } from '@/components/ui/file-upload';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ProgressWithValue } from '@/components/ui/progress-with-value';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -15,8 +13,7 @@ import { cn } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm as inertiaUseForm, usePage } from '@inertiajs/react';
-import { format } from 'date-fns';
-import { CalendarIcon, Check, ChevronsUpDown, CloudUpload, Loader } from 'lucide-react';
+import { Check, ChevronsUpDown, CloudUpload, Loader } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -62,7 +59,7 @@ export default function Create() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            title: editData?.title || '',
+            title: editData?.title || 'N/A',
             title_kh: editData?.title_kh || '',
             short_description: editData?.short_description || '',
             short_description_kh: editData?.short_description_kh || '',
@@ -163,7 +160,7 @@ export default function Create() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-5">
-                    <div className="grid md:grid-cols-12 gap-4">
+                    <div className="grid gap-4 md:grid-cols-12">
                         <div className="col-span-6">
                             <FormField
                                 control={form.control}
@@ -242,7 +239,7 @@ export default function Create() {
                             />
                         </div>
 
-                        <div className="col-span-6">
+                        {/* <div className="col-span-6">
                             <FormField
                                 control={form.control}
                                 name="post_date"
@@ -280,10 +277,33 @@ export default function Create() {
                                     </FormItem>
                                 )}
                             />
+                        </div> */}
+                        <div className="col-span-6">
+                            <FormField
+                                control={form.control}
+                                name="status"
+                                render={({ field }) => (
+                                    <FormItem key={field.value}>
+                                        <FormLabel>{t('Status')}</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select Status" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="active">{t('Active')}</SelectItem>
+                                                <SelectItem value="inactive">{t('Inactive')}</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage>{errors.status && <div>{errors.status}</div>}</FormMessage>
+                                    </FormItem>
+                                )}
+                            />
                         </div>
                     </div>
 
-                    <div className="grid md:grid-cols-12 gap-4">
+                    {/* <div className="grid md:grid-cols-12 gap-4">
                         <div className="col-span-12">
                             <FormField
                                 control={form.control}
@@ -300,7 +320,7 @@ export default function Create() {
                             />
                         </div>
 
-                        {/* <div className="col-span-6">
+                        <div className="col-span-6">
                             <FormField
                                 control={form.control}
                                 name="title_kh"
@@ -314,8 +334,8 @@ export default function Create() {
                                     </FormItem>
                                 )}
                             />
-                        </div> */}
-                    </div>
+                        </div>
+                    </div> */}
 
                     <FormField
                         control={form.control}
@@ -504,30 +524,6 @@ export default function Create() {
                                 )}
                             />
                         </div> */}
-
-                        <div className="col-span-6">
-                            <FormField
-                                control={form.control}
-                                name="status"
-                                render={({ field }) => (
-                                    <FormItem key={field.value}>
-                                        <FormLabel>{t('Status')}</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select Status" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                <SelectItem value="active">{t('Active')}</SelectItem>
-                                                <SelectItem value="inactive">{t('Inactive')}</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage>{errors.status && <div>{errors.status}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
                     </div>
                     <FormField
                         control={form.control}
