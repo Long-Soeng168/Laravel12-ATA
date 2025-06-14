@@ -187,13 +187,18 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        $item = Item::with([
-            'images',
+        $query = Item::query();
+        $query->with([
+            'images' => function ($q) {
+                $q->orderBy('id', 'desc');
+            },
             'category',
             'brand',
             'model',
             'body_type'
-        ])->find($id);
+        ]);
+        $item = $query->where('id', $id)->first();
+        $item->images = $item->images->slice(1)->values();
 
         if (!$item) {
             return response()->json(['message' => 'Item not found'], 404);
