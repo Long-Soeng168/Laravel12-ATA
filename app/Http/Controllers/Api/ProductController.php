@@ -188,9 +188,7 @@ class ProductController extends Controller
     public function show(string $id)
     {
         $item = Item::with([
-            'images' => function ($q) {
-                $q->orderBy('id', 'desc')->skip(1);
-            },
+            'images',
             'category',
             'brand',
             'model',
