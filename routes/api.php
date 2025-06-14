@@ -67,7 +67,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('shops', [ShopController::class, 'store']);
     Route::post('shops/{id}', [ShopController::class, 'update']);
     Route::post('products', [ShopController::class, 'storeProduct']);
-    Route::post('products/{id}', [ShopController::class, 'updateProduct']);
+    Route::post('update_products/{id}', [ShopController::class, 'updateProduct']);
     Route::get('products/{id}/delete', [ShopController::class, 'deleteProduct']);
 
     // Garage Route
