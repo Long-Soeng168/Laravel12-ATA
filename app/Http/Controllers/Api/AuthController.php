@@ -106,6 +106,48 @@ class AuthController extends Controller
         return response()->json(['token' => $token, 'user' => $user,  'userRoles' => ['User']], 200);
     }
 
+    public function destroy(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'password'  => 'required|string|min:6|max:255',
+        ]);
+
+        try {
+            // Check if authenticated user is deleting their own account
+            if ($request->user()->id !== $user->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not authorized to delete this account.'
+                ], 403);
+            }
+
+            // Verify password
+            if (!Hash::check($validated['password'], $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Incorrect password.'
+                ], 422);
+            }
+
+            // Delete user image if exists
+            if ($user->image) {
+                ImageHelper::deleteImage($user->image, 'assets/images/users');
+            }
+
+            // Finally delete the user
+            $user->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Account deleted successfully.'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete account: ' . $e->getMessage()
+            ], 500);
+        }
+    }
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
