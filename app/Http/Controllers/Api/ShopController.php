@@ -206,7 +206,7 @@ class ShopController extends Controller
                 ], 401);
             }
 
-            $logoName = null;
+            $logoName = $shop->logo;
             $image_file = $request->file('logo');
             if ($image_file) {
                 try {
@@ -223,7 +223,7 @@ class ShopController extends Controller
                 }
             }
 
-            $bannerName = null;
+            $bannerName = $shop->banner;
             $banner_file = $request->file('banner');
             if ($banner_file) {
                 try {
@@ -399,7 +399,7 @@ class ShopController extends Controller
                     'message' => 'Unauthorize!'
                 ], 401);
             }
-            
+
             $product->update([
                 'name' => $request->input('name'),
                 'price' => $request->input('price'),
