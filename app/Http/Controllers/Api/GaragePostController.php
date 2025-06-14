@@ -23,7 +23,11 @@ class GaragePostController extends Controller
 
         // Start building the query using query()
         $query = GaragePost::query();
-        $query->with('images');
+        $query->with([
+            'images' => function ($q) {
+                $q->orderBy('id', 'desc');
+            },
+        ]);
 
         // Apply search filter if search term is provided
         if ($search) {
@@ -54,7 +58,7 @@ class GaragePostController extends Controller
     {
         // Validate incoming request
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
+            'title' => 'nullable|string|max:255',
             'description' => 'required|string|max:1000',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:4000',
             'images' => 'nullable|array',
@@ -76,13 +80,12 @@ class GaragePostController extends Controller
         try {
 
             $created_post = GaragePost::create([
-                'title' => $request->input('title'),
+                'title' => $request->input('title') ?? 'N/A',
                 'short_description' => $request->input('description'),
                 'garage_id' => $garageId,
-                'create_by_user_id' => $userId,
-                "created_by" => $userId,
-                "post_date" => $userId,
                 "status" => 'active',
+                "created_by" => $request->user()->id,
+                "updated_by" => $request->user()->id,
             ]);
 
             $image_files = $request->file('images');
@@ -142,7 +145,7 @@ class GaragePostController extends Controller
     {
         // Validate incoming request 
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
+            'title' => 'nullable|string|max:255',
             'description' => 'required|string|max:1000',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:4000',
             'images' => 'nullable|array',
@@ -175,36 +178,34 @@ class GaragePostController extends Controller
             }
 
             // Update the image if provided
-            if ($request->hasFile('image')) {
-                $image = $request->file('image');
-                $fileName = time() . '_' . $image->getClientOriginalName();
-                $imagePath = public_path('assets/images/garageposts/' . $fileName);
-                $thumbPath = public_path('assets/images/garageposts/thumb/' . $fileName);
-
+            $image_files = $request->file('images');
+            $image_file = $request->file('image');
+            // Multi Image
+            if ($image_files) {
                 try {
-                    // Create an image instance and save the original image
-                    $uploadedImage = Image::make($image->getRealPath())->save($imagePath);
-
-                    // Resize image to create a thumbnail
-                    $uploadedImage->resize(500, null, function ($constraint) {
-                        $constraint->aspectRatio();
-                    })->save($thumbPath);
-
-                    // Delete the old image files if they exist
-                    if ($post->image) {
-                        $oldImagePath = public_path('assets/images/garageposts/' . $post->image);
-                        $oldThumbPath = public_path('assets/images/garageposts/thumb/' . $post->image);
-                        if (file_exists($oldImagePath)) {
-                            unlink($oldImagePath);
-                        }
-                        if (file_exists($oldThumbPath)) {
-                            unlink($oldThumbPath);
-                        }
+                    foreach ($image_files as $image) {
+                        $created_image_name = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/garage_posts', 600);
+                        GaragePostImage::create([
+                            'image' => $created_image_name,
+                            'post_id' => $post->id,
+                        ]);
                     }
-
-                    // Update the image filename in the post
-                    $post->image = $fileName;
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Failed to save image.',
+                    ], 500);
+                }
+            }
+            // Single Image
+            if ($image_file) {
+                try {
+                    $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/garage_posts', 600);
+                    GaragePostImage::create([
+                        'image' => $created_image_name,
+                        'post_id' => $post->id,
+                    ]);
+                } catch (\Exception $e) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Failed to save image.',
@@ -213,7 +214,8 @@ class GaragePostController extends Controller
             }
 
             // Update the description
-            $post->description = $request->input('description');
+            $post->short_description = $request->input('description');
+            $post->updated_by = $request->user()->id;
             $post->save();
 
             return response()->json([
@@ -221,11 +223,6 @@ class GaragePostController extends Controller
                 'message' => 'Post updated successfully',
                 'post' => $post
             ], 200);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Post not found'
-            ], 404);
         } catch (\Exception $e) {
             // Handle any error during the process
             return response()->json([
