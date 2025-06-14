@@ -8,9 +8,11 @@ use Inertia\Inertia;
 Route::get('/', [NokorTechController::class, 'index']);
 Route::get('/shops', [NokorTechController::class, 'shops']);
 Route::get('/about-us', [NokorTechController::class, 'about']);
-Route::get('/about-us-webview', [NokorTechController::class, 'about_webview']);
 Route::get('/download-app', [NokorTechController::class, 'download_app']);
 Route::get('/privacy', [NokorTechController::class, 'privacy']);
+Route::get('/about-us-webview', [NokorTechController::class, 'about_webview']);
+Route::get('/privacy-webview', [NokorTechController::class, 'privacy_webview']);
+Route::get('/contact-us-webview', [NokorTechController::class, 'contact_webview']);
 
 Route::get('/contact-us', [NokorTechController::class, 'contact']);
 Route::post('/submit-message', [MessageController::class, 'store']);

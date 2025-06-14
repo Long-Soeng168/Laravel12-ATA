@@ -408,6 +408,14 @@ class NokorTechController extends Controller
             'privacies' => $privacies,
         ]);
     }
+    public function privacy_webview()
+    {
+        $privacies = Page::with('children')->where('code', 'PRIVACY-POLICY-PAGE')->where('status', 'active')->orderBy('order_index')->first();
+        // return $privacies;
+        return Inertia::render("nokor-tech/web_view/PrivacyWebView", [
+            'privacies' => $privacies,
+        ]);
+    }
     public function about()
     {
         $about = Page::with('children')->where('code', 'ABOUT-ATA-AUTO')->where('status', 'active')->orderBy('order_index')->first();
@@ -435,7 +443,7 @@ class NokorTechController extends Controller
         $privacyPolicy = Page::with('children')->where('code', 'PRIVACY-POLICY')->where('status', 'active')->orderBy('order_index')->first();
         $getStartedNow = Page::with('children')->where('code', 'GET-STARTED-NOW')->where('status', 'active')->orderBy('order_index')->first();
         // return $about;
-        return Inertia::render("nokor-tech/AboutWebView", [
+        return Inertia::render("nokor-tech/web_view/AboutWebView", [
             "about" => $about,
             "whyChooseUs" => $whyChooseUs,
             "buildForEveryone" => $buildForEveryone,
@@ -450,6 +458,14 @@ class NokorTechController extends Controller
         $contactPage = Page::with('images')->where('position_code', 'CONTACT')->where('status', 'active')->orderBy('order_index')->first();
 
         return Inertia::render("nokor-tech/Contact", [
+            "contactPage" => $contactPage
+        ]);
+    }
+    public function contact_webview()
+    {
+        $contactPage = Page::with('images')->where('position_code', 'CONTACT')->where('status', 'active')->orderBy('order_index')->first();
+
+        return Inertia::render("nokor-tech/web_view/ContactWebView", [
             "contactPage" => $contactPage
         ]);
     }
