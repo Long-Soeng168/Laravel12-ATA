@@ -183,7 +183,7 @@ class ProductController extends Controller
 
         // Convert to old key structure
         $product = [
-            'product_id'       => $item->id,
+            'id'       => $item->id,
             'name'             => $item->name,
             'price'            => (float)$item->price,
             'description'      => $item->short_description,
