@@ -185,8 +185,8 @@ class ShopController extends Controller
             'description' => 'required|string|max:1000',
             'address' => 'required|string|max:255',
             'phone' => 'required|string|max:15',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20048', // Optional logo
-            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20048', // Optional banner
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4048', // Optional logo
+            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4048', // Optional banner
         ]);
 
         if ($validator->fails()) {
@@ -206,7 +206,7 @@ class ShopController extends Controller
                 ], 401);
             }
 
-            $logoName = $shop->logo;
+            $logoName = $shop->logo ?? null;
             $image_file = $request->file('logo');
             if ($image_file) {
                 try {
@@ -223,7 +223,7 @@ class ShopController extends Controller
                 }
             }
 
-            $bannerName = $shop->banner;
+            $bannerName = $shop->banner ?? null;
             $banner_file = $request->file('banner');
             if ($banner_file) {
                 try {
