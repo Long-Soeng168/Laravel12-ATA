@@ -63,7 +63,7 @@ Route::resource('models', ModelController::class);
 
 Route::middleware(['auth:sanctum'])->group(function () {
     // Shop Route
-    Route::post('user_shop', [ShopController::class, 'user_shop']);
+    Route::get('user_shop', [ShopController::class, 'user_shop']);
     Route::post('shops', [ShopController::class, 'store']);
     Route::post('shops/{id}', [ShopController::class, 'update']);
     Route::post('products', [ShopController::class, 'storeProduct']);
@@ -71,7 +71,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('products/{id}/delete', [ShopController::class, 'deleteProduct']);
 
     // Garage Route
-    Route::post('user_garage', [GarageController::class, 'user_garage']);
+    Route::get('user_garage', [GarageController::class, 'user_garage']);
     Route::post('garages', [GarageController::class, 'store']);
     Route::post('garages/{id}', [GarageController::class, 'update']);
     Route::post('garages_posts', [GaragePostController::class, 'store']);
