@@ -80,8 +80,8 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'phone' => 'required|unique:users',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'required|unique:users,phone',
             'password' => 'required|string',
         ]);
 
@@ -155,7 +155,7 @@ class AuthController extends Controller
             'email'             => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'current_password'  => 'nullable|string|min:6|max:255',
             'password'          => 'nullable|string|min:6|max:255|confirmed',
-            'phone'             => 'nullable|numeric',
+            'phone'             => 'nullable|numeric|unique:users,phone,' . $user->id,
             'gender'            => 'nullable|string|in:male,female,other',
             'image'             => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4048',
         ]);
