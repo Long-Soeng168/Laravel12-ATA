@@ -364,7 +364,7 @@ class ShopController extends Controller
         }
     }
 
-    public function updateProduct(Request $request, Item $product)
+    public function updateProduct(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -392,7 +392,7 @@ class ShopController extends Controller
             $body_type = ItemBodyType::find($request->input('bodyTypeId'));
             $model = ItemModel::find($request->input('brandModelId'));
 
-            // $product = Item::find($id);
+            $product = Item::find($id);
             if ($product->shop_id != $request->user()->shop_id) {
                 return response()->json([
                     'success' => false,
