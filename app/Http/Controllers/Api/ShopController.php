@@ -297,19 +297,19 @@ class ShopController extends Controller
         }
 
         try {
-            $category_code = ItemCategory::find($request->input('categoryId')) ?? null;
-            $brand_code = ItemBrand::find($request->input('brandId')) ?? null;
-            $body_type_code = ItemBodyType::find($request->input('bodyTypeId')) ?? null;
-            $model_code = ItemModel::find($request->input('brandModelId')) ?? null;
+            $category = ItemCategory::find($request->input('categoryId')) ?? null;
+            $brand = ItemBrand::find($request->input('brandId')) ?? null;
+            $body_type = ItemBodyType::find($request->input('bodyTypeId')) ?? null;
+            $model = ItemModel::find($request->input('brandModelId')) ?? null;
 
             $created_product = Item::create([
                 'name' => $request->input('name'),
                 'price' => $request->input('price'),
                 'short_description' => $request->input('description'),
-                'category_code' => $category_code,
-                'body_type_code' => $body_type_code,
-                'brand_code' => $brand_code,
-                'model_code' => $model_code,
+                'category_code' => $category->code,
+                'body_type_code' => $body_type->code,
+                'brand_code' => $brand->code,
+                'model_code' => $model->code,
                 'created_by' =>  $request->user()->id,
                 'updated_by' => $request->user()->id,
                 'shop_id' => $request->user()->shop_id,
