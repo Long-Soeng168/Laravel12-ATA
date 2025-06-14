@@ -109,7 +109,7 @@ class AuthController extends Controller
     public function destroy(Request $request, User $user)
     {
         $validated = $request->validate([
-            'password'  => 'required|string|min:6|max:255',
+            'password'  => 'required|string|max:255',
         ]);
 
         try {
