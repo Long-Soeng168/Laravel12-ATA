@@ -186,7 +186,7 @@ class ProductController extends Controller
             'product_id'       => $item->id,
             'name'             => $item->name,
             'price'            => (float)$item->price,
-            'description'      => $item->long_description,
+            'description'      => $item->short_description,
             'category_id'      => $item->category ? $item->category->id : null,
             'brand_id'         => $item->brand ? $item->brand->id : null,
             'model_id'         => $item->brand_model ? $item->brand_model->id : null,
