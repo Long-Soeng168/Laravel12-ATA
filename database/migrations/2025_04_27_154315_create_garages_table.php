@@ -21,8 +21,8 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('location', 500)->nullable();
             $table->string('status')->nullable()->default('active');
-            $table->string('short_description', 500)->nullable();
-            $table->string('short_description_kh', 500)->nullable();
+            $table->string('short_description', 1000)->nullable();
+            $table->string('short_description_kh', 1000)->nullable();
             $table->string('logo')->nullable();
             $table->string('banner')->nullable();
             $table->integer('order_index')->nullable()->default(100);
