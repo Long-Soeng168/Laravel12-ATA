@@ -435,7 +435,7 @@ class NokorTechController extends Controller
         $privacyPolicy = Page::with('children')->where('code', 'PRIVACY-POLICY')->where('status', 'active')->orderBy('order_index')->first();
         $getStartedNow = Page::with('children')->where('code', 'GET-STARTED-NOW')->where('status', 'active')->orderBy('order_index')->first();
         // return $about;
-        return Inertia::render("nokor-tech/About", [
+        return Inertia::render("nokor-tech/AboutWebView", [
             "about" => $about,
             "whyChooseUs" => $whyChooseUs,
             "buildForEveryone" => $buildForEveryone,
