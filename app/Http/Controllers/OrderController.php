@@ -43,7 +43,7 @@ class OrderController extends Controller implements HasMiddleware
         }
 
         $tableData = $query->withCount('order_items')->paginate(perPage: 10)->onEachSide(1);
- 
+
         return Inertia::render('admin/orders/Index', [
             'tableData' => $tableData,
         ]);
@@ -99,7 +99,7 @@ class OrderController extends Controller implements HasMiddleware
             foreach ($validated['items'] as $item) {
                 OrderItem::create([
                     'order_id'      => $order->id,
-                    'item_id'       => $item['item_id'],
+                    'item_id'       => $item['id'],
                     'price'         => $item['price'],
                     'discount'      => $item['discount'] ?? 0,
                     'discount_type' => $item['discount_type'] ?? 'percentage',
