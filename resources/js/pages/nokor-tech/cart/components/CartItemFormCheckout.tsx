@@ -53,7 +53,7 @@ const CartItemFormCheckout = () => {
 
     const handleSubmit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
-        post('/orders', {
+        post('/store_online_training_order', {
             onSuccess: (page) => {
                 if (page.props.flash?.success) {
                     clearCart(false);

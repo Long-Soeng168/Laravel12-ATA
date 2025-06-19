@@ -21,6 +21,7 @@ use App\Http\Controllers\ItemColorController;
 use App\Http\Controllers\LinkController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MessageInquiryController;
+use App\Http\Controllers\OnlineTrainingOrderController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PagePositionController;
@@ -125,6 +126,8 @@ Route::middleware('auth')->group(function () {
     Route::post('admin/message_inquiries/{message_inquiry}/update_status', [MessageInquiryController::class, 'update_status']);
 
     // Orders Route
+    Route::resource('admin/online_training_orders', OnlineTrainingOrderController::class);
+
     Route::resource('admin/orders', OrderController::class);
     Route::post('admin/orders/{order}/update', [OrderController::class, 'update']);
     Route::post('admin/orders/{order}/update_status', [OrderController::class, 'update_status']);

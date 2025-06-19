@@ -279,8 +279,22 @@ export function AppSidebar() {
         {
             title: t('Orders'),
             permission: 'order view',
-            url: '/admin/orders',
+            url: '/admin/online_training_orders',
             icon: ListOrderedIcon,
+            subItems: [
+                // {
+                //     title: t('Items'),
+                //     permission: 'order view',
+                //     url: '/admin/orders',
+                //     icon: ListOrderedIcon,
+                // },
+                {
+                    title: t('Online Training'),
+                    permission: 'order view',
+                    url: '/admin/online_training_orders',
+                    icon: ListOrderedIcon,
+                },
+            ],
         },
         {
             title: t('Banners'),

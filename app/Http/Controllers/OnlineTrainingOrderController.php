@@ -6,8 +6,6 @@ use App\Helpers\TelegramHelper;
 use App\Models\OnlineTrainingOrder;
 use App\Models\OnlineTrainingOrderItem;
 use Illuminate\Http\Request;
-use App\Models\Order;
-use App\Models\OrderItem;
 use Illuminate\Support\Facades\DB;
 
 use Illuminate\Routing\Controllers\Middleware;
@@ -15,7 +13,7 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
-class OrderController extends Controller implements HasMiddleware
+class OnlineTrainingOrderController extends Controller implements HasMiddleware
 {
     public static function middleware(): array
     {
@@ -31,7 +29,7 @@ class OrderController extends Controller implements HasMiddleware
         $sortDirection = $request->input('sortDirection', 'desc');
         $status = $request->input('status');
 
-        $query = Order::query();
+        $query = OnlineTrainingOrder::query();
 
         if ($status) {
             $query->where('status', $status);
@@ -47,87 +45,25 @@ class OrderController extends Controller implements HasMiddleware
 
         $tableData = $query->withCount('order_items')->paginate(perPage: 10)->onEachSide(1);
 
-        return Inertia::render('admin/orders/Index', [
+        return Inertia::render('admin/online_training_orders/Index', [
             'tableData' => $tableData,
         ]);
     }
-    public function show(Order $order)
+    public function show(OnlineTrainingOrder $online_training_order)
     {
-        $orderItems = OrderItem::with('item.images')->where('order_id', $order->id)->get();
+        $orderItems = OnlineTrainingOrderItem::with('item')->where('order_id', $online_training_order->id)->get();
         // return $orderItems;
-        return Inertia::render('admin/orders/Show', [
-            'order' => $order,
+        return Inertia::render('admin/online_training_orders/Show', [
+            'order' => $online_training_order,
             'orderItems' => $orderItems
         ]);
     }
-    public function destroy(Order $order)
+    public function destroy(OnlineTrainingOrder $online_training_order)
     {
-        $order->delete();
+        $online_training_order->delete();
         return redirect()->back()->with('success', 'Message deleted successfully.');
     }
 
-    public function store(Request $request)
-    {
-        // Validate request
-        $validated = $request->validate([
-            'name'       => 'nullable|string|max:255',
-            'phone'      => 'required|string|min:8|max:20',
-            'email'      => 'nullable|email|max:255',
-            'address'    => 'nullable|string|max:255',
-            'note'       => 'nullable|string',
-            'total'      => 'required|numeric',
-            'items'      => 'required|array',
-            'items.*.item_id' => 'required|exists:items,id',
-            'items.*.price'   => 'required|numeric',
-            'items.*.discount' => 'nullable|numeric',
-            'items.*.discount_type' => 'nullable|string|in:percentage,fixed',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.total'    => 'required|numeric',
-        ]);
-
-        try {
-            DB::beginTransaction();
-
-            // Create order
-            $order = Order::create([
-                'name'    => $validated['name'] ?? null,
-                'phone'   => $validated['phone'],
-                'email'   => $validated['email'] ?? null,
-                'address' => $validated['address'] ?? null,
-                'note'    => $validated['note'] ?? null,
-                'total'   => $validated['total'],
-            ]);
-
-
-            // Create order items
-            foreach ($validated['items'] as $item) {
-                OrderItem::create([
-                    'order_id'      => $order->id,
-                    'item_id'       => $item['item_id'],
-                    'price'         => $item['price'],
-                    'discount'      => $item['discount'] ?? 0,
-                    'discount_type' => $item['discount_type'] ?? 'percentage',
-                    'quantity'      => $item['quantity'],
-                    'total'         => $item['total'],
-                ]);
-            }
-
-            DB::commit();
-
-            $result = TelegramHelper::sendOrderItems($order);
-            if ($result['success']) {
-                return back()->with('success', 'Order placed successfully!');
-            } else {
-                return back()->with('error', $result['message']);
-            }
-        } catch (\Exception $e) {
-            DB::rollback();
-
-            return back()->withErrors([
-                'general' => 'Failed to place order. ' . $e->getMessage()
-            ]);
-        }
-    }
     public function store_online_training_order(Request $request)
     {
         // Validate request
