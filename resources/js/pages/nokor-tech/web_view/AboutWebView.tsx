@@ -168,7 +168,7 @@ const About = () => {
                             ></p>
                         </div>
                     </section>
-                    <section className="mt-20">
+                    {/* <section className="mt-20">
                         <div className="mx-auto mb-8 max-w-3xl">
                             <h2 className="text-foreground mb-6 text-center text-4xl font-bold">
                                 {currentLocale == 'kh' ? privacyPolicy.title_kh : privacyPolicy.title}
@@ -212,10 +212,10 @@ const About = () => {
                                 }}
                             ></p>
                         </div>
-                    </section>
+                    </section> */}
 
                     {/* Download Call-to-Action */}
-                    <section className="text-center">
+                    {/* <section className="text-center">
                         <h2 className="text-foreground mb-6 text-center text-4xl font-bold">
                             {currentLocale == 'kh' ? getStartedNow.title_kh : getStartedNow.title}
                         </h2>
@@ -232,7 +232,7 @@ const About = () => {
                         >
                             Download the App
                         </Link>
-                    </section>
+                    </section> */}
                 </main>
             </div>
         </div>

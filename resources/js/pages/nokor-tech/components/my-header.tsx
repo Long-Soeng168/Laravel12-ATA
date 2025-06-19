@@ -84,8 +84,8 @@ const MyHeader = () => {
                         </ul>
                     </div>
                     <div className="flex items-center gap-4 font-semibold">
-                        <Link prefetch href="/download-app" className="rainbow-button flex items-center gap-2 pr-4 pl-2">
-                            <img src="/assets/icons/phone-car.png" alt="Download App" className="aspect-square w-12 object-contain py-1" />
+                        <Link prefetch href="/download-app" className="rainbow-button flex lg:text-lg items-center gap-2 pr-4 pl-2">
+                            <img src="/assets/icons/phone-car.png" alt="Download App" className="aspect-square w-10 lg:w-12 object-contain py-1" />
                             Download App
                         </Link>
                     </div>

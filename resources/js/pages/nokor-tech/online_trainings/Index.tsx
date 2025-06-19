@@ -67,9 +67,14 @@ const Index = () => {
                             </CardHeader>
 
                             <CardContent className="flex h-full flex-col items-start justify-between">
-                                <Badge variant="outline" className="text-primary mb-2 text-base">
-                                    {item?.videos_count} videos
-                                </Badge>
+                                <div className='space-x-2'>
+                                    <Badge variant="outline" className="text-primary mb-2 text-base">
+                                        {item?.videos_count} videos
+                                    </Badge>
+                                    <Badge variant="outline" className="text-destructive/80 border-destructive mb-2 text-base dark:text-white">
+                                        {item?.price} $
+                                    </Badge>
+                                </div>
 
                                 {/* <Link href={`/online_trainings/${item?.id}`} prefetch> */}
                                 <div>
