@@ -74,7 +74,6 @@ class OrderController extends Controller implements HasMiddleware
             'note'       => 'nullable|string',
             'total'      => 'required|numeric',
             'items'      => 'required|array',
-            'items.*.item_id' => 'required|exists:items,id',
             'items.*.price'   => 'required|numeric',
             'items.*.discount' => 'nullable|numeric',
             'items.*.discount_type' => 'nullable|string|in:percentage,fixed',
