@@ -54,7 +54,7 @@ const MyHeader = () => {
         <>
             {/* Top Bar */}
             <nav className="bg-true-primary text-white">
-                <div className="mx-auto flex min-h-10 max-w-screen-xl flex-wrap items-center justify-between px-4 py-2 text-sm">
+                <div className="mx-auto flex min-h-10 max-w-screen-xl flex-wrap gap-y-2 items-center justify-between px-4 py-2 text-sm">
                     {application_info?.image && (
                         <Link prefetch href="/" className="flex items-center gap-2">
                             <img
@@ -84,8 +84,8 @@ const MyHeader = () => {
                         </ul>
                     </div>
                     <div className="flex items-center gap-4 font-semibold">
-                        <Link prefetch href="/download-app" className="rainbow-button flex lg:text-lg items-center gap-2 pr-4 pl-2">
-                            <img src="/assets/icons/phone-car.png" alt="Download App" className="aspect-square w-10 lg:w-12 object-contain py-1" />
+                        <Link prefetch href="/download-app" className="rainbow-button flex items-center gap-1 pr-4 pl-1 lg:gap-2 lg:text-lg">
+                            <img src="/assets/icons/phone-car.png" alt="Download App" className="aspect-square w-10 object-contain py-1 lg:w-12" />
                             Download App
                         </Link>
                     </div>
