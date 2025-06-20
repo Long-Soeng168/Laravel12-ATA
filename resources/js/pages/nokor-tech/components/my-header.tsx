@@ -62,7 +62,7 @@ const MyHeader = () => {
                                 height={65}
                                 src={`/assets/images/application_info/thumb/${application_info.image}`}
                                 alt={`${application_info.name}'s logo`}
-                                className="rounded-full"
+                                className="rounded-full size-12 lg:size-16"
                             />
                             <span className="text-base lg:text-xl font-bold">{application_info.name}</span>
                         </Link>
