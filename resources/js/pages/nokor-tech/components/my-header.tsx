@@ -64,7 +64,7 @@ const MyHeader = () => {
                                 alt={`${application_info.name}'s logo`}
                                 className="rounded-full"
                             />
-                            <span className="text-xl font-bold">{application_info.name}</span>
+                            <span className="text-base lg:text-xl font-bold">{application_info.name}</span>
                         </Link>
                     )}
                     <div className="hidden md:block lg:justify-self-center">
