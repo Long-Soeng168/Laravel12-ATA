@@ -76,9 +76,9 @@ const MyHeader = () => {
                                 </a>
                             </li>
                             <li className="flex">
-                                <span className="mr-2 font-semibold">Email:</span>
-                                <a className="hover:underline" href={`mailto:${application_info?.email}`}>
-                                    {application_info?.email}
+                                <span className="mr-2 font-semibold">Address:</span>
+                                <a className="hover:underline max-w-sm" href={`mailto:${application_info?.email}`}>
+                                    {application_info?.address}
                                 </a>
                             </li>
                         </ul>
