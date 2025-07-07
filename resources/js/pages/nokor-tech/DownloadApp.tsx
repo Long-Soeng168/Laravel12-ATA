@@ -23,7 +23,7 @@ const DownloadApp = () => {
                                 </div>
                             </a>
                             {/* App Store Button */}
-                            <a href="#" className="flex items-center gap-3 rounded-lg bg-black px-5 py-3 text-white transition hover:bg-gray-800">
+                            <a href="https://apps.apple.com/us/app/atech-auto/id6744029644" className="flex items-center gap-3 rounded-lg bg-black px-5 py-3 text-white transition hover:bg-gray-800">
                                 <img src="/assets/icons/app-store.png" className="size-12" />
                                 <div className="flex flex-col items-start leading-tight">
                                     <span className="text-xs">Download on the</span>
