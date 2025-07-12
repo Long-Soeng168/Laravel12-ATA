@@ -147,7 +147,7 @@ class GaragePostController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'nullable|string|max:255',
             'description' => 'required|string|max:1000',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:4000',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000',
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:4048',
         ]);

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\StreamFileController;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 // Default Homepage
 Route::get('/', function () {
@@ -20,6 +21,10 @@ Route::get('/lang/{locale}', function ($locale) {
 
 // Stream File
 Route::get('show_pdf_file/{path}', [StreamFileController::class, 'streamPdf'])->where('path', '.*');
+
+Route::get('/test_google_map', function () {
+   return Inertia::render('test_google_map');
+});
 
 // ========= Client =========
 require __DIR__ . '/nokor_tech.php';
