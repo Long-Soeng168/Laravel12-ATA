@@ -1,5 +1,3 @@
-# test-laravel-12
-
 How to setup project
 - composer install
 - rm package-lock.json
@@ -17,7 +15,6 @@ How to setup project
     - php artisan db:seed --class=RolesAndPermissionsSeeder
     - php artisan db:seed --class=TypeSeeder
     - php artisan db:seed --class=UserSeeder
-# Laravel12
-# Laravel12
-
+    
+-----------------------------------------
 - npm i --legacy-peer-deps# Laravel12-ATA
