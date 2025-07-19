@@ -138,6 +138,9 @@ class GarageController extends Controller implements HasMiddleware
             'status' => 'nullable|string|in:active,inactive',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
+            'location' => 'nullable|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         $validated['created_by'] = $request->user()->id;
@@ -203,6 +206,9 @@ class GarageController extends Controller implements HasMiddleware
             'status' => 'nullable|string|in:active,inactive',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
+            'location' => 'nullable|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         $validated['updated_by'] = $request->user()->id;

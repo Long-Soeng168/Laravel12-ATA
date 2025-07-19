@@ -1,10 +1,12 @@
+import LocationPicker from '@/components/LocationPicker';
 import MyDialogCancelButton from '@/components/my-dialog-cancel-button';
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea';
 import { Button } from '@/components/ui/button';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { FileInput, FileUploader, FileUploaderContent, FileUploaderItem } from '@/components/ui/file-upload';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Popover, PopoverTrigger } from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ProgressWithValue } from '@/components/ui/progress-with-value';
 import useTranslation from '@/hooks/use-translation';
 import AppLayout from '@/layouts/app-layout';
@@ -12,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm as inertiaUseForm, usePage } from '@inertiajs/react';
-import { CloudUpload, Loader, Paperclip } from 'lucide-react';
+import { Check, ChevronsUpDown, CloudUpload, Loader, Paperclip } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -31,6 +33,10 @@ const formSchema = z.object({
     short_description_kh: z.string().max(500).optional(),
     logo: z.string().optional(),
     banner: z.string().optional(),
+    brand_code: z.string().optional(),
+    location: z.string().optional(),
+    latitude: z.number().optional().nullable(),
+    longitude: z.number().optional().nullable(),
 });
 
 export default function Create({
@@ -59,7 +65,7 @@ export default function Create({
         },
     };
 
-    const { all_users, auth } = usePage().props;
+    const { all_users, all_brands, auth } = usePage().props;
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -74,6 +80,10 @@ export default function Create({
             owner_user_id: auth?.user?.id?.toString() || '',
             logo: '',
             banner: '',
+            brand_code: editData?.brand_code || '',
+            location: editData?.location || '',
+            latitude: editData?.latitude || '',
+            longitude: editData?.longitude || '',
         },
     });
 
@@ -194,21 +204,7 @@ export default function Create({
                                 )}
                             />
                         </div>
-                        <div className="col-span-6">
-                            <FormField
-                                control={form.control}
-                                name="address"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t('Address')}</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder={t('Address')} type="text" {...field} />
-                                        </FormControl>
-                                        <FormMessage>{errors.address && <div>{errors.address}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
+
                         {/* <div className="col-span-6">
                             <FormField
                                 control={form.control}
@@ -300,6 +296,74 @@ export default function Create({
                                         </Popover>
                                         {/* <FormDescription>{t('Select shop owner.')}</FormDescription> */}
                                         <FormMessage>{errors.owner_user_id && <div>{errors.owner_user_id}</div>}</FormMessage>
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                        <div className="col-span-6">
+                            <FormField
+                                control={form.control}
+                                name="brand_code"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col" key={field.value}>
+                                        <FormLabel>{t('Brand Expert')}</FormLabel>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <FormControl>
+                                                    <Button
+                                                        variant="outline"
+                                                        role="combobox"
+                                                        className={cn('w-full justify-between', !field.value && 'text-muted-foreground')}
+                                                    >
+                                                        {field.value || t('Select')}
+                                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                    </Button>
+                                                </FormControl>
+                                            </PopoverTrigger>
+
+                                            <PopoverContent className="w-[350px] p-0">
+                                                <Command>
+                                                    <CommandInput placeholder={t('Search')} />
+                                                    <CommandList>
+                                                        <CommandEmpty>{t('No data')}</CommandEmpty>
+                                                        <CommandGroup>
+                                                            <CommandItem
+                                                                value=""
+                                                                onSelect={() => {
+                                                                    form.setValue('brand_code', '');
+                                                                }}
+                                                            >
+                                                                <Check
+                                                                    className={cn('mr-2 h-4 w-4', '' == field.value ? 'opacity-100' : 'opacity-0')}
+                                                                />
+                                                                {t('Select')}
+                                                            </CommandItem>
+                                                            {all_brands?.map((item) => {
+                                                                return (
+                                                                    <CommandItem
+                                                                        value={item.name + item.code}
+                                                                        key={item.code}
+                                                                        onSelect={() => {
+                                                                            form.setValue('brand_code', item.code.toString());
+                                                                        }}
+                                                                    >
+                                                                        <Check
+                                                                            className={cn(
+                                                                                'mr-2 h-4 w-4',
+                                                                                item.code == field.value ? 'opacity-100' : 'opacity-0',
+                                                                            )}
+                                                                        />
+                                                                        {item.name}
+                                                                    </CommandItem>
+                                                                );
+                                                            })}
+                                                        </CommandGroup>
+                                                    </CommandList>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
+                                        <FormDescription>{t('Select Brand Expert.')}</FormDescription>
+                                        <FormMessage>{errors.brand_code && <div>{errors.brand_code}</div>}</FormMessage>
                                     </FormItem>
                                 )}
                             />
@@ -447,6 +511,57 @@ export default function Create({
                             </FormItem>
                         )}
                     />
+
+                    <LocationPicker
+                        key={'location_picker_key' + form.getValues('location') + editData?.location}
+                        value={
+                            // Check if both latitude and longitude exist in editData
+                            editData?.latitude !== undefined &&
+                            editData?.longitude !== undefined &&
+                            editData?.latitude !== null &&
+                            editData?.longitude !== null &&
+                            editData?.latitude !== '' &&
+                            editData?.longitude !== ''
+                                ? {
+                                      coordinates: {
+                                          // Convert to numbers as LocationPicker expects them
+                                          lat: parseFloat(editData.latitude),
+                                          lng: parseFloat(editData.longitude),
+                                      },
+                                      // You might need a formatted address from editData if available,
+                                      // or leave it as an empty string and let the geocoder fetch it.
+                                      formatted_address: editData?.location || '', // Assuming address from editData can be used here
+                                  }
+                                : null
+                        }
+                        onChange={(data) => {
+                            console.log('Selected location:', data);
+                            form.setValue('latitude', data?.coordinates?.lat);
+                            form.setValue('longitude', data?.coordinates?.lng);
+                            form.setValue('location', data?.formatted_address);
+                            // if (form.watch('address') == '') {
+                            //     form.setValue('address', data?.formatted_address);
+                            // }
+                        }}
+                        label="Pick a location"
+                        height="300px"
+                    />
+                    <div className="col-span-6">
+                        <FormField
+                            control={form.control}
+                            name="address"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>{t('Address')}</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder={t('Address')} type="text" {...field} />
+                                    </FormControl>
+                                    <FormMessage>{errors.address && <div>{errors.address}</div>}</FormMessage>
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+
                     {progress && <ProgressWithValue value={progress.percentage} position="start" />}
                     {setIsOpen && <MyDialogCancelButton onClick={() => setIsOpen(false)} />}
 

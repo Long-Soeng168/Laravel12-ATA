@@ -1,3 +1,4 @@
+import LocationPicker from '@/components/LocationPicker';
 import MyDialogCancelButton from '@/components/my-dialog-cancel-button';
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,9 @@ const formSchema = z.object({
     logo: z.string().optional(),
     banner: z.string().optional(),
     brand_code: z.string().optional(),
+    location: z.string().optional(),
+    latitude: z.number().optional().nullable(),
+    longitude: z.number().optional().nullable(),
 });
 
 export default function Create({
@@ -73,6 +77,9 @@ export default function Create({
             logo: '',
             banner: '',
             brand_code: editData?.brand_code || '',
+            location: editData?.location || '',
+            latitude: editData?.latitude || '',
+            longitude: editData?.longitude || '',
         },
     });
 
@@ -156,7 +163,7 @@ export default function Create({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-4">
-                    <div className="grid md:grid-cols-12 gap-4">
+                    <div className="grid gap-4 md:grid-cols-12">
                         <div className="col-span-6">
                             <FormField
                                 control={form.control}
@@ -184,21 +191,6 @@ export default function Create({
                                             <Input placeholder={t('Phone')} type="text" {...field} />
                                         </FormControl>
                                         <FormMessage>{errors.phone && <div>{errors.phone}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                        <div className="col-span-6">
-                            <FormField
-                                control={form.control}
-                                name="address"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t('Address')}</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder={t('Address')} type="text" {...field} />
-                                        </FormControl>
-                                        <FormMessage>{errors.address && <div>{errors.address}</div>}</FormMessage>
                                     </FormItem>
                                 )}
                             />
@@ -525,6 +517,57 @@ export default function Create({
                             </FormItem>
                         )}
                     />
+
+                    <LocationPicker
+                        key={'location_picker_key' + form.getValues('location') + editData?.location}
+                        value={
+                            // Check if both latitude and longitude exist in editData
+                            editData?.latitude !== undefined &&
+                            editData?.longitude !== undefined &&
+                            editData?.latitude !== null &&
+                            editData?.longitude !== null &&
+                            editData?.latitude !== '' &&
+                            editData?.longitude !== ''
+                                ? {
+                                      coordinates: {
+                                          // Convert to numbers as LocationPicker expects them
+                                          lat: parseFloat(editData.latitude),
+                                          lng: parseFloat(editData.longitude),
+                                      },
+                                      // You might need a formatted address from editData if available,
+                                      // or leave it as an empty string and let the geocoder fetch it.
+                                      formatted_address: editData?.location || '', // Assuming address from editData can be used here
+                                  }
+                                : null
+                        }
+                        onChange={(data) => {
+                            console.log('Selected location:', data);
+                            form.setValue('latitude', data?.coordinates?.lat);
+                            form.setValue('longitude', data?.coordinates?.lng);
+                            form.setValue('location', data?.formatted_address);
+                            // if (form.watch('address') == '') {
+                            //     form.setValue('address', data?.formatted_address);
+                            // }
+                        }}
+                        label="Pick a location"
+                        height="300px"
+                    />
+                    <div className="col-span-6">
+                        <FormField
+                            control={form.control}
+                            name="address"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>{t('Address')}</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder={t('Address')} type="text" {...field} />
+                                    </FormControl>
+                                    <FormMessage>{errors.address && <div>{errors.address}</div>}</FormMessage>
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+
                     {progress && <ProgressWithValue value={progress.percentage} position="start" />}
                     {setIsOpen && <MyDialogCancelButton onClick={() => setIsOpen(false)} />}
 

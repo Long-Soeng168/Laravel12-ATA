@@ -5,6 +5,7 @@ namespace App\Http\Controllers\UserDashboard;
 use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Garage;
+use App\Models\ItemBrand;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -32,9 +33,13 @@ class UserGarageController extends Controller implements HasMiddleware
         if ($user_garage->id != Auth::user()->garage_id) {
             abort(404);
         }
+        $all_brands = ItemBrand::orderBy('name')
+            ->where('status', 'active')
+            ->get();
         return Inertia::render('user-dashboard/garages/Create', [
             'editData' => $user_garage->load('owner'),
             'all_users' => $all_users,
+            'all_brands' => $all_brands,
         ]);
     }
     public function create()
@@ -43,6 +48,9 @@ class UserGarageController extends Controller implements HasMiddleware
             ->where('garage_id', null)
             ->get();
         // return ($all_users);
+        $all_brands = ItemBrand::orderBy('name')
+            ->where('status', 'active')
+            ->get();
         $user_garage = Garage::where('id', Auth::user()->garage_id)->first();
         if ($user_garage) {
             abort(403);
@@ -50,6 +58,7 @@ class UserGarageController extends Controller implements HasMiddleware
 
         return Inertia::render('user-dashboard/garages/Create', [
             'all_users' => $all_users,
+            'all_brands' => $all_brands,
         ]);
     }
 
@@ -68,6 +77,9 @@ class UserGarageController extends Controller implements HasMiddleware
             'status' => 'nullable|string|in:active,inactive',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
+            'location' => 'nullable|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         $validated['created_by'] = $request->user()->id;
@@ -134,6 +146,9 @@ class UserGarageController extends Controller implements HasMiddleware
             'status' => 'nullable|string|in:active,inactive',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
+            'location' => 'nullable|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         $validated['updated_by'] = $request->user()->id;

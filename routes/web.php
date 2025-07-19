@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\StreamFileController;
+use App\Models\Garage;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -24,6 +25,13 @@ Route::get('show_pdf_file/{path}', [StreamFileController::class, 'streamPdf'])->
 
 Route::get('/test_google_map', function () {
    return Inertia::render('test_google_map');
+});
+Route::get('/test_google_map_marker', function () {
+   $locationsData = Garage::get();
+   // return $tableData;
+   return Inertia::render('test_google_map_markers', [
+      'locationsData' => $locationsData,
+   ]);
 });
 
 // ========= Client =========
