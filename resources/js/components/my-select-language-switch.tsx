@@ -47,9 +47,9 @@ export default function MySelectLanguageSwitch({ className = '' }: { className?:
             <Switch
                 icon={
                     currentLocale === 'en' ? (
-                        <img src="/assets/icons/english.png" className="h-5 w-5 rounded-full" />
+                        <img src="/assets/icons/english.png" className="h-5 w-5 rounded-full" alt="English Icon" />
                     ) : (
-                        <img src="/assets/icons/khmer.png" className="h-5 w-5 rounded-full" />
+                        <img src="/assets/icons/khmer.png" className="h-5 w-5 rounded-full" alt="Khmer Icon" />
                     )
                 }
                 checked={currentLocale === 'en'}

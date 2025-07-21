@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import useTranslation from '@/hooks/use-translation';
-import { Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowUpRightIcon } from 'lucide-react';
 import NokorTechLayout from './layouts/nokor-tech-layout';
 
@@ -9,6 +9,13 @@ const About = () => {
     const { t, currentLocale } = useTranslation();
     return (
         <NokorTechLayout>
+             <Head>
+                <title>{about?.title}</title>
+                <meta
+                    name="description"
+                    content={about?.short_description}
+                />
+            </Head>
             <div className="text-foreground bg-background">
                 {/* Main Content */}
                 <main className="mx-auto max-w-7xl px-4 py-20">

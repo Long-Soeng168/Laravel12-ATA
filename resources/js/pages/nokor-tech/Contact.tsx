@@ -1,4 +1,4 @@
-import { usePage } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { Globe2Icon, MailIcon, MapPinIcon, PhoneIcon } from 'lucide-react';
 import ContactFormSubmit from './components/contact-form-submit';
 import NokorTechLayout from './layouts/nokor-tech-layout';
@@ -8,6 +8,13 @@ const ContactCamActivePage = () => {
 
     return (
         <NokorTechLayout>
+            <Head>
+                <title>Contact A-Tech Auto - Get in Touch in Phnom Penh, Cambodia</title>
+                <meta
+                    name="description"
+                    content="Reach out to A-Tech Auto for inquiries about automotive tools, courses, garage services, or spare parts in Phnom Penh, Cambodia. We're here to help car owners and professionals."
+                />
+            </Head>
             <div className="flex min-h-screen items-start justify-center">
                 <div className="mx-auto w-full max-w-screen-xl px-4">
                     {/* <div className="text-center">

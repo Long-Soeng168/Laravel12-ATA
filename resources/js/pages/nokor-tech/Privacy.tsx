@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import useTranslation from '@/hooks/use-translation';
-import { usePage } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import NokorTechLayout from './layouts/nokor-tech-layout';
 
 const Privacy = () => {
@@ -9,6 +9,13 @@ const Privacy = () => {
     const { privacies } = usePage().props;
     return (
         <NokorTechLayout>
+            <Head>
+                <title>Privacy Policy | Your Data Protection Commitment</title>
+                <meta
+                    name="description"
+                    content="Understand how ATech Auto protects your personal data. We are committed to securing your information and never share or sell it to third parties. Your trust is our priority."
+                />
+            </Head>
             <div className="mx-auto max-w-4xl space-y-8 p-8">
                 {/* Header */}
                 <header className="space-y-2 text-center">

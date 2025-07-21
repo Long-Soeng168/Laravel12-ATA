@@ -1,5 +1,5 @@
 import MyNoData from '@/components/my-no-data';
-import { usePage } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import MyBlogList from './components/my-blogs-list';
 import MyBodyTypeList from './components/my-body-types-list copy';
 import MyBrandList from './components/my-brand-list';
@@ -14,6 +14,13 @@ const Index = () => {
     const { topBanners, middleBanners, posts, newArrivals, categoriesWithItems, brandsWithItems, bodyTypes } = usePage<any>().props;
     return (
         <NokorTechLayout>
+            <Head>
+                <title>Smart Tools, Courses & Parts for Car Owners & Pros</title>
+                <meta
+                    name="description"
+                    content="Your ultimate automotive companion in Cambodia. Find trusted garages in Cambodia, instantly decode errors, access repair guides, and source top-quality spare parts for your car. Built for local owners, engineers & garages."
+                />
+            </Head>
             <main className="px-2">
                 <>
                     <div className="mx-auto mb-10 max-w-screen-xl">

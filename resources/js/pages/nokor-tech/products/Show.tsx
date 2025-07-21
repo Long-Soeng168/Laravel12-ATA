@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { PhoneIcon } from 'lucide-react';
 import CarouselWithThumbs from '../components/CarouselWithThumbs';
 import MyProductList from '../components/my-product-list';
@@ -9,6 +9,11 @@ const ProductDetailPage = () => {
     const { itemShow, relatedItems } = usePage().props;
     return (
         <NokorTechLayout>
+            <Head>
+                <title>{itemShow?.title}</title>
+                <meta name="description" content={itemShow?.short_description} />
+            </Head>
+
             <div>
                 <div className="mx-auto max-w-screen-xl overflow-hidden">
                     <div className="flex flex-col md:flex-row">
@@ -44,7 +49,7 @@ const ProductDetailPage = () => {
                                 <p className="text-2xl font-bold text-red-600">${itemShow?.price}</p>
                             </div>
                             <a href={`tel:${itemShow.shop?.phone}`}>
-                                <Button size="lg" className='mb-4 mt-2'>
+                                <Button size="lg" className="mt-2 mb-4">
                                     <PhoneIcon /> Call Now
                                 </Button>
                             </a>
