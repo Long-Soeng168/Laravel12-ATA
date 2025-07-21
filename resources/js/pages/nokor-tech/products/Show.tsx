@@ -10,7 +10,7 @@ const ProductDetailPage = () => {
     return (
         <NokorTechLayout>
             <Head>
-                <title>{itemShow?.title}</title>
+                <title>{itemShow?.name}</title>
                 <meta name="description" content={itemShow?.short_description} />
             </Head>
 
