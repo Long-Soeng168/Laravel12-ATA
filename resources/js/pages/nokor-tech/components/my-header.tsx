@@ -38,6 +38,7 @@ const MyHeader = () => {
 
         return (
             <Link
+                key={'link_key' + label + href}
                 prefetch
                 href={href}
                 className={`group relative mx-2 cursor-pointer ${isActive ? 'text-primary font-bold' : ''} hover:text-primary`}
