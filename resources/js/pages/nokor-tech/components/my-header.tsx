@@ -34,7 +34,7 @@ const MyHeader = () => {
     const getInitials = useInitials();
 
     const renderNavLink = ({ label, href }) => {
-        const isActive = window.location.pathname === href;
+        const isActive = typeof window !== 'undefined' ? window.location.pathname === href : false;
 
         return (
             <Link
@@ -54,7 +54,7 @@ const MyHeader = () => {
         <>
             {/* Top Bar */}
             <nav className="bg-true-primary text-white">
-                <div className="mx-auto flex min-h-10 max-w-screen-xl flex-wrap gap-y-2 items-center justify-between px-4 py-2 text-sm">
+                <div className="mx-auto flex min-h-10 max-w-screen-xl flex-wrap items-center justify-between gap-y-2 px-4 py-2 text-sm">
                     {application_info?.image && (
                         <Link prefetch href="/" className="flex items-center gap-2">
                             <img
@@ -62,9 +62,9 @@ const MyHeader = () => {
                                 height={65}
                                 src={`/assets/images/application_info/thumb/${application_info.image}`}
                                 alt={`${application_info.name}'s logo`}
-                                className="rounded-full size-12 lg:size-16"
+                                className="size-12 rounded-full lg:size-16"
                             />
-                            <span className="text-base lg:text-xl font-bold">{application_info.name}</span>
+                            <span className="text-base font-bold lg:text-xl">{application_info.name}</span>
                         </Link>
                     )}
                     <div className="hidden md:block lg:justify-self-center">
@@ -77,7 +77,7 @@ const MyHeader = () => {
                             </li>
                             <li className="flex">
                                 <span className="mr-2 font-semibold">Address:</span>
-                                <a className="hover:underline max-w-sm" href={`mailto:${application_info?.email}`}>
+                                <a className="max-w-sm hover:underline" href={`mailto:${application_info?.email}`}>
                                     {application_info?.address}
                                 </a>
                             </li>
