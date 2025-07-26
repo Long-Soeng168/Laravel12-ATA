@@ -1,13 +1,23 @@
 import { Link, usePage } from '@inertiajs/react';
 
-// components/Footer.js
 export default function MyFooter() {
     const { application_info, links } = usePage().props;
-    // console.log(application_info);
     return (
-        <footer className="relative border-t bg-primary dark:bg-black border-white/50">
-            {/* <BackgroundAnimated /> */}
-            <div className="relative z-10 mx-auto max-w-7xl px-4 pt-12 text-white sm:px-6 lg:px-8">
+        <footer className="bg-true-primary dark:bg-black dark relative border-t text-white">
+            <div className="relative z-10 mx-auto max-w-7xl px-4 pt-10 pb-20 sm:px-6 lg:px-8">
+                {/* Background Banner */}
+                <div className="absolute right-0 bottom-0 z-0 h-auto w-full max-w-[2000px]">
+                    <img
+                        src="/assets/backgrounds/footer_banner_for_light.png"
+                        alt=""
+                        className="z-0 w-[100%] max-w-7xl object-contain opacity-[8%] dark:hidden"
+                    />
+                    <img
+                        src="/assets/backgrounds/footer_banner_for_dark.png"
+                        alt=""
+                        className="z-0 hidden w-[100%] max-w-7xl object-contain opacity-[15%] dark:block"
+                    />
+                </div>
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
                     <div className="justify-self-center">
                         {application_info?.image && (
@@ -26,7 +36,7 @@ export default function MyFooter() {
                     {/* Company Info */}
                     <div className="lg:justify-self-center">
                         <h2 className="mb-4 text-xl font-bold">Information</h2>
-                        <ul className="flex flex-col gap-1 text-white">
+                        <ul className="flex flex-col gap-1">
                             <li className="flex">
                                 <span>{application_info?.address}</span>
                             </li>
@@ -95,49 +105,15 @@ export default function MyFooter() {
                             ))}
                         </ul>
                     </div>
-
-                    {/* Customer Service */}
-                    {/* <div className="lg:justify-self-center">
-                        <h3 className="mb-4 text-lg font-semibold">Features</h3>
-                        <ul className="space-y-2">
-                            <li>
-                                <a href="#" className="hover:underline">
-                                    Product Support
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" className="hover:underline">
-                                    Fast Delivery
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" className="hover:underline">
-                                    Easy Returns
-                                </a>
-                            </li>
-                        </ul>
-                    </div> */}
                 </div>
-
+            </div>
+            <div className="relative z-10 mx-auto max-w-7xl">
                 {/* Footer Bottom */}
-                <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-white py-6 md:flex-row">
+                <div className="flex flex-col items-center justify-between gap-4 py-6 md:flex-row">
                     <p className="text-sm">{application_info?.copyright}</p>
                     <a className="text-sm" href="https://kampu.solutions">
                         Developed by : <strong>Kampu Solutions</strong>
                     </a>
-                    {/* <div className="flex gap-4">
-                        {links?.map((item) => (
-                            <a href={item?.link ? item?.link : '#'}>
-                                <img
-                                    width={32}
-                                    height={32}
-                                    src={`/assets/images/links/thumb/${item?.image}`}
-                                    alt=""
-                                    className="transition-all duration-300 hover:scale-125 hover:cursor-pointer"
-                                />
-                            </a>
-                        ))}
-                    </div> */}
                 </div>
             </div>
         </footer>

@@ -34,6 +34,7 @@ Route::get('/test_google_map_marker', function () {
    ]);
 });
 
+
 // ========= Client =========
 require __DIR__ . '/nokor_tech.php';
 

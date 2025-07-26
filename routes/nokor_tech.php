@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NokorTechController;
+use App\Models\Garage;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -35,3 +36,11 @@ Route::middleware('auth')->group(function () {
 Route::get('/checkout_success', [NokorTechController::class, 'success']);
 
 Route::get('/documents', [NokorTechController::class, 'documents']);
+
+Route::get('/garages_map', function () {
+    $locationsData = Garage::get();
+    // return $tableData;
+    return Inertia::render('nokor-texh/GaragesMap', [
+        'locationsData' => $locationsData,
+    ]);
+});

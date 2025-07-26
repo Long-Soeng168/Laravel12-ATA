@@ -25,10 +25,12 @@ const MyHeader = () => {
     const navItems2 = [
         { label: t('Home'), href: '/' },
         { label: t('Shops'), href: '/shops' },
+        { label: t('Garages'), href: '/garages_map' },
         { label: t('Privacy'), href: '/privacy' },
         { label: t('About'), href: '/about-us' },
         { label: t('Contact'), href: '/contact-us' },
     ];
+
     const { auth } = usePage().props;
     const hasRole = useRole();
     const getInitials = useInitials();
