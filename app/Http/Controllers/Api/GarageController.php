@@ -56,6 +56,8 @@ class GarageController extends Controller
                 'logo'        => $garage->logo,
                 'banner'      => $garage->banner,
                 'description' => $garage->short_description,
+                'latitude' => $garage->latitude,
+                'longitude' => $garage->longitude,
                 'created_at'  => $garage->created_at,
                 'updated_at'  => $garage->updated_at,
 
