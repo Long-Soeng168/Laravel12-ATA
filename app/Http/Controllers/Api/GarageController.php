@@ -114,6 +114,8 @@ class GarageController extends Controller
             'phone' => 'required|string|max:15',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000', // Validate logo image
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000', // Validate banner image
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         if ($validator->fails()) {
@@ -222,6 +224,8 @@ class GarageController extends Controller
             'phone' => 'required|string|max:15',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         if ($validator->fails()) {
