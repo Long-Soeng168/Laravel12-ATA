@@ -126,6 +126,16 @@ class ShopController extends Controller implements HasMiddleware
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
         ]);
 
+        $owner = User::find($validated['owner_user_id']);
+        if (!$owner) {
+            return redirect()->back()->with('error', 'Owner user not found.');
+        }
+
+        if ($owner->shop_id !== null) {
+            return redirect()->back()->with('error', 'User already has a shop.');
+        }
+
+
         $validated['created_by'] = $request->user()->id;
         $validated['updated_by'] = $request->user()->id;
 

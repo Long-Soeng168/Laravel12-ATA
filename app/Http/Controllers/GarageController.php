@@ -143,6 +143,15 @@ class GarageController extends Controller implements HasMiddleware
             'longitude' => 'nullable|numeric',
         ]);
 
+        $owner = User::find($validated['owner_user_id']);
+        if (!$owner) {
+            return redirect()->back()->with('error', 'Owner user not found.');
+        }
+
+        if ($owner->garage_id !== null) {
+            return redirect()->back()->with('error', 'User already has a garage.');
+        }
+
         $validated['created_by'] = $request->user()->id;
         $validated['updated_by'] = $request->user()->id;
 
