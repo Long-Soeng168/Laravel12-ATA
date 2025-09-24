@@ -124,6 +124,13 @@ class GarageController extends Controller
                 'message' => $validator->errors()->first()
             ], 400);
         }
+        if ($request->user()->garage_id !== null) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User already has a garage.'
+            ], 400);
+        }
+
 
         $userId = $request->user()->id;
 
