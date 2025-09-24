@@ -77,6 +77,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('garages_posts', [GaragePostController::class, 'store']);
     Route::post('garages_posts/{id}', [GaragePostController::class, 'update']);
     Route::get('garages_posts/{id}/delete', [GaragePostController::class, 'destroy']);
+    Route::get('garages_posts/{image_name}/delete_image', [GaragePostController::class, 'destroy_image']);
 });
 
 
