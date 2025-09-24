@@ -240,7 +240,7 @@ class GaragePostController extends Controller
      */
     public function show(string $id)
     {
-        $garagepost = GaragePost::findOrFail($id);
+        $garagepost = GaragePost::findOrFail($id)->load('images');
         return response()->json($garagepost);
     }
 

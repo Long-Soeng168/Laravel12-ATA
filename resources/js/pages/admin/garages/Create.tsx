@@ -69,10 +69,10 @@ export default function Create({
             name: editData?.name || '',
             address: editData?.address || '',
             phone: editData?.phone || '',
-            status: editData?.status || 'active',
+            status: editData?.status || 'approved',
             short_description: editData?.short_description || '',
             short_description_kh: editData?.short_description_kh || '',
-            order_index: editData?.order_index?.toString() || '',
+            order_index: editData?.order_index?.toString() || '10000',
             owner_user_id: editData?.owner_user_id?.toString() || '',
             logo: '',
             banner: '',
@@ -209,8 +209,10 @@ export default function Create({
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="active">{t('Active')}</SelectItem>
-                                                <SelectItem value="inactive">{t('Inactive')}</SelectItem>
+                                                <SelectItem value="pending">{t('Pending')}</SelectItem>
+                                                <SelectItem value="approved">{t('Approved')}</SelectItem>
+                                                <SelectItem value="suspended">{t('Suspended')}</SelectItem>
+                                                <SelectItem value="rejected">{t('Rejected')}</SelectItem>
                                             </SelectContent>
                                         </Select>
                                         <FormMessage>{errors.status && <div>{errors.status}</div>}</FormMessage>
@@ -300,7 +302,7 @@ export default function Create({
                                                 </Command>
                                             </PopoverContent>
                                         </Popover>
-                                        <FormDescription>{t('Select shop owner.')}</FormDescription>
+                                        <FormDescription>{t('Select garage owner.')}</FormDescription>
                                         <FormMessage>{errors.owner_user_id && <div>{errors.owner_user_id}</div>}</FormMessage>
                                     </FormItem>
                                 )}

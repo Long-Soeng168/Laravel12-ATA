@@ -59,6 +59,11 @@ const MyTableData = () => {
                                     <ArrowUpDown size={16} /> {t('Name')}
                                 </span>
                             </TableHead>
+                            <TableHead onClick={() => handleSort('status')}>
+                                <span className="flex cursor-pointer items-center">
+                                    <ArrowUpDown size={16} /> {t('Status')}
+                                </span>
+                            </TableHead>
                             <TableHead onClick={() => handleSort('brand_code')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Brand Expert')}
@@ -94,11 +99,7 @@ const MyTableData = () => {
                                     <ArrowUpDown size={16} /> {t('Order Index')}
                                 </span>
                             </TableHead>
-                            <TableHead onClick={() => handleSort('status')}>
-                                <span className="flex cursor-pointer items-center">
-                                    <ArrowUpDown size={16} /> {t('Status')}
-                                </span>
-                            </TableHead>
+
                             <TableHead onClick={() => handleSort('created_at')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Created at')}
@@ -130,7 +131,7 @@ const MyTableData = () => {
                                 </TableCell>
                                 <TableCell>
                                     <span className="flex h-full items-center justify-start">
-                                        {hasPermission('shop view') && (
+                                        {hasPermission('garage view') && (
                                             <Link href={`/admin/garages/${item.id}`}>
                                                 <MyTooltipButton title={t('View')} side="bottom" variant="ghost">
                                                     <ScanEyeIcon />
@@ -138,8 +139,8 @@ const MyTableData = () => {
                                             </Link>
                                         )}
 
-                                        {hasPermission('shop delete') && <DeleteButton deletePath="/admin/garages/" id={item.id} />}
-                                        {hasPermission('shop update') && (
+                                        {hasPermission('garage delete') && <DeleteButton deletePath="/admin/garages/" id={item.id} />}
+                                        {hasPermission('garage update') && (
                                             <Link href={`/admin/garages/${item.id}/edit`}>
                                                 <MyTooltipButton title={t('Edit')} side="bottom" variant="ghost">
                                                     <EditIcon />
@@ -204,6 +205,18 @@ const MyTableData = () => {
                                     )}
                                 </TableCell>
                                 <TableCell>{item.name || '---'}</TableCell>
+                                <TableCell>
+                                    {hasPermission('garage update') ? (
+                                        <MyUpdateStatusButton
+                                            id={item.id}
+                                            pathName="/admin/garages"
+                                            currentStatus={item.status}
+                                            statuses={['pending', 'approved', 'suspended', 'rejected']}
+                                        />
+                                    ) : (
+                                        <span className="capitalize">{item.status}</span>
+                                    )}
+                                </TableCell>
                                 <TableCell>{item.brand_code || '---'}</TableCell>
                                 <TableCell>{item.phone || '---'}</TableCell>
                                 <TableCell>{item.address || '---'}</TableCell>
@@ -218,18 +231,7 @@ const MyTableData = () => {
                                 </TableCell>
                                 <TableCell>{item.order_index || '---'}</TableCell>
                                 {/* <TableCell>{item.order_index || '---'}</TableCell> */}
-                                <TableCell>
-                                    {hasPermission('shop update') ? (
-                                        <MyUpdateStatusButton
-                                            id={item.id}
-                                            pathName="/admin/garages"
-                                            currentStatus={item.status}
-                                            statuses={['active', 'inactive']}
-                                        />
-                                    ) : (
-                                        <span className="capitalize">{item.status}</span>
-                                    )}
-                                </TableCell>
+
                                 <TableCell>
                                     {item.created_at
                                         ? new Date(item.created_at).toLocaleDateString('en-UK', {

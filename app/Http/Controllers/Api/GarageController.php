@@ -40,7 +40,9 @@ class GarageController extends Controller
             }
         }
 
-        $query->where('status', 'active');
+        $query->where('status', 'approved');
+        $query->orderBy('order_index');
+        $query->orderBy('id', 'desc');
 
         $garages = $query->paginate(10);
 
@@ -166,7 +168,8 @@ class GarageController extends Controller
                 'created_by' => $request->user()->id,
                 'updated_by' => $request->user()->id,
                 'brand_code' => $brand->code ?? null,
-                "status" => 'active',
+                "order_index" => 10000,
+                "status" => 'pending',
             ]);
 
             // Update user details and assign role

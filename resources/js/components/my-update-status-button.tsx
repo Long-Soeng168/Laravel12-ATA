@@ -13,20 +13,30 @@ interface UpdateStatusButtonProps {
     currentStatus: string;
     statuses: string[];
 }
-
 const statusVariants: Record<string, string> = {
+    pending: 'text-white hover:bg-yellow-600/85 bg-yellow-600',
+    approved: 'text-white hover:bg-green-600/85 bg-green-600',
+    suspended: 'text-white hover:bg-gray-500/85 bg-gray-500',
+    rejected: 'text-white hover:bg-red-500/85 bg-red-500',
+
+    // keep others if needed for different modules
     active: 'text-white hover:bg-green-600/85 bg-green-600',
     inactive: 'text-white hover:bg-red-400/85 bg-red-400',
-    pending: 'text-white hover:bg-yellow-600/85 bg-yellow-600',
     public: 'text-white hover:bg-blue-500/85 bg-blue-500',
     private: 'text-white hover:bg-gray-500/85 bg-gray-500',
     free: 'text-white hover:bg-green-500/85 bg-green-500',
     subscribe: 'text-white hover:bg-red-500/85 bg-red-500',
 };
+
 const statusVariantsText: Record<string, string> = {
+    pending: 'text-yellow-600',
+    approved: 'text-green-600',
+    suspended: 'text-gray-500',
+    rejected: 'text-red-500',
+
+    // keep others if needed
     active: 'text-green-600',
     inactive: 'text-red-400',
-    pending: 'text-yellow-600',
     public: 'text-blue-500',
     private: 'text-gray-500',
     free: 'text-green-500',

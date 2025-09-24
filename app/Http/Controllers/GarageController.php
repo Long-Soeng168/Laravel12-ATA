@@ -62,7 +62,7 @@ class GarageController extends Controller implements HasMiddleware
     {
         $query = Garage::query();
 
-        $tableData = $query->where('status', 'active')->orderBy('id', 'desc')->get();
+        $tableData = $query->where('status', 'approved')->orderBy('id', 'desc')->get();
 
         return response()->json($tableData);
     }
@@ -77,7 +77,7 @@ class GarageController extends Controller implements HasMiddleware
             ->where('garage_id', null)
             ->get();
         $all_brands = ItemBrand::orderBy('name')
-            ->where('status', 'active')
+            ->where('status', 'approved')
             ->get();
         // return ($all_users);
         // return $garage->load('owner');
@@ -94,7 +94,7 @@ class GarageController extends Controller implements HasMiddleware
             ->where('garage_id', null)
             ->get();
         $all_brands = ItemBrand::orderBy('name')
-            ->where('status', 'active')
+            ->where('status', 'approved')
             ->get();
         // return ($all_users);
         return Inertia::render('admin/garages/Create', [
@@ -110,7 +110,7 @@ class GarageController extends Controller implements HasMiddleware
             ->where('garage_id', null)
             ->get();
         $all_brands = ItemBrand::orderBy('name')
-            ->where('status', 'active')
+            ->where('status', 'approved')
             ->get();
         // return ($all_users);
         return Inertia::render('admin/garages/Create', [
@@ -134,8 +134,8 @@ class GarageController extends Controller implements HasMiddleware
             'short_description_kh' => 'nullable|string|max:500',
             'parent_code' => 'nullable|string|max:255',
             'brand_code' => 'nullable|string|max:255',
-            'order_index' => 'nullable|numeric|max:255',
-            'status' => 'nullable|string|in:active,inactive',
+            'order_index' => 'nullable|numeric',
+            'status' => 'nullable|string|in:pending,approved,suspended,rejected',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'location' => 'nullable|string',
@@ -202,8 +202,8 @@ class GarageController extends Controller implements HasMiddleware
             'short_description_kh' => 'nullable|string|max:500',
             'parent_code' => 'nullable|string|max:255',
             'brand_code' => 'nullable|string|max:255',
-            'order_index' => 'nullable|numeric|max:255',
-            'status' => 'nullable|string|in:active,inactive',
+            'order_index' => 'nullable|numeric',
+            'status' => 'nullable|string|in:pending,approved,suspended,rejected',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'location' => 'nullable|string',
@@ -273,7 +273,7 @@ class GarageController extends Controller implements HasMiddleware
     public function update_status(Request $request, Garage $garage)
     {
         $request->validate([
-            'status' => 'required|string|in:active,inactive',
+            'status' => 'required|string|in:pending,approved,suspended,rejected',
         ]);
         $garage->update([
             'status' => $request->status,
