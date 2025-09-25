@@ -301,6 +301,7 @@ class GarageController extends Controller
                 'longitude' => $request->input('longitude'),
                 'logo' => $logoName,
                 'banner' => $bannerName,
+                'status' => $garage->status !== 'approved' ? 'pending': 'approved',
                 'brand_code' => $brand->code ?? null,
                 'updated_by' => $request->user()->id,
             ]);
