@@ -74,7 +74,7 @@ const MyTableData = () => {
                                     <ArrowUpDown size={16} /> {t('Phone')}
                                 </span>
                             </TableHead>
-                            <TableHead onClick={() => handleSort('address')}>
+                            {/* <TableHead onClick={() => handleSort('address')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Address')}
                                 </span>
@@ -83,7 +83,7 @@ const MyTableData = () => {
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Short Description')}
                                 </span>
-                            </TableHead>
+                            </TableHead> */}
                             {/* <TableHead onClick={() => handleSort('short_description_kh')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Short Description Khmer')}
@@ -100,6 +100,11 @@ const MyTableData = () => {
                                 </span>
                             </TableHead>
 
+                            <TableHead onClick={() => handleSort('expired_at')}>
+                                <span className="flex cursor-pointer items-center">
+                                    <ArrowUpDown size={16} /> {t('Expired at')}
+                                </span>
+                            </TableHead>
                             <TableHead onClick={() => handleSort('created_at')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Created at')}
@@ -219,8 +224,8 @@ const MyTableData = () => {
                                 </TableCell>
                                 <TableCell>{item.brand_code || '---'}</TableCell>
                                 <TableCell>{item.phone || '---'}</TableCell>
-                                <TableCell>{item.address || '---'}</TableCell>
-                                <TableCell>{item.short_description || '---'}</TableCell>
+                                {/* <TableCell>{item.address || '---'}</TableCell>
+                                <TableCell>{item.short_description || '---'}</TableCell> */}
                                 {/* <TableCell>{item.short_description_kh || '---'}</TableCell> */}
                                 {/* <TableCell>{item.owner_user_id || '---'}</TableCell> */}
                                 <TableCell>
@@ -231,6 +236,32 @@ const MyTableData = () => {
                                 </TableCell>
                                 <TableCell>{item.order_index || '---'}</TableCell>
                                 {/* <TableCell>{item.order_index || '---'}</TableCell> */}
+
+                                <TableCell>
+                                    {(() => {
+                                        if (!item.expired_at) return <span>---</span>;
+
+                                        const today = new Date();
+                                        const expiredDate = new Date(item.expired_at);
+                                        const diffTime = expiredDate - today;
+                                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // difference in days
+
+                                        let color = 'green'; // normal
+                                        if (diffDays <= 0)
+                                            color = 'red'; // expired
+                                        else if (diffDays <= 30) color = 'orange'; // almost expire
+
+                                        return (
+                                            <span style={{ color }}>
+                                                {expiredDate.toLocaleDateString('en-UK', {
+                                                    year: 'numeric',
+                                                    month: 'long',
+                                                    day: 'numeric',
+                                                })}
+                                            </span>
+                                        );
+                                    })()}
+                                </TableCell>
 
                                 <TableCell>
                                     {item.created_at

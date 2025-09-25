@@ -24,12 +24,35 @@ const Index = () => {
     const { auth } = usePage().props;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            {auth?.garage?.status == 'inactive' && (
-                <UserSuspended
-                    title={t('Garage Suspended!')}
-                    subTitle="Your garage has been temporarily suspended. Please contact our support team to resolve this issue."
-                />
-            )}
+            {auth?.garage?.status &&
+                ['pending', 'suspended', 'rejected'].includes(auth?.garage?.status) &&
+                (() => {
+                    let title = '';
+                    let subTitle = '';
+                    let type: 'pending' | 'suspended' | 'rejected' = 'pending'; // default
+
+                    switch (auth?.garage?.status) {
+                        case 'pending':
+                            title = t('Garage Pending!');
+                            subTitle = 'Your garage is currently under review. Please wait until it gets approved.';
+                            type = 'pending';
+                            break;
+                        case 'suspended':
+                            title = t('Garage Suspended!');
+                            subTitle = 'Your garage has been temporarily suspended. Please contact our support team.';
+                            type = 'suspended';
+                            break;
+                        case 'rejected':
+                            title = t('Garage Rejected!');
+                            subTitle = 'Your garage application has been rejected. Please contact our support team for details.';
+                            type = 'rejected';
+                            break;
+                        default:
+                            break;
+                    }
+
+                    return <UserSuspended type={type} title={title} subTitle={subTitle} />;
+                })()}
             <div className="flex max-w-[100vw] flex-wrap items-center justify-end gap-2">
                 <div className="flex max-w-[100vw] flex-wrap items-center justify-start gap-2 max-lg:w-full lg:flex-1">
                     <MySearchTableData />
@@ -38,13 +61,27 @@ const Index = () => {
                     <span className="flex-1"></span>
                     {/* <MyExportButton />
                     <MyImportButton /> */}
-                    {auth?.garage?.status == 'active' ? (
-                        <> {hasRole('Garage') && <MyAddNewButton url="/user-garage_posts/create" type="link" />}</>
+                    {auth?.garage?.status !== 'approved' ? (
+                        ['pending', 'suspended', 'rejected'].includes(auth.garage.status) ? (
+                            <div className="space-y-2">
+                                <p
+                                    className={
+                                        auth.garage.status === 'pending'
+                                            ? 'text-yellow-500'
+                                            : auth.garage.status === 'suspended'
+                                              ? 'text-gray-400'
+                                              : 'text-red-600' // rejected
+                                    }
+                                >
+                                    {auth.garage.status === 'pending' && t('Garage Pending!')}
+                                    {auth.garage.status === 'suspended' && t('Garage Suspended!')}
+                                    {auth.garage.status === 'rejected' && t('Garage Rejected!')}
+                                </p>
+                                <ContactUsButton />
+                            </div>
+                        ) : null
                     ) : (
-                        <>
-                            <p className="text-red-400">{t('Garage Suspended!')}</p>
-                            <ContactUsButton />
-                        </>
+                        hasRole('Garage') && <MyAddNewButton url="/user-garage_posts/create" type="link" />
                     )}
                 </div>
             </div>

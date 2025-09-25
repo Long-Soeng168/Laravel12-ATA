@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\ImageHelper;
 use App\Models\Shop;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -61,7 +62,7 @@ class ShopController extends Controller implements HasMiddleware
     {
         $query = Shop::query();
 
-        $tableData = $query->where('status', 'active')->orderBy('id', 'desc')->get();
+        $tableData = $query->where('status', 'approved')->orderBy('id', 'desc')->get();
 
         return response()->json($tableData);
     }
@@ -119,12 +120,17 @@ class ShopController extends Controller implements HasMiddleware
             'phone' => 'nullable|string',
             'short_description' => 'nullable|string|max:1000',
             'short_description_kh' => 'nullable|string|max:1000',
-            'parent_code' => 'nullable|string|max:255',
-            'order_index' => 'nullable|numeric|max:255',
-            'status' => 'nullable|string|in:active,inactive',
+            'order_index' => 'nullable|numeric',
+            'expired_at' => 'nullable|date',
+            'status' => 'nullable|string|in:pending,approved,suspended,rejected',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
         ]);
+
+        $validated['expired_at'] = isset($validated['expired_at'])
+            ? Carbon::parse($validated['expired_at'])->setTimezone('Asia/Bangkok')->startOfDay()->toDateString()
+            : now()->addYears(2)->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
+
 
         $owner = User::find($validated['owner_user_id']);
         if (!$owner) {
@@ -193,12 +199,17 @@ class ShopController extends Controller implements HasMiddleware
             'phone' => 'nullable|string',
             'short_description' => 'nullable|string|max:1000',
             'short_description_kh' => 'nullable|string|max:1000',
-            'parent_code' => 'nullable|string|max:255',
-            'order_index' => 'nullable|numeric|max:255',
-            'status' => 'nullable|string|in:active,inactive',
+            'order_index' => 'nullable|numeric',
+            'expired_at' => 'nullable|date',
+            'status' => 'nullable|string|in:pending,approved,suspended,rejected',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
         ]);
+
+        $validated['expired_at'] = isset($validated['expired_at'])
+            ? Carbon::parse($validated['expired_at'])->setTimezone('Asia/Bangkok')->startOfDay()->toDateString()
+            : now()->addYears(2)->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
+
 
         $validated['updated_by'] = $request->user()->id;
 
@@ -262,7 +273,7 @@ class ShopController extends Controller implements HasMiddleware
     public function update_status(Request $request, Shop $shop)
     {
         $request->validate([
-            'status' => 'required|string|in:active,inactive',
+            'status' => 'required|string|in:pending,approved,suspended,rejected',
         ]);
         $shop->update([
             'status' => $request->status,

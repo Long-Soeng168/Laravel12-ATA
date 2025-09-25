@@ -63,9 +63,6 @@ class UserShopController extends Controller implements HasMiddleware
             'phone' => 'nullable|string',
             'short_description' => 'nullable|string|max:1000',
             'short_description_kh' => 'nullable|string|max:1000',
-            'parent_code' => 'nullable|string|max:255',
-            'order_index' => 'nullable|numeric|max:255',
-            'status' => 'nullable|string|in:active,inactive',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
         ]);
@@ -75,6 +72,8 @@ class UserShopController extends Controller implements HasMiddleware
             abort(403);
         }
 
+        $validated['status'] = 'pending';
+        $validated['order_index'] = 10000;
         $validated['owner_user_id'] = $request->user()->id;
         $validated['created_by'] = $request->user()->id;
         $validated['updated_by'] = $request->user()->id;
@@ -138,14 +137,13 @@ class UserShopController extends Controller implements HasMiddleware
             'phone' => 'nullable|string',
             'short_description' => 'nullable|string|max:1000',
             'short_description_kh' => 'nullable|string|max:1000',
-            'parent_code' => 'nullable|string|max:255',
-            'order_index' => 'nullable|numeric|max:255',
-            'status' => 'nullable|string|in:active,inactive',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
         ]);
 
         $validated['updated_by'] = $request->user()->id;
+        $validated['order_index'] = $user_shop->order_index ? $user_shop->order_index : 10000;
+        $validated['status'] = $user_shop->status !== 'approved' ? 'pending' : 'approved';
 
         if ($validated['owner_user_id'] != $user_shop->owner_user_id) {
             User::where('id', $user_shop->owner_user_id)->update([

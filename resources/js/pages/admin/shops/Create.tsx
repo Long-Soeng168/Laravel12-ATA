@@ -1,6 +1,7 @@
 import MyDialogCancelButton from '@/components/my-dialog-cancel-button';
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { FileInput, FileUploader, FileUploaderContent, FileUploaderItem } from '@/components/ui/file-upload';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -14,7 +15,8 @@ import { cn } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm as inertiaUseForm, usePage } from '@inertiajs/react';
-import { Check, ChevronsUpDown, CloudUpload, Loader, Paperclip } from 'lucide-react';
+import { format } from 'date-fns';
+import { CalendarIcon, Check, ChevronsUpDown, CloudUpload, Loader, Paperclip } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -31,6 +33,7 @@ const formSchema = z.object({
     short_description_kh: z.string().max(500).optional(),
     logo: z.string().optional(),
     banner: z.string().optional(),
+    expired_at: z.coerce.date(),
 });
 
 export default function Create({
@@ -64,18 +67,19 @@ export default function Create({
             name: editData?.name || '',
             address: editData?.address || '',
             phone: editData?.phone || '',
-            status: editData?.status || 'active',
+            status: editData?.status || 'approved',
             short_description: editData?.short_description || '',
             short_description_kh: editData?.short_description_kh || '',
-            order_index: editData?.order_index?.toString() || '',
+            order_index: editData?.order_index?.toString() || '10000',
             owner_user_id: editData?.owner_user_id?.toString() || '',
             logo: '',
             banner: '',
+            expired_at: editData?.expired_at ? new Date(editData?.expired_at) : new Date(new Date().setFullYear(new Date().getFullYear() + 2)),
         },
     });
 
     const [error, setError] = useState(null);
-    const { all_users } = usePage().props;
+    const { all_users } = usePage<any>().props;
 
     const { post, data, progress, processing, transform, errors } = inertiaUseForm();
 
@@ -94,7 +98,7 @@ export default function Create({
             if (editData?.id) {
                 post('/admin/shops/' + editData?.id + '/update', {
                     preserveScroll: true,
-                    onSuccess: (page) => {
+                    onSuccess: (page: any) => {
                         setFiles(null);
                         setFilesBanner(null);
                         if (page.props.flash?.success) {
@@ -112,7 +116,7 @@ export default function Create({
             } else {
                 post('/admin/shops', {
                     preserveScroll: true,
-                    onSuccess: (page) => {
+                    onSuccess: (page: any) => {
                         form.reset();
                         setFiles(null);
                         setFilesBanner(null);
@@ -154,6 +158,42 @@ export default function Create({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-4">
+                    <div className="col-span-6">
+                        <FormField
+                            control={form.control}
+                            name="expired_at"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                    <FormLabel>{t('Expired Date')}</FormLabel>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <FormControl>
+                                                <Button
+                                                    variant={'outline'}
+                                                    className={cn('w-[280px] pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
+                                                >
+                                                    {field.value ? format(field.value, 'PPP') : <span>{t('Pick a date')}</span>}
+                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                </Button>
+                                            </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar
+                                                fromYear={1960}
+                                                toYear={2030}
+                                                captionLayout="dropdown-buttons"
+                                                mode="single"
+                                                selected={field.value}
+                                                onSelect={field.onChange}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                    <FormMessage>{errors.expired_at && <div>{errors.expired_at}</div>}</FormMessage>
+                                </FormItem>
+                            )}
+                        />
+                    </div>
                     <div className="grid gap-4 md:grid-cols-12">
                         <div className="col-span-6">
                             <FormField
@@ -215,8 +255,10 @@ export default function Create({
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="active">{t('Active')}</SelectItem>
-                                                <SelectItem value="inactive">{t('Inactive')}</SelectItem>
+                                                <SelectItem value="pending">{t('Pending')}</SelectItem>
+                                                <SelectItem value="approved">{t('Approved')}</SelectItem>
+                                                <SelectItem value="suspended">{t('Suspended')}</SelectItem>
+                                                <SelectItem value="rejected">{t('Rejected')}</SelectItem>
                                             </SelectContent>
                                         </Select>
                                         <FormMessage>{errors.status && <div>{errors.status}</div>}</FormMessage>
@@ -258,7 +300,7 @@ export default function Create({
                                                     >
                                                         {editData?.owner && editData?.owner.name}
                                                         {editData && editData?.owner_user_id != field.value && ', -> '}
-                                                        {field.value && all_users.find((item) => item.id == field.value)?.name}
+                                                        {field.value && all_users.find((item: any) => item.id == field.value)?.name}
                                                         {!editData && !field.value && t('Select')}
                                                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                     </Button>
@@ -282,7 +324,7 @@ export default function Create({
                                                                 />
                                                                 {t('Select')}
                                                             </CommandItem>
-                                                            {all_users?.map((item) => {
+                                                            {all_users?.map((item: any) => {
                                                                 return (
                                                                     <CommandItem
                                                                         value={item.name + item.id + item.email}

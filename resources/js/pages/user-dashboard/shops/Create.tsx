@@ -17,7 +17,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
-import ContactUsButton from '../components/contact-us-button';
 import UserSuspended from './components/user-suspended';
 
 const formSchema = z.object({
@@ -154,12 +153,36 @@ export default function Create({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            {editData?.status == 'inactive' && (
-                <UserSuspended
-                    title={t('Shop Suspended!')}
-                    subTitle="Your shop has been temporarily suspended. Please contact our support team to resolve this issue."
-                />
-            )}
+            {editData?.status &&
+                ['pending', 'suspended', 'rejected'].includes(editData.status) &&
+                (() => {
+                    let title = '';
+                    let subTitle = '';
+                    let type: 'pending' | 'suspended' | 'rejected' = 'pending'; // default
+
+                    switch (editData.status) {
+                        case 'pending':
+                            title = t('Shop Pending!');
+                            subTitle = 'Your shop is currently under review. Please wait until it gets approved.';
+                            type = 'pending';
+                            break;
+                        case 'suspended':
+                            title = t('Shop Suspended!');
+                            subTitle = 'Your shop has been temporarily suspended. Please contact our support team.';
+                            type = 'suspended';
+                            break;
+                        case 'rejected':
+                            title = t('Shop Rejected!');
+                            subTitle = 'Your shop application has been rejected. Please contact our support team for details.';
+                            type = 'rejected';
+                            break;
+                        default:
+                            break;
+                    }
+
+                    return <UserSuspended type={type} title={title} subTitle={subTitle} />;
+                })()}
+
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-4">
                     <div className="grid gap-4 md:grid-cols-12">
@@ -194,62 +217,7 @@ export default function Create({
                                 )}
                             />
                         </div>
-                        <div className="col-span-6">
-                            <FormField
-                                control={form.control}
-                                name="address"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t('Address')}</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder={t('Address')} type="text" {...field} />
-                                        </FormControl>
-                                        <FormMessage>{errors.address && <div>{errors.address}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                        {/* <div className="col-span-6">
-                            <FormField
-                                control={form.control}
-                                name="status"
-                                render={({ field }) => (
-                                    <FormItem key={field.value}>
-                                        <FormLabel>{t('Status')}</FormLabel>
-                                        <Select key={field.value} onValueChange={field.onChange} defaultValue={field.value}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select Status" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                <SelectItem value="active">{t('Active')}</SelectItem>
-                                                <SelectItem value="inactive">{t('Inactive')}</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage>{errors.status && <div>{errors.status}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
-                        </div> */}
-                        {/* <div className="col-span-6">
-                            <FormField
-                                control={form.control}
-                                name="order_index"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t('Order Index')}</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="ex: 1" type="text" {...field} />
-                                        </FormControl>
-                                        <FormDescription>{t('Lower number is priority')}</FormDescription>
-                                        <FormMessage>{errors.order_index && <div>{errors.order_index}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
-                        </div> */}
-
-                        <div className="col-span-6">
+                        <div className="col-span-6 hidden">
                             <FormField
                                 control={form.control}
                                 name="owner_user_id"
@@ -260,6 +228,7 @@ export default function Create({
                                             <PopoverTrigger asChild>
                                                 <FormControl>
                                                     <Button
+                                                        disabled
                                                         variant="outline"
                                                         role="combobox"
                                                         className={cn('w-full justify-between', !field.value && 'text-muted-foreground')}
@@ -319,6 +288,60 @@ export default function Create({
                                 )}
                             />
                         </div>
+                        <div className="col-span-12">
+                            <FormField
+                                control={form.control}
+                                name="address"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>{t('Address')}</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder={t('Address')} type="text" {...field} />
+                                        </FormControl>
+                                        <FormMessage>{errors.address && <div>{errors.address}</div>}</FormMessage>
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                        {/* <div className="col-span-6">
+                            <FormField
+                                control={form.control}
+                                name="status"
+                                render={({ field }) => (
+                                    <FormItem key={field.value}>
+                                        <FormLabel>{t('Status')}</FormLabel>
+                                        <Select key={field.value} onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select Status" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="active">{t('Active')}</SelectItem>
+                                                <SelectItem value="inactive">{t('Inactive')}</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage>{errors.status && <div>{errors.status}</div>}</FormMessage>
+                                    </FormItem>
+                                )}
+                            />
+                        </div> */}
+                        {/* <div className="col-span-6">
+                            <FormField
+                                control={form.control}
+                                name="order_index"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>{t('Order Index')}</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="ex: 1" type="text" {...field} />
+                                        </FormControl>
+                                        <FormDescription>{t('Lower number is priority')}</FormDescription>
+                                        <FormMessage>{errors.order_index && <div>{errors.order_index}</div>}</FormMessage>
+                                    </FormItem>
+                                )}
+                            />
+                        </div> */}
                     </div>
 
                     <FormField
@@ -465,25 +488,18 @@ export default function Create({
                     {progress && <ProgressWithValue value={progress.percentage} position="start" />}
                     {setIsOpen && <MyDialogCancelButton onClick={() => setIsOpen(false)} />}
 
-                    {!editData || editData?.status == 'active' ? (
-                        <>
-                            {!readOnly && (
-                                <Button disabled={processing} type="submit">
-                                    {processing && (
-                                        <span className="size-6 animate-spin">
-                                            <Loader />
-                                        </span>
-                                    )}
-                                    {processing ? t('Submitting') : t('Submit')}
-                                </Button>
-                            )}
-                        </>
-                    ) : (
-                        <>
-                            <p className="text-red-400">{t('Shop Suspended!')}</p>
-                            <ContactUsButton />
-                        </>
-                    )}
+                    <>
+                        {!readOnly && (
+                            <Button disabled={processing} type="submit">
+                                {processing && (
+                                    <span className="size-6 animate-spin">
+                                        <Loader />
+                                    </span>
+                                )}
+                                {processing ? t('Submitting') : t('Submit')}
+                            </Button>
+                        )}
+                    </>
                 </form>
             </Form>
         </AppLayout>

@@ -96,7 +96,7 @@ class ShopController extends Controller
                 'phone' => $request->input('phone'),
                 'logo' => $logoName,
                 'banner' => $bannerName,
-                'status' => 'active',
+                'status' => 'pending',
                 'owner_user_id' => $userId,
                 'created_by' => $request->user()->id,
                 'updated_by' => $request->user()->id,
@@ -142,7 +142,7 @@ class ShopController extends Controller
             'address'            => $shop->address,
             'vat_percent'        => null,
             'exchange_rate_riel' => null,
-            'status'             => $shop->status === 'active' ? 1 : 0,
+            'status'             => $shop->status === 'approved' ? 1 : 0,
             'created_at'         => $shop->created_at,
             'updated_at'         => $shop->updated_at,
             'owner'              => $shop->owner ? [
@@ -248,6 +248,7 @@ class ShopController extends Controller
                 'phone' => $request->input('phone'),
                 'logo' => $logoName,
                 'banner' => $bannerName,
+                'status' => $shop->status !== 'approved' ? 'pending': 'approved',
                 'updated_by' => $request->user()->id,
             ]);
 

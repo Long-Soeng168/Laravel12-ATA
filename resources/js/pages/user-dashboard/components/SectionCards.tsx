@@ -73,7 +73,7 @@ const SectionCards = () => {
                 )}
 
                 {/* User Plans */}
-                {hasRole('User') && (
+                {/* {hasRole('User') && (
                     <Link
                         prefetch
                         href="/user/plans"
@@ -86,7 +86,7 @@ const SectionCards = () => {
                             <span className="text-lg font-bold underline-offset-4 hover:underline">User Plans</span>
                         </div>
                     </Link>
-                )}
+                )} */}
             </div>
 
             <hr className="mt-6" />

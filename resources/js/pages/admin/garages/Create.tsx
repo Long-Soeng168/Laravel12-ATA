@@ -2,6 +2,7 @@ import LocationPicker from '@/components/LocationPicker';
 import MyDialogCancelButton from '@/components/my-dialog-cancel-button';
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { FileInput, FileUploader, FileUploaderContent, FileUploaderItem } from '@/components/ui/file-upload';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -15,7 +16,8 @@ import { cn } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm as inertiaUseForm, usePage } from '@inertiajs/react';
-import { Check, ChevronsUpDown, CloudUpload, Loader, Paperclip } from 'lucide-react';
+import { format } from 'date-fns';
+import { CalendarIcon, Check, ChevronsUpDown, CloudUpload, Loader, Paperclip } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -36,6 +38,7 @@ const formSchema = z.object({
     location: z.string().optional(),
     latitude: z.number().optional().nullable(),
     longitude: z.number().optional().nullable(),
+    expired_at: z.coerce.date(),
 });
 
 export default function Create({
@@ -80,6 +83,7 @@ export default function Create({
             location: editData?.location || '',
             latitude: editData?.latitude || '',
             longitude: editData?.longitude || '',
+            expired_at: editData?.expired_at ? new Date(editData?.expired_at) : new Date(new Date().setFullYear(new Date().getFullYear() + 2)),
         },
     });
 
@@ -103,7 +107,7 @@ export default function Create({
             if (editData?.id) {
                 post('/admin/garages/' + editData?.id + '/update', {
                     preserveScroll: true,
-                    onSuccess: (page) => {
+                    onSuccess: (page: any) => {
                         setFiles(null);
                         setFilesBanner(null);
                         if (page.props.flash?.success) {
@@ -121,7 +125,7 @@ export default function Create({
             } else {
                 post('/admin/garages', {
                     preserveScroll: true,
-                    onSuccess: (page) => {
+                    onSuccess: (page: any) => {
                         form.reset();
                         setFiles(null);
                         setFilesBanner(null);
@@ -163,6 +167,42 @@ export default function Create({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-4">
+                    <div className="col-span-6">
+                        <FormField
+                            control={form.control}
+                            name="expired_at"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                    <FormLabel>{t('Expired Date')}</FormLabel>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <FormControl>
+                                                <Button
+                                                    variant={'outline'}
+                                                    className={cn('w-[280px] pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
+                                                >
+                                                    {field.value ? format(field.value, 'PPP') : <span>{t('Pick a date')}</span>}
+                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                </Button>
+                                            </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar
+                                                fromYear={1960}
+                                                toYear={2030}
+                                                captionLayout="dropdown-buttons"
+                                                mode="single"
+                                                selected={field.value}
+                                                onSelect={field.onChange}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                    <FormMessage>{errors.expired_at && <div>{errors.expired_at}</div>}</FormMessage>
+                                </FormItem>
+                            )}
+                        />
+                    </div>
                     <div className="grid gap-4 md:grid-cols-12">
                         <div className="col-span-6">
                             <FormField
@@ -278,7 +318,7 @@ export default function Create({
                                                                 />
                                                                 {t('Select')}
                                                             </CommandItem>
-                                                            {all_users?.map((item) => {
+                                                            {all_users?.map((item: any) => {
                                                                 return (
                                                                     <CommandItem
                                                                         value={item.name + item.id}
@@ -346,7 +386,7 @@ export default function Create({
                                                                 />
                                                                 {t('Select')}
                                                             </CommandItem>
-                                                            {all_brands?.map((item) => {
+                                                            {all_brands?.map((item: any) => {
                                                                 return (
                                                                     <CommandItem
                                                                         value={item.name + item.code}
@@ -392,7 +432,7 @@ export default function Create({
                         )}
                     />
 
-                    <FormField
+                    {/* <FormField
                         control={form.control}
                         name="short_description_kh"
                         render={({ field }) => (
@@ -404,7 +444,7 @@ export default function Create({
                                 <FormMessage>{errors.short_description_kh && <div>{errors.short_description_kh}</div>}</FormMessage>
                             </FormItem>
                         )}
-                    />
+                    /> */}
 
                     <FormField
                         control={form.control}

@@ -6,6 +6,7 @@ use App\Helpers\ImageHelper;
 use App\Models\Garage;
 use App\Models\ItemBrand;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -77,7 +78,7 @@ class GarageController extends Controller implements HasMiddleware
             ->where('garage_id', null)
             ->get();
         $all_brands = ItemBrand::orderBy('name')
-            ->where('status', 'approved')
+            ->where('status', 'active')
             ->get();
         // return ($all_users);
         // return $garage->load('owner');
@@ -94,7 +95,7 @@ class GarageController extends Controller implements HasMiddleware
             ->where('garage_id', null)
             ->get();
         $all_brands = ItemBrand::orderBy('name')
-            ->where('status', 'approved')
+            ->where('status', 'active')
             ->get();
         // return ($all_users);
         return Inertia::render('admin/garages/Create', [
@@ -110,7 +111,7 @@ class GarageController extends Controller implements HasMiddleware
             ->where('garage_id', null)
             ->get();
         $all_brands = ItemBrand::orderBy('name')
-            ->where('status', 'approved')
+            ->where('status', 'active')
             ->get();
         // return ($all_users);
         return Inertia::render('admin/garages/Create', [
@@ -132,16 +133,20 @@ class GarageController extends Controller implements HasMiddleware
             'phone' => 'nullable|string',
             'short_description' => 'nullable|string|max:500',
             'short_description_kh' => 'nullable|string|max:500',
-            'parent_code' => 'nullable|string|max:255',
             'brand_code' => 'nullable|string|max:255',
             'order_index' => 'nullable|numeric',
             'status' => 'nullable|string|in:pending,approved,suspended,rejected',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
+            'expired_at' => 'nullable|date',
             'location' => 'nullable|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
         ]);
+
+        $validated['expired_at'] = isset($validated['expired_at'])
+            ? Carbon::parse($validated['expired_at'])->setTimezone('Asia/Bangkok')->startOfDay()->toDateString()
+            : now()->addYears(2)->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
 
         $owner = User::find($validated['owner_user_id']);
         if (!$owner) {
@@ -215,10 +220,15 @@ class GarageController extends Controller implements HasMiddleware
             'status' => 'nullable|string|in:pending,approved,suspended,rejected',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
+            'expired_at' => 'nullable|date',
             'location' => 'nullable|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
         ]);
+
+        $validated['expired_at'] = isset($validated['expired_at'])
+            ? Carbon::parse($validated['expired_at'])->setTimezone('Asia/Bangkok')->startOfDay()->toDateString()
+            : now()->addYears(2)->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
 
         $validated['updated_by'] = $request->user()->id;
 

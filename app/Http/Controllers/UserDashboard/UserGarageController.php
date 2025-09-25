@@ -71,10 +71,7 @@ class UserGarageController extends Controller implements HasMiddleware
             'phone' => 'nullable|string',
             'short_description' => 'nullable|string|max:1000',
             'short_description_kh' => 'nullable|string|max:1000',
-            'parent_code' => 'nullable|string|max:255',
             'brand_code' => 'nullable|string|max:255',
-            'order_index' => 'nullable|numeric|max:255',
-            'status' => 'nullable|string|in:active,inactive',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'location' => 'nullable|string',
@@ -82,6 +79,8 @@ class UserGarageController extends Controller implements HasMiddleware
             'longitude' => 'nullable|numeric',
         ]);
 
+        $validated['status'] = 'pending';
+        $validated['order_index'] = 10000;
         $validated['created_by'] = $request->user()->id;
         $validated['updated_by'] = $request->user()->id;
         $validated['owner_user_id'] = $request->user()->id;
@@ -141,9 +140,6 @@ class UserGarageController extends Controller implements HasMiddleware
             'phone' => 'nullable|string',
             'short_description' => 'nullable|string|max:1000',
             'short_description_kh' => 'nullable|string|max:1000',
-            'parent_code' => 'nullable|string|max:255',
-            'order_index' => 'nullable|numeric|max:255',
-            'status' => 'nullable|string|in:active,inactive',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'location' => 'nullable|string',
@@ -152,6 +148,8 @@ class UserGarageController extends Controller implements HasMiddleware
         ]);
 
         $validated['updated_by'] = $request->user()->id;
+        $validated['order_index'] = $user_garage->order_index ? $user_garage->order_index : 10000;
+        $validated['status'] = $user_garage->status !== 'approved' ? 'pending' : 'approved';
 
         if ($validated['owner_user_id'] != $user_garage->owner_user_id) {
             User::where('id', $user_garage->owner_user_id)->update([

@@ -19,7 +19,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
-import ContactUsButton from '../components/contact-us-button';
 import UserSuspended from '../shops/components/user-suspended';
 
 const formSchema = z.object({
@@ -164,12 +163,36 @@ export default function Create({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            {editData?.status == 'inactive' && (
-                <UserSuspended
-                    title={t('Garage Suspended!')}
-                    subTitle="Your garage has been temporarily suspended. Please contact our support team to resolve this issue."
-                />
-            )}
+            {editData?.status &&
+                ['pending', 'suspended', 'rejected'].includes(editData.status) &&
+                (() => {
+                    let title = '';
+                    let subTitle = '';
+                    let type: 'pending' | 'suspended' | 'rejected' = 'pending'; // default
+
+                    switch (editData.status) {
+                        case 'pending':
+                            title = t('Garage Pending!');
+                            subTitle = 'Your garage is currently under review. Please wait until it gets approved.';
+                            type = 'pending';
+                            break;
+                        case 'suspended':
+                            title = t('Garage Suspended!');
+                            subTitle = 'Your garage has been temporarily suspended. Please contact our support team.';
+                            type = 'suspended';
+                            break;
+                        case 'rejected':
+                            title = t('Garage Rejected!');
+                            subTitle = 'Your garage application has been rejected. Please contact our support team for details.';
+                            type = 'rejected';
+                            break;
+                        default:
+                            break;
+                    }
+
+                    return <UserSuspended type={type} title={title} subTitle={subTitle} />;
+                })()}
+
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-4">
                     <div className="grid gap-4 md:grid-cols-12">
@@ -179,9 +202,9 @@ export default function Create({
                                 name="name"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>{t('Name')}</FormLabel>
+                                        <FormLabel>{t('Garage Name')}</FormLabel>
                                         <FormControl>
-                                            <Input placeholder={t('Name')} type="text" {...field} />
+                                            <Input placeholder={t('Garage Name')} type="text" {...field} />
                                         </FormControl>
                                         <FormMessage>{errors.name && <div>{errors.name}</div>}</FormMessage>
                                     </FormItem>
@@ -229,7 +252,7 @@ export default function Create({
                             />
                         </div> */}
 
-                        <div className="col-span-6">
+                        <div className="col-span-6 hidden">
                             <FormField
                                 control={form.control}
                                 name="owner_user_id"
@@ -240,6 +263,7 @@ export default function Create({
                                             <PopoverTrigger asChild>
                                                 <FormControl>
                                                     <Button
+                                                        disabled
                                                         variant="outline"
                                                         role="combobox"
                                                         className={cn('w-full justify-between', !field.value && 'text-muted-foreground')}
@@ -565,25 +589,18 @@ export default function Create({
                     {progress && <ProgressWithValue value={progress.percentage} position="start" />}
                     {setIsOpen && <MyDialogCancelButton onClick={() => setIsOpen(false)} />}
 
-                    {!editData || editData?.status == 'active' ? (
-                        <>
-                            {!readOnly && (
-                                <Button disabled={processing} type="submit">
-                                    {processing && (
-                                        <span className="size-6 animate-spin">
-                                            <Loader />
-                                        </span>
-                                    )}
-                                    {processing ? t('Submitting') : t('Submit')}
-                                </Button>
-                            )}
-                        </>
-                    ) : (
-                        <>
-                            <p className="text-red-400">{t('Garage Suspended!')}</p>
-                            <ContactUsButton />
-                        </>
-                    )}
+                    <>
+                        {!readOnly && (
+                            <Button disabled={processing} type="submit">
+                                {processing && (
+                                    <span className="size-6 animate-spin">
+                                        <Loader />
+                                    </span>
+                                )}
+                                {processing ? t('Submitting') : t('Submit')}
+                            </Button>
+                        )}
+                    </>
                 </form>
             </Form>
         </AppLayout>
