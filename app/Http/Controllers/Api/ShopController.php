@@ -52,7 +52,7 @@ class ShopController extends Controller
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000', // Validate banner image
         ]);
 
-       
+
 
         if ($validator->fails()) {
             return response()->json([
@@ -482,6 +482,38 @@ class ShopController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error deleting product: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function destroy_image(string $image_name)
+    {
+        // Find the image by filename
+        $image = ItemImage::where('image', $image_name)->first();
+
+        // Check if image exists
+        if (!$image) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Image not found',
+            ], 404);
+        }
+
+        try {
+            if ($image->image) {
+                ImageHelper::deleteImage($image->image, 'assets/images/items');
+            }
+
+            $image->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Image deleted successfully',
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting image: ' . $e->getMessage(),
             ], 500);
         }
     }

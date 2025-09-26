@@ -69,6 +69,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('products', [ShopController::class, 'storeProduct']);
     Route::post('update_products/{id}', [ShopController::class, 'updateProduct']);
     Route::get('products/{id}/delete', [ShopController::class, 'deleteProduct']);
+     Route::get('products/{image_name}/delete_image', [ShopController::class, 'destroy_image']);
 
     // Garage Route
     Route::get('user_garage', [GarageController::class, 'user_garage']);
