@@ -204,7 +204,7 @@ export default function Create() {
                     </div>
 
                     <div className="grid grid-cols-12 gap-8">
-                        <div className="col-span-6">
+                        {/* <div className="col-span-6">
                             <FormField
                                 control={form.control}
                                 name="code"
@@ -219,7 +219,7 @@ export default function Create() {
                                     </FormItem>
                                 )}
                             />
-                        </div>
+                        </div> */}
                         <div className="col-span-6">
                             <FormField
                                 control={form.control}
@@ -347,7 +347,7 @@ export default function Create() {
                     />
 
                     <div className="grid grid-cols-6 gap-4 lg:grid-cols-12">
-                        <div className="col-span-6 flex space-x-2">
+                        {/* <div className="col-span-6 flex space-x-2">
                             <span className="flex-1">
                                 <FormField
                                     control={form.control}
@@ -364,7 +364,7 @@ export default function Create() {
                                     )}
                                 />
                             </span>
-                        </div>
+                        </div> */}
 
                         <div className="col-span-6">
                             <FormField
