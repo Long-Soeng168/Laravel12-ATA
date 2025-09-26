@@ -146,7 +146,7 @@ class ShopController extends Controller
             'address'            => $shop->address,
             'vat_percent'        => null,
             'exchange_rate_riel' => null,
-            'status'             => $shop->status === 'approved' ? 1 : 0,
+            'status'             => $shop->status,
             'created_at'         => $shop->created_at,
             'updated_at'         => $shop->updated_at,
             'owner'              => $shop->owner ? [
