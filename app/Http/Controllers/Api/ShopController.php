@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Image;
 use App\Models\Product;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 
@@ -50,6 +51,8 @@ class ShopController extends Controller
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000', // Validate logo image
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000', // Validate banner image
         ]);
+
+       
 
         if ($validator->fails()) {
             return response()->json([
@@ -99,6 +102,7 @@ class ShopController extends Controller
                 'status' => 'pending',
                 'owner_user_id' => $userId,
                 'created_by' => $request->user()->id,
+                'expired_at' => now()->addYears(2)->setTimezone('Asia/Bangkok')->startOfDay()->toDateString(),
                 'updated_by' => $request->user()->id,
             ]);
 
@@ -248,7 +252,7 @@ class ShopController extends Controller
                 'phone' => $request->input('phone'),
                 'logo' => $logoName,
                 'banner' => $bannerName,
-                'status' => $shop->status !== 'approved' ? 'pending': 'approved',
+                'status' => $shop->status !== 'approved' ? 'pending' : 'approved',
                 'updated_by' => $request->user()->id,
             ]);
 
