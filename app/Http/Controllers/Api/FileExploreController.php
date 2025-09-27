@@ -32,7 +32,7 @@ class FileExploreController extends Controller
 
         return response()->json([
             'user' => $user ? $user : null,
-            'status' => 'can_read', //can_read, need_login, need_purchase,
+            'status' => 'need_login', //can_read, need_login, need_purchase,
             'files' => $files,
             'folders' => $folders,
             'path' => $path
