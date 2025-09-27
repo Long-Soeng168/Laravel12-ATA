@@ -29,9 +29,6 @@ Route::get('/posts_most_views', [PostController::class, 'posts_most_views']);
 Route::get('/posts/{post}', [PostController::class, 'show']);
 Route::get('/post_categories', [PostController::class, 'post_categories']);
 
-// Documents Route
-Route::get('/file-explorer/folder/{path}', [FileExploreController::class, 'folder']);
-
 // DTC Route
 Route::resource('dtcs', DtcController::class);
 
@@ -69,7 +66,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('products', [ShopController::class, 'storeProduct']);
     Route::post('update_products/{id}', [ShopController::class, 'updateProduct']);
     Route::get('products/{id}/delete', [ShopController::class, 'deleteProduct']);
-     Route::get('products/{image_name}/delete_image', [ShopController::class, 'destroy_image']);
+    Route::get('products/{image_name}/delete_image', [ShopController::class, 'destroy_image']);
 
     // Garage Route
     Route::get('user_garage', [GarageController::class, 'user_garage']);
@@ -80,6 +77,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('garages_posts/{id}/delete', [GaragePostController::class, 'destroy']);
     Route::get('garages_posts/{image_name}/delete_image', [GaragePostController::class, 'destroy_image']);
 });
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    // Documents Route
+    // Route::get('/file-explorer/folder/{path}', [FileExploreController::class, 'folder']);
+});
+Route::get('/file-explorer/folder/{path}', [FileExploreController::class, 'folder']);
 
 
 // Auth API Route
