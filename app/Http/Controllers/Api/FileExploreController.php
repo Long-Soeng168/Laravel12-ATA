@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ApplicationInfo;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\PersonalAccessToken;
 use Illuminate\Http\Request;
@@ -30,12 +32,45 @@ class FileExploreController extends Controller
         $files = Storage::disk('real_storage')->files($path);
         $folders = Storage::disk('real_storage')->directories($path);
 
+
+        $appInfo = ApplicationInfo::first(); // document_status = need_purchase | free_all_with_login | free_all_no_login
+        $status = 'need_purchase'; // default
+
+        if (!$user) {
+            // guest
+            if ($appInfo->document_status === 'free_all_no_login') {
+                $status = 'can_read';
+            } else {
+                $status = 'need_login';
+            }
+        } else {
+            // logged in
+            switch ($appInfo->document_status) {
+                case 'free_all_no_login':
+                case 'free_all_with_login':
+                    $status = 'can_read';
+                    break;
+
+                case 'need_purchase':
+                    if (
+                        $user->document_access_end_at &&
+                        now()->lessThan(Carbon::parse($user->document_access_end_at)->addDay())
+                    ) {
+                        $status = 'can_read';
+                    } else {
+                        $status = 'need_purchase';
+                    }
+                    break;
+            }
+        }
+
+
         return response()->json([
-            'user' => $user ? $user : null,
-            'status' => 'can_read', //can_read, need_login, need_purchase,
+            'status' => $status, //can_read, need_login, need_purchase,
             'files' => $files,
             'folders' => $folders,
-            'path' => $path
+            'path' => $path,
+            'user' => $user ? $user : null
         ]);
     }
 }

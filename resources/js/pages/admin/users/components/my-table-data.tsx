@@ -1,16 +1,15 @@
 import DeleteButton from '@/components/delete-button';
 import MyImageGallery from '@/components/my-image-gallery';
 import MyNoData from '@/components/my-no-data';
+import { MyTooltipButton } from '@/components/my-tooltip-button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import usePermission from '@/hooks/use-permission';
 import useTranslation from '@/hooks/use-translation';
 import { Link, router, usePage } from '@inertiajs/react';
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown, EditIcon, ScanEyeIcon } from 'lucide-react';
 import { useState } from 'react';
-import EditButton from './edit-button';
-import ViewButton from './view-button';
 
 const MyTableData = () => {
     const hasPermission = usePermission();
@@ -114,9 +113,19 @@ const MyTableData = () => {
                                 </TableCell>
                                 <TableCell>
                                     <span className="flex h-full items-center justify-start">
-                                        <ViewButton item={item} />
+                                        <Link href={`/admin/users/${item.id}`}>
+                                            <MyTooltipButton title={t('Show')} side="bottom" variant="ghost">
+                                                <ScanEyeIcon />
+                                            </MyTooltipButton>
+                                        </Link>
                                         {hasPermission('user delete') && <DeleteButton deletePath="/admin/users/" id={item.id} />}
-                                        {hasPermission('user update') && <EditButton item={item} />}
+                                        {hasPermission('user update') && (
+                                            <Link href={`/admin/users/${item.id}/edit`}>
+                                                <MyTooltipButton title={t('Edit')} side="bottom" variant="ghost">
+                                                    <EditIcon />
+                                                </MyTooltipButton>
+                                            </Link>
+                                        )}
                                     </span>
                                 </TableCell>
                                 <TableCell>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ImageHelper;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
@@ -55,6 +56,25 @@ class UserController extends Controller implements HasMiddleware
         ]);
     }
 
+    public function create(Request $request)
+    {
+        return Inertia::render('admin/users/Create', []);
+    }
+
+    public function show(User $user)
+    {
+        return Inertia::render('admin/users/Create', [
+            'editData' => $user->load(['created_by', 'updated_by', 'roles', 'shop']),
+            'readOnly' => true,
+        ]);
+    }
+    public function edit(User $user)
+    {
+        return Inertia::render('admin/users/Create', [
+            'editData' => $user->load(['created_by', 'updated_by', 'roles', 'shop']),
+        ]);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -67,10 +87,14 @@ class UserController extends Controller implements HasMiddleware
             'phone' => 'nullable|numeric|unique:users,phone',
             'gender' => 'nullable|string|in:male,female,other',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
+            'document_access_end_at' => 'nullable|date',
             'roles' => 'nullable|array'
         ]);
         // dd($validated );
 
+        $validated['document_access_end_at'] = isset($validated['document_access_end_at'])
+            ? Carbon::parse($validated['document_access_end_at'])->setTimezone('Asia/Bangkok')->startOfDay()->toDateString()
+            : null;
 
         try {
             // Add creator and updater
@@ -119,6 +143,7 @@ class UserController extends Controller implements HasMiddleware
      */
     public function update(Request $request, User $user)
     {
+        // dd($request->all());
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
@@ -126,8 +151,13 @@ class UserController extends Controller implements HasMiddleware
             'phone' => 'nullable|numeric|unique:users,phone,' . $user->id,
             'gender' => 'nullable|string|in:male,female,other',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
+            'document_access_end_at' => 'nullable|date',
             'roles' => 'nullable|array'
         ]);
+
+        $validated['document_access_end_at'] = isset($validated['document_access_end_at'])
+            ? Carbon::parse($validated['document_access_end_at'])->setTimezone('Asia/Bangkok')->startOfDay()->toDateString()
+            : null;
 
         try {
             // Add updater
