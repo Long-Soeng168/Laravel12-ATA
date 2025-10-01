@@ -28,6 +28,7 @@ use App\Http\Controllers\PagePositionController;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PhoneCompanyController;
+use App\Http\Controllers\PlaylistPurchaseController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\PostCategoryController;
 use App\Http\Controllers\PostController;
@@ -142,6 +143,11 @@ Route::middleware('auth')->group(function () {
     Route::post('admin/videos/{video}/update', [VideoController::class, 'update']);
     Route::post('admin/videos/{video}/update_status', [VideoController::class, 'update_status']);
     Route::post('admin/videos_free_status/{video}/update_status', [VideoController::class, 'videos_free_status']);
+
+    // Playlist Purchase Route
+    Route::resource('admin/playlist_purchases', PlaylistPurchaseController::class);
+    Route::post('admin/playlist_purchases/{playlist_purchase}/update', [PlaylistPurchaseController::class, 'update']);
+    Route::post('admin/playlist_purchases/{playlist_purchas}/update_status', [PlaylistPurchaseController::class, 'update_status']);
 
     // Item Brands Route
     Route::resource('admin/item_brands', ItemBrandController::class);
