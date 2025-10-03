@@ -147,7 +147,7 @@ Route::middleware('auth')->group(function () {
     // Playlist Purchase Route
     Route::resource('admin/playlist_purchases', PlaylistPurchaseController::class);
     Route::post('admin/playlist_purchases/{playlist_purchase}/update', [PlaylistPurchaseController::class, 'update']);
-    Route::post('admin/playlist_purchases/{playlist_purchas}/update_status', [PlaylistPurchaseController::class, 'update_status']);
+    Route::post('admin/playlist_purchases/{playlist_purchase}/update_status', [PlaylistPurchaseController::class, 'update_status']);
 
     // Item Brands Route
     Route::resource('admin/item_brands', ItemBrandController::class);

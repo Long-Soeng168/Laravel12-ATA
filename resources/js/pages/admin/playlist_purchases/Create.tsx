@@ -102,7 +102,7 @@ export default function Create() {
     const currentBreadcrumb = readOnly ? t('Show') : editData ? t('Edit') : t('Create');
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: t('playlist_purchases'),
+            title: t('Playlist Purchases'),
             href: '/admin/playlist_purchases',
         },
         {

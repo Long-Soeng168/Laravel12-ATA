@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 class FileExploreController extends Controller
 {
     public function folder(Request $request, $path)
-    {
+    { 
         $user = null;
         $header = $request->header('Authorization');
 

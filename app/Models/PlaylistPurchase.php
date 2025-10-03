@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class PlaylistPurchase extends Model
 {
     protected $guarded = [];
+    public function playlist()
+    {
+        return $this->belongsTo(VideoPlayList::class, 'playlist_id', 'id');
+    }
     public function buyer()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');

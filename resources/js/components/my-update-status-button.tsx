@@ -16,6 +16,8 @@ interface UpdateStatusButtonProps {
 const statusVariants: Record<string, string> = {
     pending: 'text-white hover:bg-yellow-600/85 bg-yellow-600',
     approved: 'text-white hover:bg-green-600/85 bg-green-600',
+    completed: 'text-white hover:bg-green-600/85 bg-green-600',
+    cancelled: 'text-white hover:bg-gray-500/85 bg-gray-500',
     suspended: 'text-white hover:bg-gray-500/85 bg-gray-500',
     rejected: 'text-white hover:bg-red-500/85 bg-red-500',
 
@@ -26,12 +28,15 @@ const statusVariants: Record<string, string> = {
     private: 'text-white hover:bg-gray-500/85 bg-gray-500',
     free: 'text-white hover:bg-green-500/85 bg-green-500',
     subscribe: 'text-white hover:bg-red-500/85 bg-red-500',
+    purchase: 'text-white hover:bg-red-500/85 bg-red-500',
 };
 
 const statusVariantsText: Record<string, string> = {
     pending: 'text-yellow-600',
     approved: 'text-green-600',
+    completed: 'text-green-600',
     suspended: 'text-gray-500',
+    cancelled: 'text-gray-500',
     rejected: 'text-red-500',
 
     // keep others if needed
@@ -41,6 +46,7 @@ const statusVariantsText: Record<string, string> = {
     private: 'text-gray-500',
     free: 'text-green-500',
     subscribe: 'text-red-500',
+    purchase: 'text-red-500',
 };
 
 const MyUpdateStatusButton = ({ id, pathName, currentStatus, statuses }: UpdateStatusButtonProps) => {

@@ -35,7 +35,7 @@ class PlaylistPurchaseController extends Controller implements HasMiddleware
         $sortBy = $request->input('sortBy', 'id');
         $sortDirection = $request->input('sortDirection', 'desc');
 
-        $query = PlaylistPurchase::query()->with('buyer');
+        $query = PlaylistPurchase::query()->with('buyer', 'playlist', 'created_by', 'updated_by');
 
         if ($search) {
             $query->where(function ($sub_query) use ($search) {
@@ -49,6 +49,8 @@ class PlaylistPurchaseController extends Controller implements HasMiddleware
         $query->orderBy($sortBy, $sortDirection);
 
         $tableData = $query->paginate(perPage: 10)->onEachSide(1);
+
+        // return $tableData;
 
         return Inertia::render('admin/playlist_purchases/Index', [
             'tableData' => $tableData,
@@ -96,10 +98,10 @@ class PlaylistPurchaseController extends Controller implements HasMiddleware
     /**
      * Display the specified resource.
      */
-    public function show(Video $video)
+    public function show(PlaylistPurchase $playlist_purchase)
     {
         return Inertia::render('admin/playlist_purchases/Show', [
-            'video' => $video
+            'video' => $playlist_purchase
         ]);
     }
 
@@ -107,10 +109,10 @@ class PlaylistPurchaseController extends Controller implements HasMiddleware
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Video $video)
+    public function edit(PlaylistPurchase $playlist_purchase)
     {
         return Inertia::render('admin/playlist_purchases/Create', [
-            'editData' => $video,
+            'editData' => $playlist_purchase,
             'playlists' => VideoPlayList::where('status', 'active')->orderBy('id', 'desc')->get(),
         ]);
     }
@@ -119,77 +121,39 @@ class PlaylistPurchaseController extends Controller implements HasMiddleware
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Video $video)
+    public function update(Request $request, PlaylistPurchase $purchase)
     {
         $validated = $request->validate([
-            'is_free' => 'nullable|boolean',
-            'title' => 'required|string|max:255',
-            'title_kh' => 'nullable|string|max:255',
-            'video_file' => 'nullable|file|mimes:mp4|max:307200',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'playlist_code' => 'nullable|string|max:255',
-            'order_index' => 'nullable|numeric|max:255',
-            'status' => 'nullable|string|in:active,inactive',
-            'short_description' => 'nullable|string',
-            'short_description_kh' => 'nullable|string',
-            'total_view_counts' => 'nullable|integer|min:0',
+            'playlist_id' => 'required|exists:video_play_lists,id',
+            'user_id'     => 'required|exists:users,id',
+            'status'      => 'nullable|string|in:pending,completed,cancelled',
+            'expire_at'   => 'nullable|date',
         ]);
+
         $validated['updated_by'] = $request->user()->id;
 
-        $image_file = $request->file('image');
-        unset($validated['image']);
+        $purchase->update($validated);
 
-        foreach ($validated as $key => $value) {
-            if ($value === '') {
-                $validated[$key] = null;
-            }
-        }
-
-        if ($image_file) {
-            try {
-                $created_image_name = ImageHelper::uploadAndResizeImage($image_file, 'assets/images/playlist_purchases', 600);
-                $validated['image'] = $created_image_name;
-
-                if ($video->image && $created_image_name) {
-                    ImageHelper::deleteImage($video->image, 'assets/images/playlist_purchases');
-                }
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
-            }
-        }
-        if ($video_file = $request->file('video_file')) {
-            try {
-                $created_file_name  = FileHelper::uploadFile($video_file, 'assets/files/playlist_purchases', true);
-                $validated['video_file'] = $created_file_name;
-
-                if ($video->file_name && $created_file_name) {
-                    FileHelper::deleteFile($video->file_name, 'assets/files/playlist_purchases');
-                }
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload video: ' . $e->getMessage());
-            }
-        }
-        $video->update($validated);
-
-        return redirect()->route('playlist_purchases.index')->with('success', 'Video updated successfully!');
+        return redirect()->route('playlist_purchases.index')->with('success', 'Purchase updated successfully!');
     }
-    public function update_status(Request $request, Video $video)
+
+    public function update_status(Request $request, PlaylistPurchase $playlist_purchase)
     {
         $request->validate([
-            'status' => 'required|string|in:active,inactive',
+            'status' => 'required|string|in:pending,completed,cancelled',
         ]);
-        $video->update([
+        $playlist_purchase->update([
             'status' => $request->status,
         ]);
 
         return redirect()->back()->with('success', 'Status updated successfully!');
     }
-    public function playlist_purchases_free_status(Request $request, Video $video)
+    public function playlist_purchases_free_status(Request $request, PlaylistPurchase $playlist_purchase)
     {
         $request->validate([
             'status' => 'required|string|in:free,subscribe',
         ]);
-        $video->update([
+        $playlist_purchase->update([
             'is_free' => $request->status == 'free',
         ]);
 
@@ -198,16 +162,16 @@ class PlaylistPurchaseController extends Controller implements HasMiddleware
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Video $video)
+    public function destroy(PlaylistPurchase $playlist_purchase)
     {
         // Delete image if exists
-        if ($video->image) {
-            ImageHelper::deleteImage($video->image, 'assets/images/playlist_purchases');
+        if ($playlist_purchase->image) {
+            ImageHelper::deleteImage($playlist_purchase->image, 'assets/images/playlist_purchases');
         }
-        if ($video->file_name) {
-            FileHelper::deleteFile($video->file_name, 'assets/files/playlist_purchases');
+        if ($playlist_purchase->file_name) {
+            FileHelper::deleteFile($playlist_purchase->file_name, 'assets/files/playlist_purchases');
         }
-        $video->delete();
+        $playlist_purchase->delete();
 
         return redirect()->route('playlist_purchases.index')->with('success', 'Video deleted successfully!');
     }

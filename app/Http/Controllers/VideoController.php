@@ -221,7 +221,7 @@ class VideoController extends Controller implements HasMiddleware
     public function videos_free_status(Request $request, Video $video)
     {
         $request->validate([
-            'status' => 'required|string|in:free,subscribe',
+            'status' => 'required|string|in:free,purchase',
         ]);
         $video->update([
             'is_free' => $request->status == 'free',

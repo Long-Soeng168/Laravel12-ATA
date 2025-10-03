@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\PlaylistPurchase;
 use App\Models\Video;
 use App\Models\VideoPlayList;
 use App\Models\VideoPlaylistUser;
 use Illuminate\Http\Request;
+use Laravel\Sanctum\PersonalAccessToken;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 class VideoController extends Controller
@@ -16,12 +18,29 @@ class VideoController extends Controller
      */
     public function index(Request $request)
     {
+        $user = null;
+        $header = $request->header('Authorization');
+
+        if ($header && str_starts_with($header, 'Bearer ')) {
+            $token = substr($header, 7); // remove 'Bearer '
+
+            $accessToken = PersonalAccessToken::findToken($token);
+            if ($accessToken) {
+                $user = $accessToken->tokenable; // This is your authenticated user
+            }
+        }
+
+        $userPlaylists = PlaylistPurchase::where('user_id', $user->id)->where('status', 'completed')->get()->pluck('playlist_id')->toArray();
+
+        // return $userPlaylists;
+
+
         // Retrieve request parameters with defaults
         $search = $request->input('search', '');
         $playlistId = $request->input('playlistId');
         $sortBy = $request->input('sortBy', 'title'); // Default sort by 'title'
         $sortOrder = $request->input('sortOrder', 'asc'); // Default order 'asc'
-        $perPage = $request->input('perPage', 50); // Default 50 items per page
+        $perPage = $request->input('perPage', 100); // Default 50 items per page
 
         // Start building the query
         $query = Video::query();
@@ -32,8 +51,8 @@ class VideoController extends Controller
         }
 
         // Apply playlist filter
-        if (!empty($playlistId)) {
-            $playlist = VideoPlayList::find($playlistId);
+        $playlist = VideoPlayList::find($playlistId);
+        if (!empty($playlist)) {
             if ($playlist) {
                 $query->where('playlist_code', $playlist->code);
             } else {
@@ -53,21 +72,34 @@ class VideoController extends Controller
         $videos = $query->paginate($perPage);
 
         // Transform collection to old key format
-        $videos->getCollection()->transform(function ($item) {
+        $videos->getCollection()->transform(function ($item) use ($userPlaylists, $playlist) {
+            // figure out status logic
+            if ($item->is_free) {
+                $status = 'can_watch';
+            } elseif (in_array($playlist->id, $userPlaylists)) {
+                $status = 'can_watch';
+            } else {
+                $status = 'need_purchase';
+            }
+
             return [
+                'user' => $userPlaylists,
                 'id' => $item->id,
                 'title' => $item->title,
                 'image' => $item->image,
                 'description' => $item->short_description, // or $item->short_description_kh
                 'video_name' => $item->video_file,
-                'playlist_id' => optional(VideoPlayList::where('code', $item->playlist_code)->first())->id,
-                'status' => $item->status,
+                'playlist_id' => $playlist->id ?? null,
+                'playlist_code' => $playlist->code ?? null,
+                'status' => $status, //can_watch, need_login, need_purchase
                 'views_count' => $item->total_view_counts,
                 'is_free' => $item->is_free,
                 'created_at' => $item->created_at,
                 'updated_at' => $item->updated_at,
             ];
         });
+
+
 
         // Return JSON response with transformed data
         return response()->json($videos);

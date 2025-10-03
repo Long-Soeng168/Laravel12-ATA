@@ -177,8 +177,8 @@ const MyTableData = () => {
                                             <MyUpdateStatusButton
                                                 id={item.id}
                                                 pathName="/admin/videos_free_status"
-                                                currentStatus={item.is_free ? 'free' : 'subscribe'}
-                                                statuses={['free', 'subscribe']}
+                                                currentStatus={item.is_free ? 'free' : 'purchase'}
+                                                statuses={['free', 'purchase']}
                                             />
                                         ) : (
                                             <span className="capitalize">{item.is_free ? 'Free' : 'Subscribe'}</span>
