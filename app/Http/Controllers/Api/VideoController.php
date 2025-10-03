@@ -75,10 +75,12 @@ class VideoController extends Controller
         $videos = $query->paginate($perPage);
 
         // Transform collection to old key format
-        $videos->getCollection()->transform(function ($item) use ($userPlaylists, $playlist) {
+        $videos->getCollection()->transform(function ($item) use ($userPlaylists, $playlist, $user) {
             // figure out status logic
             if ($item->is_free) {
                 $status = 'can_watch';
+            } elseif (empty($user)) {
+                $status = 'need_login';
             } elseif (in_array($playlist->id ?? 0, $userPlaylists)) {
                 $status = 'can_watch';
             } else {
