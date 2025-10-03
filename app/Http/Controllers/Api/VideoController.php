@@ -30,7 +30,10 @@ class VideoController extends Controller
             }
         }
 
-        $userPlaylists = PlaylistPurchase::where('user_id', $user->id)->where('status', 'completed')->get()->pluck('playlist_id')->toArray();
+        $userPlaylists = [];
+        if ($user) {
+            $userPlaylists = PlaylistPurchase::where('user_id', $user->id)->where('status', 'completed')->get()->pluck('playlist_id')->toArray();
+        }
 
         // return $userPlaylists;
 
