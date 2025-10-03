@@ -79,7 +79,7 @@ class VideoController extends Controller
             // figure out status logic
             if ($item->is_free) {
                 $status = 'can_watch';
-            } elseif (in_array($playlist->id, $userPlaylists)) {
+            } elseif (in_array($playlist->id ?? 0, $userPlaylists)) {
                 $status = 'can_watch';
             } else {
                 $status = 'need_purchase';
@@ -93,7 +93,7 @@ class VideoController extends Controller
                 'description' => $item->short_description, // or $item->short_description_kh
                 'video_name' => $item->video_file,
                 'playlist_id' => $playlist->id ?? null,
-                'playlist_code' => $playlist->code ?? null,
+                'playlist_code' => $item->playlist_code ?? null,
                 'status' => $status, //can_watch, need_login, need_purchase
                 'views_count' => $item->total_view_counts,
                 'is_free' => $item->is_free,
