@@ -1,8 +1,6 @@
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import useTranslation from '@/hooks/use-translation';
 import { usePage } from '@inertiajs/react';
-import NokorTechLayout from '../layouts/nokor-tech-layout';
 
 const Privacy = () => {
     const { currentLocale } = useTranslation();
@@ -21,9 +19,15 @@ const Privacy = () => {
 
                 <Separator className="my-6" />
 
+                <div className="prose max-w-none">
+                    <p
+                        className="text-muted-foreground text-lg"
+                        dangerouslySetInnerHTML={{ __html: currentLocale == 'kh' ? privacies?.long_description_kh : privacies?.long_description }}
+                    ></p>
+                </div>
+                {/* 
                 {privacies.children.length && (
                     <main className="space-y-6">
-                        {/* Introduction */}
                         {privacies.children?.map((privacy) => (
                             <Card>
                                 <CardHeader>
@@ -41,7 +45,7 @@ const Privacy = () => {
                             </Card>
                         ))}
                     </main>
-                )}
+                )} */}
             </div>
         </div>
     );
