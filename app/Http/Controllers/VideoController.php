@@ -115,8 +115,8 @@ class VideoController extends Controller implements HasMiddleware
 
         if ($video_file) {
             try {
-                $created_file_name  = FileHelper::uploadFile($video_file, 'assets/files/videos', true);
-                $validated['video_file'] = $created_file_name;
+                $created_video_file  = FileHelper::uploadFile($video_file, 'assets/files/videos', true);
+                $validated['video_file'] = $created_video_file;
             } catch (\Exception $e) {
                 return redirect()->back()->with('error', 'Failed to upload video: ' . $e->getMessage());
             }
@@ -193,11 +193,11 @@ class VideoController extends Controller implements HasMiddleware
         }
         if ($video_file = $request->file('video_file')) {
             try {
-                $created_file_name  = FileHelper::uploadFile($video_file, 'assets/files/videos', true);
-                $validated['video_file'] = $created_file_name;
+                $created_video_file  = FileHelper::uploadFile($video_file, 'assets/files/videos', true);
+                $validated['video_file'] = $created_video_file;
 
-                if ($video->file_name && $created_file_name) {
-                    FileHelper::deleteFile($video->file_name, 'assets/files/videos');
+                if ($video->video_file && $created_video_file) {
+                    FileHelper::deleteFile($video->video_file, 'assets/files/videos');
                 }
             } catch (\Exception $e) {
                 return redirect()->back()->with('error', 'Failed to upload video: ' . $e->getMessage());
@@ -238,8 +238,8 @@ class VideoController extends Controller implements HasMiddleware
         if ($video->image) {
             ImageHelper::deleteImage($video->image, 'assets/images/videos');
         }
-        if ($video->file_name) {
-            FileHelper::deleteFile($video->file_name, 'assets/files/videos');
+        if ($video->video_file) {
+            FileHelper::deleteFile($video->video_file, 'assets/files/videos');
         }
         $video->delete();
 

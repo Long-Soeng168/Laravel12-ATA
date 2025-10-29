@@ -172,12 +172,12 @@ export function AppSidebar() {
                     external_url: 'https://filebrowser.kampu.solutions/',
                     icon: FilesIcon,
                 },
-                {
-                    title: t('Documents Path'),
-                    permission: 'document view',
-                    url: '/admin/document_paths',
-                    icon: FolderTreeIcon,
-                },
+                // {
+                //     title: t('Documents Path'),
+                //     permission: 'document view',
+                //     url: '/admin/document_paths',
+                //     icon: FolderTreeIcon,
+                // },
             ],
         },
         {
@@ -226,84 +226,72 @@ export function AppSidebar() {
                 },
             ],
         },
-        {
-            title: t('Messages'),
-            permission: 'message view',
-            url: '/admin/messages',
-            icon: MailsIcon,
-            subItems: [
-                {
-                    title: t('Messages'),
-                    permission: 'message view',
-                    url: '/admin/messages',
-                    icon: MailsIcon,
-                },
-                // {
-                //     title: t('Message Inquiries'),
-                //     permission: 'message view',
-                //     url: '/admin/message_inquiries',
-                //     icon: MessageCircleQuestionIcon,
-                // },
-            ],
-        },
-        {
-            title: t('Teams and Careers'),
-            permission: 'team view',
-            url: '/admin/teams',
-            icon: SquareUserIcon,
-            subItems: [
-                {
-                    title: t('Teams'),
-                    permission: 'team view',
-                    url: '/admin/teams',
-                    icon: SquareUserIcon,
-                },
-                {
-                    title: t('Team Categories'),
-                    permission: 'team view',
-                    url: '/admin/team_categories',
-                    icon: Layers2Icon,
-                },
-                {
-                    title: t('Position'),
-                    permission: 'team view',
-                    url: '/admin/positions',
-                    icon: ReplaceAllIcon,
-                },
-                {
-                    title: t('Careers'),
-                    permission: 'team view',
-                    url: '/admin/careers',
-                    icon: BriefcaseBusinessIcon,
-                },
-                {
-                    title: t('Career Submits'),
-                    permission: 'team view',
-                    url: '/admin/career_submits',
-                    icon: MailCheckIcon,
-                },
-            ],
-        },
-        {
-            title: t('Orders'),
-            permission: 'order view',
-            url: '/admin/online_training_orders',
-            icon: ListOrderedIcon,
-            subItems: [
-                // {
-                //     title: t('Items'),
-                //     permission: 'order view',
-                //     url: '/admin/orders',
-                //     icon: ListOrderedIcon,
-                // },
-                {
-                    title: t('Online Training'),
-                    permission: 'order view',
-                    url: '/admin/online_training_orders',
-                    icon: ListOrderedIcon,
-                },
-            ],
-        },
+        // {
+        //     title: t('Messages'),
+        //     permission: 'message view',
+        //     url: '/admin/messages',
+        //     icon: MailsIcon,
+        //     subItems: [
+        //         {
+        //             title: t('Messages'),
+        //             permission: 'message view',
+        //             url: '/admin/messages',
+        //             icon: MailsIcon,
+        //         },
+        //     ],
+        // },
+        // {
+        //     title: t('Teams and Careers'),
+        //     permission: 'team view',
+        //     url: '/admin/teams',
+        //     icon: SquareUserIcon,
+        //     subItems: [
+        //         {
+        //             title: t('Teams'),
+        //             permission: 'team view',
+        //             url: '/admin/teams',
+        //             icon: SquareUserIcon,
+        //         },
+        //         {
+        //             title: t('Team Categories'),
+        //             permission: 'team view',
+        //             url: '/admin/team_categories',
+        //             icon: Layers2Icon,
+        //         },
+        //         {
+        //             title: t('Position'),
+        //             permission: 'team view',
+        //             url: '/admin/positions',
+        //             icon: ReplaceAllIcon,
+        //         },
+        //         {
+        //             title: t('Careers'),
+        //             permission: 'team view',
+        //             url: '/admin/careers',
+        //             icon: BriefcaseBusinessIcon,
+        //         },
+        //         {
+        //             title: t('Career Submits'),
+        //             permission: 'team view',
+        //             url: '/admin/career_submits',
+        //             icon: MailCheckIcon,
+        //         },
+        //     ],
+        // },
+        // {
+        //     title: t('Orders'),
+        //     permission: 'order view',
+        //     url: '/admin/online_training_orders',
+        //     icon: ListOrderedIcon,
+        //     subItems: [
+        //         {
+        //             title: t('Online Training'),
+        //             permission: 'order view',
+        //             url: '/admin/online_training_orders',
+        //             icon: ListOrderedIcon,
+        //         },
+        //     ],
+        // },
         {
             title: t('Banners'),
             permission: 'banner view',
@@ -350,36 +338,36 @@ export function AppSidebar() {
                 },
             ],
         },
-        {
-            title: t('Projects'),
-            permission: 'project view',
-            url: '/admin/projects',
-            icon: ProjectorIcon,
-        },
-        {
-            title: t('Partners'),
-            permission: 'partner view',
-            url: '/admin/partners',
-            icon: HandshakeIcon,
-        },
-        {
-            title: t('Phone Companies'),
-            permission: 'phone_company view',
-            url: '/admin/phone_companies',
-            icon: SignalIcon,
-        },
+        // {
+        //     title: t('Projects'),
+        //     permission: 'project view',
+        //     url: '/admin/projects',
+        //     icon: ProjectorIcon,
+        // },
+        // {
+        //     title: t('Partners'),
+        //     permission: 'partner view',
+        //     url: '/admin/partners',
+        //     icon: HandshakeIcon,
+        // },
+        // {
+        //     title: t('Phone Companies'),
+        //     permission: 'phone_company view',
+        //     url: '/admin/phone_companies',
+        //     icon: SignalIcon,
+        // },
         {
             title: t('Courses'),
             permission: 'course view',
             url: '/admin/courses',
             icon: PresentationIcon,
         },
-        {
-            title: t('Headings'),
-            permission: 'heading view',
-            url: '/admin/headings',
-            icon: Heading1Icon,
-        },
+        // {
+        //     title: t('Headings'),
+        //     permission: 'heading view',
+        //     url: '/admin/headings',
+        //     icon: Heading1Icon,
+        // },
         {
             title: t('Links'),
             permission: 'link view',
@@ -392,12 +380,12 @@ export function AppSidebar() {
             url: '/admin/application_info',
             icon: InfoIcon,
         },
-        {
-            title: t('Types'),
-            permission: 'type view',
-            url: '/admin/types',
-            icon: ShapesIcon,
-        },
+        // {
+        //     title: t('Types'),
+        //     permission: 'type view',
+        //     url: '/admin/types',
+        //     icon: ShapesIcon,
+        // },
     ];
 
     const footerNavItems: NavItem[] = [

@@ -4,6 +4,7 @@ import { FileInput, FileUploader, FileUploaderContent, FileUploaderItem } from '
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { ProgressWithValue } from '@/components/ui/progress-with-value';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import usePermission from '@/hooks/use-permission';
 import useTranslation from '@/hooks/use-translation';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -29,6 +30,7 @@ const formSchema = z.object({
     google_map: z.string().max(500).optional(),
     copyright: z.string().optional(),
     copyright_kh: z.string().optional(),
+    document_status: z.string().optional(),
     image: z.string().optional(),
 });
 
@@ -66,6 +68,7 @@ export default function Create() {
             google_map: editData?.google_map || '',
             copyright: editData?.copyright || '',
             copyright_kh: editData?.copyright_kh || '',
+            document_status: editData?.document_status || 'free_all_no_login',
         },
     });
 
@@ -129,7 +132,7 @@ export default function Create() {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <div className="grid md:grid-cols-12 gap-4">
+                <div className="grid gap-4 md:grid-cols-12">
                     <div className="col-span-6">
                         <FormField
                             control={form.control}
@@ -156,6 +159,30 @@ export default function Create() {
                                         <Input placeholder={t('Name Khmer')} type="text" {...field} />
                                     </FormControl>
                                     <FormMessage>{errors.name_kh && <div>{errors.name_kh}</div>}</FormMessage>
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                    <div className="col-span-6">
+                        <FormField
+                            control={form.control}
+                            name="document_status"
+                            render={({ field }) => (
+                                <FormItem key={field.value}>
+                                    <FormLabel>{t('Document Status')}</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select Status" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="need_purchase">{t('Need Purchase')}</SelectItem>
+                                            <SelectItem value="free_all_with_login">{t('Free all with login')}</SelectItem>
+                                            <SelectItem value="free_all_no_login">{t('Free all no login')}</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage>{errors.status && <div>{errors.status}</div>}</FormMessage>
                                 </FormItem>
                             )}
                         />
@@ -250,7 +277,7 @@ export default function Create() {
                     </div>
                 </div>
 
-                <div className="grid md:grid-cols-12 gap-4">
+                <div className="grid gap-4 md:grid-cols-12">
                     <div className="col-span-6">
                         <FormField
                             control={form.control}
@@ -282,7 +309,7 @@ export default function Create() {
                         />
                     </div>
                 </div>
-                <div className="grid md:grid-cols-12 gap-4">
+                <div className="grid gap-4 md:grid-cols-12">
                     <div className="col-span-6">
                         <FormField
                             control={form.control}
@@ -314,7 +341,7 @@ export default function Create() {
                         />
                     </div>
                 </div>
-                <div className="grid md:grid-cols-12 gap-4">
+                <div className="grid gap-4 md:grid-cols-12">
                     <div className="col-span-6">
                         <FormField
                             control={form.control}

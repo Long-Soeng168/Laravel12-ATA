@@ -11,6 +11,10 @@ Route::get('/', function () {
    return redirect('/dashboard');
 })->name('home');
 
+Route::get('/normal-blade', function () {
+   return view('normalblade');
+});
+
 // Switch Language
 Route::get('/lang/{locale}', function ($locale) {
    if (!in_array($locale, ['en', 'kh'])) {
