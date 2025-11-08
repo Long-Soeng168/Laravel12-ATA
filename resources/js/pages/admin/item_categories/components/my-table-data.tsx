@@ -5,16 +5,16 @@ import MyUpdateStatusButton from '@/components/my-update-status-button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import usePermission from '@/hooks/use-permission';
+import useTranslation from '@/hooks/use-translation';
 import { router, usePage } from '@inertiajs/react';
 import { ArrowUpDown } from 'lucide-react';
 import { useState } from 'react';
 import EditButton from './edit-button';
 import ViewButton from './view-button';
-import useTranslation from '@/hooks/use-translation';
 
 const MyTableData = () => {
     const hasPermission = usePermission();
-    const {t} = useTranslation();
+    const { t } = useTranslation();
 
     const { tableData } = usePage().props;
     const queryParams = new URLSearchParams(window.location.search);
@@ -69,7 +69,7 @@ const MyTableData = () => {
                                     <ArrowUpDown size={16} /> {t('Name Khmer')}
                                 </span>
                             </TableHead>
-                            <TableHead onClick={() => handleSort('short_description')}>
+                            {/* <TableHead onClick={() => handleSort('short_description')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Short Description')}
                                 </span>
@@ -78,12 +78,12 @@ const MyTableData = () => {
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Short Description Khmer')}
                                 </span>
-                            </TableHead>
-                            <TableHead onClick={() => handleSort('parent_code')}>
+                            </TableHead> */}
+                            {/* <TableHead onClick={() => handleSort('parent_code')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Parent')}
                                 </span>
-                            </TableHead>
+                            </TableHead> */}
                             <TableHead onClick={() => handleSort('order_index')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Order Index')}
@@ -188,9 +188,9 @@ const MyTableData = () => {
                                 <TableCell>{item.code || '---'}</TableCell>
                                 <TableCell>{item.name || '---'}</TableCell>
                                 <TableCell>{item.name_kh || '---'}</TableCell>
-                                <TableCell>{item.short_description || '---'}</TableCell>
+                                {/* <TableCell>{item.short_description || '---'}</TableCell>
                                 <TableCell>{item.short_description_kh || '---'}</TableCell>
-                                <TableCell>{item.parent_code || '---'}</TableCell>
+                                <TableCell>{item.parent_code || '---'}</TableCell> */}
                                 <TableCell>{item.order_index || '---'}</TableCell>
                                 {/* <TableCell>{item.order_index || '---'}</TableCell> */}
                                 <TableCell>
@@ -202,7 +202,7 @@ const MyTableData = () => {
                                             statuses={['active', 'inactive']}
                                         />
                                     ) : (
-                                        <span className='capitalize'>{item.status}</span>
+                                        <span className="capitalize">{item.status}</span>
                                     )}
                                 </TableCell>
                                 <TableCell>

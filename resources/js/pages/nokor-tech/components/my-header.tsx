@@ -18,7 +18,7 @@ const MyHeader = () => {
     const { t } = useTranslation();
     const navItems1 = [
         { label: t('Products'), href: '/products' },
-        { label: t('Online Trainings'), href: '/online_trainings' },
+        // { label: t('Online Trainings'), href: '/online_trainings' },
         // { label: t('Documents'), href: '/documents' },
     ];
 
@@ -26,7 +26,7 @@ const MyHeader = () => {
         { label: t('Home'), href: '/' },
         { label: t('Shops'), href: '/shops' },
         { label: t('Garages'), href: '/garages_map' },
-        { label: t('Privacy'), href: '/privacy' },
+        // { label: t('Privacy'), href: '/privacy' },
         { label: t('About'), href: '/about-us' },
         { label: t('Contact'), href: '/contact-us' },
     ];

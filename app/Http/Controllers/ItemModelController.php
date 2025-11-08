@@ -48,7 +48,7 @@ class ItemModelController extends Controller implements HasMiddleware
 
         return Inertia::render('admin/item_models/Index', [
             'tableData' => $tableData,
-            'itemBrands' => ItemBrand::where('status', 'active')->orderBy('id','desc')->get(),
+            'itemBrands' => ItemBrand::where('status', 'active')->orderBy('name')->get(),
         ]);
     }
 

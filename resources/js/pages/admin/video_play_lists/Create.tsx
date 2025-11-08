@@ -141,9 +141,9 @@ export default function Create({
                         )}
                     />
                 </div>
-                <div className="grid md:grid-cols-12 gap-4">
+                <div className="grid gap-4 md:grid-cols-12">
                     {/* Title Khmer */}
-                    <div className="col-span-6">
+                    <div className="md:col-span-12">
                         <FormField
                             control={form.control}
                             name="name"
@@ -158,7 +158,7 @@ export default function Create({
                             )}
                         />
                     </div>
-                    <div className="col-span-6">
+                    {/* <div className="col-span-6">
                         <FormField
                             control={form.control}
                             name="name_kh"
@@ -172,27 +172,27 @@ export default function Create({
                                 </FormItem>
                             )}
                         />
+                    </div> */}
+                    {/* Price */}
+                    <div className="col-span-6 mt-4">
+                        <FormField
+                            control={form.control}
+                            name="price"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>{t('Price')}</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Price" type="number" step="0.01" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </div>
                 </div>
-                {/* Price */}
-                <div className="col-span-6">
-                    <FormField
-                        control={form.control}
-                        name="price"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{t('Price')}</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Price" type="number" step="0.01" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
-                <div className="grid md:grid-cols-12 gap-4">
+                <div className="grid gap-4 md:grid-cols-12">
                     {/* Short Description */}
-                    <div className="col-span-12">
+                    <div className="md:col-span-12">
                         <FormField
                             control={form.control}
                             name="short_description"
@@ -209,7 +209,7 @@ export default function Create({
                     </div>
 
                     {/* Short Description Khmer */}
-                    <div className="col-span-12">
+                    {/* <div className="col-span-12">
                         <FormField
                             control={form.control}
                             name="short_description_kh"
@@ -223,7 +223,7 @@ export default function Create({
                                 </FormItem>
                             )}
                         />
-                    </div>
+                    </div> */}
                 </div>
 
                 <FormField

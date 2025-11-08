@@ -59,11 +59,11 @@ const MyTableData = () => {
                                     <ArrowUpDown size={16} /> {t('Shop')}
                                 </span>
                             </TableHead>
-                            <TableHead onClick={() => handleSort('code')}>
+                            {/* <TableHead onClick={() => handleSort('code')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Code')}
                                 </span>
-                            </TableHead>
+                            </TableHead> */}
                             <TableHead onClick={() => handleSort('name')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Name')}
@@ -208,7 +208,7 @@ const MyTableData = () => {
                                         <Badge variant='outline' className='hover:underline'>{item.shop?.name || '---'}</Badge>
                                     </Link>
                                 </TableCell>
-                                <TableCell>{item.code || '---'}</TableCell>
+                                {/* <TableCell>{item.code || '---'}</TableCell> */}
                                 <TableCell>{item.name || '---'}</TableCell>
                                 <TableCell>{item.price || '---'}</TableCell>
                                 {/* <TableCell>{item.short_description || '---'}</TableCell> */}

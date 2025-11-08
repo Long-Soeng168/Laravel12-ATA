@@ -9,7 +9,7 @@ import VideoDialog from '@/components/video-dialog';
 import usePermission from '@/hooks/use-permission';
 import useTranslation from '@/hooks/use-translation';
 import { Link, router, usePage } from '@inertiajs/react';
-import { ArrowUpDown, EditIcon } from 'lucide-react';
+import { ArrowUpDown, EditIcon, EyeIcon } from 'lucide-react';
 import { useState } from 'react';
 import ViewButton from './view-button';
 
@@ -60,11 +60,11 @@ const MyTableData = () => {
                                 </span>
                             </TableHead>
 
-                            <TableHead onClick={() => handleSort('title_kh')}>
+                            {/* <TableHead onClick={() => handleSort('title_kh')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Title Khmer')}
                                 </span>
-                            </TableHead>
+                            </TableHead> */}
 
                             {/* <TableHead onClick={() => handleSort('video_file')}>
                                 <span className="flex cursor-pointer items-center">
@@ -88,11 +88,11 @@ const MyTableData = () => {
                                 </span>
                             </TableHead>
 
-                            <TableHead onClick={() => handleSort('short_description_kh')}>
+                            {/* <TableHead onClick={() => handleSort('short_description_kh')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Short Description Khmer')}
                                 </span>
-                            </TableHead>
+                            </TableHead> */}
                             <TableHead onClick={() => handleSort('is_free')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Status Price')}
@@ -121,7 +121,6 @@ const MyTableData = () => {
                                     </TableCell>
                                     <TableCell>
                                         <span className="flex h-full items-center justify-start">
-                                            <ViewButton item={item} />
                                             {hasPermission('video delete') && <DeleteButton deletePath="/admin/videos/" id={item.id} />}
                                             {hasPermission('video update') && (
                                                 <Link href={`/admin/videos/${item.id}/edit`}>
@@ -166,12 +165,12 @@ const MyTableData = () => {
                                         </span>
                                     </TableCell>
                                     <TableCell>{item.title || '---'}</TableCell>
-                                    <TableCell>{item.title_kh || '---'}</TableCell>
+                                    {/* <TableCell>{item.title_kh || '---'}</TableCell> */}
                                     {/* <TableCell>{item.video_file || '---'}</TableCell> */}
                                     <TableCell>{item?.playlist_code || '---'}</TableCell>
                                     {/* <TableCell>{item?.playlist?.name || '---'}</TableCell> */}
                                     <TableCell>{item.short_description || '---'}</TableCell>
-                                    <TableCell>{item.short_description_kh || '---'}</TableCell>
+                                    {/* <TableCell>{item.short_description_kh || '---'}</TableCell> */}
                                     <TableCell>
                                         {hasPermission('video update') ? (
                                             <MyUpdateStatusButton

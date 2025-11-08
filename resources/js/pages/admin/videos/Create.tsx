@@ -164,8 +164,8 @@ export default function Create() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-5">
-                    <div className="grid md:grid-cols-12 gap-4">
-                        <div className="col-span-6">
+                    <div className="grid gap-4 md:grid-cols-12">
+                        <div className="md:col-span-12">
                             <FormField
                                 control={form.control}
                                 name="title"
@@ -181,7 +181,7 @@ export default function Create() {
                             />
                         </div>
 
-                        <div className="col-span-6">
+                        {/* <div className="col-span-6">
                             <FormField
                                 control={form.control}
                                 name="title_kh"
@@ -195,7 +195,7 @@ export default function Create() {
                                     </FormItem>
                                 )}
                             />
-                        </div>
+                        </div> */}
                     </div>
 
                     <FormField
@@ -212,7 +212,7 @@ export default function Create() {
                         )}
                     />
 
-                    <FormField
+                    {/* <FormField
                         control={form.control}
                         name="short_description_kh"
                         render={({ field }) => (
@@ -224,10 +224,10 @@ export default function Create() {
                                 <FormMessage>{errors.short_description_kh && <div>{errors.short_description_kh}</div>}</FormMessage>
                             </FormItem>
                         )}
-                    />
+                    /> */}
 
-                    <div className="grid md:grid-cols-12 gap-4">
-                        <div className="col-span-6">
+                    <div className="grid gap-4 md:grid-cols-12">
+                        <div className="mb-4 md:col-span-12">
                             <FormField
                                 control={form.control}
                                 name="playlist_code"
@@ -298,7 +298,7 @@ export default function Create() {
                                 )}
                             />
                         </div>
-                        <div className="col-span-3">
+                        <div className="md:col-span-6">
                             <FormField
                                 control={form.control}
                                 name="order_index"
@@ -314,7 +314,7 @@ export default function Create() {
                                 )}
                             />
                         </div>
-                        <div className="col-span-3">
+                        <div className="md:col-span-6">
                             <FormField
                                 control={form.control}
                                 name="status"
@@ -338,7 +338,7 @@ export default function Create() {
                             />
                         </div>
 
-                        <div className="col-span-6">
+                        <div className="col-span-6 mt-4">
                             <FormField
                                 control={form.control}
                                 name="is_free"

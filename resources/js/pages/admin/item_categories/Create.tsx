@@ -1,20 +1,15 @@
-import MySpinner from '@/components/customized/spinner/my-spinner';
 import MyDialogCancelButton from '@/components/my-dialog-cancel-button';
-import { AutosizeTextarea } from '@/components/ui/autosize-textarea';
 import { Button } from '@/components/ui/button';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { FileInput, FileUploader, FileUploaderContent, FileUploaderItem } from '@/components/ui/file-upload';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ProgressWithValue } from '@/components/ui/progress-with-value';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useTranslation from '@/hooks/use-translation';
-import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm as inertiaUseForm } from '@inertiajs/react';
 import axios from 'axios';
-import { Check, ChevronsUpDown, CloudUpload, Loader, Paperclip } from 'lucide-react';
+import { CloudUpload, Loader, Paperclip } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -169,7 +164,7 @@ export default function Create({
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 pt-10">
-                <div className="grid md:grid-cols-12 gap-4">
+                <div className="grid gap-4 md:grid-cols-12">
                     <div className="col-span-6">
                         <FormField
                             control={form.control}
@@ -178,7 +173,7 @@ export default function Create({
                                 <FormItem>
                                     <FormLabel>{t('Name')}</FormLabel>
                                     <FormControl>
-                                        <Input placeholder={t("Name")} type="text" {...field} />
+                                        <Input placeholder={t('Name')} type="text" {...field} />
                                     </FormControl>
                                     <FormMessage>{errors.name && <div>{errors.name}</div>}</FormMessage>
                                 </FormItem>
@@ -194,7 +189,7 @@ export default function Create({
                                 <FormItem>
                                     <FormLabel>{t('Name Khmer')}</FormLabel>
                                     <FormControl>
-                                        <Input placeholder={t("Name Khmer")} type="text" {...field} />
+                                        <Input placeholder={t('Name Khmer')} type="text" {...field} />
                                     </FormControl>
                                     <FormMessage>{errors.name_kh && <div>{errors.name_kh}</div>}</FormMessage>
                                 </FormItem>
@@ -203,7 +198,7 @@ export default function Create({
                     </div>
                 </div>
 
-                <div className="grid md:grid-cols-12 gap-4">
+                <div className="grid gap-4 md:grid-cols-12">
                     <div className="col-span-6">
                         <FormField
                             control={form.control}
@@ -244,7 +239,7 @@ export default function Create({
                         />
                     </div>
                 </div>
-                <div className="grid md:grid-cols-12 gap-4">
+                <div className="grid gap-4 md:grid-cols-12">
                     <div className="col-span-6">
                         <FormField
                             control={form.control}
@@ -262,7 +257,7 @@ export default function Create({
                         />
                     </div>
 
-                    <div className="col-span-6">
+                    {/* <div className="col-span-6">
                         <FormField
                             control={form.control}
                             name="parent_code"
@@ -334,17 +329,17 @@ export default function Create({
                                 </FormItem>
                             )}
                         />
-                    </div>
+                    </div> */}
                 </div>
 
-                <FormField
+                {/* <FormField
                     control={form.control}
                     name="short_description"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>{t('Short Description')}</FormLabel>
                             <FormControl>
-                                <AutosizeTextarea placeholder={t("Short Description")} className="resize-none" {...field} />
+                                <AutosizeTextarea placeholder={t('Short Description')} className="resize-none" {...field} />
                             </FormControl>
                             <FormMessage>{errors.short_description && <div>{errors.short_description}</div>}</FormMessage>
                         </FormItem>
@@ -358,12 +353,12 @@ export default function Create({
                         <FormItem>
                             <FormLabel>{t('Short Description Khmer')}</FormLabel>
                             <FormControl>
-                                <AutosizeTextarea placeholder={t("Short Description Khmer")} className="resize-none" {...field} />
+                                <AutosizeTextarea placeholder={t('Short Description Khmer')} className="resize-none" {...field} />
                             </FormControl>
                             <FormMessage>{errors.short_description_kh && <div>{errors.short_description_kh}</div>}</FormMessage>
                         </FormItem>
                     )}
-                />
+                /> */}
 
                 <FormField
                     control={form.control}
@@ -382,7 +377,7 @@ export default function Create({
                                         <div className="flex w-full flex-col items-center justify-center p-8">
                                             <CloudUpload className="h-10 w-10 text-gray-500" />
                                             <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
-                                                 <span className="font-semibold">{t('Click to upload')}</span>
+                                                <span className="font-semibold">{t('Click to upload')}</span>
                                                 &nbsp; {t('or drag and drop')}
                                             </p>
                                             <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF</p>
@@ -422,7 +417,7 @@ export default function Create({
                     )}
                 />
 
-                <FormField
+                {/* <FormField
                     control={form.control}
                     name="banner"
                     render={({ field }) => (
@@ -439,7 +434,7 @@ export default function Create({
                                         <div className="flex w-full flex-col items-center justify-center p-8">
                                             <CloudUpload className="h-10 w-10 text-gray-500" />
                                             <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
-                                                 <span className="font-semibold">{t('Click to upload')}</span>
+                                                <span className="font-semibold">{t('Click to upload')}</span>
                                                 &nbsp; {t('or drag and drop')}
                                             </p>
                                             <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF</p>
@@ -477,7 +472,7 @@ export default function Create({
                             )}
                         </FormItem>
                     )}
-                />
+                /> */}
                 {progress && <ProgressWithValue value={progress.percentage} position="start" />}
                 {setIsOpen && <MyDialogCancelButton onClick={() => setIsOpen(false)} />}
 

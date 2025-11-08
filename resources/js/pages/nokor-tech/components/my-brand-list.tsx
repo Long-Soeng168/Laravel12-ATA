@@ -1,39 +1,42 @@
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Label } from '@/components/ui/label';
 import useTranslation from '@/hooks/use-translation';
 import { Link } from '@inertiajs/react';
 import React from 'react';
+import { ScrollArea, ScrollBar } from './ui/scroll-area';
 
 interface MyBrandListProps {
-    items: any;
+    items: any[];
 }
 
 const MyBrandList: React.FC<MyBrandListProps> = ({ items }) => {
-    const { currentLocale, t } = useTranslation();
+    const { t, currentLocale } = useTranslation();
+
     return (
-        <Carousel>
-            <Label className='px-2'>{t('Brands')}</Label>
-            <CarouselContent className="p-2">
-                {items?.map((item, i) => (
-                    <CarouselItem key={item.id} className="basis-1/2 md:basis-1/3 xl:basis-1/6">
+        <>
+            <Label>{t('Brands')}</Label>
+            <ScrollArea>
+                <div className="flex w-max gap-3 pb-4">
+                    {items.map((item) => (
                         <Link
                             prefetch
                             href={`/products?brand_code=${item?.code}`}
-                            key={i}
-                            className="border-primary bg-background flex cursor-pointer flex-col items-center justify-center gap-2 rounded border border-dashed p-2 transition-all duration-300 hover:-translate-2 hover:border-solid hover:shadow-[5px_5px_rgba(104,_96,_255,_0.4),_10px_10px_rgba(104,_96,_255,_0.3),_15px_15px_rgba(104,_96,_255,_0.2)]"
+                            key={item?.id}
+                            className="group hover:border-primary flex h-full min-w-[110px] shrink-0 flex-col items-center justify-start gap-2 rounded-xl border bg-white px-2 py-2 transition-all duration-300 hover:shadow-sm sm:min-w-[130px] md:min-w-[150px] lg:min-w-[160px]"
                         >
-                            <img src={`/assets/images/item_brands/thumb/${item.image}`} alt={`Partner ${i + 1}`} className="h-12 object-contain" />
-                            <p className="text-lg font-semibold text-gray-600 dark:text-white">
-                                {currentLocale == 'kh' ? item?.name_kh : item?.name}
-                            </p>
+                            {item?.image && (
+                                <img
+                                    src={`/assets/images/item_brands/thumb/${item?.image}`}
+                                    alt={`Brand ${item?.name}`}
+                                    className="h-12 max-w-[80px] object-contain transition-transform duration-300 group-hover:scale-110 md:h-13 md:max-w-[110px]"
+                                />
+                            )}
+                            {/* <p className="group-hover:text-primary line-clamp-1 text-center text-xs font-medium text-black sm:text-sm">{item?.name}</p> */}
                         </Link>
-                    </CarouselItem>
-                ))}
-            </CarouselContent>
-
-            <CarouselPrevious className="absolute top-1/2 -left-2 z-10 -translate-y-1/2 transform" />
-            <CarouselNext className="absolute top-1/2 -right-2 z-10 -translate-y-1/2 transform" />
-        </Carousel>
+                    ))}
+                </div>
+                <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+        </>
     );
 };
 

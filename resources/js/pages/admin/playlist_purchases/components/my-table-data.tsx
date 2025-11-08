@@ -56,7 +56,7 @@ const MyTableData = () => {
                                     <ArrowUpDown size={16} /> {t('Playlist')}
                                 </span>
                             </TableHead>
-                            <TableHead onClick={() => handleSort('buyer_id')}>
+                            <TableHead onClick={() => handleSort('user_id')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Buyer')}
                                 </span>

@@ -4,28 +4,27 @@ import { Link } from '@inertiajs/react';
 import React from 'react';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
 
-interface MyCategoryListProps {
-    items: any[];
+interface MyBodyTypeListProps {
+    items: any;
 }
 
-const MyCategoryList: React.FC<MyCategoryListProps> = ({ items }) => {
-    const { t, currentLocale } = useTranslation();
-
+const MyBodyTypeList: React.FC<MyBodyTypeListProps> = ({ items }) => {
+    const { currentLocale, t } = useTranslation();
     return (
         <>
-            <Label>{t('Categories')}</Label>
+            <Label>{t('Body Types')}</Label>
             <ScrollArea>
                 <div className="mt-2 flex w-max gap-3 pb-4">
-                    {items.map((item) => (
+                    {items.map((item: any) => (
                         <Link
                             prefetch
-                            href={`/products?category_code=${item?.code}`}
+                            href={`/products?body_type_code=${item?.code}`}
                             key={item?.id}
                             className="group bg-background hover:border-primary flex h-full min-w-[110px] shrink-0 flex-col items-center justify-start gap-2 rounded-xl border px-2 py-2 transition-all duration-300 hover:shadow-sm sm:min-w-[130px] md:min-w-[150px] lg:min-w-[160px]"
                         >
                             {item?.image && (
                                 <img
-                                    src={`/assets/images/item_categories/thumb/${item?.image}`}
+                                    src={`/assets/images/item_body_types/thumb/${item?.image}`}
                                     alt={`Category ${item?.name}`}
                                     className="size-12 object-contain transition-transform duration-300 group-hover:scale-110 md:size-13"
                                 />
@@ -42,4 +41,4 @@ const MyCategoryList: React.FC<MyCategoryListProps> = ({ items }) => {
     );
 };
 
-export default MyCategoryList;
+export default MyBodyTypeList;

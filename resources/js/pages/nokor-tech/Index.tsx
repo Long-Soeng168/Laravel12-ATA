@@ -1,7 +1,7 @@
 import MyNoData from '@/components/my-no-data';
 import { Head, usePage } from '@inertiajs/react';
 import MyBlogList from './components/my-blogs-list';
-import MyBodyTypeList from './components/my-body-types-list copy';
+import MyBodyTypeList from './components/my-body-types-list';
 import MyBrandList from './components/my-brand-list';
 import MyCategoryList from './components/my-category-list';
 import MyMiddleSlide from './components/my-middle-slide';

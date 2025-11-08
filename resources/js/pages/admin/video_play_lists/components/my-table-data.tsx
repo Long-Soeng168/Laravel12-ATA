@@ -63,11 +63,11 @@ const MyTableData = () => {
                                 </span>
                             </TableHead>
 
-                            <TableHead onClick={() => handleSort('name_kh')}>
+                            {/* <TableHead onClick={() => handleSort('name_kh')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Name Khmer')}
                                 </span>
-                            </TableHead>
+                            </TableHead> */}
 
                             <TableHead onClick={() => handleSort('price')}>
                                 <span className="flex cursor-pointer items-center">
@@ -81,11 +81,11 @@ const MyTableData = () => {
                                 </span>
                             </TableHead>
 
-                            <TableHead onClick={() => handleSort('short_description_kh')}>
+                            {/* <TableHead onClick={() => handleSort('short_description_kh')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Short Description Khmer')}
                                 </span>
-                            </TableHead>
+                            </TableHead> */}
 
                             <TableHead onClick={() => handleSort('status')}>
                                 <span className="flex cursor-pointer items-center">
@@ -140,10 +140,10 @@ const MyTableData = () => {
                                     </TableCell>
                                     <TableCell>{item.code || '---'}</TableCell>
                                     <TableCell>{item.name || '---'}</TableCell>
-                                    <TableCell>{item.name_kh || '---'}</TableCell>
+                                    {/* <TableCell>{item.name_kh || '---'}</TableCell> */}
                                     <TableCell>{item.price ? `$${item.price}` : '---'}</TableCell>
                                     <TableCell>{item.short_description || '---'}</TableCell>
-                                    <TableCell>{item.short_description_kh || '---'}</TableCell>
+                                    {/* <TableCell>{item.short_description_kh || '---'}</TableCell> */}
 
                                     {/* <TableCell>{item.image || '---'}</TableCell> */}
                                     <TableCell>
