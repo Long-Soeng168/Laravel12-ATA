@@ -24,7 +24,7 @@ const MyHeader = () => {
 
     const navItems2 = [
         { label: t('Home'), href: '/' },
-        { label: t('Shops'), href: '/shops' },
+        // { label: t('Shops'), href: '/shops' },
         { label: t('Garages'), href: '/garages_map' },
         // { label: t('Privacy'), href: '/privacy' },
         { label: t('About'), href: '/about-us' },

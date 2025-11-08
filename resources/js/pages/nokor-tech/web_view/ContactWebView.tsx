@@ -16,7 +16,7 @@ const ContactCamActivePage = () => {
                         </div>
                     </div> */}
 
-                    <div className="my-20 grid gap-16 md:gap-10 lg:grid-cols-2">
+                    <div className="my-20 grid gap-16 md:gap-10 lg:grid-cols-1">
                         {/* Contact Info */}
                         <div className="grid h-auto grid-cols-1 content-start gap-x-8 gap-y-12 sm:grid-cols-2">
                             <div className="flex flex-col items-center justify-center sm:items-start">
@@ -59,7 +59,7 @@ const ContactCamActivePage = () => {
                         </div>
 
                         {/* Contact Form */}
-                        <ContactFormSubmit />
+                        {/* <ContactFormSubmit /> */}
                     </div>
                 </div>
             </div>
