@@ -205,22 +205,6 @@ export default function Create() {
                     </div>
 
                     <div className="grid grid-cols-12 gap-8">
-                        {/* <div className="col-span-6">
-                            <FormField
-                                control={form.control}
-                                name="code"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t('Code')}</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder={t('Code')} type="text" {...field} />
-                                        </FormControl>
-                                        <FormDescription>{t('Can use product Barcode.')}</FormDescription>
-                                        <FormMessage>{errors.code && <div>{errors.code}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
-                        </div> */}
                         <div className="col-span-6 hidden">
                             <FormField
                                 control={form.control}
@@ -278,6 +262,23 @@ export default function Create() {
                                                 <Input placeholder={t('Price ($)')} type="number" {...field} />
                                             </FormControl>
                                             <FormMessage>{errors.price && <div>{errors.price}</div>}</FormMessage>
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+
+                            <div className="col-span-6">
+                                <FormField
+                                    control={form.control}
+                                    name="code"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>{t('Code')}</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder={t('Code')} type="text" {...field} />
+                                            </FormControl>
+                                            <FormDescription>{t('Can use product Barcode.')}</FormDescription>
+                                            <FormMessage>{errors.code && <div>{errors.code}</div>}</FormMessage>
                                         </FormItem>
                                     )}
                                 />
