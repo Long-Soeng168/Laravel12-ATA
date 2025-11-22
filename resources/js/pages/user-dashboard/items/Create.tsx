@@ -23,6 +23,7 @@ import * as z from 'zod';
 const formSchema = z.object({
     name: z.string().min(1).max(255),
     short_description: z.string().optional(),
+    price: z.string().optional(),
     code: z.string().max(255).optional(),
     link: z.string().max(255).optional(),
     status: z.string().optional(),
@@ -52,7 +53,7 @@ export default function Create() {
     };
 
     const { post, progress, processing, transform, errors } = inertiaUseForm();
-    const { itemCategories, itemBrands, itemModels, itemBodyTypes, editData, shops, readOnly } = usePage().props;
+    const { itemCategories, itemBrands, itemModels, itemBodyTypes, editData, shops, readOnly } = usePage<any>().props;
 
     const [files, setFiles] = useState<File[] | null>(null);
     const [long_description, setLong_description] = useState(editData?.long_description || '');
@@ -63,6 +64,7 @@ export default function Create() {
         defaultValues: {
             name: editData?.name || '',
             code: editData?.code || '',
+            price: editData?.price?.toString() || '',
             short_description: editData?.short_description || '',
             link: editData?.link || '',
             status: editData?.status || 'active',
@@ -160,7 +162,7 @@ export default function Create() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-5">
-                    <div className="grid md:grid-cols-12 gap-4">
+                    <div className="grid gap-4 md:grid-cols-12">
                         {/* <div className="col-span-6">
                             <FormField
                                 control={form.control}
@@ -264,6 +266,22 @@ export default function Create() {
                                     </FormItem>
                                 )}
                             />
+
+                            <div className="col-span-6">
+                                <FormField
+                                    control={form.control}
+                                    name="price"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>{t('Price')}</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder={t('Price ($)')} type="number" {...field} />
+                                            </FormControl>
+                                            <FormMessage>{errors.price && <div>{errors.price}</div>}</FormMessage>
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
                         </div>
 
                         {/* <div className="col-span-6">
