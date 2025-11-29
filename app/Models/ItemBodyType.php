@@ -12,11 +12,11 @@ class ItemBodyType extends Model
 
     protected $guarded = [];
 
-    public function created_by()
+    public function created_user()
     {
         return $this->belongsTo(User::class, 'created_by', 'id');
     }
-    public function updated_by()
+    public function updated_user()
     {
         return $this->belongsTo(User::class, 'created_by', 'id');
     }

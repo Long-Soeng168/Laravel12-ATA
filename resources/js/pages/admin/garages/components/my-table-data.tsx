@@ -100,11 +100,11 @@ const MyTableData = () => {
                                 </span>
                             </TableHead>
 
-                            <TableHead onClick={() => handleSort('expired_at')}>
+                            {/* <TableHead onClick={() => handleSort('expired_at')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Expired at')}
                                 </span>
-                            </TableHead>
+                            </TableHead> */}
                             <TableHead onClick={() => handleSort('created_at')}>
                                 <span className="flex cursor-pointer items-center">
                                     <ArrowUpDown size={16} /> {t('Created at')}
@@ -237,7 +237,7 @@ const MyTableData = () => {
                                 <TableCell>{item.order_index || '---'}</TableCell>
                                 {/* <TableCell>{item.order_index || '---'}</TableCell> */}
 
-                                <TableCell>
+                                {/* <TableCell>
                                     {(() => {
                                         if (!item.expired_at) return <span>---</span>;
 
@@ -261,7 +261,7 @@ const MyTableData = () => {
                                             </span>
                                         );
                                     })()}
-                                </TableCell>
+                                </TableCell> */}
 
                                 <TableCell>
                                     {item.created_at

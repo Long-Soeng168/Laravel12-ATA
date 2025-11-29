@@ -81,7 +81,7 @@ html {
 /* End Long Soeng Font */
 
 /*End Western font */
- 
+
 @theme {
     /* Start Long Soeng */
     --font-poppins-regular:
@@ -200,8 +200,52 @@ html {
     ::file-selector-button {
         border-color: var(--color-gray-200, currentColor);
     }
+
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+    }
+
+    .section-container {
+        @apply mx-auto max-w-7xl px-4;
+    }
+
+    /* Start Admin Table */
+    .table-data-container {
+        @apply w-full overflow-hidden rounded-md px-2 pb-2;
+    }
+
+    .table-header {
+        @apply bg-muted/20 border whitespace-nowrap;
+    }
+
+    .table-body {
+        @apply border;
+    }
+
+    .table-row {
+        @apply even:bg-muted/50;
+        /* Stripe effect for even rows */
+    }
+
+    /* End Admin Table */
+
+    /* Start Form */
+    .form {
+        @apply space-y-6 p-4 pb-24;
+        /* Stripe effect for even rows */
+    }
+
+    .form-field-container {
+        @apply grid grid-cols-1 gap-6 md:grid-cols-2;
+    }
+
+    /* End Form */
 }
-  
+
 /* Custom scrollbar for WebKit browsers */
 .scroll-container::-webkit-scrollbar {
     height: 5px;

@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ImageHelper;
+use App\Http\Controllers\Controller;
 use App\Models\ItemBodyType;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
-use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Inertia\Inertia;
 
 class ItemBodyTypeController extends Controller implements HasMiddleware
 {
@@ -17,7 +18,7 @@ class ItemBodyTypeController extends Controller implements HasMiddleware
         return [
             new Middleware('permission:item view', only: ['index', 'show']),
             new Middleware('permission:item create', only: ['create', 'store']),
-            new Middleware('permission:item update', only: ['edit', 'update', 'update_status']),
+            new Middleware('permission:item update', only: ['edit', 'update', 'recover']),
             new Middleware('permission:item delete', only: ['destroy', 'destroy_image']),
         ];
     }
@@ -26,26 +27,40 @@ class ItemBodyTypeController extends Controller implements HasMiddleware
      */
     public function index(Request $request)
     {
+        $perPage = $request->input('perPage', 10);
         $search = $request->input('search', '');
         $sortBy = $request->input('sortBy', 'id');
         $sortDirection = $request->input('sortDirection', 'desc');
+        $trashed = $request->input('trashed'); // '', 'with', 'only'
 
         $query = ItemBodyType::query();
 
-        if ($search) {
-            $query->where(function ($subQuery) use ($search) {
-                $subQuery->where('name', 'LIKE', "%{$search}%")
-                    ->orWhere('code', 'LIKE', "%{$search}%")
-                    ->orWhere('name_kh', 'LIKE', "%{$search}%");
-            });
-        }
 
+        // Filter by trashed (soft deletes)
+        if ($trashed === 'with') {
+            $query->withTrashed();
+        } elseif ($trashed === 'only') {
+            $query->onlyTrashed();
+        }
 
         $query->orderBy($sortBy, $sortDirection);
 
-        $tableData = $query->paginate(perPage: 10)->onEachSide(1);
+        if ($search) {
+            $query->where(function ($sub_query) use ($search) {
+                return $sub_query->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('name_kh', 'LIKE', "%{$search}%")
+                    ->orWhere('id', 'LIKE', "%{$search}%");
+            });
+        }
 
-        return Inertia::render('admin/item_body_types/Index', [
+        $query->orderBy('id', 'desc');
+        
+        $query->with('updated_user', 'created_user');
+
+        $tableData = $query->paginate($perPage)->onEachSide(1);
+
+        // return $tableData;
+        return Inertia::render('admin/ItemBodyType/Index', [
             'tableData' => $tableData,
         ]);
     }
@@ -53,9 +68,9 @@ class ItemBodyTypeController extends Controller implements HasMiddleware
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        return Inertia::render('admin/item_body_types/Create');
+        return Inertia::render('admin/ItemBodyType/Create', []);
     }
 
     /**
@@ -64,46 +79,48 @@ class ItemBodyTypeController extends Controller implements HasMiddleware
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'code' => 'required|string|max:255|unique:item_body_types,code',
-            'name' => 'nullable|string|max:255',
+            'code' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'name_kh' => 'nullable|string|max:255',
-            'order_index' => 'nullable|integer',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'order_index' => 'required|numeric',
+            'image' => 'nullable|mimes:jpeg,png,jpg,gif,webp,svg|max:4096',
         ]);
+        // dd($request->all());
 
-        $validated['created_by'] = $request->user()->id;
-        $validated['updated_by'] = $request->user()->id;
 
-        $image_file = $request->file('image');
-        unset($validated['image']);
+        try {
+            // Add creator and updater
+            $validated['created_by'] = $request->user()->id;
+            $validated['updated_by'] = $request->user()->id;
 
-        foreach ($validated as $key => $value) {
-    if ($value === '') {
-        $validated[$key] = null;
-    }
-}
-
-        if ($image_file) {
-            try {
-                $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/item_body_types', 600);
-                $validated['image'] = $created_image_name;
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
+            // Handle image upload if present
+            if ($request->hasFile('image')) {
+                $imageName = ImageHelper::uploadAndResizeImageWebp(
+                    $request->file('image'),
+                    'assets/images/item_body_types',
+                    600
+                );
+                $validated['image'] = $imageName;
             }
+
+            // Create the Item Body Type
+            ItemBodyType::create($validated);
+
+            return redirect()->back()->with('success', 'Item Body Type created successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors('Failed to create Item Body Type: ' . $e->getMessage());
         }
-
-        ItemBodyType::create($validated);
-
-        return redirect()->route('item_body_types.index')->with('success', 'Body Type created successfully!');
     }
+
 
     /**
      * Display the specified resource.
      */
     public function show(ItemBodyType $item_body_type)
     {
-        return Inertia::render('admin/item_body_types/Show', [
-            'itemBrand' => $item_body_type
+        return Inertia::render('admin/ItemBodyType/Create', [
+            'editData' => $item_body_type,
+            'readOnly' => true,
         ]);
     }
 
@@ -112,8 +129,8 @@ class ItemBodyTypeController extends Controller implements HasMiddleware
      */
     public function edit(ItemBodyType $item_body_type)
     {
-        return Inertia::render('admin/item_body_types/Edit', [
-            'itemBrand' => $item_body_type
+        return Inertia::render('admin/ItemBodyType/Create', [
+            'editData' => $item_body_type,
         ]);
     }
 
@@ -123,51 +140,51 @@ class ItemBodyTypeController extends Controller implements HasMiddleware
     public function update(Request $request, ItemBodyType $item_body_type)
     {
         $validated = $request->validate([
-            'code' => 'required|string|max:255|unique:item_body_types,code,' . $item_body_type->id,
+            'code' => 'required|string|max:255',
             'name' => 'required|string|max:255',
             'name_kh' => 'nullable|string|max:255',
-            'order_index' => 'nullable|integer',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'order_index' => 'required|numeric',
+            'image' => 'nullable|mimes:jpeg,png,jpg,gif,webp,svg|max:4096',
         ]);
-        $validated['updated_by'] = $request->user()->id;
 
-        $image_file = $request->file('image');
-        unset($validated['image']);
+        try {
+            // track updater
+            $validated['updated_by'] = $request->user()->id;
 
-        foreach ($validated as $key => $value) {
-    if ($value === '') {
-        $validated[$key] = null;
-    }
-}
+            $imageFile = $request->file('image');
+            unset($validated['image']);
 
-        if ($image_file) {
-            try {
-                $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/item_body_types', 600);
-                $validated['image'] = $created_image_name;
+            // Handle image upload if present
+            if ($imageFile) {
+                $imageName = ImageHelper::uploadAndResizeImageWebp(
+                    $imageFile,
+                    'assets/images/item_body_types',
+                    600
+                );
 
-                if ($item_body_type->image && $created_image_name) {
+                $validated['image'] = $imageName;
+
+                // delete old if replaced
+                if ($imageName && $item_body_type->image) {
                     ImageHelper::deleteImage($item_body_type->image, 'assets/images/item_body_types');
                 }
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
             }
+
+            // Update
+            $item_body_type->update($validated);
+
+            return redirect()->back()->with('success', 'Item Body Type updated successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors('Failed to update Item Body Type: ' . $e->getMessage());
         }
-
-        $item_body_type->update($validated);
-
-        return redirect()->route('item_body_types.index')->with('success', 'Body Type updated successfully!');
     }
 
-    public function update_status(Request $request, ItemBodyType $item_body_type)
-    {
-        $request->validate([
-            'status' => 'required|string|in:active,inactive',
-        ]);
-        $item_body_type->update([
-            'status' => $request->status,
-        ]);
 
-        return redirect()->back()->with('success', 'Status updated successfully!');
+    public function recover($id)
+    {
+        $item_body_type = ItemBodyType::withTrashed()->findOrFail($id); // 👈 include soft-deleted Item Body Type
+        $item_body_type->restore(); // restores deleted_at to null
+        return redirect()->back()->with('success', 'Item Body Type recovered successfully.');
     }
 
     /**
@@ -175,13 +192,11 @@ class ItemBodyTypeController extends Controller implements HasMiddleware
      */
     public function destroy(ItemBodyType $item_body_type)
     {
-        // Delete image if exists
-        if ($item_body_type->image) {
-            ImageHelper::deleteImage($item_body_type->image, 'assets/images/item_body_types');
-        }
+        // if ($user->image) {
+        //     ImageHelper::deleteImage($user->image, 'assets/images/users');
+        // }
 
-        $item_body_type->delete();
-
-        return redirect()->route('item_body_types.index')->with('success', 'Body Type deleted successfully!'); //
+        $item_body_type->delete(); // this will now just set deleted_at timestamp
+        return redirect()->back()->with('success', 'Item Body Type deleted successfully.');
     }
 }

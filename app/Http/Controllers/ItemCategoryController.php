@@ -3,21 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ImageHelper;
+use App\Http\Controllers\Controller;
 use App\Models\ItemCategory;
+use App\Models\Type;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
-use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Inertia\Inertia;
 
 class ItemCategoryController extends Controller implements HasMiddleware
 {
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:item view', only: ['index', 'show', 'all_item_categories']),
+            new Middleware('permission:item view', only: ['index', 'show']),
             new Middleware('permission:item create', only: ['create', 'store']),
-            new Middleware('permission:item update', only: ['edit', 'update', 'update_status']),
+            new Middleware('permission:item update', only: ['edit', 'update', 'recover']),
             new Middleware('permission:item delete', only: ['destroy', 'destroy_image']),
         ];
     }
@@ -26,51 +28,72 @@ class ItemCategoryController extends Controller implements HasMiddleware
      */
     public function index(Request $request)
     {
+        $perPage = $request->input('perPage', 10);
         $search = $request->input('search', '');
         $sortBy = $request->input('sortBy', 'id');
         $sortDirection = $request->input('sortDirection', 'desc');
-        $status = $request->input('status');
+        $trashed = $request->input('trashed'); // '', 'with', 'only'
+        $category_code = $request->input('category_code');
 
         $query = ItemCategory::query();
 
-        $query->with('created_by', 'updated_by');
 
-        if ($status) {
-            $query->where('status', $status);
+        $filteredCategory = ItemCategory::where('code', $category_code)->first();
+        $filteredParents = collect();
+        if ($filteredCategory) {
+            $filteredParents = $filteredCategory->allParents()->reverse()->values() ?: collect();
+
+            // $allChildren = $filteredCategory->allChildren() ?: collect();
+            // $childrenIds = $allChildren->pluck('id')->toArray();
+
+            $query->where('parent_id', $filteredCategory->id);
         }
+
+
+        // Filter by trashed (soft deletes)
+        if ($trashed === 'with') {
+            $query->withTrashed();
+        } elseif ($trashed === 'only') {
+            $query->onlyTrashed();
+        }
+
         $query->orderBy($sortBy, $sortDirection);
 
         if ($search) {
             $query->where(function ($sub_query) use ($search) {
                 return $sub_query->where('name', 'LIKE', "%{$search}%")
                     ->orWhere('name_kh', 'LIKE', "%{$search}%")
-                    ->orWhere('code', 'LIKE', "%{$search}%");
+                    ->orWhere('id', 'LIKE', "%{$search}%")
+                    ->orWhere('short_description', 'LIKE', "%{$search}%")
+                    ->orWhere('short_description_kh', 'LIKE', "%{$search}%");
             });
         }
 
-        $tableData = $query->paginate(perPage: 10)->onEachSide(1);
+        $query->orderBy('id', 'desc');
 
-        return Inertia::render('admin/item_categories/Index', [
+        $query->with('created_user', 'updated_user', 'parent');
+
+        $tableData = $query->paginate($perPage)->onEachSide(1);
+
+        // return $tableData;
+        // return $filteredCategory;
+        return Inertia::render('admin/ItemCategory/Index', [
             'tableData' => $tableData,
+            'parents' => ItemCategory::orderBy('order_index')->orderBy('id', 'desc')->get(),
+            'filteredCategory' => $filteredCategory,
+            'allParents' => $filteredParents,
         ]);
-    }
-
-    public function all_item_categories()
-    {
-        $query = ItemCategory::query();
-
-        $tableData = $query->where('status', 'active')->orderBy('id', 'desc')->get();
-
-        return response()->json($tableData);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-
-    public function create()
+    public function create(Request $request)
     {
-        //
+        return Inertia::render('admin/ItemCategory/Create', [
+            'parents' => ItemCategory::orderBy('order_index')->orderBy('id', 'desc')->get(),
+            'filtered_category_id' => $request->filtered_category_id,
+        ]);
     }
 
     /**
@@ -79,53 +102,64 @@ class ItemCategoryController extends Controller implements HasMiddleware
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'code' => 'required|string|max:255',
+            // 'parent_id' => 'nullable|string|max:255|exists:item_categories,id',
             'name' => 'required|string|max:255',
             'name_kh' => 'nullable|string|max:255',
-            'code' => 'required|string|max:255|unique:item_categories,code',
-            'short_description' => 'nullable|string|max:255',
-            'short_description_kh' => 'nullable|string|max:255',
-            'parent_code' => 'nullable|string|max:255',
-            'order_index' => 'nullable|numeric|max:255',
-            'status' => 'nullable|string|in:active,inactive',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
-            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
+            'order_index' => 'required|numeric',
+            'short_description' => 'nullable|string',
+            'short_description_kh' => 'nullable|string',
+            'image' => 'nullable|mimes:jpeg,png,jpg,gif,webp,svg|max:4096',
         ]);
+        // dd($request->all());
 
-        $validated['created_by'] = $request->user()->id;
-        $validated['updated_by'] = $request->user()->id;
 
-        $image_file = $request->file('image');
-        $banner_file = $request->file('banner');
-        unset($validated['image']);
-        unset($validated['banner']);
+        try {
+            // Add creator and updater
+            $validated['created_by'] = $request->user()->id;
+            $validated['updated_by'] = $request->user()->id;
 
-        foreach ($validated as $key => $value) {
-    if ($value === '') {
-        $validated[$key] = null;
+            // Handle image upload if present
+            if ($request->hasFile('image')) {
+                $imageName = ImageHelper::uploadAndResizeImageWebp(
+                    $request->file('image'),
+                    'assets/images/item_categories',
+                    600
+                );
+                $validated['image'] = $imageName;
+            }
+
+            // Create the Item Category
+            ItemCategory::create($validated);
+
+            return redirect()->back()->with('success', 'Item Category created successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors('Failed to create Item Category: ' . $e->getMessage());
+        }
     }
-}
 
 
-        if ($image_file) {
-            try {
-                $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/item_categories', 600);
-                $validated['image'] = $created_image_name;
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
-            }
-        }
-        if ($banner_file) {
-            try {
-                $created_image_name = ImageHelper::uploadAndResizeImageWebp($banner_file, 'assets/images/item_categories', 900);
-                $validated['banner'] = $created_image_name;
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
-            }
-        }
+    /**
+     * Display the specified resource.
+     */
+    public function show(ItemCategory $item_category)
+    {
+        return Inertia::render('admin/ItemCategory/Create', [
+            'editData' => $item_category,
+            'readOnly' => true,
+            'parents' => ItemCategory::where('id', '!=', $item_category->id)->orderBy('order_index')->orderBy('id', 'desc')->get(),
+        ]);
+    }
 
-        ItemCategory::create($validated);
-
-        return redirect()->back()->with('success', 'Category created successfully!');
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(ItemCategory $item_category)
+    {
+        return Inertia::render('admin/ItemCategory/Create', [
+            'editData' => $item_category,
+            'parents' => ItemCategory::where('id', '!=', $item_category->id)->orderBy('order_index')->orderBy('id', 'desc')->get(),
+        ]);
     }
 
     /**
@@ -134,73 +168,54 @@ class ItemCategoryController extends Controller implements HasMiddleware
     public function update(Request $request, ItemCategory $item_category)
     {
         $validated = $request->validate([
+            'code' => 'required|string|max:255',
+            // 'parent_id' => 'nullable|string|max:255|exists:item_categories,id',
             'name' => 'required|string|max:255',
             'name_kh' => 'nullable|string|max:255',
-            'code' => 'required|string|max:255|unique:item_categories,code,' . $item_category->id,
-            'short_description' => 'nullable|string|max:255',
-            'short_description_kh' => 'nullable|string|max:255',
-            'parent_code' => 'nullable|string|max:255',
-            'order_index' => 'nullable|numeric|max:255',
-            'status' => 'nullable|string|in:active,inactive',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
-            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
+            'order_index' => 'required|numeric',
+            'short_description' => 'nullable|string',
+            'short_description_kh' => 'nullable|string',
+            'image' => 'nullable|mimes:jpeg,png,jpg,gif,webp,svg|max:4096',
         ]);
 
-        $validated['updated_by'] = $request->user()->id;
+        try {
+            // track updater
+            $validated['updated_by'] = $request->user()->id;
 
-        $image_file = $request->file('image');
-        $banner_file = $request->file('banner');
-        unset($validated['image']);
-        unset($validated['banner']);
+            $imageFile = $request->file('image');
+            unset($validated['image']);
 
-        foreach ($validated as $key => $value) {
-    if ($value === '') {
-        $validated[$key] = null;
-    }
-}
+            // Handle image upload if present
+            if ($imageFile) {
+                $imageName = ImageHelper::uploadAndResizeImageWebp(
+                    $imageFile,
+                    'assets/images/item_categories',
+                    600
+                );
 
-        if ($image_file) {
-            try {
-                $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/item_categories', 600);
-                $validated['image'] = $created_image_name;
+                $validated['image'] = $imageName;
 
-                if ($item_category->image && $created_image_name) {
+                // delete old if replaced
+                if ($imageName && $item_category->image) {
                     ImageHelper::deleteImage($item_category->image, 'assets/images/item_categories');
                 }
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
             }
+
+            // Update
+            $item_category->update($validated);
+
+            return redirect()->back()->with('success', 'Item Category updated successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors('Failed to update Item Category: ' . $e->getMessage());
         }
-        if ($banner_file) {
-            try {
-                $created_image_name = ImageHelper::uploadAndResizeImageWebp($banner_file, 'assets/images/item_categories', 900);
-                $validated['banner'] = $created_image_name;
-
-                if ($item_category->banner && $created_image_name) {
-                    ImageHelper::deleteImage($item_category->banner, 'assets/images/item_categories');
-                }
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
-            }
-        }
-
-        $item_category->update($validated);
-
-
-        return redirect()->back()->with('success', 'Category updated successfully!');
     }
 
 
-    public function update_status(Request $request, ItemCategory $item_category)
+    public function recover($id)
     {
-        $request->validate([
-            'status' => 'required|string|in:active,inactive',
-        ]);
-        $item_category->update([
-            'status' => $request->status,
-        ]);
-
-        return redirect()->back()->with('success', 'Status updated successfully!');
+        $item_category = ItemCategory::withTrashed()->findOrFail($id); // 👈 include soft-deleted Item Category
+        $item_category->restore(); // restores deleted_at to null
+        return redirect()->back()->with('success', 'Item Category recovered successfully.');
     }
 
     /**
@@ -208,13 +223,11 @@ class ItemCategoryController extends Controller implements HasMiddleware
      */
     public function destroy(ItemCategory $item_category)
     {
-        if ($item_category->image) {
-            ImageHelper::deleteImage($item_category->image, 'assets/images/item_categories');
-        }
-        if ($item_category->banner) {
-            ImageHelper::deleteImage($item_category->banner, 'assets/images/item_categories');
-        }
-        $item_category->delete();
-        return redirect()->back()->with('success', 'Category deleted successfully.');
+        // if ($user->image) {
+        //     ImageHelper::deleteImage($user->image, 'assets/images/users');
+        // }
+
+        $item_category->delete(); // this will now just set deleted_at timestamp
+        return redirect()->back()->with('success', 'Item Category deleted successfully.');
     }
 }

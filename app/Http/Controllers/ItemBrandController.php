@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ImageHelper;
+use App\Http\Controllers\Controller;
 use App\Models\ItemBrand;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
-use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Inertia\Inertia;
 
 class ItemBrandController extends Controller implements HasMiddleware
 {
@@ -17,7 +18,7 @@ class ItemBrandController extends Controller implements HasMiddleware
         return [
             new Middleware('permission:item view', only: ['index', 'show']),
             new Middleware('permission:item create', only: ['create', 'store']),
-            new Middleware('permission:item update', only: ['edit', 'update', 'update_status']),
+            new Middleware('permission:item update', only: ['edit', 'update', 'recover']),
             new Middleware('permission:item delete', only: ['destroy', 'destroy_image']),
         ];
     }
@@ -26,26 +27,41 @@ class ItemBrandController extends Controller implements HasMiddleware
      */
     public function index(Request $request)
     {
+        $perPage = $request->input('perPage', 10);
         $search = $request->input('search', '');
         $sortBy = $request->input('sortBy', 'id');
         $sortDirection = $request->input('sortDirection', 'desc');
+        $trashed = $request->input('trashed'); // '', 'with', 'only'
 
         $query = ItemBrand::query();
 
-        if ($search) {
-            $query->where(function ($subQuery) use ($search) {
-                $subQuery->where('name', 'LIKE', "%{$search}%")
-                         ->orWhere('code', 'LIKE', "%{$search}%")
-                         ->orWhere('name_kh', 'LIKE', "%{$search}%");
-            });
-        }
 
+        // Filter by trashed (soft deletes)
+        if ($trashed === 'with') {
+            $query->withTrashed();
+        } elseif ($trashed === 'only') {
+            $query->onlyTrashed();
+        }
 
         $query->orderBy($sortBy, $sortDirection);
 
-        $tableData = $query->paginate(perPage: 10)->onEachSide(1);
+        if ($search) {
+            $query->where(function ($sub_query) use ($search) {
+                return $sub_query->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('name_kh', 'LIKE', "%{$search}%")
+                    ->orWhere('id', 'LIKE', "%{$search}%");
+            });
+        }
 
-        return Inertia::render('admin/item_brands/Index', [
+        $query->orderBy('id', 'desc');
+
+        $query->with('updated_user', 'created_user');
+
+        $tableData = $query->paginate($perPage)->onEachSide(1);
+
+        // return $tableData;
+        // return $filteredBrand;
+        return Inertia::render('admin/ItemBrand/Index', [
             'tableData' => $tableData,
         ]);
     }
@@ -53,9 +69,9 @@ class ItemBrandController extends Controller implements HasMiddleware
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        return Inertia::render('admin/item_brands/Create');
+        return Inertia::render('admin/ItemBrand/Create', []);
     }
 
     /**
@@ -64,46 +80,48 @@ class ItemBrandController extends Controller implements HasMiddleware
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'code' => 'required|string|max:255|unique:item_brands,code',
-            'name' => 'nullable|string|max:255',
+            'code' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'name_kh' => 'nullable|string|max:255',
-            'order_index' => 'nullable|integer',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'order_index' => 'required|numeric',
+            'image' => 'nullable|mimes:jpeg,png,jpg,gif,webp,svg|max:4096',
         ]);
+        // dd($request->all());
 
-        $validated['created_by'] = $request->user()->id;
-        $validated['updated_by'] = $request->user()->id;
 
-        $image_file = $request->file('image');
-        unset($validated['image']);
+        try {
+            // Add creator and updater
+            $validated['created_by'] = $request->user()->id;
+            $validated['updated_by'] = $request->user()->id;
 
-        foreach ($validated as $key => $value) {
-    if ($value === '') {
-        $validated[$key] = null;
-    }
-}
-
-        if ($image_file) {
-            try {
-                $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/item_brands', 600);
-                $validated['image'] = $created_image_name;
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
+            // Handle image upload if present
+            if ($request->hasFile('image')) {
+                $imageName = ImageHelper::uploadAndResizeImageWebp(
+                    $request->file('image'),
+                    'assets/images/item_brands',
+                    600
+                );
+                $validated['image'] = $imageName;
             }
+
+            // Create the Item Brand
+            ItemBrand::create($validated);
+
+            return redirect()->back()->with('success', 'Item Brand created successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors('Failed to create Item Brand: ' . $e->getMessage());
         }
-
-        ItemBrand::create($validated);
-
-        return redirect()->route('item_brands.index')->with('success', 'Item Brand created successfully!');
     }
+
 
     /**
      * Display the specified resource.
      */
     public function show(ItemBrand $item_brand)
     {
-        return Inertia::render('admin/item_brands/Show', [
-            'itemBrand' => $item_brand
+        return Inertia::render('admin/ItemBrand/Create', [
+            'editData' => $item_brand,
+            'readOnly' => true,
         ]);
     }
 
@@ -112,8 +130,8 @@ class ItemBrandController extends Controller implements HasMiddleware
      */
     public function edit(ItemBrand $item_brand)
     {
-        return Inertia::render('admin/item_brands/Edit', [
-            'itemBrand' => $item_brand
+        return Inertia::render('admin/ItemBrand/Create', [
+            'editData' => $item_brand,
         ]);
     }
 
@@ -123,51 +141,51 @@ class ItemBrandController extends Controller implements HasMiddleware
     public function update(Request $request, ItemBrand $item_brand)
     {
         $validated = $request->validate([
-            'code' => 'required|string|max:255|unique:item_brands,code,' . $item_brand->id,
+            'code' => 'required|string|max:255',
             'name' => 'required|string|max:255',
             'name_kh' => 'nullable|string|max:255',
-            'order_index' => 'nullable|integer',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'order_index' => 'required|numeric',
+            'image' => 'nullable|mimes:jpeg,png,jpg,gif,webp,svg|max:4096',
         ]);
-        $validated['updated_by'] = $request->user()->id;
 
-        $image_file = $request->file('image');
-        unset($validated['image']);
+        try {
+            // track updater
+            $validated['updated_by'] = $request->user()->id;
 
-        foreach ($validated as $key => $value) {
-    if ($value === '') {
-        $validated[$key] = null;
-    }
-}
+            $imageFile = $request->file('image');
+            unset($validated['image']);
 
-        if ($image_file) {
-            try {
-                $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/item_brands', 600);
-                $validated['image'] = $created_image_name;
+            // Handle image upload if present
+            if ($imageFile) {
+                $imageName = ImageHelper::uploadAndResizeImageWebp(
+                    $imageFile,
+                    'assets/images/item_brands',
+                    600
+                );
 
-                if ($item_brand->image && $created_image_name) {
+                $validated['image'] = $imageName;
+
+                // delete old if replaced
+                if ($imageName && $item_brand->image) {
                     ImageHelper::deleteImage($item_brand->image, 'assets/images/item_brands');
                 }
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
             }
+
+            // Update
+            $item_brand->update($validated);
+
+            return redirect()->back()->with('success', 'Item Brand updated successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors('Failed to update Item Brand: ' . $e->getMessage());
         }
-
-        $item_brand->update($validated);
-
-        return redirect()->route('item_brands.index')->with('success', 'Item Brand updated successfully!');
     }
 
-    public function update_status(Request $request, ItemBrand $item_brand)
-    {
-        $request->validate([
-            'status' => 'required|string|in:active,inactive',
-        ]);
-        $item_brand->update([
-            'status' => $request->status,
-        ]);
 
-        return redirect()->back()->with('success', 'Status updated successfully!');
+    public function recover($id)
+    {
+        $item_brand = ItemBrand::withTrashed()->findOrFail($id); // 👈 include soft-deleted Item Brand
+        $item_brand->restore(); // restores deleted_at to null
+        return redirect()->back()->with('success', 'Item Brand recovered successfully.');
     }
 
     /**
@@ -175,13 +193,11 @@ class ItemBrandController extends Controller implements HasMiddleware
      */
     public function destroy(ItemBrand $item_brand)
     {
-        // Delete image if exists
-        if ($item_brand->image) {
-            ImageHelper::deleteImage($item_brand->image, 'assets/images/item_brands');
-        }
+        // if ($user->image) {
+        //     ImageHelper::deleteImage($user->image, 'assets/images/users');
+        // }
 
-        $item_brand->delete();
-
-        return redirect()->route('item_brands.index')->with('success', 'Item Brand deleted successfully!');//
+        $item_brand->delete(); // this will now just set deleted_at timestamp
+        return redirect()->back()->with('success', 'Item Brand deleted successfully.');
     }
 }

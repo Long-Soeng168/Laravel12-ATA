@@ -10,11 +10,23 @@ class ItemCategory extends Model
     /** @use HasFactory<\Database\Factories\ItemCategoryFactory> */
     use HasFactory;
     protected $guarded = [];
+
+    // Old way declare name
     public function created_by()
     {
         return $this->belongsTo(User::class, 'created_by', 'id');
     }
     public function updated_by()
+    {
+        return $this->belongsTo(User::class, 'updated_by', 'id');
+    }
+    // New way declare name
+    public function created_user()
+    {
+        return $this->belongsTo(User::class, 'created_by', 'id');
+    }
+
+    public function updated_user()
     {
         return $this->belongsTo(User::class, 'updated_by', 'id');
     }

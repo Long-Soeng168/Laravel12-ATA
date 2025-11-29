@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\ImageHelper;
 use App\Models\Garage;
 use App\Models\ItemBrand;
+use App\Models\Province;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -47,6 +48,7 @@ class GarageController extends Controller implements HasMiddleware
             $query->where(function ($sub_query) use ($search) {
                 return $sub_query->where('name', 'LIKE', "%{$search}%")
                     ->orWhere('id', 'LIKE', "%{$search}%")
+                    ->orWhere('phone', 'LIKE', "%{$search}%")
                     ->orWhere('address', 'LIKE', "%{$search}%")
                     ->orWhere('short_description', 'LIKE', "%{$search}%");
             });
@@ -74,49 +76,60 @@ class GarageController extends Controller implements HasMiddleware
 
     public function show(Garage $garage)
     {
-        $all_users = User::orderBy('id', 'desc')
+        $owners = User::orderBy('id', 'desc')
             ->where('garage_id', null)
             ->get();
-        $all_brands = ItemBrand::orderBy('name')
+        $brands = ItemBrand::orderBy('name')
             ->where('status', 'active')
             ->get();
-        // return ($all_users);
+
+        // return ($owners);
         // return $garage->load('owner');
         return Inertia::render('admin/garages/Create', [
             'editData' => $garage->load('owner'),
-            'all_users' => $all_users,
-            'all_brands' => $all_brands,
+            'owners' => $owners,
+            'brands' => $brands,
             'readOnly' => true,
+            'provinces' => Province::orderBy('order_index')
+                ->orderBy('name')
+                ->get(),
         ]);
     }
     public function edit(Garage $garage)
     {
-        $all_users = User::orderBy('id', 'desc')
+        $owners = User::orderBy('id', 'desc')
             ->where('garage_id', null)
+            ->orWhere('garage_id', $garage->id)
             ->get();
-        $all_brands = ItemBrand::orderBy('name')
+        $brands = ItemBrand::orderBy('name')
             ->where('status', 'active')
             ->get();
-        // return ($all_users);
+        // return ($owners);
         return Inertia::render('admin/garages/Create', [
             'editData' => $garage->load('owner'),
-            'all_users' => $all_users,
-            'all_brands' => $all_brands,
+            'owners' => $owners,
+            'brands' => $brands,
+            'provinces' => Province::orderBy('order_index')
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 
     public function create()
     {
-        $all_users = User::orderBy('id', 'desc')
+        $owners = User::orderBy('id', 'desc')
             ->where('garage_id', null)
             ->get();
-        $all_brands = ItemBrand::orderBy('name')
+        $brands = ItemBrand::orderBy('name')
             ->where('status', 'active')
             ->get();
-        // return ($all_users);
+        // return ($owners);
         return Inertia::render('admin/garages/Create', [
-            'all_users' => $all_users,
-            'all_brands' => $all_brands,
+            'owners' => $owners,
+            'brands' => $brands,
+            'provinces' => Province::orderBy('order_index')
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 
@@ -134,6 +147,7 @@ class GarageController extends Controller implements HasMiddleware
             'short_description' => 'nullable|string|max:500',
             'short_description_kh' => 'nullable|string|max:500',
             'brand_code' => 'nullable|string|max:255',
+            'province_code' => 'nullable|string|max:255',
             'order_index' => 'nullable|numeric',
             'status' => 'nullable|string|in:pending,approved,suspended,rejected',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
@@ -216,6 +230,7 @@ class GarageController extends Controller implements HasMiddleware
             'short_description_kh' => 'nullable|string|max:500',
             'parent_code' => 'nullable|string|max:255',
             'brand_code' => 'nullable|string|max:255',
+            'province_code' => 'nullable|string|max:255',
             'order_index' => 'nullable|numeric',
             'status' => 'nullable|string|in:pending,approved,suspended,rejected',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',

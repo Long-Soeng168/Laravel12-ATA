@@ -34,6 +34,7 @@ use App\Http\Controllers\PostCategoryController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\PostViewController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProvinceController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\TeamCategoryController;
@@ -149,23 +150,21 @@ Route::middleware('auth')->group(function () {
     Route::post('admin/playlist_purchases/{playlist_purchase}/update', [PlaylistPurchaseController::class, 'update']);
     Route::post('admin/playlist_purchases/{playlist_purchase}/update_status', [PlaylistPurchaseController::class, 'update_status']);
 
+    Route::resource('admin/provinces', ProvinceController::class);
+    Route::post('admin/provinces/{province}/update', [ProvinceController::class, 'update']);
+
     // Item Brands Route
-    Route::resource('admin/item_brands', ItemBrandController::class);
-    Route::post('admin/item_brands/{item_brand}/update', [ItemBrandController::class, 'update']);
-    Route::post('admin/item_brands/{item_brand}/update_status', [ItemBrandController::class, 'update_status']);
+    Route::resource('admin/item-brands', ItemBrandController::class);
+    Route::post('admin/item-brands/{item_brand}/update', [ItemBrandController::class, 'update']);
     // Item Model Route
-    Route::resource('admin/item_models', ItemModelController::class);
-    Route::post('admin/item_models/{item_model}/update', [ItemModelController::class, 'update']);
-    Route::post('admin/item_models/{item_model}/update_status', [ItemModelController::class, 'update_status']);
+    Route::resource('admin/item-models', ItemModelController::class);
+    Route::post('admin/item-models/{item_model}/update', [ItemModelController::class, 'update']);
     // Item Body Type Route
-    Route::resource('admin/item_body_types', ItemBodyTypeController::class);
-    Route::post('admin/item_body_types/{item_body_type}/update', [ItemBodyTypeController::class, 'update']);
-    Route::post('admin/item_body_types/{item_body_type}/update_status', [ItemBodyTypeController::class, 'update_status']);
+    Route::resource('admin/item-body-types', ItemBodyTypeController::class);
+    Route::post('admin/item-body-types/{item_body_type}/update', [ItemBodyTypeController::class, 'update']);
     // Item Category Route
-    Route::resource('admin/item_categories', ItemCategoryController::class);
-    Route::post('admin/item_categories/{item_category}/update', [ItemCategoryController::class, 'update']);
-    Route::get('admin/all_item_categories', [ItemCategoryController::class, 'all_item_categories']);
-    Route::post('admin/item_categories/{item_category}/update_status', [ItemCategoryController::class, 'update_status']);
+    Route::resource('admin/item-categories', ItemCategoryController::class);
+    Route::post('admin/item-categories/{item_category}/update', [ItemCategoryController::class, 'update']);
 
     // Shop Route
     Route::resource('admin/shops', ShopController::class);
