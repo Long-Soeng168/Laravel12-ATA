@@ -44,7 +44,7 @@ class GarageController extends Controller
         $query->orderBy('order_index');
         $query->orderBy('id', 'desc');
 
-        $garages = $query->paginate(10);
+        $garages = $query->paginate(200);
 
         // Map to old key format
         $convertedGarages = $garages->getCollection()->map(function ($garage) {
