@@ -66,6 +66,7 @@
     "Body Type": "ប្រភេទតួរថយន្ត",
     "Shops": "ហាង",
     "DTC": "កូដកំហូច(DTC)",
+    "Garage": "យានដ្ឋាន",
     "Garages": "យានដ្ឋាន",
     "Videos": "វីដេអូ",
 
@@ -212,5 +213,17 @@
     "Select Access Type": "ជ្រើសរបៀបចូលប្រើ",
     "Select whether this video is free or requires a subscription": "ជ្រើសថាតើវីដេអូនេះឥតគិតថ្លៃ ឬទាមទារការជាវ",
     "Requires Subscription": "ទាមទារការជាវ",
-    "Free": "ឥតគិតថ្លៃ"
+    "Free": "ឥតគិតថ្លៃ",
+
+    "Owner": "ម្ចាស់",
+    "Garage Name": "ឈ្មោះយានដ្ឋាន",
+    "Phone": "លេខទូរស័ព្ទ",
+    "Brand Expert": "ម៉ាកជំនាញ",
+    "Select Brand Expert...": "ជ្រើសម៉ាកជំនាញ...",
+    "Garage Status": "ស្ថានភាព",
+    "Province": "ខេត្ត",
+    "Select Province...": "ជ្រើសខេត្ត...",
+    "Pick a location": "ជ្រើសទីតាំង",
+
+    "en": "kh"
 }
