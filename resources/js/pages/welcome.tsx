@@ -3,7 +3,6 @@ import MyBlog from '@/components/my-blog';
 import MyMenu from '@/components/my-menu';
 import { MyProject } from '@/components/my-project';
 import { MySearch } from '@/components/my-search';
-import MySlide from '@/components/my-slide';
 import { MyTestimonial } from '@/components/my-testimonial';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -139,7 +138,7 @@ const welcome = () => {
             {/*End Navbar */}
 
             {/* Slide */}
-            <MySlide />
+            {/* <MySlide /> */}
             {/*End Slide */}
 
             {/* About */}
