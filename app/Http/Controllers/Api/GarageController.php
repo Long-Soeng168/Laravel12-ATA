@@ -44,7 +44,7 @@ class GarageController extends Controller
         $query->orderBy('order_index');
         $query->orderBy('id', 'desc');
 
-        $garages = $query->paginate(200);
+        $garages = $query->paginate(500);
 
         // Map to old key format
         $convertedGarages = $garages->getCollection()->map(function ($garage) {
@@ -192,7 +192,7 @@ class GarageController extends Controller
                 'success' => true,
                 'message' => 'Garage created successfully',
                 'garage' => $garage->load('expert'),
-            ], 200);
+            ], 5);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -301,7 +301,7 @@ class GarageController extends Controller
                 'longitude' => $request->input('longitude'),
                 'logo' => $logoName,
                 'banner' => $bannerName,
-                'status' => $garage->status !== 'approved' ? 'pending': 'approved',
+                'status' => $garage->status !== 'approved' ? 'pending' : 'approved',
                 'brand_code' => $brand->code ?? null,
                 'updated_by' => $request->user()->id,
             ]);
@@ -310,7 +310,7 @@ class GarageController extends Controller
                 'success' => true,
                 'message' => 'Garage updated successfully',
                 'garage' => $garage->load('expert'),
-            ], 200);
+            ], 5);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
