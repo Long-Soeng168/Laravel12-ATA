@@ -106,7 +106,8 @@ const ProvinceFilter = () => {
                                                     )}
                                                 </span>
                                                 <span className="flex flex-1 items-center justify-between">
-                                                    {province?.name} <span className="text-xs">({province?.garages_count})</span>
+                                                    {province?.name}
+                                                    {/* <span className="text-xs">({province?.garages_count})</span> */}
                                                 </span>
                                                 <Check className={cn('ml-auto', valueProvince === province.code ? 'opacity-100' : 'opacity-0')} />
                                             </CommandItem>
