@@ -38,14 +38,14 @@ export default function CarouselWithThumbs({ images }: { images: any }) {
                 <CarouselContent>
                     {images?.map((item, index) => (
                         <CarouselItem key={index}>
-                            <Card className="p-0 overflow-hidden">
-                                <CardContent className="flex aspect-square overflow-hidden items-center justify-center p-0">
+                            <Card className="overflow-hidden p-0">
+                                <CardContent className="flex aspect-square items-center justify-center overflow-hidden p-0">
                                     <img
                                         onClick={() => {
                                             setCurrentIndex(index);
                                             setOpen(true);
                                         }}
-                                        src={`/assets/images/items/thumb/${item?.image}`}
+                                        src={`/assets/images/items/${item?.image}`}
                                         className="h-full w-full object-cover"
                                         alt=""
                                     />
@@ -63,9 +63,9 @@ export default function CarouselWithThumbs({ images }: { images: any }) {
                             className={cn('basis-1/5 cursor-pointer', current === index + 1 ? 'opacity-100' : 'opacity-50')}
                             onClick={() => handleThumbClick(index)}
                         >
-                            <Card className="p-0 overflow-hidden">
-                                <CardContent className="flex aspect-square overflow-hidden items-center justify-center p-0">
-                                    <img src={`/assets/images/items/thumb/${item?.image}`} className="h-full w-full object-contain" alt="" />
+                            <Card className="overflow-hidden p-0">
+                                <CardContent className="flex aspect-square items-center justify-center overflow-hidden p-0">
+                                    <img src={`/assets/images/items/${item?.image}`} className="h-full w-full object-contain" alt="" />
                                 </CardContent>
                             </Card>
                         </CarouselItem>
