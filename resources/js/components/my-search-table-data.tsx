@@ -35,7 +35,7 @@ export function MySearchTableData({ className }: { className?: string }) {
                     setSearch(e.target.value);
                     handleSearch(e.target.value);
                 }}
-                className="ml-0.5 min-w-xs rounded-sm border-none shadow-none"
+                className="ml-0.5 md:min-w-xs rounded-sm border-none shadow-none"
                 placeholder={`${t('Search')}...`}
             />
             <Button variant="outline" type="submit" onClick={() => handleSearch(search)}>

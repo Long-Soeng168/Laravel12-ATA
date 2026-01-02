@@ -24,8 +24,8 @@ const MyHeader = () => {
 
     const navItems2 = [
         { label: t('Home'), href: '/' },
-        // { label: t('Shops'), href: '/shops' },
-        { label: t('Garages'), href: '/garages_map' },
+        { label: t('Shops'), href: '/shops' },
+        { label: t('Garages'), href: '/garages' },
         // { label: t('Privacy'), href: '/privacy' },
         { label: t('About'), href: '/about-us' },
         { label: t('Contact'), href: '/contact-us' },
@@ -119,13 +119,13 @@ const MyHeader = () => {
                         </div>
 
                         {/* Desktop Nav */}
-                        <div className="hidden flex-1 lg:flex">
+                        <div className="hidden flex-1 lg:flex pl-2">
                             <ul className="flex items-center gap-2 font-semibold">
-                                {item_categories?.length > 0 && (
+                                {/* {item_categories?.length > 0 && (
                                     <li>
                                         <MyCategoriesNav />
                                     </li>
-                                )}
+                                )} */}
                                 {navItems1.map(renderNavLink)}
                                 <li className="border-primary/5 bg-primary/50 h-6 border" />
                                 {navItems2.map(renderNavLink)}

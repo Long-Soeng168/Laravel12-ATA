@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', [NokorTechController::class, 'index']);
-Route::get('/shops', [NokorTechController::class, 'shops']);
 Route::get('/about-us', [NokorTechController::class, 'about']);
 Route::get('/download-app', [NokorTechController::class, 'download_app']);
 Route::get('/privacy', [NokorTechController::class, 'privacy']);
@@ -27,7 +26,11 @@ Route::get('/blogs/{id}', [NokorTechController::class, 'blog_show']);
 Route::get('/products', [NokorTechController::class, 'products']);
 Route::get('/products/{id}', [NokorTechController::class, 'product_show']);
 
+Route::get('/shops', [NokorTechController::class, 'shops']);
 Route::get('/shops/{id}', [NokorTechController::class, 'shop_show']);
+
+Route::get('/garages', [NokorTechController::class, 'garages']);
+Route::get('/garages/{id}', [NokorTechController::class, 'garage_show']);
 
 Route::get('/shopping-cart', [NokorTechController::class, 'shopping_cart']);
 Route::middleware('auth')->group(function () {

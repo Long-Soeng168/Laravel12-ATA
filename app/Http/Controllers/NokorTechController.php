@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\ApplicationInfo;
 use App\Models\Banner;
+use App\Models\Garage;
+use App\Models\GaragePost;
 use App\Models\Item;
 use App\Models\ItemBodyType;
 use App\Models\ItemBrand;
@@ -13,6 +15,7 @@ use App\Models\Link;
 use App\Models\Page;
 use App\Models\Post;
 use App\Models\PostCategory;
+use App\Models\Province;
 use App\Models\Shop;
 use App\Models\VideoPlayList;
 use Illuminate\Http\Request;
@@ -28,66 +31,78 @@ class NokorTechController extends Controller
         $posts = Post::where('status', 'active')->with('images', 'category')->orderBy('id', 'desc')->limit(3)->get();
 
 
-        $newArrivals = Item::with('images', 'shop')->where('status', 'active')->orderBy('id', 'desc')->take(12)->get();
-        $bodyTypes = ItemBodyType::orderBy('order_index')->orderBy('name')
-            ->orderBy('name')
+        // $newArrivals = Item::with('images', 'shop')->where('status', 'active')->orderBy('id', 'desc')->take(12)->get();
+        // $bodyTypes = ItemBodyType::orderBy('order_index')->orderBy('name')
+        //     ->orderBy('name')
+        //     ->where('status', 'active')
+        //     ->get();
+
+        // $brandsWithItems = ItemBrand::with([
+        //     'items' => function ($query) {
+        //         $query->with('images', 'shop')
+        //             ->where('items.status', 'active') // Specify 'items' table for status
+        //             ->orderBy('id', 'desc')
+        //             ->take(12); // Limit to 12 items
+        //     },
+        // ])
+        //     ->orderBy('order_index')->orderBy('name')
+        //     ->where('item_brands.status', 'active') // Specify 'item_categories' table for status
+        //     ->get();
+
+
+        // $categoriesWithItems = ItemCategory::with([
+        //     'items' => function ($query) {
+        //         $query->with('images', 'shop')
+        //             ->where('items.status', 'active') // Specify 'items' table for status
+        //             ->orderBy('id', 'desc')
+        //             ->take(12); // Limit to 12 items
+        //     },
+        //     'children_items' => function ($query) {
+        //         $query->with('images',  'shop')
+        //             ->where('items.status', 'active') // Specify 'items' table for status
+        //             ->orderBy('id', 'desc')
+        //             ->take(12); // Limit to 12 child items
+        //     }
+        // ])
+        //     ->orderBy('order_index')->orderBy('name')
+        //     ->where('item_categories.status', 'active') // Specify 'item_categories' table for status
+        //     ->whereNull('parent_code') // Only main categories (no parent)
+        //     ->get();
+
+        // $categoriesWithItems->each(function ($category) {
+        //     $category->all_items = $category->items->merge($category->children_items)
+        //         ->sortByDesc('id') // Sort by item ID
+        //         ->take(12) // Limit to 12 items
+        //         ->values(); // Reset the keys to be sequential
+
+        //     unset($category->children_items);
+        //     unset($category->items);
+        // });
+
+
+        $products = Item::with('images', 'shop')
             ->where('status', 'active')
+            ->inRandomOrder()
+            ->take(12)
             ->get();
 
-        $brandsWithItems = ItemBrand::with([
-            'items' => function ($query) {
-                $query->with('images', 'shop')
-                    ->where('items.status', 'active') // Specify 'items' table for status
-                    ->orderBy('id', 'desc')
-                    ->take(12); // Limit to 12 items
-            },
-        ])
-            ->orderBy('order_index')->orderBy('name')
-            ->where('item_brands.status', 'active') // Specify 'item_categories' table for status
-            ->get();
+        $newArrivalsProducts = Item::with('images', 'shop')->where('status', 'active')->orderBy('id', 'desc')->take(12)->get();
 
 
-        $categoriesWithItems = ItemCategory::with([
-            'items' => function ($query) {
-                $query->with('images', 'shop')
-                    ->where('items.status', 'active') // Specify 'items' table for status
-                    ->orderBy('id', 'desc')
-                    ->take(12); // Limit to 12 items
-            },
-            'children_items' => function ($query) {
-                $query->with('images',  'shop')
-                    ->where('items.status', 'active') // Specify 'items' table for status
-                    ->orderBy('id', 'desc')
-                    ->take(12); // Limit to 12 child items
-            }
-        ])
-            ->orderBy('order_index')->orderBy('name')
-            ->where('item_categories.status', 'active') // Specify 'item_categories' table for status
-            ->whereNull('parent_code') // Only main categories (no parent)
-            ->get();
-
-        // Merge 'items' and 'children_items'
-        $categoriesWithItems->each(function ($category) {
-            // Merge and flatten the collections, then reset the keys
-            $category->all_items = $category->items->merge($category->children_items)
-                ->sortByDesc('id') // Sort by item ID
-                ->take(12) // Limit to 12 items
-                ->values(); // Reset the keys to be sequential
-
-            // Optionally, remove the individual 'children_items' and 'items' keys
-            unset($category->children_items);
-            unset($category->items);
-        });
-
+        $shops = Shop::orderBy('order_index')->orderBy('id', 'desc')->limit(15)->get();
+        // return $shops;
         // return $brandsWithItems;
         return Inertia::render("nokor-tech/Index", [
             'topBanners' => $topBanners,
             'middleBanners' => $middleBanners,
             'posts' => $posts,
-            'newArrivals' => $newArrivals,
-            'categoriesWithItems' => $categoriesWithItems,
-            'brandsWithItems' => $brandsWithItems,
-            'bodyTypes' => $bodyTypes,
+            'products' => $products,
+            'newArrivalsProducts' => $newArrivalsProducts,
+            // 'newArrivals' => $newArrivals,
+            // 'categoriesWithItems' => $categoriesWithItems,
+            // 'brandsWithItems' => $brandsWithItems,
+            // 'bodyTypes' => $bodyTypes,
+            'shops' => $shops,
         ]);
     }
     public function shops(Request $request)
@@ -95,7 +110,8 @@ class NokorTechController extends Controller
         $search = $request->input('search', '');
         $perPage = $request->input('perPage', 24);
         $sortBy = $request->input('sortBy', 'order_index');
-        $sortDirection = $request->input('sortDirection', 'desc');
+        $sortDirection = $request->input('sortDirection', 'asc');
+        $categoryCode = $request->input('category_code');
 
         $query = Shop::query();
         $query->with('created_by', 'updated_by');
@@ -107,15 +123,86 @@ class NokorTechController extends Controller
                     ->orWhere('address', 'LIKE', "%{$search}%");
             });
         }
+        if ($categoryCode) {
+            $query->where('category_code', $categoryCode);
+        }
 
         $query->orderBy($sortBy, $sortDirection);
         $query->orderBy('id', 'desc');
         $query->orderBy('name');
-        $query->where('status', 'active');
+        $query->where('status', 'approved');
 
         $tableData = $query->paginate(perPage: $perPage)->onEachSide(1);
 
+        // return $tableData;
         return Inertia::render('nokor-tech/shops/Index', [
+            'tableData' => $tableData,
+        ]);
+    }
+    public function garages(Request $request)
+    {
+        $search = $request->input('search', '');
+        $perPage = $request->input('perPage', 24);
+        $sortBy = $request->input('sortBy', 'order_index');
+        $sortDirection = $request->input('sortDirection', 'asc');
+        $province_code = $request->input('province_code');
+
+        $query = Garage::query();
+        $query->with('created_by', 'updated_by');
+
+        if ($search) {
+            $query->where(function ($sub_query) use ($search) {
+                return $sub_query->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('phone', 'LIKE', "%{$search}%")
+                    ->orWhere('address', 'LIKE', "%{$search}%");
+            });
+        }
+        if ($province_code) {
+            $query->where('province_code', $province_code);
+        }
+
+        $query->orderBy($sortBy, $sortDirection);
+        $query->orderBy('id', 'desc');
+        $query->orderBy('name');
+        $query->where('status', 'approved');
+
+        $tableData = $query->paginate(perPage: $perPage)->onEachSide(1);
+
+        $provinces = Province::orderBy('order_index')->withCount('garages')->orderBy('name')->get();
+
+        // return $provinces;
+        return Inertia::render('nokor-tech/garages/Index', [
+            'tableData' => $tableData,
+            'provinces' => $provinces,
+        ]);
+    }
+
+    public function garage_show($id, Request $request)
+    {
+        $search = $request->input('search', '');
+        $perPage = $request->input('perPage', 25);
+        $sortBy = $request->input('sortBy', 'id');
+        $sortDirection = $request->input('sortDirection', 'desc');
+
+        $query = GaragePost::query();
+        $query->with('created_by', 'updated_by', 'images', 'garage');
+
+
+        if ($search) {
+            $query->where(function ($sub_query) use ($search) {
+                return $sub_query->where('short_description', 'LIKE', "%{$search}%")
+                    ->orWhere('short_description_kh', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $query->orderBy($sortBy, $sortDirection);
+        $query->where('status', 'active');
+        $query->where('garage_id', $id);
+
+        $tableData = $query->paginate(perPage: $perPage)->onEachSide(1);
+
+        return Inertia::render('nokor-tech/garages/Show', [
+            'garage' => Garage::findOrFail($id)->load('province'),
             'tableData' => $tableData,
         ]);
     }

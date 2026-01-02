@@ -2,81 +2,75 @@ import { Carousel, CarouselApi, CarouselContent, CarouselItem, CarouselNext, Car
 import Autoplay from 'embla-carousel-autoplay';
 import React from 'react';
 
-// interface SlideItem {
-//     id: number;
-//     title: string;
-//     link: string | null;
-//     image: string;
-// }
+interface SlideItem {
+    id: number;
+    title: string;
+    link?: string | null;
+    image: string;
+}
 
 interface MySlideProps {
-    slides: any;
+    slides: SlideItem[];
     path?: string;
 }
 
-const MySlide: React.FC<MySlideProps> = ({ slides, path }) => {
-    const [api, setApi] = React.useState<CarouselApi>();
+const MySlide: React.FC<MySlideProps> = ({ slides, path = '' }) => {
+    const [api, setApi] = React.useState<CarouselApi | null>(null);
     const [current, setCurrent] = React.useState(0);
     const [count, setCount] = React.useState(0);
 
     React.useEffect(() => {
-        if (!api) {
-            return;
-        }
+        if (!api) return;
 
+        const updateCurrent = () => setCurrent(api.selectedScrollSnap());
+        updateCurrent();
         setCount(api.scrollSnapList().length);
-        setCurrent(api.selectedScrollSnap() + 1);
 
-        api.on('select', () => {
-            setCurrent(api.selectedScrollSnap() + 1);
-        });
+        api.on('select', updateCurrent);
+
+        return () => {
+            api.off('select', updateCurrent);
+        };
     }, [api]);
+
     return (
-        <Carousel
-            plugins={[
-                Autoplay({
-                    delay: 3000,
-                }),
-            ]}
-            opts={{ align: 'start', loop: false }}
-            setApi={setApi}
-            className="relative px-2"
-        >
+        <Carousel plugins={[Autoplay({ delay: 4000 })]} opts={{ align: 'start', loop: true }} setApi={setApi} className="relative">
             <CarouselContent>
                 {slides.map((slide) => (
                     <CarouselItem key={slide.id}>
                         <div>
                             {slide.link ? (
                                 <a href={slide.link}>
-                                    <img
-                                        src={`${path}${slide.image}`}
-                                        alt={slide.title}
-                                        className="h-auto max-h-[600px] w-full object-cover"
-                                        // width={900}
-                                        // height={500}
-                                    />
+                                    <img src={`${path}${slide.image}`} alt={slide.title} className="h-auto max-h-[600px] w-full object-cover" />
                                 </a>
                             ) : (
-                                <img
-                                    src={`${path}${slide.image}`}
-                                    alt={slide.title}
-                                    className="h-auto max-h-[600px] w-full object-cover"
-                                    // width={900}
-                                    // height={500}
-                                />
+                                <img src={`${path}${slide.image}`} alt={slide.title} className="h-auto max-h-[600px] w-full object-cover" />
                             )}
                         </div>
                     </CarouselItem>
                 ))}
             </CarouselContent>
-            <div className="absolute bottom-0 left-1/2 flex -translate-x-1/2 items-center justify-center gap-2 py-2">
-                {Array.from({ length: count }).map((_, index) => (
-                    <div key={index} className={`size-3 rounded-full ${current === index + 1 ? 'bg-primary' : 'bg-white'}`}></div>
-                ))}
-            </div>
 
-            <CarouselPrevious className="absolute top-1/2 -left-2 z-10 -translate-y-1/2 transform" />
-            <CarouselNext className="absolute top-1/2 -right-2 z-10 -translate-y-1/2 transform" />
+            {/* Pagination Dots */}
+
+            {/* Navigation Arrows */}
+            <div className="flex items-center justify-between gap-2 pt-2">
+                <div>
+                    <div className="flex transform items-center gap-2 px-2">
+                        {Array.from({ length: count }).map((_, index) => (
+                            <button
+                                key={index}
+                                onClick={() => api?.scrollTo(index)}
+                                className={`size-3 rounded-full transition-colors ${current === index ? 'bg-primary' : 'bg-primary/30'}`}
+                            />
+                        ))}
+                    </div>
+                </div>
+                <div className="space-x-2">
+                    <CarouselPrevious className="bg-background/50 hover:bg-background static top-0 left-4 z-10 h-10 w-10 -translate-y-0 transform rounded-md border border-neutral-300 shadow-md backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-lg" />
+                    <CarouselNext className="bg-background/50 hover:bg-background static top-0 right-4 z-10 h-10 w-10 -translate-y-0 transform rounded-md border border-neutral-300 shadow-md backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-lg" />
+                </div>
+            </div>
         </Carousel>
     );
 };

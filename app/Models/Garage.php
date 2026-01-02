@@ -26,4 +26,8 @@ class Garage extends Model
     {
         return $this->belongsTo(ItemBrand::class, 'brand_code', 'code');
     }
+    public function province()
+    {
+        return $this->belongsTo(Province::class, 'province_code', 'code');
+    }
 }

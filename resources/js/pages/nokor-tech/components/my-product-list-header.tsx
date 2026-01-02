@@ -1,7 +1,9 @@
+import useTranslation from '@/hooks/use-translation';
 import { Link } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
 
 const MyProductListHeader = ({ title, image, link = '#' }: { title: string; image?: string; link?: string }) => {
+    const { t, currentLocale } = useTranslation();
     return (
         <div className="border-primary mx-2 mb-2 flex items-center justify-between border-b pt-6">
             <div className="bg-primary flex items-center gap-2 rounded-md rounded-bl-none p-1">
@@ -11,11 +13,11 @@ const MyProductListHeader = ({ title, image, link = '#' }: { title: string; imag
                     </span>
                 )}
 
-                <p className="text-primary-foreground px-2 text-lg font-bold">{title}</p>
+                <p className="text-primary-foreground px-2 text-lg font-bold">{t(title)}</p>
             </div>
             <Link href={link}>
                 <p className="text-md text-primary flex items-center gap-2 underline-offset-2 transition-all duration-300 hover:translate-x-2 hover:underline">
-                    See More <ChevronRight size={24} />
+                    {t('See More')} <ChevronRight size={24} />
                 </p>
             </Link>
         </div>
