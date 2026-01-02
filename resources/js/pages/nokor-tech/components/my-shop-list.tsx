@@ -50,7 +50,7 @@ const MyShopList: React.FC<MyShopListProps> = ({ items }) => {
                                         <img
                                             src={`/assets/images/shops/thumb/${item.logo}`}
                                             alt={displayName}
-                                            className="h-full w-full object-contain transition-transform duration-500"
+                                            className="h-full w-full object-cover transition-transform duration-500"
                                         />
                                     ) : (
                                         <Store className="text-muted-foreground/40 size-8" />
