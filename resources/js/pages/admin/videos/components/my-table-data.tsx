@@ -49,7 +49,7 @@ const MyTableData = () => {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[50px]">{t('No')}</TableHead>
+                            <TableHead className="w-[50px]">{t('ID')}</TableHead>
                             <TableHead className="text-left">{t('Action')}</TableHead>
                             <TableHead>{t('Image')}</TableHead>
                             <TableHead>{t('Video')}</TableHead>
@@ -117,7 +117,8 @@ const MyTableData = () => {
                             return (
                                 <TableRow key={item.id}>
                                     <TableCell className="font-medium">
-                                        {tableData?.current_page > 1 ? tableData?.per_page * (tableData?.current_page - 1) + index + 1 : index + 1}
+                                        {item?.id}
+                                        {/* {tableData?.current_page > 1 ? tableData?.per_page * (tableData?.current_page - 1) + index + 1 : index + 1} */}
                                     </TableCell>
                                     <TableCell>
                                         <span className="flex h-full items-center justify-start">

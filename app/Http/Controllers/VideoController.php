@@ -44,8 +44,8 @@ class VideoController extends Controller implements HasMiddleware
             });
         }
 
-        $query->orderBy('playlist_code');
-        $query->orderBy('order_index');
+        $query->orderBy('id', 'desc');
+        // $query->orderBy('playlist_code');
         $query->orderBy($sortBy, $sortDirection);
 
         $tableData = $query->paginate(perPage: 10)->onEachSide(1);
