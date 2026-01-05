@@ -83,7 +83,7 @@ class VideoController extends Controller implements HasMiddleware
             'video_file' => 'required|file|mimes:mp4|max:307200', // 300MB
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'playlist_code' => 'nullable|string|max:255',
-            'order_index' => 'nullable|numeric|max:255',
+            'order_index' => 'required|numeric|max:255',
             'status' => 'nullable|string|in:active,inactive',
             'short_description' => 'nullable|string',
             'short_description_kh' => 'nullable|string',
@@ -162,7 +162,7 @@ class VideoController extends Controller implements HasMiddleware
             'video_file' => 'nullable|file|mimes:mp4|max:307200',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'playlist_code' => 'nullable|string|max:255',
-            'order_index' => 'nullable|numeric|max:255',
+            'order_index' => 'required|numeric|max:255',
             'status' => 'nullable|string|in:active,inactive',
             'short_description' => 'nullable|string',
             'short_description_kh' => 'nullable|string',
