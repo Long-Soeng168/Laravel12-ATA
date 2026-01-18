@@ -6,6 +6,7 @@ use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Garage;
 use App\Models\ItemBrand;
+use App\Models\Province;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -206,6 +207,11 @@ class GarageController extends Controller
     /**
      * Display the specified resource.
      */
+    public function provinces()
+    {
+        $provinces = Province::orderBy('order_index')->orderBy('name')->get();
+        return response()->json($provinces);
+    }
     public function show(string $id)
     {
         $garage = Garage::with('expert')->find($id);
