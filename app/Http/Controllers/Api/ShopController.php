@@ -24,9 +24,25 @@ use function PHPUnit\Framework\isEmpty;
 
 class ShopController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $shops = Shop::paginate(10);
+        $search   = $request->input('search');
+
+        $query = Shop::query();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', "%$search%")
+                    ->orWhere('address', 'LIKE', "%$search%")
+                    ->orWhere('short_description', 'LIKE', "%$search%");
+            });
+        }
+
+        $query->where('status', 'approved');
+        $query->orderBy('order_index');
+        $query->orderBy('id', 'desc');
+
+        $shops = $query->paginate(20);
 
         return response()->json($shops);
     }

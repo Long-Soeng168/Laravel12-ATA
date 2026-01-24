@@ -23,6 +23,7 @@ class GarageController extends Controller
     {
         $search   = $request->input('search');
         $expertId = $request->input('expertId');
+        $provinceId = $request->input('provinceId');
 
         $query = Garage::with('expert');
 
@@ -38,6 +39,12 @@ class GarageController extends Controller
             $brand = ItemBrand::find($expertId);
             if ($brand) {
                 $query->where('brand_code', $brand->code);
+            }
+        }
+        if ($provinceId) {
+            $province = Province::find($provinceId);
+            if ($province) {
+                $query->where('province_code', $province->code);
             }
         }
 
