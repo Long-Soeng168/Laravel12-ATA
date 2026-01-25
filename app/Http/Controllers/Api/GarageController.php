@@ -281,7 +281,7 @@ class GarageController extends Controller
      */
     public function provinces()
     {
-        $provinces = Province::orderBy('order_index')->orderBy('name')->get();
+        $provinces = Province::orderBy('order_index')->orderBy('name_kh')->get();
         return response()->json($provinces);
     }
     public function show(string $id)
