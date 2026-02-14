@@ -85,8 +85,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Documents Route
     // Route::get('/file-explorer/folder/{path}', [FileExploreController::class, 'folder']);
 });
-// Route::get('/file-explorer/folder/{path}', [FileExploreController::class, 'folder']);
-Route::get('/file-explorer/folder/{path}', [FileExploreR2FileController::class, 'folder']);
+Route::get('/file-explorer/folder/{path}', [FileExploreController::class, 'folder']);
+// Route::get('/file-explorer/folder/{path}', [FileExploreR2FileController::class, 'folder']);
 
 
 // Auth API Route

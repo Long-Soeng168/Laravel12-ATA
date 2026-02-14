@@ -26,8 +26,8 @@ Route::get('/lang/{locale}', function ($locale) {
 });
 
 // Stream File
-// Route::get('show_pdf_file/{path}', [StreamFileController::class, 'streamPdf'])->where('path', '.*');
-Route::get('show_pdf_file/{path}', [StreamR2FileController::class, 'streamPdf'])->where('path', '.*');
+Route::get('show_pdf_file/{path}', [StreamFileController::class, 'streamPdf'])->where('path', '.*');
+// Route::get('show_pdf_file/{path}', [StreamR2FileController::class, 'streamPdf'])->where('path', '.*');
 
 Route::get('/test_google_map', function () {
    return Inertia::render('test_google_map');
