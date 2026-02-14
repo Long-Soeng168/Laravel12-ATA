@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\DtcController;
 use App\Http\Controllers\Api\FileExploreController;
+use App\Http\Controllers\Api\FileExploreR2FileController;
 use App\Http\Controllers\Api\GarageController;
 use App\Http\Controllers\Api\GaragePostController;
 use App\Http\Controllers\Api\LinkController;
@@ -84,7 +85,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Documents Route
     // Route::get('/file-explorer/folder/{path}', [FileExploreController::class, 'folder']);
 });
-Route::get('/file-explorer/folder/{path}', [FileExploreController::class, 'folder']);
+// Route::get('/file-explorer/folder/{path}', [FileExploreController::class, 'folder']);
+Route::get('/file-explorer/folder/{path}', [FileExploreR2FileController::class, 'folder']);
 
 
 // Auth API Route

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\StreamFileController;
+use App\Http\Controllers\StreamR2FileController;
 use App\Models\Garage;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -25,7 +26,8 @@ Route::get('/lang/{locale}', function ($locale) {
 });
 
 // Stream File
-Route::get('show_pdf_file/{path}', [StreamFileController::class, 'streamPdf'])->where('path', '.*');
+// Route::get('show_pdf_file/{path}', [StreamFileController::class, 'streamPdf'])->where('path', '.*');
+Route::get('show_pdf_file/{path}', [StreamR2FileController::class, 'streamPdf'])->where('path', '.*');
 
 Route::get('/test_google_map', function () {
    return Inertia::render('test_google_map');
@@ -57,3 +59,12 @@ require __DIR__ . '/order.php';
 
 // ========= Telegram Testing Route =========
 require __DIR__ . '/telegram.php';
+
+use App\Http\Controllers\R2FileController;
+
+Route::get('/r2', [R2FileController::class, 'index']);
+Route::post('/r2/upload', [R2FileController::class, 'upload']);
+Route::delete('/r2/delete', [R2FileController::class, 'delete']);
+Route::post('/r2/folder', [R2FileController::class, 'createFolder']);
+Route::get('/r2/view', [R2FileController::class, 'view'])->name('r2.view');
+
