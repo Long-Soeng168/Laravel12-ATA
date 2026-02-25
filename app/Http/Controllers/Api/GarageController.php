@@ -91,74 +91,74 @@ class GarageController extends Controller
         return response()->json($garages);
     }
 
-    // public function allGarages(Request $request)
-    // {
-    //     $search   = $request->input('search');
-    //     $expertId = $request->input('expertId');
+    public function allGarages(Request $request)
+    {
+        $search   = $request->input('search');
+        $expertId = $request->input('expertId');
 
-    //     $query = Garage::with('expert');
+        $query = Garage::with('expert');
 
-    //     if ($search) {
-    //         $query->where(function ($q) use ($search) {
-    //             $q->where('name', 'LIKE', "%$search%")
-    //                 ->orWhere('address', 'LIKE', "%$search%")
-    //                 ->orWhere('short_description', 'LIKE', "%$search%");
-    //         });
-    //     }
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', "%$search%")
+                    ->orWhere('address', 'LIKE', "%$search%")
+                    ->orWhere('short_description', 'LIKE', "%$search%");
+            });
+        }
 
-    //     if ($expertId) {
-    //         $brand = ItemBrand::find($expertId);
-    //         if ($brand) {
-    //             $query->where('brand_code', $brand->code);
-    //         }
-    //     }
+        if ($expertId) {
+            $brand = ItemBrand::find($expertId);
+            if ($brand) {
+                $query->where('brand_code', $brand->code);
+            }
+        }
 
-    //     $query->where('status', 'approved');
-    //     $query->orderBy('order_index');
-    //     $query->orderBy('id', 'desc');
+        $query->where('status', 'approved');
+        $query->orderBy('order_index');
+        $query->orderBy('id', 'desc');
 
-    //     $garages = $query->paginate(1000);
+        $garages = $query->paginate(1000);
 
-    //     // Map to old key format
-    //     $convertedGarages = $garages->getCollection()->map(function ($garage) {
-    //         return [
-    //             'id'          => $garage->id,
-    //             'name'        => $garage->name,
-    //             'address'     => $garage->address,
-    //             'phone'       => $garage->phone,
-    //             'user_id'     => $garage->owner_user_id,
-    //             'brand_id'    => $garage->expert ? $garage->expert->id : null,
-    //             'logo'        => $garage->logo,
-    //             'banner'      => $garage->banner,
-    //             'description' => $garage->short_description,
-    //             'latitude' => $garage->latitude,
-    //             'longitude' => $garage->longitude,
-    //             'created_at'  => $garage->created_at,
-    //             'updated_at'  => $garage->updated_at,
+        // Map to old key format
+        $convertedGarages = $garages->getCollection()->map(function ($garage) {
+            return [
+                'id'          => $garage->id,
+                'name'        => $garage->name,
+                'address'     => $garage->address,
+                'phone'       => $garage->phone,
+                'user_id'     => $garage->owner_user_id,
+                'brand_id'    => $garage->expert ? $garage->expert->id : null,
+                'logo'        => $garage->logo,
+                'banner'      => $garage->banner,
+                'description' => $garage->short_description,
+                'latitude' => $garage->latitude,
+                'longitude' => $garage->longitude,
+                'created_at'  => $garage->created_at,
+                'updated_at'  => $garage->updated_at,
 
-    //             'expert' => $garage->expert ? [
-    //                 'id'                => $garage->expert->id,
-    //                 'create_by_user_id' => $garage->expert->created_by,
-    //                 'name'              => $garage->expert->name,
-    //                 'name_kh'           => $garage->expert->name_kh,
-    //                 'code'              => $garage->expert->code,
-    //                 'image'             => $garage->expert->image,
-    //                 'status'            => $garage->expert->status === 'active' ? 1 : 0,
-    //                 'created_at'        => $garage->expert->created_at,
-    //                 'updated_at'        => $garage->expert->updated_at,
-    //             ] : null,
-    //         ];
-    //     });
+                'expert' => $garage->expert ? [
+                    'id'                => $garage->expert->id,
+                    'create_by_user_id' => $garage->expert->created_by,
+                    'name'              => $garage->expert->name,
+                    'name_kh'           => $garage->expert->name_kh,
+                    'code'              => $garage->expert->code,
+                    'image'             => $garage->expert->image,
+                    'status'            => $garage->expert->status === 'active' ? 1 : 0,
+                    'created_at'        => $garage->expert->created_at,
+                    'updated_at'        => $garage->expert->updated_at,
+                ] : null,
+            ];
+        });
 
-    //     // Replace the collection in the paginator
-    //     $garages->setCollection($convertedGarages);
+        // Replace the collection in the paginator
+        $garages->setCollection($convertedGarages);
 
-    //     return response()->json($garages);
-    // }
+        return response()->json($garages);
+    }
 
 
     // New for performance
-    public function allGarages(Request $request)
+    public function allGaragesV2(Request $request)
     {
         $search   = $request->input('search');
         $expertId = $request->input('expertId');

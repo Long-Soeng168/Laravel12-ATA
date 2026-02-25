@@ -49,6 +49,7 @@ Route::resource('shops', ShopController::class);
 // Garage Route
 Route::resource('garages', GarageController::class);
 Route::get('all-garages', [GarageController::class, 'allGarages']);
+Route::get('v2/all-garages', [GarageController::class, 'allGaragesV2']);
 Route::get('provinces', [GarageController::class, 'provinces']);
 Route::resource('garages_posts', GaragePostController::class);
 
