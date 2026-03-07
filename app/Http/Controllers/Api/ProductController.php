@@ -26,16 +26,19 @@ class ProductController extends Controller
         $brandId = $request->input('brandId');
         $shopId = $request->input('shopId');
         $userId = $request->input('userId');
+        $status = $request->input('status', 'active');
         $brandModelId = $request->input('brandModelId');
         $sortBy = $request->input('sortBy', 'id'); // Default sort by 'id'
         $sortOrder = $request->input('sortOrder', 'desc'); // Default order 'asc'
         $perPage = $request->input('perPage', 10); // Default 50 items per page
 
-        // dd($userId);
         // Start building the query
         $query = Item::query();
 
-        $query->where('status', 'active');
+
+        if ($status != 'all_status') {
+            $query->where('status', $status);
+        }
 
         // Apply search filter
         if (!empty($search)) {
@@ -84,8 +87,6 @@ class ProductController extends Controller
             'body_type'
         ]);
         $products = $query->paginate($perPage);
-
-        dd($products);
 
         $products->getCollection()->transform(function ($item) {
             return [
