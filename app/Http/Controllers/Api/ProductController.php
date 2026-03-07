@@ -37,6 +37,7 @@ class ProductController extends Controller
         $query = Item::query();
 
 
+        return $shopId;
         if ($status != 'all_status') {
             $query->where('status', $status);
         }
