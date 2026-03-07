@@ -31,6 +31,7 @@ class ProductController extends Controller
         $sortBy = $request->input('sortBy', 'id'); // Default sort by 'id'
         $sortOrder = $request->input('sortOrder', 'desc'); // Default order 'asc'
         $perPage = $request->input('perPage', 10); // Default 50 items per page
+        $getAll = $request->input('getAll'); // Default 50 items per page
 
         // Start building the query
         $query = Item::query();
@@ -38,6 +39,9 @@ class ProductController extends Controller
 
         if ($status != 'all_status') {
             $query->where('status', $status);
+        }
+        if ($getAll == 1) {
+            $perPage = 1000;
         }
 
         // Apply search filter
