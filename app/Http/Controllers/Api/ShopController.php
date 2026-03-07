@@ -333,8 +333,8 @@ class ShopController extends Controller
                 'model_code' => $model->code ?? null,
                 'created_by' =>  $request->user()->id,
                 'updated_by' => $request->user()->id,
-                'shop_id' => $request->user()->shop_id,
-                "status" => 'active',
+                'shop_id' => $request->user()->shop_id ?? null,
+                "status" => 'inactive',
             ]);
 
             // Multiple Images
