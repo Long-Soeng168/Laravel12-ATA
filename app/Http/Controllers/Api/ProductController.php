@@ -31,6 +31,7 @@ class ProductController extends Controller
         $sortOrder = $request->input('sortOrder', 'desc'); // Default order 'asc'
         $perPage = $request->input('perPage', 10); // Default 50 items per page
 
+        dd($userId);
         // Start building the query
         $query = Item::query();
 
