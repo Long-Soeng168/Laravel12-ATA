@@ -196,9 +196,9 @@ class VideoController extends Controller implements HasMiddleware
                 $created_video_file  = FileHelper::uploadFile($video_file, 'assets/files/videos', true);
                 $validated['video_file'] = $created_video_file;
 
-                if ($video->video_file && $created_video_file) {
-                    FileHelper::deleteFile($video->video_file, 'assets/files/videos');
-                }
+                // if ($video->video_file && $created_video_file) {
+                //     FileHelper::deleteFile($video->video_file, 'assets/files/videos');
+                // }
             } catch (\Exception $e) {
                 return redirect()->back()->with('error', 'Failed to upload video: ' . $e->getMessage());
             }
