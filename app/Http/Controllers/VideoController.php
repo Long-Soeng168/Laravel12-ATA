@@ -75,12 +75,13 @@ class VideoController extends Controller implements HasMiddleware
      */
     public function store(Request $request)
     {
+        set_time_limit(3600);
         // dd($request->all());
         $validated = $request->validate([
             'is_free' => 'nullable|boolean',
             'title' => 'required|string|max:255',
             'title_kh' => 'nullable|string|max:255',
-            'video_file' => 'required|file|mimes:mp4|max:307200', // 300MB
+            'video_file' => 'required|file|mimes:mp4|max:1258291', // 300MB
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'playlist_code' => 'nullable|string|max:255',
             'order_index' => 'required|numeric|min:1|max:255',
@@ -155,11 +156,12 @@ class VideoController extends Controller implements HasMiddleware
      */
     public function update(Request $request, Video $video)
     {
+        set_time_limit(3600);
         $validated = $request->validate([
             'is_free' => 'nullable|boolean',
             'title' => 'required|string|max:255',
             'title_kh' => 'nullable|string|max:255',
-            'video_file' => 'nullable|file|mimes:mp4|max:307200',
+            'video_file' => 'nullable|file|mimes:mp4|max:1258291',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'playlist_code' => 'nullable|string|max:255',
             'order_index' => 'required|numeric|min:1|max:255',
