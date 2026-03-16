@@ -235,12 +235,12 @@ class VideoController extends Controller implements HasMiddleware
     public function destroy(Video $video)
     {
         // Delete image if exists
-        if ($video->image) {
-            ImageHelper::deleteImage($video->image, 'assets/images/videos');
-        }
-        if ($video->video_file) {
-            FileHelper::deleteFile($video->video_file, 'assets/files/videos');
-        }
+        // if ($video->image) {
+        //     ImageHelper::deleteImage($video->image, 'assets/images/videos');
+        // }
+        // if ($video->video_file) {
+        //     FileHelper::deleteFile($video->video_file, 'assets/files/videos');
+        // }
         $video->delete();
 
         return redirect()->route('videos.index')->with('success', 'Video deleted successfully!');
