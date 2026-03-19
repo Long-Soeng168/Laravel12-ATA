@@ -253,7 +253,7 @@ class ProductController extends Controller
             'body_type'
         ]);
         $item = $query->where('id', $id)->first();
-        $item->images = $item->images->slice(0)->values();
+        // $item->images = $item->images->values();
 
         if (!$item) {
             return response()->json(['message' => 'Item not found'], 404);
