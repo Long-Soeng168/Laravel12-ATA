@@ -55,6 +55,7 @@ Route::resource('garages_posts', GaragePostController::class);
 
 // Product Route
 Route::resource('products', ProductController::class);
+Route::get('products/{id}', [ProductController::class, 'show_with_all_images']);
 Route::get('related_products/{id}', [ProductController::class, 'relatedProducts']);
 Route::resource('categories', CategoryController::class);
 Route::resource('body_types', BodyTypeController::class);
