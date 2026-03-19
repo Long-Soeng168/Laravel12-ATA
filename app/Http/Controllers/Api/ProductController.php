@@ -82,7 +82,7 @@ class ProductController extends Controller
         // $query->select('id', 'name', 'image', 'price', 'is_instock', 'category_id');
         $query->with([
             'images' => function ($q) {
-                $q->orderBy('id', 'desc');
+                $q->orderBy('id');
             },
             'category',
             'brand',
@@ -130,7 +130,7 @@ class ProductController extends Controller
         // Select the necessary columns and paginate
         $query->with([
             'images' => function ($q) {
-                $q->orderBy('id', 'desc');
+                $q->orderBy('id');
             },
         ]);
 
@@ -201,7 +201,7 @@ class ProductController extends Controller
         $query = Item::query();
         $query->with([
             'images' => function ($q) {
-                $q->orderBy('id', 'desc');
+                $q->orderBy('id');
             },
             'category',
             'brand',
@@ -245,7 +245,7 @@ class ProductController extends Controller
         $query = Item::query();
         $query->with([
             'images' => function ($q) {
-                $q->orderBy('id', 'desc');
+                $q->orderBy('id');
             },
             'category',
             'brand',
