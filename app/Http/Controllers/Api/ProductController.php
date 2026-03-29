@@ -235,7 +235,7 @@ class ProductController extends Controller
             'shop_id' => $item->shop_id,
             'images'           => $item->images,
             'created_at'       => $item->created_at,
-            'created_by'       => $item->created_by_user ?? null,
+            'created_by_user'       => $item->created_by_user ?? null,
             'shop'       => $item->shop ?? null,
             'updated_at'       => $item->updated_at,
         ];
