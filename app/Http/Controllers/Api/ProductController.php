@@ -181,7 +181,6 @@ class ProductController extends Controller
                 'phone' => $user->phone,
                 'address' => $user->address,
                 'image' => $user->image ? "https://atech-auto.com/assets/images/users/" . $user->image : null,
-                'joined' => $user->created_at->format('M Y'),
             ],
             'products' => $items
         ]);
