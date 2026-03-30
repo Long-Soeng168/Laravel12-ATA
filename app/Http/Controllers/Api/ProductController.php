@@ -160,7 +160,7 @@ class ProductController extends Controller
         $user = User::select('id', 'name', 'phone', 'image', 'created_at')
             ->findOrFail($id);
 
-        $items = Item::where('create_by', $id)
+        $items = Item::where('created_by', $id)
             ->with(['images' => fn($q) => $q->orderBy('id')])
             ->orderBy('id', 'desc')
             ->paginate(10);
