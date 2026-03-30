@@ -135,6 +135,13 @@ class ProductController extends Controller
                 ->orderBy('id', 'desc')
                 ->paginate($perPage);
         }
+        if ($products->isEmpty() && $product->created_by) {
+            $products = Item::where('created_by', $product->created_by)
+                ->where('id', '!=', $product->id)
+                ->with(['images' => fn($q) => $q->orderBy('id')])
+                ->orderBy('id', 'desc')
+                ->paginate($perPage);
+        }
 
         // 3. Transform the collection
         $products->getCollection()->transform(function ($item) {
