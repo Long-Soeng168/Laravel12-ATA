@@ -242,6 +242,52 @@ class ProductController extends Controller
 
         return response()->json($product);
     }
+    public function show_product_with_all_images(string $id)
+    {
+        $query = Item::query();
+        $query->with([
+            'images' => function ($q) {
+                $q->orderBy('id');
+            },
+            'category',
+            'brand',
+            'model',
+            'body_type'
+        ]);
+        $item = $query->where('id', $id)->first();
+        $item->images = $item->images->values();
+
+        if (!$item) {
+            return response()->json(['message' => 'Item not found'], 404);
+        }
+
+        // Convert to old key structure
+        $product = [
+            'id'       => $item->id,
+            'name'             => $item->name,
+            'price'            => (float)$item->price,
+            'description'      => $item->short_description,
+            'category_id'      => $item->category ? $item->category->id : null,
+            'brand_id'         => $item->brand ? $item->brand->id : null,
+            'model_id'         => $item->brand_model ? $item->brand_model->id : null,
+            'body_type_id'     => $item->body_type ? $item->body_type->id : null,
+            'status'           => $item->status === 'active' ? 1 : 0,
+            'create_by_user_id' => $item->created_by,
+            'updated_by'       => $item->updated_by,
+            'category'       => $item->category,
+            'body_type'       => $item->body_type,
+            'brand'       => $item->brand,
+            'brand_model'       => $item->brand_model,
+            'shop_id' => $item->shop_id,
+            'images'           => $item->images,
+            'created_at'       => $item->created_at,
+            'created_by_user'       => $item->created_by_user ?? null,
+            'shop'       => $item->shop ?? null,
+            'updated_at'       => $item->updated_at,
+        ];
+
+        return response()->json($product);
+    }
     public function show_with_all_images(string $id)
     {
         $query = Item::query();
