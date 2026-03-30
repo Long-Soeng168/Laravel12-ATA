@@ -157,7 +157,7 @@ class ProductController extends Controller
 
     public function getSellerProfile($id)
     {
-        $user = User::select('id', 'name', 'phone', 'image', 'created_at')
+        $user = User::select('id', 'name', 'address', 'phone', 'image', 'created_at')
             ->findOrFail($id);
 
         $items = Item::where('created_by', $id)
