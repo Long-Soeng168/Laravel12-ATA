@@ -116,48 +116,41 @@ class ProductController extends Controller
     }
     public function relatedProducts($id)
     {
-        // Find the product by its ID or throw a 404 error
         $product = Item::findOrFail($id);
-
-        // Number of products per page (define the $perPage variable)
         $perPage = 10;
 
-        // Query to get products in the same category, excluding the current product
-        $query = Item::where('category_code', $product->category_code)
+        // 1. Try to get products in the same category
+        $products = Item::where('category_code', $product->category_code)
             ->where('id', '!=', $product->id)
-            ->orderBy('id', 'desc');
+            ->with(['images' => fn($q) => $q->orderBy('id')])
+            ->orderBy('id', 'desc')
+            ->paginate($perPage);
 
-        // Select the necessary columns and paginate
-        $query->with([
-            'images' => function ($q) {
-                $q->orderBy('id');
-            },
-        ]);
+        // 2. Fallback: If category is empty, get other items from the same shop
+        if ($products->isEmpty() && $product->shop_id) {
+            $products = Item::where('shop_id', $product->shop_id)
+                ->where('id', '!=', $product->id)
+                ->with(['images' => fn($q) => $q->orderBy('id')])
+                ->orderBy('id', 'desc')
+                ->paginate($perPage);
+        }
 
-        $products = $query->paginate($perPage);
-
+        // 3. Transform the collection
         $products->getCollection()->transform(function ($item) {
             return [
                 'id' => $item->id,
                 'name' => $item->name,
                 'name_kh' => $item->name_kh,
-                'code' => $item->code,
-                'short_description' => $item->short_description,
                 'price' => $item->price,
-                'category_id' => optional($item->category)->id,
-                'brand_id' => optional($item->brand)->id,
-                'model_id' => optional($item->model)->id,
-                'body_type_id' => optional($item->body_type)->id,
+                'description' => $item->description,
+                'category_id' => $item->category_id,
                 'shop_id' => $item->shop_id,
-                'status' => $item->status,
+                // Match the thumbnail logic used in your Flutter app
+                'image' => $item->images->first()?->image,
                 'created_at' => $item->created_at,
-                'updated_at' => $item->updated_at,
-                'image' => optional($item->images->first())->image,
-                // add more fields if needed
             ];
         });
 
-        // Return the paginated products as a JSON response
         return response()->json($products);
     }
 
