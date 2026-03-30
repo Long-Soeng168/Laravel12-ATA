@@ -163,7 +163,7 @@ class ProductController extends Controller
         $items = Item::where('created_by', $id)
             ->with(['images' => fn($q) => $q->orderBy('id')])
             ->orderBy('id', 'desc')
-            ->paginate(10);
+            ->paginate(500);
 
         // Transform items for the Flutter ProductCard
         $items->getCollection()->transform(function ($item) {
