@@ -11,6 +11,7 @@ use App\Models\ItemModel;
 use Illuminate\Http\Request;
 
 use App\Models\Product;
+use App\Models\User;
 
 class ProductController extends Controller
 {
@@ -152,6 +153,38 @@ class ProductController extends Controller
         });
 
         return response()->json($products);
+    }
+
+    public function getSellerProfile($id)
+    {
+        $user = User::select('id', 'name', 'phone', 'image', 'created_at')
+            ->findOrFail($id);
+
+        $items = Item::where('create_by', $id)
+            ->with(['images' => fn($q) => $q->orderBy('id')])
+            ->orderBy('id', 'desc')
+            ->paginate(10);
+
+        // Transform items for the Flutter ProductCard
+        $items->getCollection()->transform(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'price' => $item->price,
+                'image' => $item->images->first()?->image,
+            ];
+        });
+
+        return response()->json([
+            'seller' => [
+                'name' => $user->name,
+                'phone' => $user->phone,
+                'address' => $user->address,
+                'image' => $user->image ? "https://atech-auto.com/assets/images/users/" . $user->image : null,
+                'joined' => $user->created_at->format('M Y'),
+            ],
+            'products' => $items
+        ]);
     }
 
     public function getProductsByShop(String $shop_id)
