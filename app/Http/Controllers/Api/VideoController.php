@@ -75,8 +75,10 @@ class VideoController extends Controller
         // Paginate the results
         $videos = $query->paginate($perPage);
 
+        $disk = Storage::disk('s3');
+
         // Transform collection to old key format
-        $videos->getCollection()->transform(function ($item) use ($userPlaylists, $playlist, $user) {
+        $videos->getCollection()->transform(function ($item) use ($userPlaylists, $playlist, $user, $disk) {
             // figure out status logic
             if ($item->is_free) {
                 $status = 'can_watch';
@@ -88,13 +90,22 @@ class VideoController extends Controller
                 $status = 'need_purchase';
             }
 
+            $videoUrl = $disk->temporaryUrl(
+                'Videos/Testing/video1.mp4',
+                now()->addMinutes(60) // expire time
+            );
+
+
             return [
                 'user' => $userPlaylists,
                 'id' => $item->id,
                 'title' => $item->title,
                 'image' => $item->image,
+                'image_url' => 'https://atech-auto.com/assets/images/videos/thumb/' . $item->image,
                 'description' => $item->short_description, // or $item->short_description_kh
                 'video_name' => $item->video_file,
+                // 'video_url' => 'https://atech-auto.com/assets/files/videos/' . $video->video_file,
+                'video_url' => $videoUrl,
                 'playlist_id' => $playlist->id ?? null,
                 'playlist_code' => $item->playlist_code ?? null,
                 'status' => $status, //can_watch, need_login, need_purchase
