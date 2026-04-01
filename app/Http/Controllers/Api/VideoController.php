@@ -104,8 +104,8 @@ class VideoController extends Controller
                 'image_url' => 'https://atech-auto.com/assets/images/videos/thumb/' . $item->image,
                 'description' => $item->short_description, // or $item->short_description_kh
                 'video_name' => $item->video_file,
-                // 'video_url' => 'https://atech-auto.com/assets/files/videos/' . $video->video_file,
-                'video_url' => $videoUrl,
+                'video_url' => 'https://atech-auto.com/assets/files/videos/' . $item->video_file,
+                // 'video_url' => $videoUrl,
                 'playlist_id' => $playlist->id ?? null,
                 'playlist_code' => $item->playlist_code ?? null,
                 'status' => $status, //can_watch, need_login, need_purchase
@@ -150,8 +150,8 @@ class VideoController extends Controller
             'image_url' => 'https://atech-auto.com/assets/images/videos/thumb/' . $video->image,
             'description' => $video->short_description, // or $video->short_description_kh
             'video_name' => $video->video_file,
-            // 'video_url' => 'https://atech-auto.com/assets/files/videos/' . $video->video_file,
-            'video_url' => $videoUrl,
+            'video_url' => 'https://atech-auto.com/assets/files/videos/' . $video->video_file,
+            // 'video_url' => $videoUrl,
             'playlist_id' => $playlistId,
             'status' => $video->status,
             'views_count' => $video->total_view_counts,
