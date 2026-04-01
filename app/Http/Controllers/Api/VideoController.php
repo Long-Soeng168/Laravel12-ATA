@@ -125,8 +125,10 @@ class VideoController extends Controller
             'id' => $video->id,
             'title' => $video->title,
             'image' => $video->image,
+            'image_url' => 'https://atech-auto.com/assets/images/videos/thumb/' . $video->image,
             'description' => $video->short_description, // or $video->short_description_kh
             'video_name' => $video->video_file,
+            'video_url' => 'https://atech-auto.com/assets/files/videos/' . $video->video_file,
             'playlist_id' => $playlistId,
             'status' => $video->status,
             'views_count' => $video->total_view_counts,
