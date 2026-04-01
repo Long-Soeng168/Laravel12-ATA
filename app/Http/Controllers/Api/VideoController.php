@@ -8,6 +8,7 @@ use App\Models\Video;
 use App\Models\VideoPlayList;
 use App\Models\VideoPlaylistUser;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\PersonalAccessToken;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
@@ -121,6 +122,16 @@ class VideoController extends Controller
         // Return video in old key format
         $playlistId = optional(VideoPlayList::where('code', $video->playlist_code)->first())->id;
 
+        $disk = Storage::disk('s3');
+        $videoUrl = $disk->temporaryUrl(
+            'Videos/Testing/video1.mp4',
+            now()->addMinutes(60) // expire time
+        );
+        // $videoUrl = $disk->temporaryUrl(
+        //     'Videos/Testing' . $video->video_file,
+        //     now()->addMinutes(60) // expire time
+        // );
+
         $formattedVideo = [
             'id' => $video->id,
             'title' => $video->title,
@@ -128,7 +139,8 @@ class VideoController extends Controller
             'image_url' => 'https://atech-auto.com/assets/images/videos/thumb/' . $video->image,
             'description' => $video->short_description, // or $video->short_description_kh
             'video_name' => $video->video_file,
-            'video_url' => 'https://atech-auto.com/assets/files/videos/' . $video->video_file,
+            // 'video_url' => 'https://atech-auto.com/assets/files/videos/' . $video->video_file,
+            'video_url' => $videoUrl,
             'playlist_id' => $playlistId,
             'status' => $video->status,
             'views_count' => $video->total_view_counts,
