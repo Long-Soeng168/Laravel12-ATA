@@ -322,6 +322,10 @@ class ShopController extends Controller
             $brand = ItemBrand::find($request->input('brandId'));
             $body_type = ItemBodyType::find($request->input('bodyTypeId'));
             $model = ItemModel::find($request->input('brandModelId'));
+            $shop = Shop::where('id', $request->user()->shop_id)
+                ->where('status', 'approved')
+                ->first();
+
 
             $created_product = Item::create([
                 'name' => $request->input('name'),
@@ -333,7 +337,7 @@ class ShopController extends Controller
                 'model_code' => $model->code ?? null,
                 'created_by' =>  $request->user()->id,
                 'updated_by' => $request->user()->id,
-                'shop_id' => $request->user()->shop_id ?? null,
+                'shop_id' => $shop?->id,
                 "status" => 'active',
             ]);
 
