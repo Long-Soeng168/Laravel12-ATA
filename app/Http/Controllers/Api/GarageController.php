@@ -238,8 +238,8 @@ class GarageController extends Controller
             'description' => 'nullable|string|max:1000',
             'address' => 'required|string|max:255',
             'phone' => 'required|string|max:15',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000', // Validate logo image
-            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000', // Validate banner image
+            'logo' => 'nullable|image|mimes:webp,jpeg,png,jpg,gif|max:4000', // Validate logo image
+            'banner' => 'nullable|image|mimes:webp,jpeg,png,jpg,gif|max:4000', // Validate banner image
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
         ]);
@@ -362,8 +362,8 @@ class GarageController extends Controller
             'description' => 'nullable|string|max:1000',
             'address' => 'required|string|max:255',
             'phone' => 'required|string|max:15',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000',
-            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000',
+            'logo' => 'nullable|image|mimes:webp,jpeg,png,jpg,gif|max:4000',
+            'banner' => 'nullable|image|mimes:webp,jpeg,png,jpg,gif|max:4000',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
         ]);
