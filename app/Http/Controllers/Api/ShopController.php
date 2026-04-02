@@ -64,8 +64,8 @@ class ShopController extends Controller
             'description' => 'required|string|max:1000',
             'address' => 'required|string|max:255',
             'phone' => 'required|string|max:15',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000', // Validate logo image
-            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4000', // Validate banner image
+            'logo' => 'nullable|image|mimes:webp,jpeg,png,jpg,gif|max:4000', // Validate logo image
+            'banner' => 'nullable|image|mimes:webp,jpeg,png,jpg,gif|max:4000', // Validate banner image
         ]);
 
 
@@ -205,8 +205,8 @@ class ShopController extends Controller
             'description' => 'required|string|max:1000',
             'address' => 'required|string|max:255',
             'phone' => 'required|string|max:15',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4048', // Optional logo
-            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4048', // Optional banner
+            'logo' => 'nullable|image|mimes:webp,jpeg,png,jpg,gif|max:4048', // Optional logo
+            'banner' => 'nullable|image|mimes:webp,jpeg,png,jpg,gif|max:4048', // Optional banner
         ]);
 
         if ($validator->fails()) {
