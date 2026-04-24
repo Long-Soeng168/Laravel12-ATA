@@ -8,7 +8,7 @@ import { FormLabel } from './FormLabel';
 
 interface FormFieldProps {
     id: string;
-    name: string;
+    name?: string;
     label: string;
     description?: string;
     placeholder?: string;

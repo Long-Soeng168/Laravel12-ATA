@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 
 interface FormFieldTextAreaProps {
     id: string;
-    name: string;
+    name?: string;
     label: string;
     placeholder?: string;
     value: string | number | readonly string[] | undefined;

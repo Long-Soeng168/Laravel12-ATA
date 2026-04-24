@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ItemCategory extends Model
 {
+    use SoftDeletes;
     /** @use HasFactory<\Database\Factories\ItemCategoryFactory> */
     use HasFactory;
     protected $guarded = [];
@@ -31,6 +33,10 @@ class ItemCategory extends Model
         return $this->belongsTo(User::class, 'updated_by', 'id');
     }
 
+    public function fields()
+    {
+        return $this->hasMany(ItemCategoryField::class, 'category_id', 'id');
+    }
     public function items()
     {
         return $this->hasMany(Item::class, 'category_code', 'code');

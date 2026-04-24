@@ -11,6 +11,10 @@ class Item extends Model
     use HasFactory;
 
     protected $guarded = [];
+    protected $casts = [
+        'attributes' => 'array', // Automatically converts JSON string to PHP Array
+    ];
+
     public function shop()
     {
         return $this->belongsTo(Shop::class, 'shop_id', 'id');

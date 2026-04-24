@@ -12,7 +12,6 @@ import {
     CarIcon,
     CircleDollarSignIcon,
     FilePenLineIcon,
-    FilesIcon,
     GalleryThumbnailsIcon,
     InfoIcon,
     Layers2Icon,
@@ -60,12 +59,6 @@ export function AppSidebar() {
                     url: '/admin/items',
                 },
                 {
-                    title: t('Categories'),
-                    permission: 'item view',
-                    icon: Layers2Icon,
-                    url: '/admin/item-categories',
-                },
-                {
                     title: t('Brands'),
                     permission: 'item view',
                     icon: TagsIcon,
@@ -88,6 +81,32 @@ export function AppSidebar() {
                     permission: 'item view',
                     icon: Tally5Icon,
                     url: '/admin/item_view_counts',
+                },
+            ],
+        },
+        {
+            title: t('Item Categories'),
+            permission: 'item view',
+            icon: Layers2Icon,
+            url: '/admin/item-categories',
+            subItems: [
+                {
+                    title: t('Categories'),
+                    permission: 'item view',
+                    icon: Layers2Icon,
+                    url: '/admin/item-categories',
+                },
+                {
+                    title: t('Fields'),
+                    permission: 'item view',
+                    icon: Layers2Icon,
+                    url: '/admin/item-category-fields',
+                },
+                {
+                    title: t('Field Options'),
+                    permission: 'item view',
+                    icon: Layers2Icon,
+                    url: '/admin/item-category-field-options',
                 },
             ],
         },
@@ -154,28 +173,6 @@ export function AppSidebar() {
                     icon: CircleDollarSignIcon,
                 },
             ],
-        },
-        {
-            title: t('Documents'),
-            permission: 'document view',
-            url: '',
-            external_url: 'https://filebrowser.kampu.solutions/',
-            icon: FilesIcon,
-            // subItems: [
-            //     {
-            //         title: t('Documents'),
-            //         permission: 'document view',
-            //         url: '',
-            //         external_url: 'https://filebrowser.kampu.solutions/',
-            //         icon: FilesIcon,
-            //     },
-            //     {
-            //         title: t('Documents Path'),
-            //         permission: 'document view',
-            //         url: '/admin/document_paths',
-            //         icon: FolderTreeIcon,
-            //     },
-            // ],
         },
         // {
         //     title: t('Posts'),

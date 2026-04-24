@@ -1,802 +1,431 @@
+import AlertFlashMessage from '@/components/Alert/AlertFlashMessage';
+import AllErrorsAlert from '@/components/Alert/AllErrorsAlert';
+import SubmitButton from '@/components/Button/SubmitButton';
 import DeleteButton from '@/components/delete-button';
+import FormFileUpload from '@/components/Form/FormFileUpload';
+import { FormCombobox } from '@/components/Input/FormCombobox';
+import { FormField } from '@/components/Input/FormField';
+import { FormFieldTextArea } from '@/components/Input/FormFieldTextArea';
+import { FormLabel } from '@/components/Input/FormLabel';
+import FormToggle from '@/components/Input/FormToggle';
+import { ProgressWithValue } from '@/components/ProgressBar/progress-with-value';
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea';
-import { Button } from '@/components/ui/button';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { FileInput, FileUploader, FileUploaderContent, FileUploaderItem } from '@/components/ui/file-upload';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ProgressWithValue } from '@/components/ui/progress-with-value';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useTranslation from '@/hooks/use-translation';
 import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm as inertiaUseForm, usePage } from '@inertiajs/react';
-import { Check, ChevronsUpDown, CloudUpload, Loader } from 'lucide-react';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, usePage } from '@inertiajs/react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import * as z from 'zod';
-
-const formSchema = z.object({
-    name: z.string().min(1).max(255),
-    short_description: z.string().optional(),
-    price: z.string().optional(),
-    code: z.string().max(255).optional(),
-    link: z.string().max(255).optional(),
-    status: z.string().optional(),
-    source: z.string().optional(),
-    category_code: z.string().optional(),
-    shop_id: z.any().optional(),
-    brand_code: z.string().optional(),
-    model_code: z.string().optional(),
-    body_type_code: z.string().optional(),
-    post_date: z.coerce.date().optional(),
-    images: z.string().optional(),
-});
 
 export default function Create() {
-    // ===== Start Our Code =====
-    const { t } = useTranslation();
-    const dropZoneConfig = {
-        maxFiles: 100,
-        maxSize: 1024 * 1024 * 2, // 2MB
-        multiple: true,
-        accept: {
-            'image/jpeg': ['.jpeg', '.jpg'],
-            'image/png': ['.png'],
-            'image/gif': ['.gif'],
-            'image/webp': ['.webp'],
-        },
-    };
-
-    const { post, progress, processing, transform, errors } = inertiaUseForm();
+    const { t, currentLocale } = useTranslation();
     const { itemCategories, itemBrands, itemModels, itemBodyTypes, editData, shops, readOnly } = usePage<any>().props;
 
+    const isInitialMount = useRef(true); // 1. Add this ref at the top of your component
     const [files, setFiles] = useState<File[] | null>(null);
-    const [long_description, setLong_description] = useState(editData?.long_description || '');
-    const [editorKey, setEditorKey] = useState(0);
+    const [dynamicFieldErrors, setDynamicFieldErrors] = useState<Record<string, string>>({});
+    const [dynamicFields, setDynamicFields] = useState<any[]>([]);
+    const [flashMessage, setFlashMessage] = useState({ message: '', type: 'message' });
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            name: editData?.name || '',
-            code: editData?.code || '',
-            price: editData?.price?.toString() || '',
-            short_description: editData?.short_description || '',
-            link: editData?.link || '',
-            status: editData?.status || 'active',
-            category_code: editData?.category_code?.toString() || '',
-            shop_id: editData?.shop_id?.toString() || '',
-            brand_code: editData?.brand_code?.toString() || '',
-            model_code: editData?.model_code?.toString() || '',
-            body_type_code: editData?.body_type_code?.toString() || '',
-            // post_date: editData?.id ? new Date(editData?.post_date) : new Date(),
-        },
+    // 1. Initialize Inertia Form
+    const { data, setData, post, processing, progress, errors, transform, reset } = useForm({
+        name: editData?.name || '',
+        name_kh: editData?.name_kh || '',
+        code: editData?.code || '',
+        price: editData?.price?.toString() || '',
+        short_description: editData?.short_description || '',
+        long_description: editData?.long_description || '',
+        link: editData?.link || '',
+        status: editData?.status || 'active',
+        category_code: editData?.category_code?.toString() || '',
+        shop_id: editData?.shop_id?.toString() || '',
+        brand_code: editData?.brand_code?.toString() || '',
+        model_code: editData?.model_code?.toString() || '',
+        body_type_code: editData?.body_type_code?.toString() || '',
+        attributes: editData?.attributes || {}, // JSON dynamic data
+        images: '',
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        try {
-            // console.log(values);
-            // toast(
-            //     <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-            //         <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-            //     </pre>,
-            // );
-            // return;
-            transform(() => ({
-                ...values,
-                long_description: long_description,
-                images: files || null,
-            }));
+    // 2. Handle Dynamic Field Switching
+    useEffect(() => {
+        if (data.category_code) {
+            const category = itemCategories.find((c: any) => c.code === data.category_code);
 
-            if (editData?.id) {
-                post(`/admin/items/${editData?.id}/update`, {
-                    preserveScroll: true,
-                    onSuccess: (page) => {
-                        setFiles(null);
-                        if (page.props.flash?.success) {
-                            toast.success('Success', {
-                                description: page.props.flash.success,
-                            });
-                        }
-                        if (page.props.flash?.error) {
-                            toast.error('Error', {
-                                description: page.props.flash.error,
-                            });
-                        }
-                    },
-                    onError: (e) => {
-                        toast.error('Error', {
-                            description: 'Failed to create.' + JSON.stringify(e, null, 2),
-                        });
-                    },
+            if (category && category.fields) {
+                setDynamicFields(category.fields);
+
+                const newAttrs: Record<string, any> = {};
+
+                category.fields.forEach((field: any) => {
+                    // 2. Only preserve data from 'data.attributes' if it's the very first time
+                    // the component loads (e.g., when opening the Edit page).
+                    if (isInitialMount.current) {
+                        newAttrs[field.field_key] = data.attributes[field.field_key] || '';
+                    } else {
+                        // 3. Otherwise, if the user is changing categories manually,
+                        // force every field to be empty/default.
+                        newAttrs[field.field_key] = '';
+                    }
                 });
-            } else {
-                post('/admin/items', {
-                    preserveScroll: true,
-                    onSuccess: (page) => {
-                        form.reset();
-                        setLong_description('');
-                        setEditorKey((prev) => prev + 1);
-                        setFiles(null);
-                        if (page.props.flash?.success) {
-                            toast.success('Success', {
-                                description: page.props.flash.success,
-                            });
-                        }
-                        if (page.props.flash?.error) {
-                            toast.error('Error', {
-                                description: page.props.flash.error,
-                            });
-                        }
-                    },
-                    onError: (e) => {
-                        toast.error('Error', {
-                            description: 'Failed to create.' + JSON.stringify(e, null, 2),
-                        });
-                    },
-                });
+
+                setData('attributes', newAttrs);
+
+                // 4. After the first load logic runs once, set mount to false
+                isInitialMount.current = false;
             }
-        } catch (error) {
-            console.error('Form submission error', error);
-            toast.error('Failed to submit the form. Please try again.' + error);
+        } else {
+            setDynamicFields([]);
+            setData('attributes', {});
         }
-    }
+    }, [data.category_code]);
 
-    const currentBreadcrumb = readOnly ? t('Show') : editData ? t('Edit') : t('Create');
+    // 3. Form Submission
+    const onSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        // 1. Reset dynamic errors at the start of submission
+        setDynamicFieldErrors({});
+
+        // 2. Manual check for required fields
+        const newErrors: Record<string, string> = {};
+
+        dynamicFields.forEach((field) => {
+            const isRequired = field.is_required === 1 || field.is_required === true;
+            const value = data.attributes[field.field_key];
+
+            // FIX: Check for null, undefined, or empty string.
+            // Boolean 'false' is allowed to pass.
+            const isEmpty = value === null || value === undefined || value === '';
+
+            if (isRequired && isEmpty) {
+                newErrors[field.field_key] = t('This field is required');
+            }
+        });
+
+        // 3. If there are errors, stop and show them
+        if (Object.keys(newErrors).length > 0) {
+            setDynamicFieldErrors(newErrors);
+            toast.error(t('Please check required specifications'));
+            return;
+        }
+
+        transform((data) => ({
+            ...data,
+            images: files || null,
+        }));
+
+        const url = editData?.id ? `/admin/items/${editData.id}/update` : '/admin/items';
+
+        post(url, {
+            preserveScroll: false,
+            onSuccess: (page: any) => {
+                if (!editData) {
+                    reset();
+                }
+                setFiles(null);
+                setFlashMessage({ message: page.props.flash?.success, type: 'success' });
+            },
+        });
+    };
+
     const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: t('Items'),
-            href: '/admin/items',
-        },
-        {
-            title: currentBreadcrumb,
-            href: '#',
-        },
+        { title: t('Items'), href: '/admin/items' },
+        { title: editData ? t('Edit') : t('Create'), href: '#' },
     ];
-    // ===== End Our Code =====
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-5">
-                    <div className="grid gap-4 md:grid-cols-12">
-                        {/* <div className="col-span-6">
-                            <FormField
-                                control={form.control}
-                                name="post_date"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col">
-                                        <FormLabel>{t('Post Date')}</FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button
-                                                        variant={'outline'}
-                                                        className={cn(
-                                                            'w-[280px] pl-3 text-left font-normal',
-                                                            !field.value && 'text-muted-foreground',
-                                                        )}
-                                                    >
-                                                        {field.value ? format(field.value, 'PPP') : <span>{t('Pick a date')}</span>}
-                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0" align="start">
-                                                <Calendar
-                                                    fromYear={1960}
-                                                    toYear={2030}
-                                                    captionLayout="dropdown-buttons"
-                                                    mode="single"
-                                                    selected={field.value}
-                                                    onSelect={field.onChange}
-                                                    initialFocus
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
-                                        <FormMessage>{errors.post_date && <div>{errors.post_date}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
-                        </div> */}
-                    </div>
+            <form onSubmit={onSubmit} className="form space-y-8 p-5">
+                <AlertFlashMessage
+                    key={flashMessage.message}
+                    type={flashMessage.type}
+                    flashMessage={flashMessage.message}
+                    setFlashMessage={setFlashMessage}
+                />
 
-                    <div className="grid grid-cols-12 gap-8">
-                        <div className="col-span-6">
-                            <FormField
-                                control={form.control}
-                                name="shop_id"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col" key={field.value}>
-                                        <FormLabel>{t('Shop')}</FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button
-                                                        variant="outline"
-                                                        role="combobox"
-                                                        className={cn('w-full justify-between', !field.value && 'text-muted-foreground')}
-                                                    >
-                                                        {field.value
-                                                            ? (() => {
-                                                                  const shop = shops?.find((shop) => shop.id == field.value);
-                                                                  return shop ? `${shop.name}` : '';
-                                                              })()
-                                                            : t('Select shop')}
+                {Object.keys(errors).length > 0 && <AllErrorsAlert title={t('Please fix the following errors')} errors={errors} />}
 
-                                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="p-0">
-                                                <Command>
-                                                    <CommandInput placeholder="Search shop..." />
-                                                    <CommandList>
-                                                        <CommandEmpty>{t('No data')}</CommandEmpty>
-                                                        <CommandGroup>
-                                                            <CommandItem
-                                                                value=""
-                                                                onSelect={() => {
-                                                                    form.setValue('shop_id', '');
-                                                                }}
-                                                            >
-                                                                <Check
-                                                                    className={cn('mr-2 h-4 w-4', '' == field.value ? 'opacity-100' : 'opacity-0')}
-                                                                />
-                                                                {t('Select shop')}
-                                                            </CommandItem>
-                                                            {shops?.map((shop) => (
-                                                                <CommandItem
-                                                                    value={shop.name}
-                                                                    key={shop.id}
-                                                                    onSelect={() => {
-                                                                        form.setValue('shop_id', shop.id);
-                                                                    }}
-                                                                >
-                                                                    <Check
-                                                                        className={cn(
-                                                                            'mr-2 h-4 w-4',
-                                                                            shop.id === field.value ? 'opacity-100' : 'opacity-0',
-                                                                        )}
-                                                                    />
-                                                                    {shop.logo && (
-                                                                        <img
-                                                                            className="size-6 object-contain"
-                                                                            src={`/assets/images/shops/thumb/${shop.logo}`}
-                                                                        />
-                                                                    )}
-                                                                    {shop.name}
-                                                                    {/* {shop.name_kh && `(${shop.name_kh})`} */}
-                                                                </CommandItem>
-                                                            ))}
-                                                        </CommandGroup>
-                                                    </CommandList>
-                                                </Command>
-                                            </PopoverContent>
-                                        </Popover>
-                                        <FormDescription>{t('Select the shop where this item belong to.')}</FormDescription>
-                                        <FormMessage>{errors.shop_id && <div>{errors.shop_id}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        <div className="col-span-12">
-                            <FormField
-                                control={form.control}
-                                name="name"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t('Name')}</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder={t('Name')} type="text" {...field} />
-                                        </FormControl>
-                                        <FormMessage>{errors.name && <div>{errors.name}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        <div className="col-span-6">
-                            <FormField
-                                control={form.control}
-                                name="price"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t('Price')}</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder={t('Price ($)')} type="number" {...field} />
-                                        </FormControl>
-                                        <FormMessage>{errors.price && <div>{errors.price}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                        <div className="col-span-6">
-                            <FormField
-                                control={form.control}
-                                name="code"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t('Code')}</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder={t('Code')} type="text" {...field} />
-                                        </FormControl>
-                                        <FormDescription>{t('Can use product Barcode.')}</FormDescription>
-                                        <FormMessage>{errors.code && <div>{errors.code}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                    </div>
-
-                    <FormField
-                        control={form.control}
-                        name="short_description"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{t('Description')}</FormLabel>
-                                <FormControl>
-                                    <AutosizeTextarea placeholder={t('Description')} className="resize-none whitespace-pre-line" {...field} />
-                                </FormControl>
-                                <FormMessage>{errors.short_description && <div>{errors.short_description}</div>}</FormMessage>
-                            </FormItem>
-                        )}
+                <div className="form-field-container">
+                    <FormCombobox
+                        name="shop_id"
+                        label={t('Shop')}
+                        options={shops?.map((shop: any) => ({
+                            value: shop.id.toString(),
+                            label: shop.name,
+                        }))}
+                        value={data.shop_id}
+                        onChange={(val) => setData('shop_id', val)}
+                        error={errors.shop_id}
                     />
 
-                    <div className="grid grid-cols-6 gap-4 lg:grid-cols-12">
-                        {/* <div className="col-span-6 flex space-x-2">
-                            <span className="flex-1">
-                                <FormField
-                                    control={form.control}
-                                    name="link"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>{t('Link')}</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder={t('Link')} type="text" {...field} />
-                                            </FormControl>
-                                            <FormDescription>{t('For external content you can put link here.')}</FormDescription>
-                                            <FormMessage>{errors.link && <div>{errors.link}</div>}</FormMessage>
-                                        </FormItem>
-                                    )}
-                                />
-                            </span>
-                        </div> */}
+                    <FormField
+                        required
+                        id="name"
+                        label={t('Name')}
+                        value={data.name}
+                        onChange={(val) => setData('name', val)}
+                        error={errors.name}
+                        containerClassName="md:col-span-2"
+                    />
 
-                        <div className="col-span-6">
-                            <FormField
-                                control={form.control}
-                                name="category_code"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col" key={field.value}>
-                                        <FormLabel>{t('Category')}</FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button
-                                                        variant="outline"
-                                                        role="combobox"
-                                                        className={cn('w-full justify-between', !field.value && 'text-muted-foreground')}
-                                                    >
-                                                        {field.value
-                                                            ? (() => {
-                                                                  const category = itemCategories?.find((category) => category.code === field.value);
-                                                                  return category ? `${category.name} (${category.name_kh})` : '';
-                                                              })()
-                                                            : t('Select category')}
+                    <FormField
+                        required
+                        type="number"
+                        id="price"
+                        label={t('Price ($)')}
+                        value={data.price}
+                        onChange={(val) => setData('price', val)}
+                        error={errors.price}
+                    />
 
-                                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="p-0">
-                                                <Command>
-                                                    <CommandInput placeholder="Search category..." />
-                                                    <CommandList>
-                                                        <CommandEmpty>{t('No data')}</CommandEmpty>
-                                                        <CommandGroup>
-                                                            <CommandItem
-                                                                value=""
-                                                                onSelect={() => {
-                                                                    form.setValue('category_code', '');
-                                                                }}
-                                                            >
-                                                                <Check
-                                                                    className={cn('mr-2 h-4 w-4', '' == field.value ? 'opacity-100' : 'opacity-0')}
-                                                                />
-                                                                {t('Select category')}
-                                                            </CommandItem>
-                                                            {itemCategories?.map((category) => (
-                                                                <CommandItem
-                                                                    value={category.name}
-                                                                    key={category.code}
-                                                                    onSelect={() => {
-                                                                        form.setValue('category_code', category.code);
-                                                                    }}
-                                                                >
-                                                                    <Check
-                                                                        className={cn(
-                                                                            'mr-2 h-4 w-4',
-                                                                            category.code === field.value ? 'opacity-100' : 'opacity-0',
-                                                                        )}
-                                                                    />
-                                                                    {category.image && (
-                                                                        <img
-                                                                            className="size-6 object-contain"
-                                                                            src={`/assets/images/item_categories/thumb/${category.image}`}
-                                                                        />
-                                                                    )}
-                                                                    {category.parent_code && '--'}
-                                                                    {category.name}
-                                                                    {/* {category.name_kh && `(${category.name_kh})`} */}
-                                                                </CommandItem>
-                                                            ))}
-                                                        </CommandGroup>
-                                                    </CommandList>
-                                                </Command>
-                                            </PopoverContent>
-                                        </Popover>
-                                        <FormDescription>{t('Select the category where this item belong to.')}</FormDescription>
-                                        <FormMessage>{errors.category_code && <div>{errors.category_code}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
+                    <FormField
+                        id="code"
+                        label={t('Code')}
+                        value={data.code}
+                        onChange={(val) => setData('code', val)}
+                        error={errors.code}
+                        description={t('Can use product Barcode.')}
+                    />
+
+                    <div className="w-full md:col-span-full">
+                        <FormCombobox
+                            name="category_code"
+                            label={t('Category')}
+                            options={itemCategories?.map((cat: any) => ({
+                                value: cat.code,
+                                label: cat.name,
+                            }))}
+                            value={data.category_code}
+                            onChange={(val) => setData('category_code', val)}
+                            error={errors.category_code}
+                        />
+                    </div>
+                </div>
+
+                {/* DYNAMIC FIELDS SECTION */}
+                {true && (
+                    <div className="col-span-12 grid grid-cols-1 gap-6 rounded-xl border bg-slate-50/50 p-6 md:grid-cols-2 dark:bg-white/5">
+                        <div className="col-span-full mb-2 flex items-center gap-2">
+                            <div className="h-4 w-1 rounded-full bg-blue-500" />
+                            <h3 className="text-xs font-bold tracking-widest text-blue-500 uppercase">{t('Specifications')}</h3>
                         </div>
-
-                        <div className="col-span-6">
-                            <FormField
-                                control={form.control}
+                        <div className="form-field-container w-full md:col-span-full">
+                            <FormCombobox
                                 name="brand_code"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col" key={field.value}>
-                                        <FormLabel>{t('Brand')}</FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button
-                                                        variant="outline"
-                                                        role="combobox"
-                                                        className={cn('w-full justify-between', !field.value && 'text-muted-foreground')}
-                                                    >
-                                                        {field.value
-                                                            ? (() => {
-                                                                  const brand = itemBrands?.find((brand) => brand.code === field.value);
-                                                                  return brand ? `${brand.name} (${brand.name_kh})` : '';
-                                                              })()
-                                                            : t('Select brand')}
-
-                                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="p-0">
-                                                <Command>
-                                                    <CommandInput placeholder="Search brand..." />
-                                                    <CommandList>
-                                                        <CommandEmpty>{t('No data')}</CommandEmpty>
-                                                        <CommandGroup>
-                                                            <CommandItem
-                                                                value=""
-                                                                onSelect={() => {
-                                                                    form.setValue('brand_code', '');
-                                                                }}
-                                                            >
-                                                                <Check
-                                                                    className={cn('mr-2 h-4 w-4', '' == field.value ? 'opacity-100' : 'opacity-0')}
-                                                                />
-                                                                {t('Select brand')}
-                                                            </CommandItem>
-                                                            {itemBrands?.map((brand) => (
-                                                                <CommandItem
-                                                                    value={brand.name}
-                                                                    key={brand.code}
-                                                                    onSelect={() => {
-                                                                        form.setValue('brand_code', brand.code);
-                                                                        form.setValue('model_code', '');
-                                                                    }}
-                                                                >
-                                                                    <Check
-                                                                        className={cn(
-                                                                            'mr-2 h-4 w-4',
-                                                                            brand.code === field.value ? 'opacity-100' : 'opacity-0',
-                                                                        )}
-                                                                    />
-                                                                    {brand.image && (
-                                                                        <img
-                                                                            className="size-6 object-contain"
-                                                                            src={`/assets/images/item_brands/thumb/${brand.image}`}
-                                                                        />
-                                                                    )}
-                                                                    {brand.name}
-                                                                    {/* {brand.name_kh && `(${brand.name_kh})`} */}
-                                                                </CommandItem>
-                                                            ))}
-                                                        </CommandGroup>
-                                                    </CommandList>
-                                                </Command>
-                                            </PopoverContent>
-                                        </Popover>
-                                        <FormDescription>{t('Select the model where this item belong to.')}</FormDescription>
-                                        <FormMessage>{errors.brand_code && <div>{errors.brand_code}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
+                                label={t('Brand')}
+                                options={itemBrands?.map((brand: any) => ({
+                                    value: brand.code,
+                                    label: brand.name,
+                                }))}
+                                value={data.brand_code}
+                                onChange={(val) => {
+                                    setData((prev) => ({ ...prev, brand_code: val, model_code: '' }));
+                                }}
+                                error={errors.brand_code}
                             />
-                        </div>
 
-                        <div className="col-span-6">
-                            <FormField
-                                control={form.control}
+                            <FormCombobox
                                 name="model_code"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col" key={field.value}>
-                                        <FormLabel>{t('Model')}</FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button
-                                                        variant="outline"
-                                                        role="combobox"
-                                                        className={cn('w-full justify-between', !field.value && 'text-muted-foreground')}
-                                                    >
-                                                        {field.value
-                                                            ? (() => {
-                                                                  const model = itemModels?.find((model) => model.code === field.value);
-                                                                  return model ? `${model.name} (${model.name_kh})` : '';
-                                                              })()
-                                                            : t('Select model')}
-
-                                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="p-0">
-                                                <Command>
-                                                    <CommandInput placeholder="Search model..." />
-                                                    <CommandList>
-                                                        <CommandEmpty>{t('No data')}</CommandEmpty>
-                                                        <CommandGroup>
-                                                            <CommandItem
-                                                                value=""
-                                                                onSelect={() => {
-                                                                    form.setValue('model_code', '');
-                                                                }}
-                                                            >
-                                                                <Check
-                                                                    className={cn('mr-2 h-4 w-4', '' == field.value ? 'opacity-100' : 'opacity-0')}
-                                                                />
-                                                                {t('Select model')}
-                                                            </CommandItem>
-                                                            {form.watch('brand_code') &&
-                                                                itemModels
-                                                                    ?.filter((model) => model.brand_code === form.watch('brand_code'))
-                                                                    .map((model) => (
-                                                                        <CommandItem
-                                                                            value={model.name}
-                                                                            key={model.code}
-                                                                            onSelect={() => {
-                                                                                form.setValue('model_code', model.code);
-                                                                            }}
-                                                                        >
-                                                                            <Check
-                                                                                className={cn(
-                                                                                    'mr-2 h-4 w-4',
-                                                                                    model.code === field.value ? 'opacity-100' : 'opacity-0',
-                                                                                )}
-                                                                            />
-                                                                            {model.name}
-                                                                            {/* {model.name_kh && `(${model.name_kh})`} */}
-                                                                        </CommandItem>
-                                                                    ))}
-                                                        </CommandGroup>
-                                                    </CommandList>
-                                                </Command>
-                                            </PopoverContent>
-                                        </Popover>
-                                        <FormDescription>{t('Select Brand first before select Model')}</FormDescription>
-                                        <FormMessage>{errors.model_code && <div>{errors.model_code}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
+                                label={t('Model')}
+                                options={itemModels
+                                    ?.filter((m: any) => m.brand_code === data.brand_code)
+                                    ?.map((model: any) => ({
+                                        value: model.code,
+                                        label: model.name,
+                                    }))}
+                                value={data.model_code}
+                                onChange={(val) => setData('model_code', val)}
+                                error={errors.model_code}
                             />
-                        </div>
 
-                        <div className="col-span-6">
-                            <FormField
-                                control={form.control}
+                            <FormCombobox
                                 name="body_type_code"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col" key={field.value}>
-                                        <FormLabel>{t('Body Type')}</FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button
-                                                        variant="outline"
-                                                        role="combobox"
-                                                        className={cn('w-full justify-between', !field.value && 'text-muted-foreground')}
-                                                    >
-                                                        {field.value
-                                                            ? (() => {
-                                                                  const bodyType = itemBodyTypes?.find((bodyType) => bodyType.code === field.value);
-                                                                  return bodyType ? `${bodyType.name} (${bodyType.name_kh})` : '';
-                                                              })()
-                                                            : t('Select bodyType')}
-
-                                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="p-0">
-                                                <Command>
-                                                    <CommandInput placeholder="Search bodyType..." />
-                                                    <CommandList>
-                                                        <CommandEmpty>{t('No data')}</CommandEmpty>
-                                                        <CommandGroup>
-                                                            <CommandItem
-                                                                value=""
-                                                                onSelect={() => {
-                                                                    form.setValue('body_type_code', '');
-                                                                }}
-                                                            >
-                                                                <Check
-                                                                    className={cn('mr-2 h-4 w-4', '' == field.value ? 'opacity-100' : 'opacity-0')}
-                                                                />
-                                                                {t('Select bodyType')}
-                                                            </CommandItem>
-                                                            {itemBodyTypes?.map((bodyType) => (
-                                                                <CommandItem
-                                                                    value={bodyType.name}
-                                                                    key={bodyType.code}
-                                                                    onSelect={() => {
-                                                                        form.setValue('body_type_code', bodyType.code);
-                                                                    }}
-                                                                >
-                                                                    <Check
-                                                                        className={cn(
-                                                                            'mr-2 h-4 w-4',
-                                                                            bodyType.code === field.value ? 'opacity-100' : 'opacity-0',
-                                                                        )}
-                                                                    />
-                                                                    {bodyType.image && (
-                                                                        <img
-                                                                            className="size-6 object-contain"
-                                                                            src={`/assets/images/item_body_types/thumb/${bodyType.image}`}
-                                                                        />
-                                                                    )}
-                                                                    {bodyType.name}
-                                                                    {/* {bodyType.name_kh && `(${bodyType.name_kh})`} */}
-                                                                </CommandItem>
-                                                            ))}
-                                                        </CommandGroup>
-                                                    </CommandList>
-                                                </Command>
-                                            </PopoverContent>
-                                        </Popover>
-                                        <FormMessage>{errors.body_type_code && <div>{errors.body_type_code}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
+                                label={t('Body Type')}
+                                options={itemBodyTypes?.map((bt: any) => ({
+                                    value: bt.code,
+                                    label: bt.name,
+                                }))}
+                                value={data.body_type_code}
+                                onChange={(val) => setData('body_type_code', val)}
+                                error={errors.body_type_code}
                             />
                         </div>
 
-                        <div className="col-span-6">
-                            <FormField
-                                control={form.control}
-                                name="status"
-                                render={({ field }) => (
-                                    <FormItem key={field.value}>
-                                        <FormLabel>{t('Status')}</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select Status" />
-                                                </SelectTrigger>
-                                            </FormControl>
+                        {dynamicFields.map((field) => (
+                            <div key={field.id} className="group space-y-2">
+                                {/* 1. HEADER / LABEL SECTION */}
+                                <FormLabel
+                                    id={field.field_key}
+                                    label={currentLocale === 'kh' ? field.label_kh : field.label}
+                                    required={field.is_required === 1 || field.is_required === true}
+                                    error={!!dynamicFieldErrors[field.field_key]}
+                                />
+
+                                {/* 2. INPUT TYPES */}
+                                <div className="relative">
+                                    {/* SELECT */}
+                                    {field.field_type === 'select' && (
+                                        <Select
+                                            value={data.attributes[field.field_key] || ''}
+                                            onValueChange={(val) => setData('attributes', { ...data.attributes, [field.field_key]: val })}
+                                        >
+                                            <SelectTrigger
+                                                className={cn(
+                                                    'bg-background transition-all duration-200',
+                                                    dynamicFieldErrors[field.field_key]
+                                                        ? 'border-destructive ring-destructive/20 ring-1'
+                                                        : 'focus:ring-primary/20 focus:ring-2',
+                                                )}
+                                            >
+                                                <SelectValue placeholder={t('Select')} />
+                                            </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="active">{t('Active')}</SelectItem>
-                                                <SelectItem value="inactive">{t('Inactive')}</SelectItem>
+                                                {field.options?.map((opt: any) => (
+                                                    <SelectItem key={opt.id} value={opt.option_value}>
+                                                        {currentLocale === 'kh' ? opt.label_kh : opt.label_en}
+                                                    </SelectItem>
+                                                ))}
                                             </SelectContent>
                                         </Select>
-                                        <FormMessage>{errors.status && <div>{errors.status}</div>}</FormMessage>
-                                    </FormItem>
+                                    )}
+
+                                    {/* RADIO PILLS */}
+                                    {field.field_type === 'radio' && (
+                                        <RadioGroup
+                                            value={data.attributes[field.field_key] || ''}
+                                            onValueChange={(val) => setData('attributes', { ...data.attributes, [field.field_key]: val })}
+                                            className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4"
+                                        >
+                                            {field.options?.map((opt: any) => (
+                                                <div key={opt.id} className="relative">
+                                                    <RadioGroupItem
+                                                        value={opt.option_value}
+                                                        id={`${field.field_key}-${opt.id}`}
+                                                        className="peer sr-only"
+                                                    />
+                                                    <label
+                                                        htmlFor={`${field.field_key}-${opt.id}`}
+                                                        className={cn(
+                                                            'bg-background hover:bg-accent peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 peer-data-[state=checked]:text-primary dark:peer-data-[state=checked]:bg-primary/10 flex cursor-pointer items-center justify-center rounded-lg border px-3 py-2.5 text-center text-sm font-medium transition-all',
+                                                            dynamicFieldErrors[field.field_key] ? 'border-destructive/50' : 'border-input',
+                                                        )}
+                                                    >
+                                                        {currentLocale === 'kh' ? opt.label_kh : opt.label_en}
+                                                    </label>
+                                                </div>
+                                            ))}
+                                        </RadioGroup>
+                                    )}
+
+                                    {/* CHECKBOX BOX */}
+                                    {/* 3. CHECKBOX (Now using FormToggle) */}
+                                    {field.field_type === 'checkbox' && (
+                                        <FormToggle
+                                            id={field.field_key}
+                                            label={currentLocale === 'kh' ? field.label_kh : field.label}
+                                            value={data.attributes[field.field_key]}
+                                            onChange={(checked) => setData('attributes', { ...data.attributes, [field.field_key]: checked })}
+                                            error={!!dynamicFieldErrors[field.field_key]}
+                                            statusOn={t('On')}
+                                            statusOff={t('Off')}
+                                        />
+                                    )}
+
+                                    {/* TEXTAREA & INPUT */}
+                                    {(field.field_type === 'textarea' || field.field_type === 'text' || field.field_type === 'number') &&
+                                        (field.field_type === 'textarea' ? (
+                                            <AutosizeTextarea
+                                                className={cn(
+                                                    'bg-background min-h-[100px]',
+                                                    dynamicFieldErrors[field.field_key] && 'border-destructive focus-visible:ring-destructive/20',
+                                                )}
+                                                value={data.attributes[field.field_key] || ''}
+                                                onChange={(e) => setData('attributes', { ...data.attributes, [field.field_key]: e.target.value })}
+                                                placeholder={t('Enter details...')}
+                                            />
+                                        ) : (
+                                            <Input
+                                                className={cn(
+                                                    'bg-background',
+                                                    dynamicFieldErrors[field.field_key] && 'border-destructive focus-visible:ring-destructive/20',
+                                                )}
+                                                type={field.field_type}
+                                                value={data.attributes[field.field_key] || ''}
+                                                onChange={(e) => setData('attributes', { ...data.attributes, [field.field_key]: e.target.value })}
+                                            />
+                                        ))}
+                                </div>
+
+                                {/* 3. ERROR MESSAGE */}
+                                {dynamicFieldErrors[field.field_key] && (
+                                    <p className="animate-in fade-in slide-in-from-top-1 text-destructive px-1 text-[11px] font-medium">
+                                        {dynamicFieldErrors[field.field_key]}
+                                    </p>
                                 )}
-                            />
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                <FormFieldTextArea
+                    id="short_description"
+                    label={t('Description')}
+                    value={data.short_description}
+                    onChange={(val) => setData('short_description', val)}
+                    error={errors.short_description}
+                />
+
+                <div className="space-y-4">
+                    {/* Use your standard FormFileUpload component */}
+                    <div className={cn('form-field-container md:grid-cols-1')}>
+                        <FormFileUpload
+                            key={editData?.images?.map((img: any) => img.image || img).join('-')}
+                            id="images"
+                            label={t('Select Images (Max 20)')}
+                            files={files}
+                            setFiles={setFiles}
+                            className="md:col-span-2"
+                            error={errors.images}
+                            dropzoneOptions={{
+                                maxFiles: 20, // Updated to 20 to match your label
+                                maxSize: 1024 * 1024 * 4,
+                                multiple: true, // Set to true for multiple images
+                                accept: {
+                                    'image/jpeg': ['.jpeg', '.jpg'],
+                                    'image/png': ['.png'],
+                                    'image/gif': ['.gif'],
+                                    'image/webp': ['.webp'],
+                                    'image/svg+xml': ['.svg'],
+                                },
+                            }}
+                        />
+                    </div>
+                </div>
+
+                {editData?.images?.length > 0 && (
+                    <div className="space-y-4">
+                        <p className="text-muted-foreground text-sm font-medium">{t('Uploaded Images')}</p>
+                        <div className="grid grid-cols-3 gap-2 md:grid-cols-6">
+                            {editData.images.map((img: any) => (
+                                <div key={img.id} className="group relative aspect-square overflow-hidden rounded-md border">
+                                    <img src={`/assets/images/items/thumb/${img.image}`} className="h-full w-full object-cover" />
+                                    <div className="absolute top-1 right-1 rounded bg-white/30">
+                                        <DeleteButton deletePath="/admin/items/images/" id={img.id} />
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
-                    <FormField
-                        control={form.control}
-                        name="images"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{t('Select Images')}</FormLabel>
-                                <FormControl>
-                                    <FileUploader value={files} onValueChange={setFiles} dropzoneOptions={dropZoneConfig} className="relative p-1">
-                                        <FileInput id="fileInput" className="outline-1 outline-slate-500 outline-dashed">
-                                            <div className="flex w-full flex-col items-center justify-center p-8">
-                                                <CloudUpload className="h-10 w-10 text-gray-500" />
-                                                <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
-                                                    <span className="font-semibold">{t('Click to upload')}</span>
-                                                    &nbsp; or drag and drop
-                                                </p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF</p>
-                                            </div>
-                                        </FileInput>
-                                        <FileUploaderContent className="grid w-full grid-cols-3 gap-2 rounded-md lg:grid-cols-6">
-                                            {files?.map((file, i) => (
-                                                <FileUploaderItem
-                                                    key={i}
-                                                    index={i}
-                                                    className="bg-background aspect-square h-auto w-full overflow-hidden rounded-md border p-0"
-                                                    aria-roledescription={`file ${i + 1} containing ${file.name}`}
-                                                >
-                                                    <img src={URL.createObjectURL(file)} alt={file.name} className="h-full w-full object-contain" />
-                                                </FileUploaderItem>
-                                                // <FileUploaderItem key={i} index={i}>
-                                                //     <Paperclip className="h-4 w-4 stroke-current" />
-                                                //     <span>{file.name}</span>
-                                                // </FileUploaderItem>
-                                            ))}
-                                        </FileUploaderContent>
-                                    </FileUploader>
-                                </FormControl>
-                                <FormMessage>{errors.images && <div>{errors.images}</div>}</FormMessage>
-                            </FormItem>
-                        )}
-                    />
-                    {/* Initial Image */}
-                    {editData?.images?.length > 0 && (
-                        <div className="mt-4 p-1">
-                            <FormDescription className="mb-2">{t('Uploaded Images')}</FormDescription>
-                            <div className="grid w-full grid-cols-3 gap-2 rounded-md lg:grid-cols-6">
-                                {editData.images.map((imageObject) => (
-                                    <>
-                                        <span
-                                            key={imageObject.id}
-                                            className="group bg-background relative aspect-square h-auto w-full overflow-hidden rounded-md border p-0"
-                                        >
-                                            <img
-                                                src={'/assets/images/items/thumb/' + imageObject.image}
-                                                alt={imageObject.name}
-                                                className="h-full w-full object-contain"
-                                            />
-                                            <span className="absolute top-1 right-1 group-hover:opacity-100 lg:opacity-0">
-                                                <DeleteButton deletePath="/admin/items/images/" id={imageObject.id} />
-                                            </span>
-                                        </span>
-                                    </>
+                )}
 
-                                    // <FileUploaderItem key={i} index={i}>
-                                    //     <Paperclip className="h-4 w-4 stroke-current" />
-                                    //     <span>{file.name}</span>
-                                    // </FileUploaderItem>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                    {/* Start Long Description */}
-                    {/* <div key={editorKey} className="space-y-8">
-                        <div>
-                            <p className="mb-1 text-sm font-medium">{t('Long Description')}</p>
-                            <MyCkeditor5 data={long_description} setData={setLong_description} />
-                        </div>
-                    </div> */}
+                {progress && <ProgressWithValue value={progress.percentage} position="start" />}
 
-                    {/* End Long Description */}
-                    {progress && <ProgressWithValue value={progress.percentage} position="start" />}
-                    {!readOnly && (
-                        <Button disabled={processing} type="submit">
-                            {processing && (
-                                <span className="size-6 animate-spin">
-                                    <Loader />
-                                </span>
-                            )}
-                            {processing ? t('Submitting') : t('Submit')}
-                        </Button>
-                    )}
-                </form>
-            </Form>
+                {!readOnly && <SubmitButton processing={processing} />}
+            </form>
         </AppLayout>
     );
 }

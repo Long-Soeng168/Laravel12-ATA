@@ -6,7 +6,6 @@ use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\DtcController;
-use App\Http\Controllers\Api\FileExploreController;
 use App\Http\Controllers\Api\FileExploreR2FileController;
 use App\Http\Controllers\Api\GarageController;
 use App\Http\Controllers\Api\GaragePostController;
@@ -95,3 +94,5 @@ Route::get('/file-explorer/folder/{path}', [FileExploreR2FileController::class, 
 
 // Auth API Route
 require __DIR__ . '/api_auth.php';
+require __DIR__ . '/api_v2.php';
+

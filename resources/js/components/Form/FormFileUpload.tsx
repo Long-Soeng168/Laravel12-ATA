@@ -9,6 +9,7 @@ interface FormFileUploadProps {
     id: string;
     label: string;
     error?: string;
+    requred?: boolean;
     files: File[] | null;
     setFiles: (value: File[] | null) => void;
     dropzoneOptions?: {
@@ -20,7 +21,7 @@ interface FormFileUploadProps {
     className?: string;
 }
 
-const FormFileUpload: React.FC<FormFileUploadProps> = ({ id, label, error, files, setFiles, dropzoneOptions, className = '' }) => {
+const FormFileUpload: React.FC<FormFileUploadProps> = ({ id, label, error, files, setFiles, dropzoneOptions, className = '', requred = false }) => {
     const defaultDropzone = {
         maxFiles: 1,
         maxSize: 1024 * 1024 * 4,
@@ -32,18 +33,23 @@ const FormFileUpload: React.FC<FormFileUploadProps> = ({ id, label, error, files
     const { t } = useTranslation();
     return (
         <div className="grid content-start gap-2">
-            <FormLabel id={id} label={label} />
-            <FileUploader value={files} onValueChange={setFiles} dropzoneOptions={finalDropzoneOptions} className="relative group rounded-lg bg-background">
-                <FileInput id={id} className="border dark:bg-muted border-foreground/50 group-hover:border-foreground border-dashed">
+            <FormLabel id={id} label={label} required={requred} />
+            <FileUploader
+                value={files}
+                onValueChange={setFiles}
+                dropzoneOptions={finalDropzoneOptions}
+                className="group bg-background overflow-visible relative rounded-lg"
+            >
+                <FileInput id={id} className="dark:bg-muted border-foreground/50 group-hover:border-foreground border border-dashed">
                     <div className="flex w-full flex-col items-center justify-center p-8">
-                        <CloudUpload className="h-10 w-10 text-muted-foreground" />
-                        <p className="text-center text-sm text-muted-foreground">
+                        <CloudUpload className="text-muted-foreground h-10 w-10" />
+                        <p className="text-muted-foreground text-center text-sm">
                             <span className="text-foreground">{t('Click to upload')}</span> {t('or drag and drop')}
                         </p>
                         {/* <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG</p> */}
                     </div>
                 </FileInput>
-                <FileUploaderContent>
+                <FileUploaderContent >
                     {files?.map((file, i) => (
                         <FileUploaderItem key={i + file.name} index={i}>
                             <span>

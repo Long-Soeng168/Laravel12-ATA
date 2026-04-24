@@ -444,6 +444,7 @@ class NokorTechController extends Controller
         $relatedItemsQuery->with(['category', 'images', 'shop']);
 
         $relatedItemsQuery->where('id', '!=', $id);
+        $relatedItemsQuery->where('status', 'active');
 
         if ($itemShow->category_code) {
             $relatedItemsQuery->where('category_code', $itemShow->category_code);

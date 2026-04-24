@@ -269,7 +269,7 @@ export const FileUploaderContent = forwardRef<
         {...props}
         ref={ref}
         className={cn(
-          "flex rounded-xl gap-1",
+          "flex rounded gap-1",
           orientation === "horizontal" ? "flex-raw flex-wrap" : "flex-col",
           className
         )}
@@ -293,7 +293,7 @@ export const FileUploaderItem = forwardRef<
       ref={ref}
       className={cn(
         buttonVariants({ variant: "ghost" }),
-        "h-8 p-1 justify-between group cursor-pointer relative",
+        "h-8 p-1 justify-between group rounded bg-muted px-2 cursor-pointer relative",
         className,
         isSelected ? "bg-muted" : ""
       )}
@@ -305,13 +305,13 @@ export const FileUploaderItem = forwardRef<
       <button
         type="button"
         className={cn(
-          "absolute lg:invisible group-hover:visible",
+          "absolute",
           direction === "rtl" ? "top-1 left-1" : "top-1 right-1"
         )}
         onClick={() => removeFileFromSet(index)}
       >
         <span className="sr-only">remove item {index}</span>
-        <RemoveIcon className="w-4 h-4 bg-destructive/80 stroke-white rounded-sm p-0.5 group-hover:stroke-white duration-200 ease-in-out" />
+        <RemoveIcon className="w-4 h-4 bg-destructive/80 stroke-white rounded p-0.5 group-hover:stroke-white duration-200 ease-in-out" />
       </button>
     </div>
   );
@@ -335,7 +335,7 @@ export const FileInput = forwardRef<
     >
       <div
         className={cn(
-          `w-full rounded-lg duration-300 ease-in-out
+          `w-full rounded duration-300 ease-in-out
          ${
            dropzoneState.isDragAccept
              ? "border-green-500"

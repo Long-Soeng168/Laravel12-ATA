@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import usePermission from '@/hooks/use-permission';
 import useTranslation from '@/hooks/use-translation';
+import { cn } from '@/lib/utils';
 import { useForm } from '@inertiajs/react';
 import { LoaderCircleIcon, Trash2Icon, TriangleAlertIcon } from 'lucide-react';
 import { useState } from 'react';
@@ -22,7 +23,7 @@ const DeleteItemButton = ({ deletePath = '#', id, permission }: { deletePath?: s
     const handleDelete = () => {
         destroy(deletePath + id, {
             preserveScroll: true,
-            onSuccess: (page) => {
+            onSuccess: (page: any) => {
                 if (page.props.flash?.success) {
                     toast.success('Success', {
                         description: page.props.flash.success,
@@ -47,8 +48,19 @@ const DeleteItemButton = ({ deletePath = '#', id, permission }: { deletePath?: s
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <TooltipButton tooltip={t('Delete Item')}>
                 <DialogTrigger asChild>
-                    <Button variant="outline" size="icon" className="text-destructive shadow-none hover:text-destructive">
-                        <Trash2Icon />
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className={cn(
+                            'h-8 w-8 rounded-md transition-all duration-200',
+                            // Light mode: Soft red tint
+                            'text-destructive hover:bg-destructive/10 hover:text-destructive',
+                            // Dark mode: Stronger contrast for visibility
+                            'dark:hover:bg-destructive/20 dark:text-red-400 dark:hover:text-red-300',
+                            'shadow-none active:scale-95',
+                        )}
+                    >
+                        <Trash2Icon className="h-4 w-4 stroke-[2.1]" />
                     </Button>
                 </DialogTrigger>
             </TooltipButton>
@@ -56,7 +68,7 @@ const DeleteItemButton = ({ deletePath = '#', id, permission }: { deletePath?: s
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>
-                        <div className="flex items-center gap-2 text-start text-destructive">
+                        <div className="text-destructive flex items-center gap-2 text-start">
                             <TriangleAlertIcon />
                             {t('Delete Item')} (ID: {id})
                         </div>
@@ -67,7 +79,7 @@ const DeleteItemButton = ({ deletePath = '#', id, permission }: { deletePath?: s
                     <Button
                         onClick={handleDelete}
                         autoFocus
-                        className="ring-destructive/20 focus:ring-4 dark:bg-destructive dark:ring-destructive/40"
+                        className="ring-destructive/20 dark:bg-destructive dark:ring-destructive/40 focus:ring-4"
                         disabled={processing}
                         variant="destructive"
                     >
@@ -78,7 +90,7 @@ const DeleteItemButton = ({ deletePath = '#', id, permission }: { deletePath?: s
                         )}
                         {processing ? t('Deleting') : t('Delete')}
                     </Button>
-                    <Button onClick={() => setIsOpen(false)} disabled={processing} variant="outline" className="border border-foreground">
+                    <Button onClick={() => setIsOpen(false)} disabled={processing} variant="outline" className="border-foreground border">
                         {t('Cancel')}
                     </Button>
                 </DialogFooter>

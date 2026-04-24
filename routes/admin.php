@@ -15,6 +15,9 @@ use App\Http\Controllers\HeadingController;
 use App\Http\Controllers\ItemBodyTypeController;
 use App\Http\Controllers\ItemBrandController;
 use App\Http\Controllers\ItemCategoryController;
+use App\Http\Controllers\ItemCategoryFieldController;
+use App\Http\Controllers\ItemCategoryFieldOpOptionController;
+use App\Http\Controllers\ItemCategoryFieldOptionController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ItemModelController;
 use App\Http\Controllers\ItemColorController;
@@ -165,6 +168,12 @@ Route::middleware('auth')->group(function () {
     // Item Category Route
     Route::resource('admin/item-categories', ItemCategoryController::class);
     Route::post('admin/item-categories/{item_category}/update', [ItemCategoryController::class, 'update']);
+
+    Route::resource('admin/item-category-fields', ItemCategoryFieldController::class);
+    Route::post('admin/item-category-fields/{item_category_field}/update', [ItemCategoryFieldController::class, 'update']);
+
+    Route::resource('admin/item-category-field-options', ItemCategoryFieldOptionController::class);
+    Route::post('admin/item-category-field-options/{item_category_field_option}/update', [ItemCategoryFieldOptionController::class, 'update']);
 
     // Shop Route
     Route::resource('admin/shops', ShopController::class);
