@@ -54,4 +54,9 @@ class ItemCategory extends Model
     {
         return $this->hasManyThrough(Item::class, ItemCategory::class, 'parent_code', 'category_code', 'code', 'code');
     }
+
+    public function brands()
+    {
+        return $this->belongsToMany(ItemBrand::class, 'item_brand_item_category');
+    }
 }

@@ -3,6 +3,7 @@ import DeleteItemButton from '@/components/Button/DeleteItemButton';
 import EditItemButton from '@/components/Button/EditItemButton';
 import RecoverItem from '@/components/Button/RecoverItemButton';
 import ViewItemButton from '@/components/Button/ViewItemButton';
+import CategoriesHoverCard from '@/components/CategoriesHoverCard';
 import NoDataDisplay from '@/components/NoDataDisplay';
 import TableCellActions from '@/components/Table/TableCellActions';
 import TableCellDate from '@/components/Table/TableCellDate';
@@ -26,11 +27,9 @@ const TableData = () => {
                             <TableHeadWithSort field="name" label="Name" />
                             <TableHeadWithSort field="name_kh" label="Name Khmer" />
                             <TableHeadWithSort field="order_index" label="Order Index" />
-                            {/* <TableHeadWithSort field="parent_id" label="Parent" /> */}
+                            <TableHeadWithSort label="Categories" />
                             <TableHeadWithSort field="created_at" label="Created at" />
-                            <TableHeadWithSort field="created_by" label="Created by" />
                             <TableHeadWithSort field="updated_at" label="Updated at" />
-                            <TableHeadWithSort field="updated_by" label="Updated by" />
                         </TableRow>
                     </TableHeader>
                     <TableBody className="table-body rounded-md">
@@ -72,7 +71,9 @@ const TableData = () => {
                                 <TableCellText value={item.name} />
                                 <TableCellText value={item.name_kh} />
                                 <TableCellText value={item.order_index} />
-                                {/* <TableCellBadge variant="accent" value={item.parent?.name} /> */}
+                                <TableCell>
+                                    <CategoriesHoverCard categories={item.categories} />
+                                </TableCell>
                                 <TableCellDate value={item.created_at} />
                                 <TableCellText value={item.created_user?.name} />
                                 <TableCellDate value={item.updated_at} />

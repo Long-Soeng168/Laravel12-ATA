@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
 use App\Models\ItemBrand;
+use App\Models\ItemCategory;
 use Illuminate\Http\Request;
 
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ItemBrandController extends Controller implements HasMiddleware
@@ -44,6 +46,7 @@ class ItemBrandController extends Controller implements HasMiddleware
         }
 
         $query->orderBy($sortBy, $sortDirection);
+        $query->with('categories');
 
         if ($search) {
             $query->where(function ($sub_query) use ($search) {
@@ -66,12 +69,11 @@ class ItemBrandController extends Controller implements HasMiddleware
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(Request $request)
     {
-        return Inertia::render('admin/ItemBrand/Create', []);
+        return Inertia::render('admin/ItemBrand/Create', [
+            'categories' => ItemCategory::orderByDesc('order_index')->orderBy('name')->get(),
+        ]);
     }
 
     /**
@@ -80,16 +82,22 @@ class ItemBrandController extends Controller implements HasMiddleware
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'code' => 'required|string|max:255',
+            'code' => 'required|string|max:255|unique:item_brands,code', // Added unique validation
             'name' => 'required|string|max:255',
             'name_kh' => 'nullable|string|max:255',
             'order_index' => 'required|numeric',
             'image' => 'nullable|mimes:jpeg,png,jpg,gif,webp,svg|max:4096',
+            'category_ids' => 'nullable|array', // Validate incoming categories
+            'category_ids.*' => 'exists:item_categories,id', // Ensure categories actually exist
         ]);
-        // dd($request->all());
-
 
         try {
+            DB::beginTransaction();
+
+            // Extract category_ids and remove from validated array so it doesn't break the create() method
+            $categoryIds = $request->input('category_ids', []);
+            unset($validated['category_ids']);
+
             // Add creator and updater
             $validated['created_by'] = $request->user()->id;
             $validated['updated_by'] = $request->user()->id;
@@ -105,10 +113,18 @@ class ItemBrandController extends Controller implements HasMiddleware
             }
 
             // Create the Item Brand
-            ItemBrand::create($validated);
+            $itemBrand = ItemBrand::create($validated);
+
+            // Attach the many-to-many categories
+            if (!empty($categoryIds)) {
+                $itemBrand->categories()->attach($categoryIds);
+            }
+
+            DB::commit();
 
             return redirect()->back()->with('success', 'Item Brand created successfully!');
         } catch (\Exception $e) {
+            DB::rollBack();
             return redirect()->back()->withErrors('Failed to create Item Brand: ' . $e->getMessage());
         }
     }
@@ -119,7 +135,11 @@ class ItemBrandController extends Controller implements HasMiddleware
      */
     public function show(ItemBrand $item_brand)
     {
+        // Load the associated categories so your frontend can display them
+        $item_brand->load('categories');
+
         return Inertia::render('admin/ItemBrand/Create', [
+            'categories' => ItemCategory::orderByDesc('order_index')->orderBy('name')->get(),
             'editData' => $item_brand,
             'readOnly' => true,
         ]);
@@ -130,7 +150,11 @@ class ItemBrandController extends Controller implements HasMiddleware
      */
     public function edit(ItemBrand $item_brand)
     {
+        // Load the associated categories so your frontend knows which ones are selected
+        $item_brand->load('categories');
+
         return Inertia::render('admin/ItemBrand/Create', [
+            'categories' => ItemCategory::orderByDesc('order_index')->orderBy('name')->get(),
             'editData' => $item_brand,
         ]);
     }
@@ -141,14 +165,22 @@ class ItemBrandController extends Controller implements HasMiddleware
     public function update(Request $request, ItemBrand $item_brand)
     {
         $validated = $request->validate([
-            'code' => 'required|string|max:255',
+            'code' => 'required|string|max:255|unique:item_brands,code,' . $item_brand->id, // Ignore current brand ID for unique check
             'name' => 'required|string|max:255',
             'name_kh' => 'nullable|string|max:255',
             'order_index' => 'required|numeric',
             'image' => 'nullable|mimes:jpeg,png,jpg,gif,webp,svg|max:4096',
+            'category_ids' => 'nullable|array', // Validate incoming categories
+            'category_ids.*' => 'exists:item_categories,id',
         ]);
 
         try {
+            DB::beginTransaction();
+
+            // Extract category_ids and remove from validated array
+            $categoryIds = $request->input('category_ids', []);
+            unset($validated['category_ids']);
+
             // track updater
             $validated['updated_by'] = $request->user()->id;
 
@@ -171,11 +203,17 @@ class ItemBrandController extends Controller implements HasMiddleware
                 }
             }
 
-            // Update
+            // Update the brand details
             $item_brand->update($validated);
+
+            // Sync the many-to-many categories (this automatically adds new ones and removes unselected ones)
+            $item_brand->categories()->sync($categoryIds);
+
+            DB::commit();
 
             return redirect()->back()->with('success', 'Item Brand updated successfully!');
         } catch (\Exception $e) {
+            DB::rollBack();
             return redirect()->back()->withErrors('Failed to update Item Brand: ' . $e->getMessage());
         }
     }

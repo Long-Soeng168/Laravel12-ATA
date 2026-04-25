@@ -110,6 +110,7 @@ class ItemCategoryController extends Controller implements HasMiddleware
             'short_description' => 'nullable|string',
             'short_description_kh' => 'nullable|string',
             'image' => 'nullable|mimes:jpeg,png,jpg,gif,webp,svg|max:4096',
+            'has_body_type' => 'nullable|boolean',
         ]);
         // dd($request->all());
 
@@ -176,6 +177,7 @@ class ItemCategoryController extends Controller implements HasMiddleware
             'short_description' => 'nullable|string',
             'short_description_kh' => 'nullable|string',
             'image' => 'nullable|mimes:jpeg,png,jpg,gif,webp,svg|max:4096',
+            'has_body_type' => 'nullable|boolean',
         ]);
 
         try {

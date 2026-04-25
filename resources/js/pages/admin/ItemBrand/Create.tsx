@@ -5,6 +5,7 @@ import FormFileUpload from '@/components/Form/FormFileUpload';
 import UploadedImage from '@/components/Form/UploadedImageDisplay';
 import { FormField } from '@/components/Input/FormField';
 import { ProgressWithValue } from '@/components/ProgressBar/progress-with-value';
+import MultipleSelector, { Option } from '@/components/ui/multiple-selector';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import useTranslation from '@/hooks/use-translation';
 import AppLayout from '@/layouts/app-layout';
@@ -12,32 +13,65 @@ import { cn, toSlug } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { useForm } from '@inertiajs/react';
 import { useState } from 'react';
+// Define the shape of your category to safely type the props
+interface Category {
+    id: number;
+    name: string;
+}
 
 interface TypeGroupForm {
     code?: string;
     name: string;
     name_kh?: string;
-    order_index?: string;
-    image?: string | null;
+    order_index?: string | number;
+    image?: string | null | File;
+    category_ids: number[]; // Added this to hold the IDs for submission
 }
 
-export default function Create({ editData, readOnly }: { editData?: any; readOnly?: boolean }) {
+export default function Create({ editData, readOnly, categories = [] }: { editData?: any; readOnly?: boolean; categories?: Category[] }) {
+    const { t, currentLocale } = useTranslation();
+
     const [flashMessage, setFlashMessage] = useState<{ message: string; type: string }>({
         message: '',
         type: 'message',
     });
 
     const [inputLanguage, setInputLanguage] = useState<'default' | 'khmer'>('default');
-
     const [files, setFiles] = useState<File[] | null>(null);
 
+    // 1. Format available categories for the MultipleSelector
+    const categoryOptions: Option[] = categories.map((cat) => ({
+        label: cat.name,
+        value: cat.id.toString(),
+    }));
+
+    // 2. Format existing selected categories (if editing) for the MultipleSelector
+    const initialSelectedCategories: Option[] =
+        editData?.categories?.map((cat: any) => ({
+            label: cat.name,
+            value: cat.id.toString(),
+        })) || [];
+
+    const [selectedCategories, setSelectedCategories] = useState<Option[]>(initialSelectedCategories);
+
+    // 3. Initialize the form data
     const { data, setData, post, processing, transform, progress, errors, reset } = useForm<TypeGroupForm>({
         code: editData?.code || '',
         name: editData?.name || '',
         name_kh: editData?.name_kh || '',
         order_index: editData?.order_index || 10000,
         image: editData?.image || null,
+        category_ids: editData?.categories?.map((cat: any) => cat.id) || [], // Extract IDs for initial state
     });
+
+    // 4. Handle changes from MultipleSelector and sync with Inertia form data
+    const handleCategoryChange = (selected: Option[]) => {
+        setSelectedCategories(selected);
+        setData(
+            'category_ids',
+            selected.map((item) => Number(item.value)),
+        );
+    };
 
     const onSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -55,6 +89,7 @@ export default function Create({ editData, readOnly }: { editData?: any; readOnl
             post('/admin/item-brands', {
                 onSuccess: (page: any) => {
                     reset();
+                    setSelectedCategories([]); // Clear selector UI on successful create
                     setFiles(null);
                     setFlashMessage({ message: page.props.flash?.success, type: 'success' });
                 },
@@ -69,8 +104,6 @@ export default function Create({ editData, readOnly }: { editData?: any; readOnl
         { title: editData?.name || 'Create', href: '#' },
     ];
 
-    const { t, currentLocale } = useTranslation();
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <form onSubmit={onSubmit} className="form">
@@ -81,7 +114,8 @@ export default function Create({ editData, readOnly }: { editData?: any; readOnl
                     setFlashMessage={setFlashMessage}
                 />
                 {errors && <AllErrorsAlert title="Please fix the following errors" errors={errors} />}
-                <div className="sticky top-0">
+
+                <div className="bg-background sticky top-0 z-10 pt-4 pb-2">
                     <Tabs value={inputLanguage} onValueChange={(val: any) => setInputLanguage(val)}>
                         <TabsList className="bg-border/50 border p-1 dark:border-white/20">
                             <TabsTrigger value="default" className="h-full dark:data-[state=active]:bg-white/20">
@@ -129,6 +163,7 @@ export default function Create({ editData, readOnly }: { editData?: any; readOnl
                         />
                     </div>
                 )}
+
                 {inputLanguage == 'default' && (
                     <>
                         <div className="form-field-container">
@@ -144,6 +179,34 @@ export default function Create({ editData, readOnly }: { editData?: any; readOnl
                                 description="Lower number has higher priority."
                             />
                         </div>
+
+                        {/* Categories Selection Field */}
+                        {/* Categories Selection Field */}
+                        <div className="form-field-container md:grid-cols-1">
+                            <div className="col-span-12">
+                                {/* Replaced FormLabel with a standard styled label or shadcn Label */}
+                                <label className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    {t('Categories')}
+                                </label>
+
+                                <MultipleSelector
+                                    className="my-2" // Slightly adjusted margin for better spacing
+                                    value={selectedCategories}
+                                    onChange={handleCategoryChange}
+                                    defaultOptions={categoryOptions}
+                                    placeholder="Select categories..."
+                                    emptyIndicator={
+                                        <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">No results found.</p>
+                                    }
+                                />
+
+                                {/* Replaced FormMessage with standard conditional rendering */}
+                                {errors.category_ids && <p className="text-destructive mt-1 text-[0.8rem] font-medium">{errors.category_ids}</p>}
+
+                                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Select the categories this brand belongs to.</p>
+                            </div>
+                        </div>
+
                         <div className={cn('form-field-container', !editData?.image && 'md:grid-cols-1')}>
                             <FormFileUpload
                                 key={editData?.image}

@@ -24,4 +24,13 @@ class ItemBrand extends Model
     {
         return $this->hasMany(Item::class, 'brand_code', 'code');
     }
+    public function brand_models()
+    {
+        return $this->hasMany(ItemModel::class, 'brand_code', 'code');
+    }
+
+    public function categories()
+    {
+        return $this->belongsToMany(ItemCategory::class, 'item_brand_item_category');
+    }
 }

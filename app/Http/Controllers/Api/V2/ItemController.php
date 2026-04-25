@@ -23,15 +23,15 @@ class ItemController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. Start the Query with relationships. 
-        // Optimization: We still eager load 'images' to get the count and the first one.
+        // 1. Start the Query with relationships
         $query = Item::with(['category', 'images']);
 
-        // Filter by Category Code
+        // Filter by Category Code and Dynamic Attributes
         if ($request->filled('category_code')) {
             $categoryCode = $request->category_code;
             $query->where('category_code', $categoryCode);
 
+            // Fetch valid fields for this category to prevent SQL injection or bad queries
             $category = ItemCategory::where('code', $categoryCode)->first();
 
             if ($category) {
@@ -39,17 +39,27 @@ class ItemController extends Controller
                     ->pluck('field_key')
                     ->toArray();
 
+                // Loop through request inputs to match valid JSON attributes
                 foreach ($request->all() as $key => $value) {
                     if (in_array($key, $validFields) && $request->filled($key)) {
+                        // Assuming 'attributes' is cast to an array/json in your Item model
                         $query->where("attributes->$key", $value);
                     }
                 }
             }
         }
 
-        // Standard Filters (Brand, Search)
+        // Standard Filters
         if ($request->filled('brand_code')) {
             $query->where('brand_code', $request->brand_code);
+        }
+
+        if ($request->filled('model_code')) {
+            $query->where('model_code', $request->model_code);
+        }
+
+        if ($request->filled('body_type_code')) {
+            $query->where('body_type_code', $request->body_type_code);
         }
 
         if ($request->filled('q')) {
@@ -59,12 +69,12 @@ class ItemController extends Controller
             });
         }
 
-        // 2. Paginate
-        $items = $query->latest()->paginate(15);
+        // 2. Paginate & Sort (Removed latest() to prevent conflicting with orderByDesc)
+        $items = $query->orderByDesc('id')->paginate(15);
 
-        // 3. Pre-fetch mappings for attributes (Optimization for transformation)
-        $categoryCodes = $items->pluck('category_code')->unique();
-        $categoryIds = ItemCategory::whereIn('code', $categoryCodes)->pluck('id');
+        // 3. Pre-fetch mappings for attributes (Optimized)
+        // We get the IDs from the already eager-loaded categories instead of running a new query!
+        $categoryIds = $items->pluck('category.id')->filter()->unique();
 
         $categoryMaps = ItemCategoryField::whereIn('category_id', $categoryIds)
             ->with('options')
@@ -73,24 +83,24 @@ class ItemController extends Controller
 
         // 4. Transform Collection
         $items->getCollection()->transform(function ($item) use ($categoryMaps) {
+
             // --- Image Optimization for Flutter List ---
             $firstImage = $item->images->first();
 
-            $item->thumbnail_url = $firstImage
+            $item->image_url = $firstImage
                 ? asset('assets/images/items/' . $firstImage->image)
-                : asset('assets/images/placeholder.webp'); // Fallback if no image
+                : asset('assets/images/placeholder.webp');
 
             $item->total_images = $item->images->count();
 
-            // Optional: If you still want the image object structure but just 1 item:
             $item->thumbnail_image = $firstImage ? [
                 'id' => $firstImage->id,
                 'image' => $firstImage->image,
-                'url' => asset('assets/images/items/' . $firstImage->image),
+                'image_url' => asset('assets/images/items/' . $firstImage->image),
             ] : null;
 
             // --- Attribute Display Logic ---
-            $categoryId = $item->category ? $item->category->id : null;
+            $categoryId = $item->category?->id;
             $fields = $categoryMaps->get($categoryId);
             $displayAttributes = [];
 
@@ -111,9 +121,8 @@ class ItemController extends Controller
 
             $item->display_attributes = $displayAttributes;
 
-            // Remove the full images collection to keep the JSON small
-            unset($item->images);
-            unset($item->category); // Usually not needed in index if category_code is there
+            // Correct Laravel way to hide relationships from the final JSON payload
+            $item->makeHidden(['images', 'category']);
 
             return $item;
         });
@@ -130,14 +139,48 @@ class ItemController extends Controller
             'success' => true,
             'data' => [
                 'itemCategories' => ItemCategory::where('status', 'active')
-                    ->with(['fields.options'])
+                    ->with(['fields.options', 'brands'])
                     ->orderBy('order_index')
                     ->orderBy('name')
-                    ->get(),
+                    ->get()
+                    ->map(function ($item) {
+                        $item->image_url = $item->image ? asset('assets/images/item_categories/' . $item->image) : null;
+                        $item->brand_ids = $item->brands->pluck('id')->toArray();
+                        return $item;
+                    }),
 
-                'itemBrands' => ItemBrand::where('status', 'active')->orderBy('name')->get(),
-                'itemModels' => ItemModel::where('status', 'active')->orderBy('name')->get(),
-                'itemBodyTypes' => ItemBodyType::where('status', 'active')->orderBy('name')->get(),
+                'itemBrands' => ItemBrand::where('status', 'active')
+                    ->orderBy('order_index')
+                    ->orderBy('name')
+                    ->with(['brand_models' => function ($query) {
+                        $query->where('status', 'active')->orderBy('name');
+                    }])
+                    ->get()
+                    ->map(function ($brand) {
+                        // 1. Add image_url for the Brand
+                        $brand->image_url = $brand->image
+                            ? asset('assets/images/item_brands/' . $brand->image)
+                            : null;
+
+                        // 2. Map through the nested models to add their image_url
+                        $brand->brand_models->map(function ($model) {
+                            $model->image_url = $model->image
+                                ? asset('assets/images/item_models/' . $model->image)
+                                : null;
+                            return $model;
+                        });
+
+                        return $brand;
+                    }),
+
+                'itemBodyTypes' => ItemBodyType::where('status', 'active')
+                    ->orderBy('order_index')
+                    ->orderBy('name')
+                    ->get()
+                    ->map(function ($item) {
+                        $item->image_url = $item->image ? asset('assets/images/item_body_types/' . $item->image) : null;
+                        return $item;
+                    }),
             ]
         ]);
     }
@@ -148,8 +191,9 @@ class ItemController extends Controller
     public function show($id)
     {
         // Eager load everything needed, but we will selectively return data
-        $item = Item::with(['images', 'category.fields.options'])->findOrFail($id);
+        $item = Item::with(['images', 'brand', 'model', 'body_type', 'shop', 'created_by_user', 'category.fields.options'])->findOrFail($id);
 
+        $item->increment('total_view_counts');
         // 1. Convert the basic item to an array
         $formattedItem = $item->toArray();
 
@@ -214,9 +258,144 @@ class ItemController extends Controller
             ];
         });
 
+        // 5. Format images and related profiles with absolute URLs
+
+        // Item Images
+        $formattedItem['images'] = $item->images->map(function ($img) {
+            return [
+                'id' => $img->id,
+                'image' => $img->image,
+                'url' => asset('assets/images/items/' . $img->image),
+                'item_id' => $img->item_id,
+            ];
+        });
+
+        // Shop Image URL
+        if ($item->shop) {
+            $formattedItem['shop']['logo_url'] = $item->shop->logo
+                ? asset('assets/images/shops/' . $item->shop->logo)
+                : null;
+            $formattedItem['shop']['banner_url'] = $item->shop->banner
+                ? asset('assets/images/shops/' . $item->shop->banner)
+                : null;
+        }
+
+        // User (created_by_user) Image/Avatar URL
+        if ($item->created_by_user) {
+            $formattedItem['created_by_user']['image_url'] = $item->created_by_user->image
+                ? asset('assets/images/users/' . $item->created_by_user->image)
+                : null;
+        }
+
+        // Also handle Brand/Model/BodyType images if you have them
+        if ($item->brand) {
+            $formattedItem['brand']['image_url'] = $item->brand->image
+                ? asset('assets/images/brands/' . $item->brand->image)
+                : null;
+        }
+
         return response()->json([
             'success' => true,
             'data' => $formattedItem
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $formattedItem
+        ]);
+    }
+    public function related_items($id)
+    {
+        // 1. Find the base item to relate to
+        $baseItem = Item::find($id);
+
+        if (!$baseItem) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Item not found.',
+                'data' => []
+            ], 404);
+        }
+
+        // 2. Start the Query for Related Items with relationships
+        $query = Item::with(['category', 'images'])
+            ->where('id', '!=', $baseItem->id); // Exclude the current item
+
+        // Define what makes an item "related" (e.g., same category, brand, or model)
+        $query->where(function ($q) use ($baseItem) {
+            if ($baseItem->category_code) {
+                $q->orWhere('category_code', $baseItem->category_code);
+            }
+            if ($baseItem->brand_code) {
+                $q->orWhere('brand_code', $baseItem->brand_code);
+            }
+            if ($baseItem->model_code) {
+                $q->orWhere('model_code', $baseItem->model_code);
+            }
+        });
+
+        // 3. Get results without pagination (limit to 10 or 15 items for a related carousel)
+        $items = $query->orderByDesc('id')->take(10)->get();
+
+        // 4. Pre-fetch mappings for attributes (Optimized)
+        $categoryIds = $items->pluck('category.id')->filter()->unique();
+
+        $categoryMaps = ItemCategoryField::whereIn('category_id', $categoryIds)
+            ->with('options')
+            ->get()
+            ->groupBy('category_id');
+
+        // 5. Transform Collection
+        // Note: Because we used get() instead of paginate(), $items is already a Collection, 
+        // so we call transform() directly instead of $items->getCollection()->transform()
+        $items->transform(function (Item $item) use ($categoryMaps) {
+
+            // --- Image Optimization for Flutter List ---
+            $firstImage = $item->images->first();
+
+            $item->image_url = $firstImage
+                ? asset('assets/images/items/' . $firstImage->image)
+                : asset('assets/images/placeholder.webp');
+
+            $item->total_images = $item->images->count();
+
+            $item->thumbnail_image = $firstImage ? [
+                'id' => $firstImage->id,
+                'image' => $firstImage->image,
+                'image_url' => asset('assets/images/items/' . $firstImage->image),
+            ] : null;
+
+            // --- Attribute Display Logic ---
+            $categoryId = $item->category?->id;
+            $fields = $categoryMaps->get($categoryId);
+            $displayAttributes = [];
+
+            if ($fields && is_array($item->attributes)) {
+                foreach ($item->attributes as $key => $storedValue) {
+                    $field = $fields->where('field_key', $key)->first();
+                    $option = $field ? $field->options->where('option_value', $storedValue)->first() : null;
+
+                    $displayAttributes[$key] = [
+                        'label' => $field->label ?? $key,
+                        'label_kh' => $field->label_kh ?? $key,
+                        'value' => $storedValue,
+                        'value_label_en' => $option->label_en ?? $storedValue,
+                        'value_label_kh' => $option->label_kh ?? $storedValue,
+                    ];
+                }
+            }
+
+            $item->display_attributes = $displayAttributes;
+
+            // Correct Laravel way to hide relationships from the final JSON payload
+            $item->makeHidden(['images', 'category']);
+
+            return $item;
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $items
         ]);
     }
 

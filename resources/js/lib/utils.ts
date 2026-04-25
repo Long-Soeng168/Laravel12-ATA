@@ -12,6 +12,6 @@ export function toSlug(input: string): string {
         .trim()
         .replace(/\s+/g, '-')
         .replace(/[~!@#$%^&*()_+]/g, '')
-        .replace(/-+/g, '-');
-        // .toUpperCase();
+        .replace(/-+/g, '-')
+        .toLowerCase();
 }

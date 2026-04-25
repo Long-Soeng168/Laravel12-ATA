@@ -3,10 +3,11 @@ import AllErrorsAlert from '@/components/Alert/AllErrorsAlert';
 import SubmitButton from '@/components/Button/SubmitButton';
 import FormFileUpload from '@/components/Form/FormFileUpload';
 import UploadedImage from '@/components/Form/UploadedImageDisplay';
-import { FormCombobox } from '@/components/Input/FormCombobox';
 import { FormField } from '@/components/Input/FormField';
 import { FormFieldTextArea } from '@/components/Input/FormFieldTextArea';
 import { ProgressWithValue } from '@/components/ProgressBar/progress-with-value';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import useTranslation from '@/hooks/use-translation';
 import AppLayout from '@/layouts/app-layout';
@@ -23,6 +24,7 @@ interface TypeGroupForm {
     order_index?: string;
     short_description?: string;
     short_description_kh?: string;
+    has_body_type?: boolean | null;
     image?: string | null;
 }
 
@@ -47,6 +49,7 @@ export default function Create({ editData, readOnly }: { editData?: any; readOnl
         short_description: editData?.short_description || '',
         short_description_kh: editData?.short_description_kh || '',
         image: editData?.image || null,
+        has_body_type: editData?.has_body_type || null,
     });
 
     const onSubmit = (e: React.FormEvent) => {
@@ -192,6 +195,22 @@ export default function Create({ editData, readOnly }: { editData?: any; readOnl
                                 error={errors.order_index}
                                 description="Lower number has higher priority."
                             />
+
+                            <div className="bg-accent/5 flex items-center space-x-4 rounded-lg border p-4">
+                                <Switch
+                                    id="has_body_type"
+                                    checked={data.has_body_type ?? false}
+                                    onCheckedChange={(val) => setData('has_body_type', val)}
+                                />
+                                <div className="grid gap-1.5 leading-none">
+                                    <Label htmlFor="has_body_type" className="text-sm font-bold">
+                                        {t('Has Body Type')}
+                                    </Label>
+                                    <p className="text-muted-foreground text-xs">
+                                        {t('Enable this if the category includes body type (e.g., sedan, SUV, etc.).')}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                         <div className={cn('form-field-container', !editData?.image && 'md:grid-cols-1')}>
                             <FormFileUpload

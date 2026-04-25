@@ -11,6 +11,9 @@ use App\Http\Controllers\ItemCategoryController;
 */
 
 // /api/v2/...
+// http://127.0.0.1:8000/api/v2/items?category_code=BRAKE
+// http://127.0.0.1:8000/api/v2/items/123
+// http://127.0.0.1:8000/api/v2/items-form-data
 Route::prefix('v2')->group(function () {
 
     Route::get('/items-categories', [ItemCategoryController::class, 'getFieldsByCategory']);
@@ -20,6 +23,7 @@ Route::prefix('v2')->group(function () {
     Route::get('/items', [ItemController::class, 'index']);
     // Get a single item detail
     Route::get('/items/{id}', [ItemController::class, 'show']);
+    Route::get('/items/{id}/related', [ItemController::class, 'related_items']);
 
     Route::get('/items-form-data', [ItemController::class, 'form_data']);
     Route::post('/items', [ItemController::class, 'store']);         // Store item
