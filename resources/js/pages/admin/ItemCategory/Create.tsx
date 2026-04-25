@@ -49,7 +49,7 @@ export default function Create({ editData, readOnly }: { editData?: any; readOnl
         short_description: editData?.short_description || '',
         short_description_kh: editData?.short_description_kh || '',
         image: editData?.image || null,
-        has_body_type: editData?.has_body_type || null,
+        has_body_type: editData?.has_body_type || false,
     });
 
     const onSubmit = (e: React.FormEvent) => {
