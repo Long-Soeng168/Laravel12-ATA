@@ -142,7 +142,6 @@ class GarageController extends Controller implements HasMiddleware
         $validated = $request->validate([
             'owner_user_id' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
-            'address' => 'nullable|string|max:255',
             'phone' => 'nullable|string',
             'short_description' => 'nullable|string|max:500',
             'short_description_kh' => 'nullable|string|max:500',
@@ -153,6 +152,7 @@ class GarageController extends Controller implements HasMiddleware
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'expired_at' => 'nullable|date',
+            'address' => 'nullable|string|max:255',
             'location' => 'nullable|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',

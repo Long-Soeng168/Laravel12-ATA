@@ -1,40 +1,29 @@
-import MyDialogCancelButton from '@/components/my-dialog-cancel-button';
+import SubmitButton from '@/components/Button/SubmitButton';
+import FormFileUpload from '@/components/Form/FormFileUpload';
+import UploadedImage from '@/components/Form/UploadedImageDisplay';
+import { FormErrorLabel } from '@/components/Input/FormErrorLabel';
+import { FormField } from '@/components/Input/FormField';
+import { FormLabel } from '@/components/Input/FormLabel';
+import LocationPicker from '@/components/LocationPicker';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
-import { FileInput, FileUploader, FileUploaderContent, FileUploaderItem } from '@/components/ui/file-upload';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ProgressWithValue } from '@/components/ui/progress-with-value';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Switch } from '@/components/ui/switch';
 import useTranslation from '@/hooks/use-translation';
 import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm as inertiaUseForm } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
 import axios from 'axios';
 import { format } from 'date-fns';
-import { CalendarIcon, CloudUpload, Loader, Paperclip } from 'lucide-react';
+import { CalendarIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import * as z from 'zod';
-
-const formSchema = z.object({
-    name: z.string().min(1).max(255),
-    email: z.string().min(6).max(255),
-    phone: z.string().max(255).optional(),
-    gender: z.string().max(255).optional(),
-    password: z.string().max(255).optional(),
-    password_confirmation: z.string().max(255).optional(),
-    image: z.string().optional(),
-    roles: z.array(z.string()).optional(),
-    document_access_end_at: z.coerce.date().optional(),
-});
 
 export default function Create({
     editData,
@@ -45,376 +34,304 @@ export default function Create({
     readOnly?: boolean;
     setIsOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-    // ===== Start Our Code =====
     const { t } = useTranslation();
     const [files, setFiles] = useState<File[] | null>(null);
-    const [filesBanner, setFilesBanner] = useState<File[] | null>(null);
-
-    const dropZoneConfig = {
-        maxFiles: 100,
-        maxSize: 1024 * 1024 * 4,
-        multiple: false,
-        accept: {
-            'image/jpeg': ['.jpeg', '.jpg'],
-            'image/png': ['.png'],
-            'image/gif': ['.gif'],
-            'image/webp': ['.webp'],
-        },
-    };
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            name: editData?.name || '',
-            email: editData?.email || '',
-            phone: editData?.phone || '',
-            gender: editData?.gender || '',
-            document_access_end_at: editData?.document_access_end_at ? new Date(editData.document_access_end_at) : undefined,
-            password: '',
-            password_confirmation: '',
-            image: '',
-            roles: editData?.roles?.map((r: any) => r.name) || [],
-        },
-    });
-
-    const [roles, setRoles] = useState([]);
+    const [roles, setRoles] = useState<any[]>([]);
     const [isGettingRoles, setIsGettingRoles] = useState(false);
-    const [error, setError] = useState(null);
+
+    const { data, setData, post, processing, progress, errors, reset, transform } = useForm({
+        name: editData?.name || '',
+        email: editData?.email || '',
+        phone: editData?.phone || '',
+        gender: editData?.gender || '',
+        document_access_end_at: editData?.document_access_end_at ? new Date(editData.document_access_end_at) : null,
+        password: '',
+        password_confirmation: '',
+        image: null as any,
+        roles: editData?.roles?.map((r: any) => r.name) || [],
+        address: editData?.address || '',
+        location: editData?.location || '',
+        latitude: editData?.latitude ?? null,
+        longitude: editData?.longitude ?? null,
+        is_verified: editData?.is_verified === 1 || editData?.is_verified === true || false,
+    });
 
     useEffect(() => {
         setIsGettingRoles(true);
-        getParentsTableData();
-        // Fetch data from the Laravel API route
-    }, []);
-
-    function getParentsTableData() {
         axios
             .get('/admin/all_roles')
             .then((response) => {
-                setIsGettingRoles(false);
                 setRoles(response.data);
+                setIsGettingRoles(false);
             })
-            .catch((error) => {
-                setError(error);
-            });
-    }
+            .catch(() => setIsGettingRoles(false));
+    }, []);
 
-    const { post, data, progress, processing, transform, errors } = inertiaUseForm();
+    const onSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        // toast(
-        //     <pre className="mt-2 w-[320px] rounded-md bg-slate-950 p-4">
-        //         <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        //     </pre>,
-        // );
-        try {
-            transform(() => ({
-                ...values,
-                image: files ? files[0] : null,
-            }));
-            if (editData?.id) {
-                post('/admin/users/' + editData.id + '/update', {
-                    preserveScroll: true,
-                    onSuccess: (page) => {
-                        setFiles(null);
-                        if (page.props.flash?.success) {
-                            toast.success('Success', {
-                                description: page.props.flash.success,
-                            });
-                        }
-                    },
-                    onError: (e) => {
-                        toast.error('Error', {
-                            description: 'Failed to update.' + JSON.stringify(e, null, 2),
-                        });
-                    },
-                });
-            } else {
-                post('/admin/users', {
-                    preserveScroll: true,
-                    onSuccess: (page) => {
-                        form.reset();
-                        setFiles(null);
-                        if (page.props.flash?.success) {
-                            toast.success('Success', {
-                                description: page.props.flash.success,
-                            });
-                        }
-                    },
-                    onError: (e) => {
-                        toast.error('Error', {
-                            description: 'Failed to create.' + JSON.stringify(e, null, 2),
-                        });
-                    },
-                });
-            }
-        } catch (error) {
-            console.error('Form submission error', error);
-            toast.error('Error', {
-                description: 'Something went wrong!' + error,
-            });
-        }
-    }
-    // ===== End Our Code =====
-    const currentBreadcrumb = readOnly ? t('Show') : editData ? t('Edit') : t('Create');
+        transform((data) => ({
+            ...data,
+            image: files ? files[0] : null,
+        }));
+
+        const url = editData?.id ? `/admin/users/${editData.id}/update` : '/admin/users';
+
+        post(url, {
+            preserveScroll: false,
+            onSuccess: (page: any) => {
+                if (!editData?.id) {
+                    reset();
+                    setFiles(null);
+                }
+                if (page.props.flash?.success) {
+                    toast.success(t('Success'), { description: page.props.flash.success });
+                }
+            },
+            onError: () => {
+                toast.error(t('Error'), { description: t('Please check the form for errors.') });
+            },
+        });
+    };
+
     const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: t('Users'),
-            href: '/admin/users',
-        },
-        {
-            title: currentBreadcrumb,
-            href: '#',
-        },
+        { title: t('Users'), href: '/admin/users' },
+        { title: readOnly ? t('Show') : editData ? t('Edit') : t('Create'), href: '#' },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-5">
-                    <div className="col-span-6">
-                        <FormField
-                            control={form.control}
-                            name="document_access_end_at"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                    <FormLabel>{t('Document Access End At')}</FormLabel>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <FormControl>
-                                                <Button
-                                                    variant={'outline'}
-                                                    className={cn('w-[280px] pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
-                                                >
-                                                    {field.value ? format(field.value, 'PPP') : <span>{t('Pick a date')}</span>}
-                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                </Button>
-                                            </FormControl>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0" align="start">
-                                            <Calendar
-                                                fromYear={1960}
-                                                toYear={2030}
-                                                captionLayout="dropdown-buttons"
-                                                mode="single"
-                                                selected={field.value}
-                                                onSelect={field.onChange}
-                                                initialFocus
-                                            />
-                                        </PopoverContent>
-                                    </Popover>
-                                    <FormMessage>{errors.document_access_end_at && <div>{errors.document_access_end_at}</div>}</FormMessage>
-                                </FormItem>
-                            )}
-                        />
-                    </div>
-                    <div className="grid gap-4 md:grid-cols-12">
-                        <div className="col-span-6">
-                            <FormField
-                                control={form.control}
-                                name="name"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t('Name')}</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder={t('Name')} type="text" {...field} />
-                                        </FormControl>
-                                        <FormMessage>{errors.name && <div>{errors.name}</div>}</FormMessage>
-                                    </FormItem>
+            <form onSubmit={onSubmit} className="space-y-8 p-5">
+                {/* Header Section: Date Picker */}
+                <div className="flex flex-col space-y-2">
+                    <FormLabel id="document_access_end_at" label={t('Document Access End At')} required={false} />
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant={'outline'}
+                                className={cn(
+                                    'w-full pl-3 text-left font-normal md:w-[280px]',
+                                    !data.document_access_end_at && 'text-muted-foreground',
                                 )}
+                            >
+                                {data.document_access_end_at ? format(data.document_access_end_at, 'PPP') : <span>{t('Pick a date')}</span>}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                                fromYear={1960}
+                                toYear={2030}
+                                captionLayout="dropdown-buttons"
+                                mode="single"
+                                selected={data.document_access_end_at as any}
+                                onSelect={(date) => setData('document_access_end_at', date as any)}
+                                initialFocus
                             />
-                        </div>
+                        </PopoverContent>
+                    </Popover>
+                    {errors.document_access_end_at && <p className="text-destructive text-sm">{errors.document_access_end_at}</p>}
+                </div>
 
-                        <div className="col-span-6">
-                            <FormField
-                                control={form.control}
-                                name="phone"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t('Phone Number')}</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder={t('Phone Number')} type="number" {...field} />
-                                        </FormControl>
-                                        <FormMessage>{errors.phone && <div>{errors.phone}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        <div className="col-span-6">
-                            <FormField
-                                control={form.control}
-                                name="email"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t('Email')}</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder={t('Email')} type="email" {...field} />
-                                        </FormControl>
-                                        <FormMessage>{errors.email && <div>{errors.email}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        <div className="col-span-6">
-                            <FormField
-                                control={form.control}
-                                name="gender"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t('Gender')}</FormLabel>
-                                        <Select key={field.value} onValueChange={field.onChange} defaultValue={field.value}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder={t('Gender')} />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                <SelectItem value="male">{t('Male')}</SelectItem>
-                                                <SelectItem value="female">{t('Female')}</SelectItem>
-                                                <SelectItem value="other">{t('Other')}</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage>{errors.gender && <div>{errors.gender}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                        <div className="col-span-6">
-                            <FormField
-                                control={form.control}
-                                name="password"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t('Password')}</FormLabel>
-                                        <FormControl>
-                                            <PasswordInput placeholder={t('Password')} {...field} />
-                                        </FormControl>
-                                        <FormMessage>{errors.password && <div>{errors.password}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                        <div className="col-span-6">
-                            <FormField
-                                control={form.control}
-                                name="password_confirmation"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{t('Confirm Password')}</FormLabel>
-                                        <FormControl>
-                                            <PasswordInput placeholder={t('Confirm Password')} {...field} />
-                                        </FormControl>
-                                        <FormMessage>{errors.password_confirmation && <div>{errors.password_confirmation}</div>}</FormMessage>
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                    </div>
-                    {roles.length > 0 && (
-                        <div>
-                            <Label className="font-semibold">{t('Roles')}</Label>
-                            <div className="mt-2 flex flex-wrap items-center gap-6">
-                                {roles.map(({ name }) => {
-                                    const selectedRoles = form.watch('roles') || [];
-
-                                    return (
-                                        <div key={name} className="flex items-center gap-1">
-                                            <Checkbox
-                                                id={name}
-                                                checked={selectedRoles.includes(name)}
-                                                onCheckedChange={(checked) => {
-                                                    const updated = checked ? [...selectedRoles, name] : selectedRoles.filter((r) => r !== name);
-                                                    form.setValue('roles', updated);
-                                                }}
-                                            />
-                                            <label
-                                                htmlFor={name}
-                                                className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                            >
-                                                {name}
-                                            </label>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
-
+                {/* Main Info Grid */}
+                <div className="form-field-container md:grid-cols-2">
                     <FormField
-                        control={form.control}
-                        name="image"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{t('Image')}</FormLabel>
-                                <FormControl>
-                                    <FileUploader
-                                        value={files}
-                                        onValueChange={setFiles}
-                                        dropzoneOptions={dropZoneConfig}
-                                        className="bg-background relative rounded-lg p-2"
-                                    >
-                                        <FileInput id="fileInput" className="outline-1 outline-slate-500 outline-dashed">
-                                            <div className="flex w-full flex-col items-center justify-center p-8">
-                                                <CloudUpload className="h-10 w-10 text-gray-500" />
-                                                <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
-                                                    <span className="font-semibold">{t('Click to upload')}</span>
-                                                    &nbsp; {t('or drag and drop')}
-                                                </p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF</p>
-                                            </div>
-                                        </FileInput>
-                                        <FileUploaderContent>
-                                            {files &&
-                                                files.length > 0 &&
-                                                files.map((file, i) => (
-                                                    <FileUploaderItem key={i} index={i}>
-                                                        <Paperclip className="h-4 w-4 stroke-current" />
-                                                        <span>{file.name}</span>
-                                                    </FileUploaderItem>
-                                                ))}
-                                        </FileUploaderContent>
-                                    </FileUploader>
-                                </FormControl>
-                                <FormMessage>{errors.image && <div>{errors.image}</div>}</FormMessage>
-
-                                {/* Initial Image */}
-                                {editData?.image && (
-                                    <div className="mt-4 p-1">
-                                        <FormDescription className="mb-2">{t('Uploaded Image')}</FormDescription>
-                                        <div className="grid w-full grid-cols-3 gap-2 rounded-md lg:grid-cols-5">
-                                            <span
-                                                key={editData?.image}
-                                                className="group bg-background relative aspect-square h-auto w-full overflow-hidden rounded-md border p-0"
-                                            >
-                                                <img
-                                                    src={'/assets/images/users/thumb/' + editData?.image}
-                                                    alt={editData?.image}
-                                                    className="h-full w-full object-contain"
-                                                />
-                                            </span>
-                                        </div>
-                                    </div>
-                                )}
-                            </FormItem>
-                        )}
+                        required
+                        id="name"
+                        name="name"
+                        label={t('Name')}
+                        value={data.name}
+                        onChange={(val) => setData('name', val)}
+                        error={errors.name}
+                        placeholder={t('Name')}
                     />
 
-                    {progress && <ProgressWithValue value={progress.percentage} position="start" />}
-                    {setIsOpen && <MyDialogCancelButton onClick={() => setIsOpen(false)} />}
+                    <FormField
+                        required
+                        id="phone"
+                        name="phone"
+                        type="number"
+                        label={t('Phone Number')}
+                        value={data.phone}
+                        onChange={(val) => setData('phone', val)}
+                        error={errors.phone}
+                        placeholder={t('Phone Number')}
+                    />
 
-                    {!readOnly && (
-                        <Button disabled={processing} type="submit">
-                            {processing && (
-                                <span className="size-6 animate-spin">
-                                    <Loader />
-                                </span>
-                            )}
-                            {processing ? t('Submitting') : t('Submit')}
-                        </Button>
+                    <FormField
+                        required
+                        id="email"
+                        name="email"
+                        type="email"
+                        label={t('Email')}
+                        value={data.email}
+                        onChange={(val) => setData('email', val)}
+                        error={errors.email}
+                        placeholder={t('Email')}
+                    />
+
+                    <div className="space-y-2">
+                        <FormLabel id="gender" label={t('Gender')} required={false} />
+                        <RadioGroup value={data.gender} onValueChange={(val) => setData('gender', val)} className="grid grid-cols-3 gap-2">
+                            {[
+                                { value: 'male', label: t('Male') },
+                                { value: 'female', label: t('Female') },
+                                { value: 'other', label: t('Other') },
+                            ].map((opt) => (
+                                <div key={opt.value} className="relative">
+                                    <RadioGroupItem value={opt.value} id={`gender-${opt.value}`} className="peer sr-only" />
+                                    <label
+                                        htmlFor={`gender-${opt.value}`}
+                                        className={cn(
+                                            'bg-background hover:bg-accent peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 peer-data-[state=checked]:text-primary dark:peer-data-[state=checked]:bg-primary/10 flex cursor-pointer items-center justify-center rounded-lg border px-3 py-2 text-center text-sm font-medium transition-all',
+                                            errors.gender ? 'border-destructive/50' : 'border-input',
+                                        )}
+                                    >
+                                        {opt.label}
+                                    </label>
+                                </div>
+                            ))}
+                        </RadioGroup>
+                        {errors.gender && (
+                            <p className="text-destructive animate-in fade-in slide-in-from-top-1 text-[11px] font-medium">{errors.gender}</p>
+                        )}
+                    </div>
+
+                    <div className="space-y-2">
+                        <FormLabel id="password" label={t('Password')} required={true} />
+                        <PasswordInput
+                            value={data.password}
+                            onChange={(e) => setData('password', e.target.value)}
+                            placeholder={t('Password')}
+                            className={cn(errors.password && 'border-destructive focus-visible:ring-destructive/20')}
+                        />
+                        <FormErrorLabel error={errors.password} />
+                    </div>
+
+                    <div className="space-y-2">
+                        <FormLabel id="confirm_password" label={t('Confirm Password')} required={true} />
+                        <PasswordInput
+                            value={data.password_confirmation}
+                            onChange={(e) => setData('password_confirmation', e.target.value)}
+                            placeholder={t('Confirm Password')}
+                            className={cn(errors.password && 'border-destructive focus-visible:ring-destructive/20')}
+                        />
+                    </div>
+                </div>
+
+                {/* Location Picker */}
+                <div className="form-field-container md:grid-cols-1">
+                    <div className="space-y-2">
+                        <FormLabel id="location" label={t('Location')} required={false} />
+                        <LocationPicker
+                            key={'loc_' + data.location}
+                            value={
+                                data.latitude
+                                    ? {
+                                          coordinates: { lat: Number(data.latitude), lng: Number(data.longitude) },
+                                          formatted_address: data.location,
+                                      }
+                                    : null
+                            }
+                            onChange={(loc: any) => {
+                                setData((prev) => ({
+                                    ...prev,
+                                    latitude: loc?.coordinates?.lat ?? null,
+                                    longitude: loc?.coordinates?.lng ?? null,
+                                    location: loc?.formatted_address ?? '',
+                                }));
+                            }}
+                            height="300px"
+                        />
+                        <FormErrorLabel error={errors.location} />
+                    </div>
+
+                    <FormField
+                        id="address"
+                        name="address"
+                        label={t('Detailed Address')}
+                        value={data.address}
+                        onChange={(val) => setData('address', val)}
+                        error={errors.address}
+                        placeholder={t('Address')}
+                    />
+                </div>
+
+                {/* Password Section Fix */}
+                <div className="space-y-2">
+                    <FormLabel id="confirm_password" label={t('Confirm Password')} required={true} />
+                    <PasswordInput
+                        value={data.password_confirmation}
+                        onChange={(e) => setData('password_confirmation', e.target.value)}
+                        placeholder={t('Confirm Password')}
+                        className={cn(errors.password_confirmation && 'border-destructive focus-visible:ring-destructive/20')}
+                    />
+                    <FormErrorLabel error={errors.password_confirmation} />
+                </div>
+
+                {/* Roles & Verification Row */}
+                <div className="grid gap-6 md:grid-cols-2">
+                    {roles.length > 0 && (
+                        <div className="space-y-2">
+                            <FormLabel id="user_roles" label={t('User Roles')} required={false} />
+                            <div className="bg-accent/5 flex flex-wrap gap-4 rounded-lg border p-4">
+                                {roles.map(({ name }) => (
+                                    <div key={name} className="flex items-center gap-2">
+                                        <Checkbox
+                                            id={name}
+                                            checked={data.roles.includes(name)}
+                                            onCheckedChange={(checked) => {
+                                                const updated = checked ? [...data.roles, name] : data.roles.filter((r: string) => r !== name);
+                                                setData('roles', updated);
+                                            }}
+                                        />
+                                        <label htmlFor={name} className="cursor-pointer text-sm font-medium">
+                                            {name}
+                                        </label>
+                                    </div>
+                                ))}
+                            </div>
+                            <FormErrorLabel error={errors.roles} />
+                        </div>
                     )}
-                </form>
-            </Form>
+
+                    <div className="space-y-2">
+                        <FormLabel id="account_status" label={t('Account Status')} required={false} />
+                        <div className="bg-accent/5 flex h-full max-h-[74px] items-center space-x-4 rounded-lg border border-blue-200/50 p-4 dark:border-blue-900/30">
+                            <Switch id="is_verified" checked={data.is_verified} onCheckedChange={(val) => setData('is_verified', val)} />
+                            <div className="grid gap-1 leading-none">
+                                <Label htmlFor="is_verified" className="flex items-center gap-2 text-sm font-bold">
+                                    {t('Verified Account')}
+                                    {data.is_verified && (
+                                        <span className="rounded-full bg-blue-500 px-1.5 py-0.5 text-[10px] tracking-wider text-white uppercase">
+                                            {t('Verified')}
+                                        </span>
+                                    )}
+                                </Label>
+                                <p className="text-muted-foreground text-[11px]">{t('Grant a verified badge to this user profile.')}</p>
+                            </div>
+                        </div>
+                        <FormErrorLabel error={errors.is_verified} />
+                    </div>
+                </div>
+
+                <div className={cn('form-field-container', !editData?.image && 'md:grid-cols-1')}>
+                    <FormFileUpload key={editData?.image} id="image" label="Profile Image" files={files} setFiles={setFiles} />
+                    {editData?.image && (
+                        <UploadedImage
+                            containerClassName="mt-0"
+                            imageContainerClassName="flex-1"
+                            label="Uploaded image"
+                            images={editData?.image}
+                            basePath="/assets/images/users/thumb/"
+                        />
+                    )}
+                </div>
+
+                {progress && <ProgressWithValue value={progress.percentage} position="start" />}
+
+                {!readOnly && <SubmitButton processing={processing} />}
+            </form>
         </AppLayout>
     );
 }

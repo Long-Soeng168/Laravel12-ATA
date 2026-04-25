@@ -32,7 +32,7 @@ class UserController extends Controller implements HasMiddleware
 
         $query = User::query();
 
-        $query->with('created_by', 'updated_by', 'roles', 'shop');
+        $query->with('created_by', 'updated_by', 'roles', 'shop', 'garage');
 
         if ($status) {
             $query->where('status', $status);
@@ -88,7 +88,12 @@ class UserController extends Controller implements HasMiddleware
             'gender' => 'nullable|string|in:male,female,other',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'document_access_end_at' => 'nullable|date',
-            'roles' => 'nullable|array'
+            'address' => 'nullable|string|max:255',
+            'location' => 'nullable|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'roles' => 'nullable|array',
+
         ]);
         // dd($validated );
 
@@ -146,12 +151,16 @@ class UserController extends Controller implements HasMiddleware
         // dd($request->all());
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:6|max:255|confirmed', // Laravel auto-validates against confirm_password
-            'phone' => 'nullable|numeric|unique:users,phone,' . $user->id,
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'phone' => 'nullable|numeric|digits_between:8,15|unique:users,phone,' . $user->id,
             'gender' => 'nullable|string|in:male,female,other',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'document_access_end_at' => 'nullable|date',
+            'address' => 'nullable|string|max:255',
+            'location' => 'nullable|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'roles' => 'nullable|array'
         ]);
 

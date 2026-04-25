@@ -177,16 +177,6 @@ export default function Create({ editData, readOnly }: { editData?: any; readOnl
                         onChange={(val) => setData('short_description', val)}
                         error={errors.short_description}
                     />
-
-                    {/* <FormField
-                        textarea
-                        id="short_description_kh"
-                        name="short_description_kh"
-                        label="Short Description (Khmer)"
-                        value={data.short_description_kh}
-                        onChange={(val) => setData('short_description_kh', val)}
-                        error={errors.short_description_kh}
-                    /> */}
                 </div>
 
                 {/* STATUS + ORDER INDEX */}

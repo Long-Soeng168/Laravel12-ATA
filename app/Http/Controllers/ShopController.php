@@ -86,10 +86,10 @@ class ShopController extends Controller implements HasMiddleware
     }
     public function edit(Shop $shop)
     {
-        $all_users = User::orderBy('id', 'desc')
-            ->where('shop_id', null)
-            ->get();
-        // return ($all_users);
+        $all_users = User::where(function ($q) use ($shop) {
+            $q->whereNull('shop_id')
+                ->orWhere('shop_id', $shop->id);
+        })->orderByDesc('id')->get();
         return Inertia::render('admin/shops/Create', [
             'editData' => $shop->load('owner'),
             'all_users' => $all_users,
@@ -116,8 +116,7 @@ class ShopController extends Controller implements HasMiddleware
         $validated = $request->validate([
             'owner_user_id' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
-            'address' => 'nullable|string|max:255',
-            'phone' => 'nullable|string',
+            'phone' => 'nullable|numeric|digits_between:8,15',
             'short_description' => 'nullable|string|max:1000',
             'short_description_kh' => 'nullable|string|max:1000',
             'order_index' => 'nullable|numeric',
@@ -125,6 +124,10 @@ class ShopController extends Controller implements HasMiddleware
             'status' => 'nullable|string|in:pending,approved,suspended,rejected',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
+            'address' => 'nullable|string|max:255',
+            'location' => 'nullable|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         $validated['expired_at'] = isset($validated['expired_at'])
@@ -195,8 +198,7 @@ class ShopController extends Controller implements HasMiddleware
         $validated = $request->validate([
             'owner_user_id' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
-            'address' => 'nullable|string|max:255',
-            'phone' => 'nullable|string',
+            'phone' => 'nullable|numeric|digits_between:8,15',
             'short_description' => 'nullable|string|max:1000',
             'short_description_kh' => 'nullable|string|max:1000',
             'order_index' => 'nullable|numeric',
@@ -204,6 +206,10 @@ class ShopController extends Controller implements HasMiddleware
             'status' => 'nullable|string|in:pending,approved,suspended,rejected',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
+            'address' => 'nullable|string|max:255',
+            'location' => 'nullable|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         $validated['expired_at'] = isset($validated['expired_at'])

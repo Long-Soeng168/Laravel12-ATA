@@ -90,7 +90,7 @@ export default function Create({ editData, readOnly }: { editData?: any; readOnl
                 </div>
 
                 {inputLanguage === 'khmer' ? (
-                    <div className="form-field-container md:grid-cols-1">
+                    <div className="form-field-container md:grid-cols-2">
                         <FormField
                             id="label_kh"
                             name="label_kh"

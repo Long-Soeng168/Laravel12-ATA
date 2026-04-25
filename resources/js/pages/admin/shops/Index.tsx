@@ -1,39 +1,42 @@
-import MyAddNewButton from '@/components/my-add-new-button';
-import { MyPagination } from '@/components/my-pagination';
-import { MyRefreshButton } from '@/components/my-refresh-button';
-import { MySearchTableData } from '@/components/my-search-table-data';
-import usePermission from '@/hooks/use-permission';
+import NewItemButton from '@/components/Button/NewItemButton'; // Standardized naming
+import RefreshButton from '@/components/Button/RefreshButton'; // Standardized naming
+import PaginationTabs from '@/components/Pagination/PaginationTabs';
+import TableDataSearch from '@/components/Search/TableDataSearch';
 import useTranslation from '@/hooks/use-translation';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import MyTableData from './components/my-table-data';
+import TableData from './components/TableData';
 
 const Index = () => {
     const { t } = useTranslation();
+
     const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: t('Shops'),
-            href: '/admin/shops',
-        },
+        { title: t('Dashboard'), href: '/dashboard' },
+        { title: t('Shops'), href: '#' },
     ];
-    const hasPermission = usePermission();
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <div className="flex max-w-[100vw] flex-wrap items-center justify-end gap-2">
-                <div className="flex max-w-[100vw] flex-wrap items-center justify-start gap-2 max-lg:w-full lg:flex-1">
-                    <MySearchTableData />
-                    {/* <MyFilterButton /> */}
-                    <MyRefreshButton />
-                    <span className="flex-1"></span>
-                    {/* <MyExportButton />
-                    <MyImportButton /> */}
-                    {/* {hasPermission('item create') && <AddNewButton />} */}
-                    {hasPermission('shop create') && <MyAddNewButton url="/admin/shops/create" type="link" />}
+            <div className="flex flex-wrap items-center justify-between gap-2 px-2 py-6">
+                <div className="flex w-full gap-2 md:w-auto">
+                    {/* Standardized Search and Refresh */}
+                    <TableDataSearch placeholder={t('Search shops...')} />
+                    <RefreshButton />
+                </div>
+
+                <div className="flex w-full justify-end md:w-auto">
+                    {/* Standardized Create Button with permission check */}
+                    <NewItemButton url="/admin/shops/create" permission="shop create" />
                 </div>
             </div>
-            <div className="h-2" />
-            <MyTableData />
-            <MyPagination />
+
+            {/* Main Table Content */}
+            <TableData />
+
+            {/* Standardized Pagination */}
+            <div className="mt-4">
+                <PaginationTabs />
+            </div>
         </AppLayout>
     );
 };

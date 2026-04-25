@@ -15,3 +15,25 @@ export function toSlug(input: string): string {
         .replace(/-+/g, '-')
         .toLowerCase();
 }
+
+export const formatToKhmerDateTime = (utcDate?: string, showTime = true, showFulllYear = false) => {
+    if (!utcDate) return '-';
+
+    const date = new Date(utcDate);
+
+    const options: Intl.DateTimeFormatOptions = {
+        timeZone: 'Asia/Bangkok',
+        day: '2-digit',
+        month: 'short',
+        year: showFulllYear ? 'numeric' : '2-digit',
+    };
+
+    if (showTime) {
+        options.hour = '2-digit';
+        options.minute = '2-digit';
+        options.second = '2-digit';
+        options.hour12 = true;
+    }
+
+    return date.toLocaleString('en-GB', options);
+};
