@@ -469,8 +469,10 @@ class ItemController extends Controller
             }
 
             // Add auth-dependent IDs
-            $validated['created_by'] = $request->user()->id;
-            $validated['shop_id'] = $request->user()->shop_id;
+            // $validated['created_by'] = $request->user()->id;
+            // $validated['shop_id'] = $request->user()->shop_id;
+            $validated['created_by'] = 1;
+            $validated['shop_id'] = null;
 
             // Prevent images array from hitting the items table insert
             unset($validated['images']);
