@@ -404,6 +404,57 @@ class ItemController extends Controller
      */
     public function store(Request $request)
     {
+        // =========================================================================
+        // 🧪 RANDOM ERROR GENERATOR FOR FLUTTER TESTING
+        // Set to 'false' when you are done testing!
+        // =========================================================================
+        $testingMode = true;
+
+        if ($testingMode) {
+            $chance = rand(1, 100);
+
+            if ($chance <= 15) {
+                // 1. 401 Unauthorized (15% chance)
+                // Simulates an expired or missing Bearer token
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            } elseif ($chance <= 30) {
+                // 2. 403 Forbidden (15% chance)
+                // Simulates the user not having permission to post to this shop
+                return response()->json(['message' => 'This action is unauthorized.'], 403);
+            } elseif ($chance <= 45) {
+                // 3. 404 Not Found (15% chance)
+                // Simulates trying to link to a category or shop that was just deleted
+                return response()->json(['message' => 'The requested resource was not found.'], 404);
+            } elseif ($chance <= 60) {
+                // 4. 500 Internal Server Error (15% chance)
+                // Simulates a database crash or a syntax error in your PHP code
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Server Error',
+                    'error' => 'SQLSTATE[HY000] [2002] Connection refused'
+                ], 500);
+            } elseif ($chance <= 85) {
+                // 5. 422 Validation Error (25% chance)
+                // Simulates someone bypassing client-side validation, or failing a unique check
+                // Note: Includes a dynamic attribute error to test your UI mapping!
+                return response()->json([
+                    'success' => false,
+                    'message' => 'The given data was invalid.',
+                    'errors' => [
+                        'name' => ['The product name has already been taken in this shop.'],
+                        'price' => ['The price must be at least 0.01.'],
+                        'images' => ['The uploaded file is corrupt.'],
+                        'attributes.color' => ['The color specification is currently out of stock.']
+                    ]
+                ], 422);
+            }
+
+            // Remaining 15% chance: The code continues and succeeds!
+        }
+        // =========================================================================
+        // END TESTING BLOCK
+        // =========================================================================
+
         // 1. Pre-process multipart/form-data strings from Flutter
         $input = $request->all();
 
@@ -451,6 +502,7 @@ class ItemController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
+                'message' => 'The given data was invalid.',
                 'errors' => $validator->errors()
             ], 422);
         }
