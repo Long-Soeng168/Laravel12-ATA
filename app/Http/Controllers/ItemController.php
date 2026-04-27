@@ -95,10 +95,6 @@ class ItemController extends Controller implements HasMiddleware
             'name_kh' => 'nullable|string|max:255',
             'price' => 'required|numeric',
             'short_description' => 'nullable|string',
-            'short_description_kh' => 'nullable|string',
-            'long_description' => 'nullable|string',
-            'long_description_kh' => 'nullable|string',
-            'link' => 'nullable|string|max:255',
             'category_code' => 'nullable|string|exists:item_categories,code',
             'attributes' => 'nullable|array', // Validate that attributes is an array/object
             'shop_id' => 'nullable|exists:shops,id',
