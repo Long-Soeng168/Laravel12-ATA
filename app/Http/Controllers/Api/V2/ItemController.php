@@ -408,7 +408,7 @@ class ItemController extends Controller
         // 🧪 RANDOM ERROR GENERATOR FOR FLUTTER TESTING
         // Set to 'false' when you are done testing!
         // =========================================================================
-        $testingMode = true;
+        $testingMode = false;
 
         if ($testingMode) {
             $chance = rand(1, 100);
@@ -483,7 +483,7 @@ class ItemController extends Controller
 
         // 3. Validate Data (Merged base rules + dynamic rules)
         $validator = Validator::make($input, array_merge([
-            'code' => 'nullable|string|max:255',
+            'code' => 'required|string|max:255',
             'name' => 'required|string|max:255',
             'name_kh' => 'nullable|string|max:255',
             'short_description' => 'nullable|string',
@@ -497,6 +497,23 @@ class ItemController extends Controller
             'attributes' => 'nullable|array',
             'images' => 'required|array|min:1',
             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120', // 5MB limit
+            'discount' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                function ($attribute, $value, $fail) use ($request) {
+                    // If it's a percentage, it cannot be greater than 100
+                    if ($request->input('discount_type') === 'percentage' && $value > 100) {
+                        $fail('The discount percentage cannot exceed 100.');
+                    }
+
+                    // Optional: If it's a fixed amount, it shouldn't exceed the actual price
+                    if ($request->input('discount_type') === 'amount' && $value > $request->input('price')) {
+                        $fail('The discount amount cannot be greater than the price.');
+                    }
+                },
+            ],
+            'discount_type' => 'nullable|in:percentage,amount|required_with:discount',
         ], $dynamicRules));
 
         if ($validator->fails()) {
