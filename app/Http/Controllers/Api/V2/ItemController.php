@@ -483,7 +483,7 @@ class ItemController extends Controller
 
         // 3. Validate Data (Merged base rules + dynamic rules)
         $validator = Validator::make($input, array_merge([
-            'code' => 'required|string|max:255',
+            'code' => 'nullable|string|max:255',
             'name' => 'required|string|max:255',
             'name_kh' => 'nullable|string|max:255',
             'short_description' => 'nullable|string',
@@ -572,36 +572,132 @@ class ItemController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $item = Item::findOrFail($id);
+        // 1. Find the existing item
+        $item = \App\Models\Item::findOrFail($id);
 
-        // Flutter often sends PUT requests as POST with _method=PUT
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric',
-            'category_code' => 'required|string|exists:item_categories,code',
-            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
-        ]);
+        // Optional: Ensure the user actually owns this item before updating
+        // if ($item->shop_id !== $request->user()->shop_id) {
+        //     return response()->json(['message' => 'Unauthorized action.'], 403);
+        // }
 
-        if ($validator->fails()) {
-            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        // 2. Pre-process multipart/form-data strings from Flutter
+        $input = $request->all();
+
+        if (isset($input['attributes']) && is_string($input['attributes'])) {
+            $input['attributes'] = json_decode($input['attributes'], true);
         }
 
-        return DB::transaction(function () use ($request, $item) {
-            $data = $request->all();
-            foreach ($data as $key => $value) {
-                if (is_string($value) && $value === '') $data[$key] = null;
+        if (isset($input['is_free_delivery'])) {
+            $input['is_free_delivery'] = filter_var($input['is_free_delivery'], FILTER_VALIDATE_BOOLEAN);
+        }
+
+        // Handle stringified numbers for discount
+        if (isset($input['discount']) && is_string($input['discount'])) {
+            $input['discount'] = $input['discount'] === 'null' || $input['discount'] === '' ? null : (float) $input['discount'];
+        }
+
+        // 3. Dynamic Validation for Category Attributes
+        $dynamicRules = [];
+        if (!empty($input['category_code'])) {
+            $category = \App\Models\ItemCategory::where('code', $input['category_code'])->first();
+            if ($category) {
+                $requiredFields = \App\Models\ItemCategoryField::where('category_id', $category->id)
+                    ->where('is_required', true)
+                    ->get();
+
+                foreach ($requiredFields as $field) {
+                    $dynamicRules["attributes.{$field->field_key}"] = 'required';
+                }
             }
+        }
 
-            $item->update($data);
+        // 4. Validate Data
+        $validator = Validator::make($input, array_merge([
+            'code' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
+            'name_kh' => 'nullable|string|max:255',
+            'short_description' => 'nullable|string',
+            'price' => 'required|numeric',
+            'discount' => 'nullable|numeric|min:0',
+            'discount_type' => 'nullable|string|in:percentage,amount',
+            'category_code' => 'required|string|exists:item_categories,code',
+            'brand_code' => 'nullable|string|exists:item_brands,code',
+            'model_code' => 'nullable|string|exists:item_models,code',
+            'body_type_code' => 'nullable|string|exists:item_body_types,code',
+            'status' => 'nullable|string|in:active,inactive',
+            'is_free_delivery' => 'nullable|boolean',
+            'attributes' => 'nullable|array',
 
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    $filename = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/items', 800);
-                    ItemImage::create(['item_id' => $item->id, 'image' => $filename]);
+            // Arrays for images
+            'deleted_image_ids' => 'nullable|array',
+            'deleted_image_ids.*' => 'integer|exists:item_images,id',
+
+            // Images are NO LONGER strictly required here, because they might just be updating text
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
+        ], $dynamicRules));
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The given data was invalid.',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $validated = $validator->validated();
+
+        // 5. Database Transaction for safe updating
+        return DB::transaction(function () use ($request, $validated, $item) {
+
+            // Clean empty strings to null
+            foreach ($validated as $key => $value) {
+                if (is_string($value) && trim($value) === '') {
+                    $validated[$key] = null;
                 }
             }
 
-            return response()->json(['success' => true, 'message' => 'Item updated.', 'data' => $item->load('images')]);
+            $validated['updated_by'] = 1; // Or: $request->user()->id;
+
+            // Prevent arrays from hitting the items table update
+            unset($validated['images']);
+            unset($validated['deleted_image_ids']);
+
+            // Update the core item record
+            $item->update($validated);
+
+            // --- HANDLE DELETED IMAGES ---
+            if ($request->has('deleted_image_ids') && is_array($request->deleted_image_ids)) {
+                // Fetch images that belong to this specific item to prevent deleting other users' images
+                $imagesToDelete = \App\Models\ItemImage::where('item_id', $item->id)
+                    ->whereIn('id', $request->deleted_image_ids)
+                    ->get();
+
+                foreach ($imagesToDelete as $imageModel) {
+                    // Optional: Delete the physical file from your server storage to save space
+                    // \Illuminate\Support\Facades\Storage::disk('public')->delete($imageModel->image); // Adjust path if needed
+
+                    // Delete the database record
+                    $imageModel->delete();
+                }
+            }
+
+            // --- HANDLE NEW IMAGES ---
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $filename = \App\Helpers\ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/items', 800);
+                    \App\Models\ItemImage::create([
+                        'item_id' => $item->id,
+                        'image' => $filename,
+                    ]);
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Item updated successfully.',
+                'data' => $item->load('images')
+            ], 200); // 200 OK
         });
     }
 
