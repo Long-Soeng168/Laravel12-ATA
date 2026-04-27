@@ -92,7 +92,6 @@ class ItemController extends Controller implements HasMiddleware
         $validated = $request->validate([
             'code' => 'nullable|string|max:255',
             'name' => 'required|string|max:255',
-            'name_kh' => 'nullable|string|max:255',
             'price' => 'required|numeric',
             'short_description' => 'nullable|string',
             'category_code' => 'nullable|string|exists:item_categories,code',
@@ -102,6 +101,7 @@ class ItemController extends Controller implements HasMiddleware
             'model_code' => 'nullable|string|exists:item_models,code',
             'body_type_code' => 'nullable|string|exists:item_body_types,code',
             'status' => 'nullable|string|in:active,inactive',
+            'is_free_delivery' => 'nullable|boolean',
             'images' => 'required|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
         ]);
@@ -109,8 +109,6 @@ class ItemController extends Controller implements HasMiddleware
 
         $validated['created_by'] = $request->user()->id;
         $validated['updated_by'] = $request->user()->id;
-        // $validated['post_date'] = Carbon::parse($validated['post_date'])->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
-
 
         $image_files = $request->file('images');
         unset($validated['images']);
@@ -136,14 +134,7 @@ class ItemController extends Controller implements HasMiddleware
                 return redirect()->back()->with('error', 'Failed to upload images: ' . $e->getMessage());
             }
         }
-        // $result = TelegramHelper::sendItemToTelegram($created_item->id);
-
-        // if (!$result['success']) {
-        //     session()->flash('error', $result['message']);
-        //     session()->flash('success', 'Item Created Successfully!.');
-        // } else {
-        //     session()->flash('success', 'Item Created Successfully!.');
-        // }
+        
         return redirect()->back()->with('success', 'Item Created Successfully!.');
     }
 

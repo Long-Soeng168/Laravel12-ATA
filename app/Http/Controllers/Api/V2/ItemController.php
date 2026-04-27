@@ -404,10 +404,21 @@ class ItemController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Dynamic Validation for Category Attributes
+        // 1. Pre-process multipart/form-data strings from Flutter
+        $input = $request->all();
+
+        if (isset($input['attributes']) && is_string($input['attributes'])) {
+            $input['attributes'] = json_decode($input['attributes'], true);
+        }
+
+        if (isset($input['is_free_delivery'])) {
+            $input['is_free_delivery'] = filter_var($input['is_free_delivery'], FILTER_VALIDATE_BOOLEAN);
+        }
+
+        // 2. Dynamic Validation for Category Attributes
         $dynamicRules = [];
-        if ($request->category_code) {
-            $category = ItemCategory::where('code', $request->category_code)->first();
+        if (!empty($input['category_code'])) {
+            $category = ItemCategory::where('code', $input['category_code'])->first();
             if ($category) {
                 $requiredFields = ItemCategoryField::where('category_id', $category->id)
                     ->where('is_required', true)
@@ -419,38 +430,56 @@ class ItemController extends Controller
             }
         }
 
-        $validator = Validator::make($request->all(), array_merge([
+        // 3. Validate Data (Merged base rules + dynamic rules)
+        $validator = Validator::make($input, array_merge([
+            'code' => 'nullable|string|max:255',
             'name' => 'required|string|max:255',
             'name_kh' => 'nullable|string|max:255',
+            'short_description' => 'nullable|string',
             'price' => 'required|numeric',
             'category_code' => 'required|string|exists:item_categories,code',
             'brand_code' => 'nullable|string|exists:item_brands,code',
             'model_code' => 'nullable|string|exists:item_models,code',
             'body_type_code' => 'nullable|string|exists:item_body_types,code',
+            'status' => 'nullable|string|in:active,inactive',
+            'is_free_delivery' => 'nullable|boolean', // Added the new field
             'attributes' => 'nullable|array',
             'images' => 'required|array|min:1',
             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120', // 5MB limit
         ], $dynamicRules));
 
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
         }
 
-        return DB::transaction(function () use ($request) {
-            $data = $request->all();
+        // Use only validated data moving forward to prevent mass-assignment vulnerabilities
+        $validated = $validator->validated();
+
+        // 4. Database Transaction
+        return DB::transaction(function () use ($request, $validated) {
 
             // Clean empty strings to null
-            foreach ($data as $key => $value) {
-                if (is_string($value) && $value === '') $data[$key] = null;
+            foreach ($validated as $key => $value) {
+                if (is_string($value) && trim($value) === '') {
+                    $validated[$key] = null;
+                }
             }
 
-            $data['created_by'] = $request->user()->id;
-            $data['shop_id'] = $request->user()->shop_id;
+            // Add auth-dependent IDs
+            $validated['created_by'] = $request->user()->id;
+            $validated['shop_id'] = $request->user()->shop_id;
 
-            $item = Item::create($data);
+            // Prevent images array from hitting the items table insert
+            unset($validated['images']);
+
+            $item = Item::create($validated);
 
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
+                    // Using 800px resize per your updated logic
                     $filename = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/items', 800);
                     ItemImage::create([
                         'item_id' => $item->id,
