@@ -433,7 +433,7 @@ class ItemController extends Controller
                     'message' => 'Server Error',
                     'error' => 'SQLSTATE[HY000] [2002] Connection refused'
                 ], 500);
-            } elseif ($chance <= 85) {
+            } elseif ($chance <= 100) {
                 // 5. 422 Validation Error (25% chance)
                 // Simulates someone bypassing client-side validation, or failing a unique check
                 // Note: Includes a dynamic attribute error to test your UI mapping!
