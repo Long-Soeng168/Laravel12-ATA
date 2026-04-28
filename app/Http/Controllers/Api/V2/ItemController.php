@@ -573,7 +573,7 @@ class ItemController extends Controller
     public function update(Request $request, $id)
     {
         // 1. Find the existing item
-        $item = \App\Models\Item::findOrFail($id);
+        $item = Item::findOrFail($id);
 
         // Optional: Ensure the user actually owns this item before updating
         // if ($item->shop_id !== $request->user()->shop_id) {
@@ -598,15 +598,39 @@ class ItemController extends Controller
 
         // 3. Dynamic Validation for Category Attributes
         $dynamicRules = [];
-        if (!empty($input['category_code'])) {
-            $category = \App\Models\ItemCategory::where('code', $input['category_code'])->first();
-            if ($category) {
-                $requiredFields = \App\Models\ItemCategoryField::where('category_id', $category->id)
-                    ->where('is_required', true)
-                    ->get();
 
-                foreach ($requiredFields as $field) {
-                    $dynamicRules["attributes.{$field->field_key}"] = 'required';
+        // Ensure the attributes array and all its children are allowed through initially
+        $dynamicRules["attributes"] = 'nullable|array';
+        $dynamicRules["attributes.*"] = 'nullable';
+
+        if (!empty($input['category_code'])) {
+            $category = ItemCategory::where('code', $input['category_code'])->first();
+
+            if ($category) {
+                $categoryFields = ItemCategoryField::where('category_id', $category->id)->get();
+
+                foreach ($categoryFields as $field) {
+                    $key = "attributes.{$field->field_key}";
+                    $rules = [];
+
+                    // 1. Check for Required
+                    if ($field->is_required) {
+                        $rules[] = 'required';
+                    } else {
+                        $rules[] = 'nullable';
+                    }
+
+                    // 2. Specific Validation for 'year'
+                    if ($field->field_key === 'year') {
+                        $rules[] = 'integer';
+                        $rules[] = 'min:1900';
+                        $rules[] = 'max:' . (date('Y') + 1);
+                    }
+
+                    // Only add to dynamicRules if we actually defined rules for this specific key
+                    if (!empty($rules)) {
+                        $dynamicRules[$key] = implode('|', $rules);
+                    }
                 }
             }
         }
@@ -669,7 +693,7 @@ class ItemController extends Controller
             // --- HANDLE DELETED IMAGES ---
             if ($request->has('deleted_image_ids') && is_array($request->deleted_image_ids)) {
                 // Fetch images that belong to this specific item to prevent deleting other users' images
-                $imagesToDelete = \App\Models\ItemImage::where('item_id', $item->id)
+                $imagesToDelete = ItemImage::where('item_id', $item->id)
                     ->whereIn('id', $request->deleted_image_ids)
                     ->get();
 
@@ -686,7 +710,7 @@ class ItemController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $filename = \App\Helpers\ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/items', 800);
-                    \App\Models\ItemImage::create([
+                    ItemImage::create([
                         'item_id' => $item->id,
                         'image' => $filename,
                     ]);

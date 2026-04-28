@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V2\BannerController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V2\ItemController;
 use App\Http\Controllers\ItemCategoryController;
@@ -16,6 +17,8 @@ use Illuminate\Http\Request;
 // http://127.0.0.1:8000/api/v2/items/123
 // http://127.0.0.1:8000/api/v2/items-form-data
 Route::prefix('v2')->group(function () {
+
+    Route::get('/banners', [BannerController::class, 'index']);
 
     Route::get('/items-categories', [ItemCategoryController::class, 'getFieldsByCategory']);
     Route::get('/categories_fields/{cate_id}', [ItemCategoryController::class, 'getFieldsByCategory']);
