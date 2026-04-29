@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V2\BannerController;
+use App\Http\Controllers\Api\V2\GarageController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V2\ItemController;
 use App\Http\Controllers\Api\V2\ShopController;
@@ -21,6 +22,7 @@ Route::prefix('v2')->group(function () {
 
     Route::get('/banners', [BannerController::class, 'index']);
     Route::get('/shops', [ShopController::class, 'index']);
+    Route::get('/garages', [GarageController::class, 'index']);
 
     Route::get('/items-categories', [ItemCategoryController::class, 'getFieldsByCategory']);
     Route::get('/categories_fields/{cate_id}', [ItemCategoryController::class, 'getFieldsByCategory']);
