@@ -11,9 +11,11 @@ import { FormFieldTextArea } from '@/components/Input/FormFieldTextArea';
 import { FormLabel } from '@/components/Input/FormLabel';
 import LocationPicker from '@/components/LocationPicker';
 import { ProgressWithValue } from '@/components/ProgressBar/progress-with-value';
+import { Switch } from '@/components/ui/switch';
 import { shopStatusData } from '@/data/status-data';
 import useTranslation from '@/hooks/use-translation';
 import AppLayout from '@/layouts/app-layout';
+import { Label } from '@/pages/nokor-tech/components/ui/label';
 import { BreadcrumbItem } from '@/types';
 import { useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
@@ -35,6 +37,7 @@ interface GarageFormType {
     latitude?: number | null;
     longitude?: number | null;
     expired_at?: string;
+    is_verified?: boolean;
 }
 
 export default function Create({ editData, readOnly }: { editData?: any; readOnly?: boolean }) {
@@ -66,6 +69,7 @@ export default function Create({ editData, readOnly }: { editData?: any; readOnl
         latitude: editData?.latitude ?? null,
         longitude: editData?.longitude ?? null,
         expired_at: editData?.expired_at || '',
+        is_verified: editData?.is_verified === 1 || editData?.is_verified === true || false,
     });
 
     const onSubmit = (e: React.FormEvent) => {
@@ -201,6 +205,24 @@ export default function Create({ editData, readOnly }: { editData?: any; readOnl
                         </div>
                         <FormErrorLabel error={errors.status} />
                     </div>
+                    <div className="space-y-2">
+                        <FormLabel id="account_status" label={t('Account Status')} required={false} />
+                        <div className="bg-accent/5 flex h-full max-h-[74px] items-center space-x-4 rounded-lg border border-blue-200/50 p-4 dark:border-blue-900/30">
+                            <Switch id="is_verified" checked={data.is_verified} onCheckedChange={(val) => setData('is_verified', val)} />
+                            <div className="grid gap-1 leading-none">
+                                <Label htmlFor="is_verified" className="flex items-center gap-2 text-sm font-bold">
+                                    {t('Verified Account')}
+                                    {data.is_verified && (
+                                        <span className="rounded-full bg-blue-500 px-1.5 py-0.5 text-[10px] tracking-wider text-white uppercase">
+                                            {t('Verified')}
+                                        </span>
+                                    )}
+                                </Label>
+                                <p className="text-muted-foreground text-[11px]">{t('Grant a verified badge to this user profile.')}</p>
+                            </div>
+                        </div>
+                        <FormErrorLabel error={errors.is_verified} />
+                    </div>
                 </div>
 
                 {/* BRAND + PROVINCE */}
@@ -221,7 +243,7 @@ export default function Create({ editData, readOnly }: { editData?: any; readOnl
                     <FormField
                         id="order_index"
                         name="order_index"
-                        type='number'
+                        type="number"
                         label="Order Index"
                         value={data.order_index}
                         onChange={(val) => setData('order_index', val)}

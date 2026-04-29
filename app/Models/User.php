@@ -39,6 +39,7 @@ class User extends Authenticatable
         'created_by',
         'updated_by',
         'document_access_end_at',
+        'is_verified',
     ];
 
     /**

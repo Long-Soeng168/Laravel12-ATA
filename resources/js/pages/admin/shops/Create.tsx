@@ -209,6 +209,24 @@ export default function Create({
                         </div>
                         <FormErrorLabel error={errors.status} />
                     </div>
+                    {/* Account Status / Verified Toggle */}
+                    <div className="space-y-2">
+                        <FormLabel id="account_status" label={t('Account Status')} />
+                        <div className="bg-accent/5 flex max-w-md items-center space-x-4 rounded-lg border border-blue-200/50 p-4 dark:border-blue-900/30">
+                            <Switch id="is_verified" checked={data.is_verified} onCheckedChange={(val) => setData('is_verified', val)} />
+                            <div className="grid gap-1 leading-none">
+                                <Label htmlFor="is_verified" className="flex items-center gap-2 text-sm font-bold">
+                                    {t('Verified Shop')}
+                                    {data.is_verified && (
+                                        <span className="rounded-full bg-blue-500 px-1.5 py-0.5 text-[10px] tracking-wider text-white uppercase">
+                                            {t('Verified')}
+                                        </span>
+                                    )}
+                                </Label>
+                                <p className="text-muted-foreground text-[11px]">{t('Enable this to show a verified badge on this shop.')}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Location Section */}
@@ -244,25 +262,6 @@ export default function Create({
                         error={errors.address}
                         placeholder={t('Address')}
                     />
-                </div>
-
-                {/* Account Status / Verified Toggle */}
-                <div className="space-y-2">
-                    <FormLabel id="account_status" label={t('Account Status')} />
-                    <div className="bg-accent/5 flex max-w-md items-center space-x-4 rounded-lg border border-blue-200/50 p-4 dark:border-blue-900/30">
-                        <Switch id="is_verified" checked={data.is_verified} onCheckedChange={(val) => setData('is_verified', val)} />
-                        <div className="grid gap-1 leading-none">
-                            <Label htmlFor="is_verified" className="flex items-center gap-2 text-sm font-bold">
-                                {t('Verified Shop')}
-                                {data.is_verified && (
-                                    <span className="rounded-full bg-blue-500 px-1.5 py-0.5 text-[10px] tracking-wider text-white uppercase">
-                                        {t('Verified')}
-                                    </span>
-                                )}
-                            </Label>
-                            <p className="text-muted-foreground text-[11px]">{t('Enable this to show a verified badge on this shop.')}</p>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Media Upload */}
