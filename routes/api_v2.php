@@ -23,6 +23,7 @@ Route::prefix('v2')->group(function () {
     Route::get('/banners', [BannerController::class, 'index']);
     Route::get('/shops', [ShopController::class, 'index']);
     Route::get('/garages', [GarageController::class, 'index']);
+    Route::get('provinces', [GarageController::class, 'provinces']);
 
     Route::get('/items-categories', [ItemCategoryController::class, 'getFieldsByCategory']);
     Route::get('/categories_fields/{cate_id}', [ItemCategoryController::class, 'getFieldsByCategory']);
