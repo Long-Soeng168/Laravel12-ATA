@@ -11,6 +11,7 @@ class GarageController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $province_code = $request->input('province_code');
         $query = Garage::query();
 
         if ($search) {
@@ -25,6 +26,10 @@ class GarageController extends Controller
         $query->where('status', 'approved');
         $query->orderBy('order_index');
         $query->orderBy('id', 'desc');
+
+        if ($province_code) {
+            $query->where('province_code', $province_code);
+        }
 
         $garages = $query->paginate(20);
 
