@@ -30,8 +30,8 @@ class GarageController extends Controller
         // Transform the collection inside the paginator
         $garages->getCollection()->transform(function ($item) {
             // Map the new URL fields
-            $item->logo_url = $item->logo ? asset('assets/images/garages/' . $item->logo) : null;
-            $item->banner_url = $item->banner ? asset('assets/images/garages/' . $item->banner) : null;
+            $item->logo_url = $item->logo ? asset('assets/images/garages/thumb/' . $item->logo) : null;
+            $item->banner_url = $item->banner ? asset('assets/images/garages/thumb/' . $item->banner) : null;
 
             return $item;
         });
