@@ -21,6 +21,7 @@ class GarageController extends Controller
             });
         }
 
+        $query->with('province');
         $query->where('status', 'approved');
         $query->orderBy('order_index');
         $query->orderBy('id', 'desc');
