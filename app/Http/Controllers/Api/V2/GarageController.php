@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Controller;
 use App\Models\Garage;
+use App\Models\Province;
 use Illuminate\Http\Request;
 
 class GarageController extends Controller
@@ -43,5 +44,11 @@ class GarageController extends Controller
         });
 
         return response()->json($garages);
+    }
+
+    public function provinces()
+    {
+        $provinces = Province::orderBy('order_index')->orderBy('name_kh')->get();
+        return response()->json($provinces);
     }
 }
