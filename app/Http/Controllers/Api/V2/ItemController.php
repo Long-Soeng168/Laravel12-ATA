@@ -26,6 +26,8 @@ class ItemController extends Controller
         // 1. Start the Query with relationships
         $query = Item::with(['category', 'images']);
 
+        $query->where('status', 'active');
+
         // Filter by Category Code and Dynamic Attributes
         if ($request->filled('category_code')) {
             $categoryCode = $request->category_code;
