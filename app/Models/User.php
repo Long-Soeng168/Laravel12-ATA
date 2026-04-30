@@ -33,6 +33,7 @@ class User extends Authenticatable
         'image',
         'gender',
         'phone',
+        'other_phones',
         'shop_id',
         'garage_id',
         'status',
@@ -62,6 +63,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'other_phones' => 'array',
         ];
     }
 

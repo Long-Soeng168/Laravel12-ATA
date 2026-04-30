@@ -85,6 +85,12 @@ class UserController extends Controller implements HasMiddleware
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:6|max:255|confirmed', // Laravel auto-validates against confirm_password
             'phone' => 'nullable|numeric|unique:users,phone',
+            'other_phones' => 'nullable|array',
+            'other_phones.*' => [
+                'nullable',
+                'string',
+                'regex:/^(0|\+855)(\d{8,9})$/', // Validates Khmer format for each entry
+            ],
             'gender' => 'nullable|string|in:male,female,other',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'is_verified' => 'nullable|boolean',
@@ -155,6 +161,12 @@ class UserController extends Controller implements HasMiddleware
             'password' => 'nullable|string|min:6|max:255|confirmed', // Laravel auto-validates against confirm_password
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'nullable|numeric|digits_between:8,15|unique:users,phone,' . $user->id,
+            'other_phones' => 'nullable|array',
+            'other_phones.*' => [
+                'nullable',
+                'string',
+                'regex:/^(0|\+855)(\d{8,9})$/', // Validates Khmer format for each entry
+            ],
             'gender' => 'nullable|string|in:male,female,other',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'document_access_end_at' => 'nullable|date',

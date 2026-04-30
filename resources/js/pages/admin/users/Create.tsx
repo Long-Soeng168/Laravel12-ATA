@@ -8,6 +8,7 @@ import LocationPicker from '@/components/LocationPicker';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -21,7 +22,7 @@ import { BreadcrumbItem } from '@/types';
 import { useForm } from '@inertiajs/react';
 import axios from 'axios';
 import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, PlusIcon, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -43,6 +44,7 @@ export default function Create({
         name: editData?.name || '',
         email: editData?.email || '',
         phone: editData?.phone || '',
+        other_phones: editData?.other_phones || [],
         gender: editData?.gender || '',
         document_access_end_at: editData?.document_access_end_at ? new Date(editData.document_access_end_at) : null,
         password: '',
@@ -55,6 +57,19 @@ export default function Create({
         longitude: editData?.longitude ?? null,
         is_verified: editData?.is_verified === 1 || editData?.is_verified === true || false,
     });
+
+    const addOtherPhone = () => setData('other_phones', [...data.other_phones, '']);
+    const removeOtherPhone = (index: number) => {
+        setData(
+            'other_phones',
+            data.other_phones.filter((_: any, i: number) => i !== index),
+        );
+    };
+    const handleOtherPhoneChange = (index: number, value: string) => {
+        const updated = [...data.other_phones];
+        updated[index] = value;
+        setData('other_phones', updated);
+    };
 
     useEffect(() => {
         setIsGettingRoles(true);
@@ -144,20 +159,74 @@ export default function Create({
                         onChange={(val) => setData('name', val)}
                         error={errors.name}
                         placeholder={t('Name')}
+                        containerClassName="col-span-full"
                     />
 
-                    <FormField
-                        required
-                        id="phone"
-                        name="phone"
-                        type="number"
-                        label={t('Phone Number')}
-                        value={data.phone}
-                        onChange={(val) => setData('phone', val)}
-                        error={errors.phone}
-                        placeholder={t('Phone Number')}
-                    />
+                    <div className="space-y-4">
+                        {/* Primary Phone and Add Button Row */}
+                        <div className="flex flex-1 items-start gap-4">
+                            <div className="flex-1">
+                                <FormField
+                                    required
+                                    id="phone"
+                                    name="phone"
+                                    type="number"
+                                    label={t('Phone Number')}
+                                    value={data.phone}
+                                    onChange={(val) => setData('phone', val)}
+                                    error={errors.phone}
+                                    placeholder={t('Phone Number')}
+                                    containerClassName="flex-1"
+                                />
+                                {data.other_phones.length > 0 && (
+                                    <div className="bg-accent/5 mt-2 w-full flex-1 space-y-2">
+                                        {data.other_phones.map((p: string, i: number) => (
+                                            <div>
+                                                <div key={i} className="flex items-center gap-2">
+                                                    <Input
+                                                        id={`other_phone_${i}`}
+                                                        name={`other_phones.${i}`}
+                                                        type="number"
+                                                        value={p}
+                                                        // Extract the value from the event target
+                                                        onChange={(e) => handleOtherPhoneChange(i, e.target.value)}
+                                                        placeholder={t('Other Phone')}
+                                                    />
 
+                                                    {!readOnly && (
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="icon"
+                                                            onClick={() => removeOtherPhone(i)}
+                                                            className="text-destructive h-10"
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                                {errors[`other_phones.${i}` as keyof typeof errors] && (
+                                                    <p className="text-destructive mt-1 text-sm font-medium transition-all">
+                                                        Phone format is invalid.
+                                                    </p>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {!readOnly && (
+                                <div className="space-y-2">
+                                    <FormLabel className="invisible" label="For Space" />
+                                    <Button type="button" variant="outline" size="sm" onClick={addOtherPhone} className="h-[41px] rounded border-dashed">
+                                        <PlusIcon className="mr-2 h-4 w-4" />
+                                        {t('Add Phones')}
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                     <FormField
                         required
                         id="email"
@@ -196,7 +265,8 @@ export default function Create({
                             <p className="text-destructive animate-in fade-in slide-in-from-top-1 text-[11px] font-medium">{errors.gender}</p>
                         )}
                     </div>
-
+                </div>
+                <div className="form-field-container md:grid-cols-2">
                     <div className="space-y-2">
                         <FormLabel id="password" label={t('Password')} required={true} />
                         <PasswordInput
@@ -255,18 +325,6 @@ export default function Create({
                         error={errors.address}
                         placeholder={t('Address')}
                     />
-                </div>
-
-                {/* Password Section Fix */}
-                <div className="space-y-2">
-                    <FormLabel id="confirm_password" label={t('Confirm Password')} required={true} />
-                    <PasswordInput
-                        value={data.password_confirmation}
-                        onChange={(e) => setData('password_confirmation', e.target.value)}
-                        placeholder={t('Confirm Password')}
-                        className={cn(errors.password_confirmation && 'border-destructive focus-visible:ring-destructive/20')}
-                    />
-                    <FormErrorLabel error={errors.password_confirmation} />
                 </div>
 
                 {/* Roles & Verification Row */}
