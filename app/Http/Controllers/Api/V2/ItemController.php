@@ -23,7 +23,7 @@ class ItemController extends Controller
     public function index(Request $request)
     {
         // 1. Start the Query with relationships
-        $query = Item::with(['category', 'images']);
+        $query = Item::with(['category', 'brand', 'images']);
 
         $query->where('status', 'active');
 
@@ -123,7 +123,7 @@ class ItemController extends Controller
             $item->display_attributes = $displayAttributes;
 
             // Correct Laravel way to hide relationships from the final JSON payload
-            $item->makeHidden(['images', 'category']);
+            $item->makeHidden(['images']);
 
             return $item;
         });
