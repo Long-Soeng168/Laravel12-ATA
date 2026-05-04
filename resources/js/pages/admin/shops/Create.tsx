@@ -10,6 +10,7 @@ import LocationPicker from '@/components/LocationPicker';
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ProgressWithValue } from '@/components/ui/progress-with-value';
@@ -21,7 +22,7 @@ import { cn } from '@/lib/utils';
 import { BreadcrumbItem } from '@/types';
 import { useForm, usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
-import { AlertTriangle, CalendarIcon } from 'lucide-react';
+import { AlertTriangle, CalendarIcon, PlusIcon, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -44,6 +45,7 @@ export default function Create({
         owner_user_id: editData?.owner_user_id || '',
         name: editData?.name || '',
         phone: editData?.phone || '',
+        other_phones: editData?.other_phones || [],
         address: editData?.address || '',
         status: editData?.status || 'approved',
         order_index: editData?.order_index?.toString() || '10000',
@@ -57,6 +59,21 @@ export default function Create({
         longitude: editData?.longitude ?? null,
         is_verified: editData?.is_verified === 1 || editData?.is_verified === true || false,
     });
+
+    // Add Other Phones Logic
+    const addOtherPhone = () => setData('other_phones', [...data.other_phones, '']);
+    const removeOtherPhone = (index: number) => {
+        setData(
+            'other_phones',
+            data.other_phones.filter((_: any, i: number) => i !== index),
+        );
+    };
+    const handleOtherPhoneChange = (index: number, value: string) => {
+        const updated = [...data.other_phones];
+        updated[index] = value;
+        setData('other_phones', updated);
+    };
+    // End Other Phones Logic
 
     const onSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -157,16 +174,77 @@ export default function Create({
                         placeholder={t('Name')}
                         containerClassName="md:col-span-2"
                     />
-                    <FormField
-                        id="phone"
-                        name="phone"
-                        label={t('Phone')}
-                        value={data.phone}
-                        onChange={(val) => setData('phone', val)}
-                        error={errors.phone}
-                        placeholder={t('Phone')}
-                        type="number"
-                    />
+                    <div className="space-y-4">
+                        {/* Primary Phone and Add Button Row */}
+                        <div className="flex flex-1 items-start gap-4">
+                            <div className="flex-1">
+                                <FormField
+                                    required
+                                    id="phone"
+                                    name="phone"
+                                    type="number"
+                                    label={t('Phone Number')}
+                                    value={data.phone}
+                                    onChange={(val) => setData('phone', val)}
+                                    error={errors.phone}
+                                    placeholder={t('Phone Number')}
+                                    containerClassName="flex-1"
+                                />
+                                {data.other_phones.length > 0 && (
+                                    <div className="bg-accent/5 mt-2 w-full flex-1 space-y-2">
+                                        {data.other_phones.map((p: string, i: number) => (
+                                            <div>
+                                                <div key={i} className="flex items-center gap-2">
+                                                    <Input
+                                                        id={`other_phone_${i}`}
+                                                        name={`other_phones.${i}`}
+                                                        type="number"
+                                                        value={p}
+                                                        // Extract the value from the event target
+                                                        onChange={(e) => handleOtherPhoneChange(i, e.target.value)}
+                                                        placeholder={t('Other Phone')}
+                                                    />
+
+                                                    {!readOnly && (
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="icon"
+                                                            onClick={() => removeOtherPhone(i)}
+                                                            className="text-destructive h-10"
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                                {errors[`other_phones.${i}` as keyof typeof errors] && (
+                                                    <p className="text-destructive mt-1 text-sm font-medium transition-all">
+                                                        Phone format is invalid.
+                                                    </p>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {!readOnly && (
+                                <div className="space-y-2">
+                                    <FormLabel className="invisible" label="For Space" />
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={addOtherPhone}
+                                        className="h-[41px] rounded border-dashed"
+                                    >
+                                        <PlusIcon className="mr-2 h-4 w-4" />
+                                        {t('Add Phones')}
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
 
                     <FormField
                         id="order_index"

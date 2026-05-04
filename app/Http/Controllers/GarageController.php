@@ -143,6 +143,12 @@ class GarageController extends Controller implements HasMiddleware
             'owner_user_id' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string',
+            'other_phones' => 'nullable|array',
+            'other_phones.*' => [
+                'nullable',
+                'string',
+                'regex:/^(0|\+855)(\d{8,9})$/', // Validates Khmer format for each entry
+            ],
             'short_description' => 'nullable|string|max:500',
             'short_description_kh' => 'nullable|string|max:500',
             'brand_code' => 'nullable|string|max:255',
@@ -227,6 +233,12 @@ class GarageController extends Controller implements HasMiddleware
             'name' => 'required|string|max:255',
             'address' => 'nullable|string|max:255',
             'phone' => 'nullable|string',
+            'other_phones' => 'nullable|array',
+            'other_phones.*' => [
+                'nullable',
+                'string',
+                'regex:/^(0|\+855)(\d{8,9})$/', // Validates Khmer format for each entry
+            ],
             'short_description' => 'nullable|string|max:500',
             'short_description_kh' => 'nullable|string|max:500',
             'parent_code' => 'nullable|string|max:255',

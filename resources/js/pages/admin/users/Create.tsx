@@ -58,6 +58,7 @@ export default function Create({
         is_verified: editData?.is_verified === 1 || editData?.is_verified === true || false,
     });
 
+    // Add Other Phones Logic
     const addOtherPhone = () => setData('other_phones', [...data.other_phones, '']);
     const removeOtherPhone = (index: number) => {
         setData(
@@ -70,6 +71,7 @@ export default function Create({
         updated[index] = value;
         setData('other_phones', updated);
     };
+    // End Other Phones Logic
 
     useEffect(() => {
         setIsGettingRoles(true);
@@ -219,7 +221,13 @@ export default function Create({
                             {!readOnly && (
                                 <div className="space-y-2">
                                     <FormLabel className="invisible" label="For Space" />
-                                    <Button type="button" variant="outline" size="sm" onClick={addOtherPhone} className="h-[41px] rounded border-dashed">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={addOtherPhone}
+                                        className="h-[41px] rounded border-dashed"
+                                    >
                                         <PlusIcon className="mr-2 h-4 w-4" />
                                         {t('Add Phones')}
                                     </Button>

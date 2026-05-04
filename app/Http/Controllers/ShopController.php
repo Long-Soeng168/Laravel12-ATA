@@ -117,6 +117,12 @@ class ShopController extends Controller implements HasMiddleware
             'owner_user_id' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
             'phone' => 'nullable|numeric|digits_between:8,15',
+            'other_phones' => 'nullable|array',
+            'other_phones.*' => [
+                'nullable',
+                'string',
+                'regex:/^(0|\+855)(\d{8,9})$/', // Validates Khmer format for each entry
+            ],
             'short_description' => 'nullable|string|max:1000',
             'short_description_kh' => 'nullable|string|max:1000',
             'order_index' => 'nullable|numeric',
@@ -200,6 +206,12 @@ class ShopController extends Controller implements HasMiddleware
             'owner_user_id' => 'required|exists:users,id',
             'name' => 'required|string|max:255',
             'phone' => 'nullable|numeric|digits_between:8,15',
+            'other_phones' => 'nullable|array',
+            'other_phones.*' => [
+                'nullable',
+                'string',
+                'regex:/^(0|\+855)(\d{8,9})$/', // Validates Khmer format for each entry
+            ],
             'short_description' => 'nullable|string|max:1000',
             'short_description_kh' => 'nullable|string|max:1000',
             'order_index' => 'nullable|numeric',

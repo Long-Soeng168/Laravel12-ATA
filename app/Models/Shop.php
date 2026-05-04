@@ -10,6 +10,13 @@ class Shop extends Model
     /** @use HasFactory<\Database\Factories\ShopFactory> */
     use HasFactory;
     protected $guarded = [];
+    protected function casts(): array
+    {
+        return [
+            'other_phones' => 'array',
+        ];
+    }
+
     public function created_by()
     {
         return $this->belongsTo(User::class, 'created_by', 'id');

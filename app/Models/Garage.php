@@ -10,6 +10,14 @@ class Garage extends Model
     /** @use HasFactory<\Database\Factories\GarageFactory> */
     use HasFactory;
     protected $guarded = [];
+
+    protected function casts(): array
+    {
+        return [
+            'other_phones' => 'array',
+        ];
+    }
+
     public function created_by()
     {
         return $this->belongsTo(User::class, 'created_by', 'id');
