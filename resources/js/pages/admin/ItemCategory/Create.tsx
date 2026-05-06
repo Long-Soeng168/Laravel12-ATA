@@ -25,6 +25,7 @@ interface TypeGroupForm {
     short_description?: string;
     short_description_kh?: string;
     has_body_type?: boolean | null;
+    is_show_loan_calculator?: boolean | null;
     image?: string | null;
 }
 
@@ -50,6 +51,7 @@ export default function Create({ editData, readOnly }: { editData?: any; readOnl
         short_description_kh: editData?.short_description_kh || '',
         image: editData?.image || null,
         has_body_type: editData?.has_body_type || false,
+        is_show_loan_calculator: editData?.is_show_loan_calculator || false,
     });
 
     const onSubmit = (e: React.FormEvent) => {
@@ -138,6 +140,17 @@ export default function Create({ editData, readOnly }: { editData?: any; readOnl
                             error={errors.code}
                             description="Example: my-item-code"
                         />
+                        <FormField
+                            required
+                            type="number"
+                            id="order_index"
+                            name="order_index"
+                            label="Order Index"
+                            value={data.order_index}
+                            onChange={(val) => setData('order_index', val)}
+                            error={errors.order_index}
+                            description="Lower number has higher priority."
+                        />
 
                         <FormField
                             required
@@ -184,17 +197,6 @@ export default function Create({ editData, readOnly }: { editData?: any; readOnl
                                     description="Select the parent that this category belongs to."
                                 />
                             )} */}
-                            <FormField
-                                required
-                                type="number"
-                                id="order_index"
-                                name="order_index"
-                                label="Order Index"
-                                value={data.order_index}
-                                onChange={(val) => setData('order_index', val)}
-                                error={errors.order_index}
-                                description="Lower number has higher priority."
-                            />
 
                             <div className="bg-accent/5 flex items-center space-x-4 rounded-lg border p-4">
                                 <Switch
@@ -209,6 +211,24 @@ export default function Create({ editData, readOnly }: { editData?: any; readOnl
                                     <p className="text-muted-foreground text-xs">
                                         {t('Enable this if the category includes body type (e.g., sedan, SUV, etc.).')}
                                     </p>
+                                </div>
+                            </div>
+                            <div className="grid gap-4">
+                                {/* New Loan Calculator Switch */}
+                                <div className="bg-accent/5 flex items-center space-x-4 rounded-lg border p-4">
+                                    <Switch
+                                        id="is_show_loan_calculator"
+                                        checked={data.is_show_loan_calculator ?? false}
+                                        onCheckedChange={(val) => setData('is_show_loan_calculator', val)}
+                                    />
+                                    <div className="grid gap-1.5 leading-none">
+                                        <Label htmlFor="is_show_loan_calculator" className="text-sm font-bold">
+                                            {t('Show Loan Calculator')}
+                                        </Label>
+                                        <p className="text-muted-foreground text-xs">
+                                            {t('Enable this to display a monthly payment estimator for items in this category.')}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>

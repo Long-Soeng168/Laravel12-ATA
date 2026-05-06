@@ -38,4 +38,20 @@ class ShopController extends Controller
 
         return response()->json($shops);
     }
+    public function show(Request $request, string $id)
+    {
+        // 1. Find the specific shop by ID and ensure it is approved
+        $shop = Shop::where('status', 'approved')->find($id);
+
+        // 2. Handle 404 if the shop doesn't exist or isn't approved
+        if (!$shop) {
+            return response()->json(['message' => 'Shop not found'], 404);
+        }
+
+        // 3. Transform the single object (No need for transform() on a collection)
+        $shop->logo_url = $shop->logo ? asset('assets/images/shops/' . $shop->logo) : null;
+        $shop->banner_url = $shop->banner ? asset('assets/images/shops/' . $shop->banner) : null;
+
+        return response()->json($shop);
+    }
 }

@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V2\GarageController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V2\ItemController;
 use App\Http\Controllers\Api\V2\ShopController;
+use App\Http\Controllers\Api\V2\UserController;
 use App\Http\Controllers\Api\V2\VideoController;
 use App\Http\Controllers\ItemCategoryController;
 use Illuminate\Http\Request;
@@ -22,7 +23,12 @@ use Illuminate\Http\Request;
 Route::prefix('v2')->group(function () {
 
     Route::get('/banners', [BannerController::class, 'index']);
+
+    Route::get('/users/{id}', [UserController::class, 'show']);
+
     Route::get('/shops', [ShopController::class, 'index']);
+    Route::get('/shops/{id}', [ShopController::class, 'show']);
+
     Route::get('/garages', [GarageController::class, 'index']);
     Route::get('/garages_for_map', [GarageController::class, 'garages_for_map']);
     Route::get('/provinces', [GarageController::class, 'provinces']);

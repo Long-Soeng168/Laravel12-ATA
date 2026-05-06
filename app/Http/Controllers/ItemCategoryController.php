@@ -111,6 +111,7 @@ class ItemCategoryController extends Controller implements HasMiddleware
             'short_description_kh' => 'nullable|string',
             'image' => 'nullable|mimes:jpeg,png,jpg,gif,webp,svg|max:4096',
             'has_body_type' => 'nullable|boolean',
+            'is_show_loan_calculator' => 'nullable|boolean',
         ]);
         // dd($request->all());
 
@@ -178,6 +179,7 @@ class ItemCategoryController extends Controller implements HasMiddleware
             'short_description_kh' => 'nullable|string',
             'image' => 'nullable|mimes:jpeg,png,jpg,gif,webp,svg|max:4096',
             'has_body_type' => 'nullable|boolean',
+            'is_show_loan_calculator' => 'nullable|boolean',
         ]);
 
         try {

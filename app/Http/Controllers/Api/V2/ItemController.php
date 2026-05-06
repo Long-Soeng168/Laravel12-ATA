@@ -9,7 +9,7 @@ use App\Models\ItemBodyType;
 use App\Models\ItemBrand;
 use App\Models\ItemCategory;
 use App\Models\ItemCategoryField;
-use App\Models\ItemImage; 
+use App\Models\ItemImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -51,6 +51,13 @@ class ItemController extends Controller
         }
 
         // Standard Filters
+        if ($request->filled('shop_id')) {
+            $query->where('shop_id', $request->shop_id);
+        }
+        if ($request->filled('user_id')) {
+            $query->where('created_by', $request->user_id);
+        }
+
         if ($request->filled('brand_code')) {
             $query->where('brand_code', $request->brand_code);
         }
@@ -322,6 +329,8 @@ class ItemController extends Controller
         $query = Item::with(['category', 'images'])
             ->where('id', '!=', $baseItem->id); // Exclude the current item
 
+        $query->where('status', 'active');
+        
         // Define what makes an item "related" (e.g., same category, brand, or model)
         $query->where(function ($q) use ($baseItem) {
             if ($baseItem->category_code) {
