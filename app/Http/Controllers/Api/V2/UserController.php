@@ -19,7 +19,7 @@ class UserController extends Controller
         }
 
         // 3. Transform the single object (No need for transform() on a collection)
-        $user->logo_url = $user->logo ? asset('assets/images/users/' . $user->logo) : null;
+        $user->logo_url = $user->image ? asset('assets/images/users/' . $user->image) : null;
         $user->banner_url = $user->banner ? asset('assets/images/users/' . $user->banner) : null;
 
         return response()->json($user);
