@@ -14,9 +14,9 @@ class SlideController extends Controller
         $position = $request->position;
 
         if ($position) {
-            $slides = Banner::where('position_code', $position)->get();
+            $slides = Banner::where('position_code', $position)->where('status', 'active')->get();
         } else {
-            $slides = Banner::all();
+            $slides = Banner::where('status', 'active')->get();
         }
 
         $data = $slides->map(function ($item) {
