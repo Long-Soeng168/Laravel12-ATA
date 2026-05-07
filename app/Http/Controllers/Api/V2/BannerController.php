@@ -15,8 +15,7 @@ class BannerController extends Controller
         // Fetch data based on position presence
         $slides = Banner::when($position, function ($query, $position) {
             return $query->where('position_code', $position);
-        })->get();
-
+        })->where('status', 'active')->get();
 
         $data = $slides->map(function ($item) {
             $item->image_url = $item->image ? asset('assets/images/banners/' . $item->image) : null;
