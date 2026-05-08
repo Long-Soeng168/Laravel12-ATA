@@ -78,7 +78,7 @@ class ItemController extends Controller
         }
 
         // 2. Paginate & Sort (Removed latest() to prevent conflicting with orderByDesc)
-        $items = $query->orderByDesc('id')->paginate(15);
+        $items = $query->orderByDesc('id')->paginate(16);
 
         // 3. Pre-fetch mappings for attributes (Optimized)
         // We get the IDs from the already eager-loaded categories instead of running a new query!
@@ -330,7 +330,7 @@ class ItemController extends Controller
             ->where('id', '!=', $baseItem->id); // Exclude the current item
 
         $query->where('status', 'active');
-        
+
         // Define what makes an item "related" (e.g., same category, brand, or model)
         $query->where(function ($q) use ($baseItem) {
             if ($baseItem->category_code) {
