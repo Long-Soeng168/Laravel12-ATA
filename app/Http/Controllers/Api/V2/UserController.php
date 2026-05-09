@@ -131,7 +131,7 @@ class UserController extends Controller
         // =========================================================================
         // 🧪 RANDOM ERROR GENERATOR FOR FLUTTER TESTING
         // =========================================================================
-        $testingMode = false;
+        $testingMode = true;
 
         if ($testingMode) {
             $chance = rand(1, 100);
