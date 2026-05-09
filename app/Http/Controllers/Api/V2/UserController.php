@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 
@@ -123,5 +124,86 @@ class UserController extends Controller
             'message' => 'Invalid email/phone or password.',
             'error' => 'Unauthorized'
         ], 401);
+    }
+
+    public function register(Request $request)
+    {
+        // =========================================================================
+        // 🧪 RANDOM ERROR GENERATOR FOR FLUTTER TESTING
+        // =========================================================================
+        $testingMode = false;
+
+        if ($testingMode) {
+            $chance = rand(1, 100);
+            if ($chance <= 20) {
+                // Simulates a general server failure
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Internal Server Error',
+                    'error' => 'PDOException: Could not connect to host'
+                ], 500);
+            } elseif ($chance <= 100) {
+                // Simulates validation failures (already taken, etc.)
+                return response()->json([
+                    'success' => false,
+                    'message' => 'The given data was invalid.',
+                    'errors' => [
+                        'email' => ['The email has already been taken.'],
+                        'phone' => ['The phone number is already registered.'],
+                        'password' => ['The password must be at least 8 characters.']
+                    ]
+                ], 422);
+            }
+        }
+        // =========================================================================
+
+        // 1. Validation
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'nullable|unique:users,phone',
+            'password' => 'required|string|min:8', // Added min length for better security
+            'address' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The given data was invalid.',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // 2. Database Transaction
+        return DB::transaction(function () use ($request) {
+
+            // Create the User
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'address' => $request->address,
+                'password' => Hash::make($request->password),
+                'image' => null,
+                'status' => 'active', // Optional: Set default status
+            ]);
+
+            // 3. Assign Default Role
+            // Wrapped in a try-catch or check to ensure the 'User' role exists
+            if ($user) {
+                $user->assignRole('User');
+            }
+
+            // 4. Generate Token
+            $token = $user->createToken('AuthToken')->plainTextToken;
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Registration successful.',
+                'token' => $token,
+                'user' => $user,
+                'userRoles' => ['User']
+            ], 201); // 201 Created is the correct status for a successful registration
+        });
     }
 }
