@@ -159,7 +159,7 @@ class ShopController extends Controller
         }
 
         // 4. Database Transaction
-        return DB::transaction(function () use ($request, $validated, $owner) {
+        return DB::transaction(function () use ($request, $validated, $owner, $userId) {
 
             // Clean empty strings to null
             foreach ($validated as $key => $value) {
