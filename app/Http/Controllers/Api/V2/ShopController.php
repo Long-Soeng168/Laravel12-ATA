@@ -106,11 +106,6 @@ class ShopController extends Controller
             $input['other_phones'] = json_decode($input['other_phones'], true);
         }
 
-        // Flutter multipart sends booleans as strings ("true" / "false")
-        if (isset($input['is_verified'])) {
-            $input['is_verified'] = filter_var($input['is_verified'], FILTER_VALIDATE_BOOLEAN);
-        }
-
         // 2. Validate Data using Validator::make for custom JSON response
         $validator = Validator::make($input, [
             'name' => 'required|string|max:255',
@@ -212,6 +207,114 @@ class ShopController extends Controller
                 'message' => 'Shop created successfully!',
                 'data' => $shop
             ], 201);
+        });
+    }
+
+    public function update(Request $request, $id)
+    {
+        // 1. Find the Shop
+        $shop = Shop::find($id);
+
+        if (!$shop) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Shop not found.'
+            ], 404);
+        }
+
+        // 2. Pre-process multipart/form-data strings from Flutter
+        $input = $request->all();
+
+        // Flutter multipart sends arrays as JSON strings
+        if (isset($input['other_phones']) && is_string($input['other_phones'])) {
+            $input['other_phones'] = json_decode($input['other_phones'], true);
+        }
+
+        // 3. Validate Data
+        $validator = Validator::make($input, [
+            'name' => 'required|string|max:255',
+            'phone' => 'required|numeric|digits_between:8,15',
+            'other_phones' => 'nullable|array',
+            'other_phones.*' => [
+                'nullable',
+                'string',
+                'regex:/^(0|\+855)(\d{8,9})$/',
+            ],
+            'short_description' => 'nullable|string|max:1000',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
+            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
+            'address' => 'required|string|max:255',
+            'location' => 'nullable|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The given data was invalid.',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $validated = $validator->validated();
+
+        // 4. Authorization Check
+        $userId = $request->user() ? $request->user()->id : 1;
+
+        // Ensure the user updating the shop actually owns it
+        if ($shop->owner_user_id !== $userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to update this shop.'
+            ], 403);
+        }
+
+        // 5. Database Transaction
+        return DB::transaction(function () use ($request, $validated, $shop, $userId) {
+
+            // Clean empty strings to null
+            foreach ($validated as $key => $value) {
+                if (is_string($value) && trim($value) === '') {
+                    $validated[$key] = null;
+                }
+            }
+
+            // Only update the 'updated_by' field. 
+            // We DO NOT touch 'created_by', 'owner_user_id', 'status', or 'expired_at' on a standard update.
+            $validated['updated_by'] = $userId;
+
+            // Process Images
+            if ($request->hasFile('logo')) {
+                try {
+                    // Tip: You can optionally add code here to delete the old image using Storage::delete()
+                    $validated['logo'] = ImageHelper::uploadAndResizeImageWebp($request->file('logo'), 'assets/images/shops', 600);
+                } catch (\Exception $e) {
+                    throw new \Exception('Failed to upload logo: ' . $e->getMessage());
+                }
+            } else {
+                unset($validated['logo']); // Prevent overwriting the existing logo with null
+            }
+
+            if ($request->hasFile('banner')) {
+                try {
+                    // Tip: You can optionally add code here to delete the old image using Storage::delete()
+                    $validated['banner'] = ImageHelper::uploadAndResizeImageWebp($request->file('banner'), 'assets/images/shops', 1200);
+                } catch (\Exception $e) {
+                    throw new \Exception('Failed to upload banner: ' . $e->getMessage());
+                }
+            } else {
+                unset($validated['banner']); // Prevent overwriting the existing banner with null
+            }
+
+            // Update the existing Shop model
+            $shop->update($validated);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Shop updated successfully!',
+                'data' => $shop->fresh() // Returns the updated model
+            ], 200); // 200 OK is standard for successful updates
         });
     }
 }
