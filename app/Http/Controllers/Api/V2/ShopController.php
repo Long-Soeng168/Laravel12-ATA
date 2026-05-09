@@ -66,7 +66,7 @@ class ShopController extends Controller
         // 🧪 RANDOM ERROR GENERATOR FOR FLUTTER TESTING
         // Set to 'false' when you are done testing!
         // =========================================================================
-        $testingMode = true;
+        $testingMode = false;
 
         if ($testingMode) {
             $chance = rand(1, 100);
