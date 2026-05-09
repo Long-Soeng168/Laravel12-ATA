@@ -141,7 +141,8 @@ class ShopController extends Controller
         $validated = $validator->validated();
 
         // 3. Pre-Database Logical Checks
-        $owner = User::find($validated['owner_user_id']);
+        $userId = $request->user() ? $request->user()->id : 1;
+        $owner = User::find($userId);
 
         if (!$owner) {
             return response()->json([
@@ -168,7 +169,6 @@ class ShopController extends Controller
             }
 
             // Assign Authorship (Fallback to 1 if auth is bypassed during testing)
-            $userId = $request->user() ? $request->user()->id : 1;
             $validated['owner_user_id'] = $userId;
             $validated['created_by'] = $userId;
             $validated['updated_by'] = $userId;
