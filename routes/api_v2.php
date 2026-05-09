@@ -28,6 +28,8 @@ Route::prefix('v2')->group(function () {
 
     Route::get('/shops', [ShopController::class, 'index']);
     Route::get('/shops/{id}', [ShopController::class, 'show']);
+    Route::post('/shops', [ShopController::class, 'store']);
+    Route::post('/shops/{id}', [ShopController::class, 'update']);
 
     Route::get('/garages', [GarageController::class, 'index']);
     Route::get('/garages_for_map', [GarageController::class, 'garages_for_map']);
