@@ -114,7 +114,7 @@ class ShopController extends Controller
         // 2. Validate Data using Validator::make for custom JSON response
         $validator = Validator::make($input, [
             'name' => 'required|string|max:255',
-            'phone' => 'nullable|numeric|digits_between:8,15',
+            'phone' => 'required|numeric|digits_between:8,15',
             'other_phones' => 'nullable|array',
             'other_phones.*' => [
                 'nullable',
@@ -122,9 +122,9 @@ class ShopController extends Controller
                 'regex:/^(0|\+855)(\d{8,9})$/', // Validates Khmer format for each entry
             ],
             'short_description' => 'nullable|string|max:1000',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
-            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
-            'address' => 'nullable|string|max:255',
+            'logo' => 'required|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
+            'banner' => 'required|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
+            'address' => 'required|string|max:255',
             'location' => 'nullable|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
