@@ -46,7 +46,7 @@ class ShopController extends Controller
     public function show(Request $request, string $id)
     {
         // 1. Find the specific shop by ID and ensure it is approved
-        $shop = Shop::where('status', 'approved')->find($id);
+        $shop = Shop::find($id);
 
         // 2. Handle 404 if the shop doesn't exist or isn't approved
         if (!$shop) {
