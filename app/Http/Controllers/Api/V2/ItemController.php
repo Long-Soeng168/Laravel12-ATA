@@ -199,14 +199,7 @@ class ItemController extends Controller
     public function show($id)
     {
         // Eager load everything needed, but we will selectively return data
-        $item = Item::with(['images', 'brand', 'model', 'body_type', 'shop', 'created_by_user', 'category.fields.options'])->find($id);
-
-        if (!$item) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Item not found or is inactive.'
-            ], 404);
-        }
+        $item = Item::with(['images', 'brand', 'model', 'body_type', 'shop', 'created_by_user', 'category.fields.options'])->findOrFail($id);
 
         $item->increment('total_view_counts');
         // 1. Convert the basic item to an array
@@ -313,6 +306,11 @@ class ItemController extends Controller
             'success' => true,
             'data' => $formattedItem
         ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $formattedItem
+        ]);
     }
     public function related_items($id)
     {
@@ -371,11 +369,11 @@ class ItemController extends Controller
 
             $item->total_images = $item->images->count();
 
-            // $item->thumbnail_image = $firstImage ? [
-            //     'id' => $firstImage->id,
-            //     'image' => $firstImage->image,
-            //     'image_url' => asset('assets/images/items/' . $firstImage->image),
-            // ] : null;
+            $item->thumbnail_image = $firstImage ? [
+                'id' => $firstImage->id,
+                'image' => $firstImage->image,
+                'image_url' => asset('assets/images/items/' . $firstImage->image),
+            ] : null;
 
             // --- Attribute Display Logic ---
             $categoryId = $item->category?->id;
