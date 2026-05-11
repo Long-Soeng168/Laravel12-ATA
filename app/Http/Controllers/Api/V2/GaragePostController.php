@@ -6,6 +6,7 @@ use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Garage;
 use App\Models\GaragePost;
+use App\Models\GaragePostImage;
 use App\Models\Province;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -95,5 +96,145 @@ class GaragePostController extends Controller
 
         // 6. Return the perfectly formatted JSON
         return response()->json($formattedPost);
+    }
+
+    public function store(Request $request)
+    {
+        // =========================================================================
+        // 🧪 RANDOM ERROR GENERATOR FOR FLUTTER TESTING
+        // =========================================================================
+        $testingMode = false;
+        if ($testingMode) {
+            $chance = rand(1, 100);
+            if ($chance <= 15) return response()->json(['message' => 'Unauthenticated.'], 401);
+            if ($chance <= 30) return response()->json(['message' => 'This action is unauthorized.'], 403);
+            if ($chance <= 45) return response()->json(['message' => 'The requested resource was not found.'], 404);
+            if ($chance <= 60) return response()->json(['success' => false, 'message' => 'Server Error'], 500);
+            if ($chance <= 100) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'The given data was invalid.',
+                    'errors' => [
+                        'title' => ['The title field is required.'],
+                        'images' => ['Please upload at least one image.']
+                    ]
+                ], 422);
+            }
+        }
+
+        // 1. Validate Data (Simplified for GaragePost)
+        $validator = Validator::make($request->all(), [
+            'title'             => 'required|string|max:255',
+            'short_description' => 'nullable|string',
+            'images'            => 'required|array|min:1',
+            'images.*'          => 'image|mimes:jpeg,png,jpg,webp|max:5120', // 5MB limit
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The given data was invalid.',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // 2. Database Transaction
+        return DB::transaction(function () use ($request) {
+
+            // Create the GaragePost
+            $post = GaragePost::create([
+                'title'             => $request->title,
+                'short_description' => $request->short_description,
+                'status'            => 'active', // Default status
+                'user_id'           => 1, // Fallback for testing
+            ]);
+
+            // 3. Handle Image Uploads
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    // Upload and Resize (Adjust path to garage_posts)
+                    $filename = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/garage_posts', 800);
+
+                    // Save to your GaragePostImage model
+                    GaragePostImage::create([
+                        'garage_post_id' => $post->id,
+                        'image'          => $filename,
+                    ]);
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Garage post created successfully.',
+                'data'    => $post->load('images')
+            ], 201);
+        });
+    }
+
+    public function update(Request $request, string $id)
+    {
+        // 1. Find the post
+        $post = GaragePost::where('id', $id)->first();
+
+        if (!$post) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Garage post not found.'
+            ], 404);
+        }
+
+        // 2. Validate Data
+        $validator = Validator::make($request->all(), [
+            'title'             => 'required|string|max:255',
+            'short_description' => 'nullable|string',
+            'images'            => 'nullable|array', // Optional during update
+            'images.*'          => 'image|mimes:jpeg,png,jpg,webp|max:5120',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The given data was invalid.',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // 3. Database Transaction
+        return DB::transaction(function () use ($request, $post) {
+
+            // Update basic info
+            $post->update([
+                'title'             => $request->title,
+                'short_description' => $request->short_description,
+            ]);
+
+            // 4. Handle Image Uploads (Only if new images are provided)
+            if ($request->hasFile('images')) {
+
+                // OPTIONAL: Delete old images from storage & DB if you want to replace them
+                /*
+            foreach ($post->images as $oldImage) {
+                $oldPath = public_path('assets/images/garage_posts/' . $oldImage->image);
+                if (file_exists($oldPath)) @unlink($oldPath);
+                $oldImage->delete();
+            }
+            */
+
+                foreach ($request->file('images') as $image) {
+                    $filename = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/garage_posts', 800);
+
+                    GaragePostImage::create([
+                        'garage_post_id' => $post->id,
+                        'image'          => $filename,
+                    ]);
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Garage post updated successfully.',
+                'data'    => $post->load('images')
+            ], 200);
+        });
     }
 }

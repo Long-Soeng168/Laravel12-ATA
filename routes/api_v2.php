@@ -42,7 +42,9 @@ Route::prefix('v2')->group(function () {
     Route::get('/provinces', [GarageController::class, 'provinces']);
 
     Route::get('/garage-posts', [GaragePostController::class, 'index']);
+    Route::post('/garage-posts', [GaragePostController::class, 'store']);
     Route::get('/garage-posts/{id}', [GaragePostController::class, 'show']);
+    Route::post('/garage-posts/{id}', [GaragePostController::class, 'update']);
 
     Route::get('/video-playlists', [VideoController::class, 'video_playlists']);
 
