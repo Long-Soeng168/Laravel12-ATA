@@ -18,8 +18,9 @@ class GaragePostController extends Controller
     {
         $query = GaragePost::query();
 
-        // $query->where('garage_id', $id);
         $query->where('status', 'active');
+
+        $query->where('garage_id', $request->garage_id);
 
         if ($request->filled('q')) {
             $query->where(function ($q) use ($request) {

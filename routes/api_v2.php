@@ -41,8 +41,8 @@ Route::prefix('v2')->group(function () {
     Route::get('/garages_for_map', [GarageController::class, 'garages_for_map']);
     Route::get('/provinces', [GarageController::class, 'provinces']);
 
-    Route::get('/garages/{id}/posts', [GaragePostController::class, 'index']);
-    Route::get('/garages/posts/{id}', [GaragePostController::class, 'show']);
+    Route::get('/garage-posts', [GaragePostController::class, 'index']);
+    Route::get('/garage-posts/{id}', [GaragePostController::class, 'show']);
 
     Route::get('/video-playlists', [VideoController::class, 'video_playlists']);
 
