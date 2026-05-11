@@ -68,8 +68,8 @@ class UserController extends Controller
 
         // 1. Validation
         $validator = Validator::make($request->all(), [
-            'email' => 'required', // Keeping it 'email' as the key, but it can be a phone string
-            'password' => 'required',
+            'email'    => 'required|string',
+            'password' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -80,23 +80,17 @@ class UserController extends Controller
             ], 422);
         }
 
-        // 2. Determine if logging in via Phone or Email
+        // 2. Determine Login Field (Email vs Phone)
         $loginValue = $request->input('email');
-        $credentials = ['password' => $request->password];
 
-        if (is_numeric($loginValue)) {
-            // Attempt to find user by phone
-            $user = User::where('phone', $loginValue)->first();
-            if (!$user) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No account found with that phone number.'
-                ], 401);
-            }
-            $credentials['email'] = $user->email;
-        } else {
-            $credentials['email'] = $loginValue;
-        }
+        // Use PHP's built-in email filter to check if the string is formatted as an email
+        $loginField = filter_var($loginValue, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
+
+        // Build the dynamic credentials array
+        $credentials = [
+            $loginField => $loginValue,
+            'password'  => $request->input('password'),
+        ];
 
         // 3. Attempt Authentication
         if (Auth::attempt($credentials)) {
