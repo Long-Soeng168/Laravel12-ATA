@@ -193,7 +193,7 @@ class GaragePostController extends Controller
             'images.*'          => 'image|mimes:jpeg,png,jpg,webp|max:5120',
 
             'deleted_image_ids' => 'nullable|array',
-            'deleted_image_ids.*' => 'integer|exists:item_images,id',
+            'deleted_image_ids.*' => 'integer|exists:garage_post_images,id',
         ]);
 
         if ($validator->fails()) {
