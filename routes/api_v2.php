@@ -45,6 +45,8 @@ Route::prefix('v2')->group(function () {
     Route::post('/garage-posts', [GaragePostController::class, 'store']);
     Route::get('/garage-posts/{id}', [GaragePostController::class, 'show']);
     Route::post('/garage-posts/{id}', [GaragePostController::class, 'update']);
+    Route::delete('/garage-posts/{id}', [GaragePostController::class, 'destroy']); // Delete item
+
 
     Route::get('/video-playlists', [VideoController::class, 'video_playlists']);
 

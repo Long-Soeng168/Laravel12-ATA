@@ -244,4 +244,16 @@ class GaragePostController extends Controller
             ], 200);
         });
     }
+
+    public function destroy($id)
+    {
+        $item = GaragePost::findOrFail($id);
+
+        foreach ($item->images as $image) {
+            ImageHelper::deleteImage($image->image, 'assets/images/garage_posts');
+        }
+
+        $item->delete();
+        return response()->json(['success' => true, 'message' => 'Post deleted']);
+    }
 }
