@@ -569,7 +569,8 @@ class ItemController extends Controller
             // $validated['created_by'] = $request->user()->id;
             // $validated['shop_id'] = $request->user()->shop_id;
             $validated['created_by'] = 1;
-            $validated['shop_id'] = null;
+            $validated['user_id'] = 1;
+            $validated['shop_id'] = 18;
 
             // Prevent images array from hitting the items table insert
             unset($validated['images']);
