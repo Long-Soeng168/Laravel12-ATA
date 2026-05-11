@@ -53,6 +53,10 @@ class Item extends Model
     {
         return $this->belongsTo(User::class, 'updated_by', 'id');
     }
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
     public function images()
     {
         return $this->hasMany(ItemImage::class, 'item_id', 'id');

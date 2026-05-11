@@ -217,7 +217,7 @@ class ItemController extends Controller
     public function show($id)
     {
         // Eager load everything needed, but we will selectively return data
-        $item = Item::with(['images', 'brand', 'model', 'body_type', 'shop', 'created_by_user', 'category.fields.options'])->findOrFail($id);
+        $item = Item::with(['images', 'brand', 'model', 'body_type', 'owner.shop', 'category.fields.options'])->findOrFail($id);
 
         $item->increment('total_view_counts');
         // 1. Convert the basic item to an array
