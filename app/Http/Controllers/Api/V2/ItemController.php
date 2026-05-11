@@ -199,7 +199,14 @@ class ItemController extends Controller
     public function show($id)
     {
         // Eager load everything needed, but we will selectively return data
-        $item = Item::with(['images', 'brand', 'model', 'body_type', 'shop', 'created_by_user', 'category.fields.options'])->findOrFail($id);
+        $item = Item::with(['images', 'brand', 'model', 'body_type', 'shop', 'created_by_user', 'category.fields.options'])->find($id);
+
+        if (!$item) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Item not found or is inactive.'
+            ], 404);
+        }
 
         $item->increment('total_view_counts');
         // 1. Convert the basic item to an array
@@ -301,11 +308,6 @@ class ItemController extends Controller
                 ? asset('assets/images/brands/' . $item->brand->image)
                 : null;
         }
-
-        return response()->json([
-            'success' => true,
-            'data' => $formattedItem
-        ]);
 
         return response()->json([
             'success' => true,

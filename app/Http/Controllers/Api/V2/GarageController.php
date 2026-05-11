@@ -101,6 +101,38 @@ class GarageController extends Controller
 
         return response()->json($posts);
     }
+    public function post_show(Request $request, string $id)
+    {
+        // 1. Fetch the single active post by ID. 
+        // firstOrFail() automatically returns a 404 response if the post doesn't exist or isn't active.
+        $post = GaragePost::where('id', $id)
+            ->where('status', 'active')
+            ->first();
+
+        if (!$post) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Garage post not found or is inactive.'
+            ], 404);
+        }
+
+        // 2. --- Image Optimization for Flutter ---
+        // Since we now have a single model instance ($post) instead of a collection,
+        // we can apply the transformations directly to it.
+        $firstImage = $post->images->first();
+
+        $post->image_url = $firstImage
+            ? asset('assets/images/garage_posts/' . $firstImage->image)
+            : asset('assets/images/placeholder.webp');
+
+        $post->total_images = $post->images->count();
+
+        // Hide the raw images relationship to keep the JSON payload clean
+        $post->makeHidden(['images']);
+
+        // 3. Return the single object
+        return response()->json($post);
+    }
 
     public function garages_for_map(Request $request)
     {

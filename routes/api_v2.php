@@ -36,6 +36,7 @@ Route::prefix('v2')->group(function () {
     Route::get('/garages', [GarageController::class, 'index']);
     Route::get('/garages/{id}', [GarageController::class, 'show']);
     Route::get('/garages/{id}/posts', [GarageController::class, 'posts']);
+    Route::get('/garages/posts/{id}', [GarageController::class, 'post_show']);
     Route::post('/garages', [GarageController::class, 'store']);
     Route::post('/garages/{id}', [GarageController::class, 'update']);
     Route::get('/garages_for_map', [GarageController::class, 'garages_for_map']);
