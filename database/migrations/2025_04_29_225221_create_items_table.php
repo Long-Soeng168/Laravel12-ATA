@@ -23,7 +23,7 @@ return new class extends Migration
             $table->text('long_description_kh')->nullable();
             $table->string('link')->nullable();
             $table->decimal('cost')->nullable()->default(0);
-            $table->decimal('price')->nullable()->default(0);
+            $table->decimal('price', 9, 2)->nullable()->default(0);
             $table->integer('quantity')->nullable()->default(0);
             $table->string('stock_status')->default('na')->nullable();
             $table->string('status')->default('active')->nullable();

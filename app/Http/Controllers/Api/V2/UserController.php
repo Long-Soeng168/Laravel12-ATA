@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V2;
 
+use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -205,5 +206,88 @@ class UserController extends Controller
                 'userRoles' => ['User']
             ], 201); // 201 Created is the correct status for a successful registration
         });
+    }
+
+    public function update(Request $request, User $user)
+    {
+        if (!$request->user()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not logged in.'
+            ], 401);
+        }
+        $validated = $request->validate([
+            'name'              => 'required|string|max:255',
+            'address'              => 'nullable|string|max:300',
+            'email'             => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'current_password'  => 'nullable|string|min:6|max:255',
+            'password'          => 'nullable|string|min:6|max:255|confirmed',
+            'phone'             => 'nullable|numeric|unique:users,phone,' . $user->id,
+            'gender'            => 'nullable|string|in:male,female,other',
+            'image'             => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4048',
+        ]);
+
+        try {
+            $validated['updated_by'] = $request->user()->id;
+
+            // Check if new password is provided
+            if (!empty($validated['password'])) {
+                // Require current_password to be provided
+                if (empty($validated['current_password'])) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Current password is required to change your password.'
+                    ], 422);
+                }
+
+                // Verify current password
+                if (!Hash::check($validated['current_password'], $user->password)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Current password is incorrect.'
+                    ], 422);
+                }
+
+                // Hash and store new password
+                $validated['password'] = Hash::make($validated['password']);
+            } else {
+                unset($validated['password']); // Don't update password if not provided
+            }
+            $imageFile = $request->file('image');
+
+            if ($imageFile) {
+                $imageName = ImageHelper::uploadAndResizeImageWebp($imageFile, 'assets/images/users', 600);
+                $validated['image'] = $imageName;
+                if ($imageName && $user->image) {
+                    ImageHelper::deleteImage($user->image, 'assets/images/users');
+                }
+            }
+
+            // Clean out empty values
+            foreach ($validated as $key => $value) {
+                if ($value === null || $value === '') {
+                    unset($validated[$key]);
+                }
+            }
+
+            $user->update($validated);
+
+            if (!empty($roles)) {
+                $user->syncRoles($roles);
+            } else {
+                $user->syncRoles('User');
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User updated successfully!',
+                'user'    => $user->fresh()
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update user: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
