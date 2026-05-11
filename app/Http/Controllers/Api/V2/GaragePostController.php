@@ -80,8 +80,8 @@ class GaragePostController extends Controller
                 // Change it to 'items' if that's where they are actually stored!
                 'url' => asset('assets/images/garage_posts/' . $img->image),
                 // Update this foreign key to match your actual database column 
-                // (e.g., 'item_id', 'post_id', or 'garage_post_id')
-                'item_id' => $img->garage_post_id,
+                // (e.g., 'item_id', 'post_id', or 'post_id')
+                'item_id' => $img->post_id,
             ];
         });
 
@@ -159,7 +159,7 @@ class GaragePostController extends Controller
 
                     // Save to your GaragePostImage model
                     GaragePostImage::create([
-                        'garage_post_id' => $post->id,
+                        'post_id' => $post->id,
                         'image'          => $filename,
                     ]);
                 }
@@ -226,7 +226,7 @@ class GaragePostController extends Controller
                     $filename = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/garage_posts', 800);
 
                     GaragePostImage::create([
-                        'garage_post_id' => $post->id,
+                        'post_id' => $post->id,
                         'image'          => $filename,
                     ]);
                 }
