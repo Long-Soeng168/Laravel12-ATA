@@ -117,6 +117,8 @@ class GarageController extends Controller
             ], 404);
         }
 
+        $post->increment('total_view_counts');
+
         // 3. Convert the model to an array so we can safely inject our custom formats
         $formattedPost = $post->toArray();
 
