@@ -219,15 +219,28 @@ class UserController extends Controller
             ], 401);
         }
 
-        $validated = $request->validate([
+        // 1. Use Validator::make() instead of $request->validate()
+        $validator = Validator::make($request->all(), [
             'name'              => 'required|string|max:255',
-            'address'              => 'nullable|string|max:300',
+            'address'           => 'nullable|string|max:300',
             'email'             => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'current_password'  => 'nullable|string|min:6|max:255',
             'password'          => 'nullable|string|min:6|max:255|confirmed',
             'phone'             => 'nullable|numeric|unique:users,phone,' . $user->id,
             'gender'            => 'nullable|string|in:male,female,other',
         ]);
+
+        // 2. Check if validation fails and return a structured JSON response
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed.',
+                'errors'  => $validator->errors()
+            ], 422);
+        }
+
+        // 3. Retrieve the validated data
+        $validated = $validator->validated();
 
         try {
             $validated['updated_by'] = $request->user()->id;
