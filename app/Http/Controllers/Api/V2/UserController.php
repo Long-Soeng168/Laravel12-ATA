@@ -208,7 +208,7 @@ class UserController extends Controller
         });
     }
 
-    public function update(Request $request)
+    public function update(Request $request, String $id)
     {
         $user = $request->user();
 
@@ -227,7 +227,6 @@ class UserController extends Controller
             'password'          => 'nullable|string|min:6|max:255|confirmed',
             'phone'             => 'nullable|numeric|unique:users,phone,' . $user->id,
             'gender'            => 'nullable|string|in:male,female,other',
-            'image'             => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4048',
         ]);
 
         try {

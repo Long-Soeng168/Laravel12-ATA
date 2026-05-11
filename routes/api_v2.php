@@ -25,7 +25,7 @@ use Illuminate\Http\Request;
 
 // === For Logined Route ===
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::post('/users', [UserController::class, 'update']);
+    Route::post('/users/{id}', [UserController::class, 'update']);
 });
 
 Route::prefix('v2')->group(function () {
