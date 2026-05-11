@@ -163,7 +163,12 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'phone' => 'nullable|unique:users,phone',
+            'phone' => [
+                'nullable',
+                'string',
+                'regex:/^0\d{8,10}$/',
+                'unique:users,phone'
+            ],
             'password' => 'required|string|min:8', // Added min length for better security
             'address' => 'nullable|string|max:255',
         ]);
@@ -218,12 +223,17 @@ class UserController extends Controller
             'current_password' => 'nullable|required_with:password|string', // Added to handle password checks securely
             'password'         => 'nullable|string|min:6|max:255|confirmed',
             'email'            => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'phone'            => 'required|numeric|digits_between:8,15|unique:users,phone,' . $user->id,
+            'phone' => [
+                'required',
+                'string',
+                'regex:/^0\d{8,10}$/',
+                'unique:users,phone,' . $user->id
+            ],
             'other_phones'     => 'nullable|array',
             'other_phones.*'   => [
                 'nullable',
                 'string',
-                'regex:/^(0|\+855)(\d{8,9})$/',
+                'regex:/^(0|\+855)(\d{8,10})$/',
             ],
             'gender'           => 'nullable|string|in:male,female,other',
             'image'            => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048', // Removed duplicate webp
