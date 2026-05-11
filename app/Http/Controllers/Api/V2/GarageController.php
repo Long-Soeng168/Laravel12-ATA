@@ -82,7 +82,7 @@ class GarageController extends Controller
             $firstImage = $item->images->first();
 
             $item->image_url = $firstImage
-                ? asset('assets/images/items/' . $firstImage->image)
+                ? asset('assets/images/garage_posts/' . $firstImage->image)
                 : asset('assets/images/placeholder.webp');
 
             $item->total_images = $item->images->count();
