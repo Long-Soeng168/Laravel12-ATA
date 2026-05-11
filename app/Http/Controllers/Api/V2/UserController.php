@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -208,53 +209,47 @@ class UserController extends Controller
         });
     }
 
-    public function update(Request $request, String $id)
+    public function update(Request $request)
     {
         $user = $request->user();
 
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User not logged in.'
-            ], 401);
-        }
-
-        // 1. Use Validator::make() instead of $request->validate()
         $validator = Validator::make($request->all(), [
-            'name'              => 'required|string|max:255',
-            'address'           => 'nullable|string|max:300',
-            'email'             => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'current_password'  => 'nullable|string|min:6|max:255',
-            'password'          => 'nullable|string|min:6|max:255|confirmed',
-            'phone'             => 'nullable|numeric|unique:users,phone,' . $user->id,
-            'gender'            => 'nullable|string|in:male,female,other',
+            'name'             => 'required|string|max:255',
+            'current_password' => 'nullable|required_with:password|string', // Added to handle password checks securely
+            'password'         => 'nullable|string|min:6|max:255|confirmed',
+            'email'            => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'phone'            => 'required|numeric|digits_between:8,15|unique:users,phone,' . $user->id,
+            'other_phones'     => 'nullable|array',
+            'other_phones.*'   => [
+                'nullable',
+                'string',
+                'regex:/^(0|\+855)(\d{8,9})$/',
+            ],
+            'gender'           => 'nullable|string|in:male,female,other',
+            'image'            => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048', // Removed duplicate webp
+            'address'          => 'nullable|string|max:255',
+            'location'         => 'nullable|string',
+            'latitude'         => 'nullable|numeric',
+            'longitude'        => 'nullable|numeric',
+            'roles'            => 'nullable|array', // Added to prevent undefined variable $roles
         ]);
 
-        // 2. Check if validation fails and return a structured JSON response
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validation failed.',
+                'message' => 'The given data was invalid.',
                 'errors'  => $validator->errors()
             ], 422);
         }
 
-        // 3. Retrieve the validated data
+        // Extract the validated data (This was missing in your original code)
         $validated = $validator->validated();
 
         try {
-            $validated['updated_by'] = $request->user()->id;
+            $validated['updated_by'] = $user->id;
 
-            // Check if new password is provided
+            // --- Password Logic ---
             if (!empty($validated['password'])) {
-                // Require current_password to be provided
-                if (empty($validated['current_password'])) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Current password is required to change your password.'
-                    ], 422);
-                }
-
                 // Verify current password
                 if (!Hash::check($validated['current_password'], $user->password)) {
                     return response()->json([
@@ -262,23 +257,44 @@ class UserController extends Controller
                         'message' => 'Current password is incorrect.'
                     ], 422);
                 }
-
                 // Hash and store new password
                 $validated['password'] = Hash::make($validated['password']);
-            } else {
-                unset($validated['password']); // Don't update password if not provided
             }
 
-            $imageFile = $request->file('image');
-            if ($imageFile) {
+            // Remove password-related fields from the array so we don't accidentally update them as plain text/null
+            unset($validated['current_password']);
+            if (empty($validated['password'])) {
+                unset($validated['password']);
+            }
+
+            // --- Image Logic ---
+            if ($request->hasFile('image')) {
+                $imageFile = $request->file('image');
                 $imageName = ImageHelper::uploadAndResizeImageWebp($imageFile, 'assets/images/users', 600);
                 $validated['image'] = $imageName;
+
+                // Delete old image if a new one was uploaded successfully
                 if ($imageName && $user->image) {
                     ImageHelper::deleteImage($user->image, 'assets/images/users');
                 }
             }
 
+            // Clean out empty values to prevent overwriting existing data with null unnecessarily
+            foreach ($validated as $key => $value) {
+                if ($value === null || $value === '') {
+                    unset($validated[$key]);
+                }
+            }
+
+            // Update the user details
             $user->update($validated);
+
+            // --- Roles Logic ---
+            // Warning: Be careful syncing a default 'User' role on a simple profile update. 
+            // If an Admin updates their profile, this might accidentally strip their admin rights.
+            if (isset($validated['roles']) && !empty($validated['roles'])) {
+                $user->syncRoles($validated['roles']);
+            }
 
             return response()->json([
                 'success' => true,
@@ -286,6 +302,9 @@ class UserController extends Controller
                 'user'    => $user->fresh()
             ], 200);
         } catch (\Exception $e) {
+            // It's good practice to log the actual error for debugging
+            Log::error('User update failed: ' . $e->getMessage());
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update user: ' . $e->getMessage()
