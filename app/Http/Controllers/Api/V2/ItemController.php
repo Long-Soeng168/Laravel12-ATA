@@ -10,6 +10,8 @@ use App\Models\ItemBrand;
 use App\Models\ItemCategory;
 use App\Models\ItemCategoryField;
 use App\Models\ItemImage;
+use App\Models\Shop;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -52,10 +54,26 @@ class ItemController extends Controller
 
         // Standard Filters
         if ($request->filled('shop_id')) {
-            $query->where('shop_id', $request->shop_id);
+            $shop = Shop::find($request->shop_id);
+            if ($shop) {
+                $query->where(function ($q) use ($shop) {
+                    $q->where('user_id', $shop->owner_user_id)
+                        ->orWhere('shop_id', $shop->id);
+                });
+            } else {
+                $query->where('shop_id', $request->shop_id);
+            }
         }
         if ($request->filled('user_id')) {
-            $query->where('created_by', $request->user_id);
+            $user = User::find($request->user_id);
+            if ($user) {
+                $query->where(function ($q) use ($user) {
+                    $q->where('shop_id', $user->shop_id)
+                        ->orWhere('user_id', $user->id);
+                });
+            } else {
+                $query->where('user_id', $request->user_id);
+            }
         }
 
         if ($request->filled('brand_code')) {
