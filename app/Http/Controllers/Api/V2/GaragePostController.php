@@ -146,7 +146,9 @@ class GaragePostController extends Controller
                 'title'             => $request->title,
                 'short_description' => $request->short_description,
                 'status'            => 'active', // Default status
-                'user_id'           => 1, // Fallback for testing
+                'updated_by'           => 1,
+                'created_by'           => 1,
+                'garage_id'           => 888,
             ]);
 
             // 3. Handle Image Uploads
