@@ -208,14 +208,17 @@ class UserController extends Controller
         });
     }
 
-    public function update(Request $request, User $user)
+    public function update(Request $request)
     {
-        if (!$request->user()) {
+        $user = $request->user();
+
+        if (!$user) {
             return response()->json([
                 'success' => false,
                 'message' => 'User not logged in.'
             ], 401);
         }
+
         $validated = $request->validate([
             'name'              => 'required|string|max:255',
             'address'              => 'nullable|string|max:300',

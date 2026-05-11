@@ -26,7 +26,7 @@ Route::prefix('v2')->group(function () {
     Route::get('/banners', [BannerController::class, 'index']);
 
     Route::get('/users/{id}', [UserController::class, 'show']);
-    Route::post('/users/{id}', [UserController::class, 'update']);
+    Route::post('/users', [UserController::class, 'update']);
     Route::post('/login', [UserController::class, 'login']);
     Route::post('/register', [UserController::class, 'register']);
 
