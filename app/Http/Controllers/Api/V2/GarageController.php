@@ -103,12 +103,13 @@ class GarageController extends Controller
     }
     public function post_show(Request $request, string $id)
     {
-        // 1. Fetch the single active post by ID. 
-        // firstOrFail() automatically returns a 404 response if the post doesn't exist or isn't active.
-        $post = GaragePost::where('id', $id)
+        // 1. Fetch the post and eager load images
+        $post = GaragePost::with('images')
+            ->where('id', $id)
             ->where('status', 'active')
             ->first();
 
+        // 2. Handle 404 cleanly via API
         if (!$post) {
             return response()->json([
                 'success' => false,
@@ -116,22 +117,34 @@ class GarageController extends Controller
             ], 404);
         }
 
-        // 2. --- Image Optimization for Flutter ---
-        // Since we now have a single model instance ($post) instead of a collection,
-        // we can apply the transformations directly to it.
+        // 3. Convert the model to an array so we can safely inject our custom formats
+        $formattedPost = $post->toArray();
+
+        // 4. Format the images array exactly as requested
+        $formattedPost['images'] = $post->images->map(function ($img) {
+            return [
+                'id' => $img->id,
+                'image' => $img->image,
+                // Note: I used 'garage_posts' folder based on your first snippet. 
+                // Change it to 'items' if that's where they are actually stored!
+                'url' => asset('assets/images/garage_posts/' . $img->image),
+                // Update this foreign key to match your actual database column 
+                // (e.g., 'item_id', 'post_id', or 'garage_post_id')
+                'item_id' => $img->garage_post_id,
+            ];
+        });
+
+        // 5. Keep your root-level image helpers for Flutter (optional, but good for list-style previews)
         $firstImage = $post->images->first();
 
-        $post->image_url = $firstImage
+        $formattedPost['image_url'] = $firstImage
             ? asset('assets/images/garage_posts/' . $firstImage->image)
             : asset('assets/images/placeholder.webp');
 
-        $post->total_images = $post->images->count();
+        $formattedPost['total_images'] = $post->images->count();
 
-        // Hide the raw images relationship to keep the JSON payload clean
-        $post->makeHidden(['images']);
-
-        // 3. Return the single object
-        return response()->json($post);
+        // 6. Return the perfectly formatted JSON
+        return response()->json($formattedPost);
     }
 
     public function garages_for_map(Request $request)
