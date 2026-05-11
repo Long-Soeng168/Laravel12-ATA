@@ -275,12 +275,6 @@ class UserController extends Controller
 
             $user->update($validated);
 
-            if (!empty($roles)) {
-                $user->syncRoles($roles);
-            } else {
-                $user->syncRoles('User');
-            }
-
             return response()->json([
                 'success' => true,
                 'message' => 'User updated successfully!',
