@@ -74,6 +74,13 @@ class GarageController extends Controller
         // $query->where('garage_id', $id);
         $query->where('status', 'active');
 
+        if ($request->filled('q')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->q . '%')
+                    ->orWhere('short_description', 'like', '%' . $request->q . '%');
+            });
+        }
+
         $posts = $query->orderByDesc('id')->paginate(16);
 
         $posts->getCollection()->transform(function ($item) {
