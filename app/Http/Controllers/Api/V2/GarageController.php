@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V2;
 use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Garage;
+use App\Models\GaragePost;
 use App\Models\Province;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -65,6 +66,33 @@ class GarageController extends Controller
         $garage->banner_url = $garage->banner ? asset('assets/images/garages/' . $garage->banner) : null;
 
         return response()->json($garage);
+    }
+    public function posts(Request $request, string $id)
+    {
+        $query = GaragePost::query();
+
+        // $query->where('garage_id', $id);
+        $query->where('status', 'active');
+
+        $posts = $query->orderByDesc('id')->paginate(16);
+
+        $posts->getCollection()->transform(function ($item) {
+
+            // --- Image Optimization for Flutter List ---
+            $firstImage = $item->images->first();
+
+            $item->image_url = $firstImage
+                ? asset('assets/images/items/' . $firstImage->image)
+                : asset('assets/images/placeholder.webp');
+
+            $item->total_images = $item->images->count();
+
+            $item->makeHidden(['images']);
+
+            return $item;
+        });
+
+        return response()->json($posts);
     }
 
     public function garages_for_map(Request $request)

@@ -369,11 +369,11 @@ class ItemController extends Controller
 
             $item->total_images = $item->images->count();
 
-            $item->thumbnail_image = $firstImage ? [
-                'id' => $firstImage->id,
-                'image' => $firstImage->image,
-                'image_url' => asset('assets/images/items/' . $firstImage->image),
-            ] : null;
+            // $item->thumbnail_image = $firstImage ? [
+            //     'id' => $firstImage->id,
+            //     'image' => $firstImage->image,
+            //     'image_url' => asset('assets/images/items/' . $firstImage->image),
+            // ] : null;
 
             // --- Attribute Display Logic ---
             $categoryId = $item->category?->id;
