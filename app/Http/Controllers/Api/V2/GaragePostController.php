@@ -191,6 +191,9 @@ class GaragePostController extends Controller
             'short_description' => 'nullable|string',
             'images'            => 'nullable|array', // Optional during update
             'images.*'          => 'image|mimes:jpeg,png,jpg,webp|max:5120',
+
+            'deleted_image_ids' => 'nullable|array',
+            'deleted_image_ids.*' => 'integer|exists:item_images,id',
         ]);
 
         if ($validator->fails()) {
@@ -211,16 +214,18 @@ class GaragePostController extends Controller
             ]);
 
             // 4. Handle Image Uploads (Only if new images are provided)
+            if ($request->has('deleted_image_ids') && is_array($request->deleted_image_ids)) {
+                // Fetch images that belong to this specific item to prevent deleting other users' images
+                $imagesToDelete = GaragePostImage::where('post_id', $post->id)
+                    ->whereIn('id', $request->deleted_image_ids)
+                    ->get();
+
+                foreach ($imagesToDelete as $imageModel) {
+                    $imageModel->delete();
+                }
+            }
             if ($request->hasFile('images')) {
 
-                // OPTIONAL: Delete old images from storage & DB if you want to replace them
-                /*
-            foreach ($post->images as $oldImage) {
-                $oldPath = public_path('assets/images/garage_posts/' . $oldImage->image);
-                if (file_exists($oldPath)) @unlink($oldPath);
-                $oldImage->delete();
-            }
-            */
 
                 foreach ($request->file('images') as $image) {
                     $filename = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/garage_posts', 800);
