@@ -256,20 +256,13 @@ class UserController extends Controller
             } else {
                 unset($validated['password']); // Don't update password if not provided
             }
-            $imageFile = $request->file('image');
 
+            $imageFile = $request->file('image');
             if ($imageFile) {
                 $imageName = ImageHelper::uploadAndResizeImageWebp($imageFile, 'assets/images/users', 600);
                 $validated['image'] = $imageName;
                 if ($imageName && $user->image) {
                     ImageHelper::deleteImage($user->image, 'assets/images/users');
-                }
-            }
-
-            // Clean out empty values
-            foreach ($validated as $key => $value) {
-                if ($value === null || $value === '') {
-                    unset($validated[$key]);
                 }
             }
 
