@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class GaragePostController extends Controller
 {
-    public function index(Request $request, string $id)
+    public function index(Request $request)
     {
         $query = GaragePost::query();
 
