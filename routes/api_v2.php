@@ -21,12 +21,18 @@ use Illuminate\Http\Request;
 // http://127.0.0.1:8000/api/v2/items?category_code=BRAKE
 // http://127.0.0.1:8000/api/v2/items/123
 // http://127.0.0.1:8000/api/v2/items-form-data
+
+
+// === For Logined Route ===
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/users', [UserController::class, 'update']);
+});
+
 Route::prefix('v2')->group(function () {
 
     Route::get('/banners', [BannerController::class, 'index']);
 
     Route::get('/users/{id}', [UserController::class, 'show']);
-    Route::post('/users', [UserController::class, 'update']);
     Route::post('/login', [UserController::class, 'login']);
     Route::post('/register', [UserController::class, 'register']);
 
