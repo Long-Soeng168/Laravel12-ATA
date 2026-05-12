@@ -26,6 +26,20 @@ use Illuminate\Http\Request;
 // === For Logined Route ===
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/v2/update-users', [UserController::class, 'update']);
+
+    Route::post('/shops', [ShopController::class, 'store']);
+    Route::post('/shops/{id}', [ShopController::class, 'update']);
+
+    Route::post('/garages', [GarageController::class, 'store']);
+    Route::post('/garages/{id}', [GarageController::class, 'update']);
+
+    Route::post('/garage-posts', [GaragePostController::class, 'store']);
+    Route::post('/garage-posts/{id}', [GaragePostController::class, 'update']);
+    Route::delete('/garage-posts/{id}', [GaragePostController::class, 'destroy']);
+
+    Route::post('/items', [ItemController::class, 'store']);         // Store item
+    Route::post('/items/{id}', [ItemController::class, 'update']);   // Update (Use POST for images)
+    Route::delete('/items/{id}', [ItemController::class, 'destroy']); // Delete item
 });
 
 Route::prefix('v2')->group(function () {
@@ -38,21 +52,15 @@ Route::prefix('v2')->group(function () {
 
     Route::get('/shops', [ShopController::class, 'index']);
     Route::get('/shops/{id}', [ShopController::class, 'show']);
-    Route::post('/shops', [ShopController::class, 'store']);
-    Route::post('/shops/{id}', [ShopController::class, 'update']);
 
     Route::get('/garages', [GarageController::class, 'index']);
     Route::get('/garages/{id}', [GarageController::class, 'show']);
-    Route::post('/garages', [GarageController::class, 'store']);
-    Route::post('/garages/{id}', [GarageController::class, 'update']);
+
     Route::get('/garages_for_map', [GarageController::class, 'garages_for_map']);
     Route::get('/provinces', [GarageController::class, 'provinces']);
 
     Route::get('/garage-posts', [GaragePostController::class, 'index']);
-    Route::post('/garage-posts', [GaragePostController::class, 'store']);
     Route::get('/garage-posts/{id}', [GaragePostController::class, 'show']);
-    Route::post('/garage-posts/{id}', [GaragePostController::class, 'update']);
-    Route::delete('/garage-posts/{id}', [GaragePostController::class, 'destroy']); // Delete item
 
 
     Route::get('/video-playlists', [VideoController::class, 'video_playlists']);
@@ -67,13 +75,11 @@ Route::prefix('v2')->group(function () {
     Route::get('/items/{id}/related', [ItemController::class, 'related_items']);
 
     Route::get('/items-form-data', [ItemController::class, 'form_data']);
-    Route::post('/items', [ItemController::class, 'store']);         // Store item
-    Route::post('/items/{id}', [ItemController::class, 'update']);   // Update (Use POST for images)
-    Route::delete('/items/{id}', [ItemController::class, 'destroy']); // Delete item
+
 
     // Specific Actions
-    Route::post('/items/{id}/status', [ItemController::class, 'updateStatus']);
-    Route::delete('/item-images/{id}', [ItemController::class, 'destroyImage']);
+    // Route::post('/items/{id}/status', [ItemController::class, 'updateStatus']);
+    // Route::delete('/item-images/{id}', [ItemController::class, 'destroyImage']);
 });
 
 Route::post('/test-errors', function (Request $request) {
