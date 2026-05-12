@@ -202,60 +202,50 @@ class GarageController extends Controller
 
     public function store(Request $request)
     {
-        // =========================================================================
-        // 🧪 RANDOM ERROR GENERATOR FOR FLUTTER TESTING
-        // Set to 'false' when you are done testing!
-        // =========================================================================
-        $testingMode = false;
+        $user = $request->user();
 
-        if ($testingMode) {
-            $chance = rand(1, 100);
+        // 1. Critical Security Check: Ensure user is authenticated
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized or user not found.'
+            ], 401);
+        }
 
-            if ($chance <= 15) {
-                return response()->json(['message' => 'Unauthenticated.'], 401);
-            } elseif ($chance <= 30) {
-                return response()->json(['message' => 'This action is unauthorized.'], 403);
-            } elseif ($chance <= 45) {
-                return response()->json(['message' => 'The requested resource was not found.'], 404);
-            } elseif ($chance <= 60) {
+        // 2. Pre-Database Logical Checks (Fail fast before validation)
+        if ($user->garage_id !== null) {
+            $garage = Garage::withTrashed()->find($user->garage_id);
+
+            if (!$garage) {
+                // The ID exists on the user, but the garage was hard-deleted. Clean it up.
+                $user->update(['garage_id' => null]);
+            } elseif ($garage->trashed()) {
+                // Garage exists but is soft-deleted
                 return response()->json([
                     'success' => false,
-                    'message' => 'Server Error',
-                    'error' => 'SQLSTATE[HY000] [2002] Connection refused'
-                ], 500);
-            } elseif ($chance <= 100) {
+                    'message' => 'You already have a garage, but it is currently disabled/deleted.'
+                ], 409);
+            } else {
+                // Garage is active
                 return response()->json([
                     'success' => false,
-                    'message' => 'The given data was invalid.',
-                    'errors' => [
-                        'phone' => ['The phone number must be between 8 and 15 digits.'],
-                        'logo' => ['The logo failed to upload.'],
-                    ]
-                ], 422);
+                    'message' => 'User already has an active garage.'
+                ], 409);
             }
         }
-        // =========================================================================
-        // END TESTING BLOCK
-        // =========================================================================
 
-        // 1. Pre-process multipart/form-data strings from Flutter
+        // 3. Pre-process multipart/form-data strings from Flutter
         $input = $request->all();
-
-        // Flutter multipart often sends arrays as JSON strings
         if (isset($input['other_phones']) && is_string($input['other_phones'])) {
             $input['other_phones'] = json_decode($input['other_phones'], true);
         }
 
-        // 2. Validate Data using Validator::make for custom JSON response
+        // 4. Validate Data
         $validator = Validator::make($input, [
             'name' => 'required|string|max:255',
             'phone' => 'required|numeric|digits_between:8,15',
             'other_phones' => 'nullable|array',
-            'other_phones.*' => [
-                'nullable',
-                'string',
-                'regex:/^(0|\+855)(\d{8,9})$/', // Validates Khmer format for each entry
-            ],
+            'other_phones.*' => 'nullable|string|regex:/^(0|\+855)(\d{8,10})$/',
             'short_description' => 'nullable|string|max:1000',
             'logo' => 'required|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
             'banner' => 'required|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
@@ -275,84 +265,58 @@ class GarageController extends Controller
 
         $validated = $validator->validated();
 
-        // 3. Pre-Database Logical Checks
-        $userId = $request->user() ? $request->user()->id : 1;
-        $owner = User::find($userId);
+        // 5. Database Transaction
+        try {
+            return DB::transaction(function () use ($request, $validated, $user) {
 
-        if (!$owner) {
+                // Assign Authorship
+                $validated['owner_user_id'] = $user->id;
+                $validated['created_by']    = $user->id;
+                $validated['updated_by']    = $user->id;
+                $validated['status']        = 'pending';
+                $validated['order_index']   = 10000;
+                $validated['expired_at']    = now()->addYears(2)->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
+
+                // Process Images (No 'else' needed because validation guarantees they exist)
+                $validated['logo']   = ImageHelper::uploadAndResizeImageWebp($request->file('logo'), 'assets/images/garages', 600);
+                $validated['banner'] = ImageHelper::uploadAndResizeImageWebp($request->file('banner'), 'assets/images/garages', 1200);
+
+                // Create the Garage
+                $garage = Garage::create($validated);
+
+                // Update the User's garage_id 
+                $user->update([
+                    'garage_id' => $garage->id,
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Garage created successfully!',
+                    'data' => $garage
+                ], 201);
+            });
+        } catch (\Exception $e) {
+            // Safely catch any upload or DB errors and return a proper JSON response
             return response()->json([
                 'success' => false,
-                'message' => 'Owner user not found.'
-            ], 404);
+                'message' => 'Failed to create garage. ' . $e->getMessage()
+            ], 500);
         }
-
-        if ($owner->garage_id !== null) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User already has a garage.'
-            ], 409); // 409 Conflict is standard for "already exists" states
-        }
-
-        // 4. Database Transaction
-        return DB::transaction(function () use ($request, $validated, $owner, $userId) {
-
-            // Clean empty strings to null
-            foreach ($validated as $key => $value) {
-                if (is_string($value) && trim($value) === '') {
-                    $validated[$key] = null;
-                }
-            }
-
-            // Assign Authorship (Fallback to 1 if auth is bypassed during testing)
-            $validated['owner_user_id'] = $userId;
-            $validated['created_by'] = $userId;
-            $validated['updated_by'] = $userId;
-            $validated['status'] = 'pending';
-            $validated['order_index'] = 10000;
-
-            $validated['expired_at'] = now()->addYears(2)->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
-
-            // Process Images
-            if ($request->hasFile('logo')) {
-                try {
-                    $validated['logo'] = ImageHelper::uploadAndResizeImageWebp($request->file('logo'), 'assets/images/garages', 600);
-                } catch (\Exception $e) {
-                    // Throwing an exception rolls back the DB transaction automatically
-                    throw new \Exception('Failed to upload logo: ' . $e->getMessage());
-                }
-            } else {
-                unset($validated['logo']); // Prevent null override if not required
-            }
-
-            if ($request->hasFile('banner')) {
-                try {
-                    $validated['banner'] = ImageHelper::uploadAndResizeImageWebp($request->file('banner'), 'assets/images/garages', 1200);
-                } catch (\Exception $e) {
-                    throw new \Exception('Failed to upload banner: ' . $e->getMessage());
-                }
-            } else {
-                unset($validated['banner']);
-            }
-
-            // Create the Garage
-            $garage = Garage::create($validated);
-
-            // Update the User's garage_id (Using the $owner instance we already queried)
-            $owner->update([
-                'garage_id' => $garage->id,
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Garage created successfully!',
-                'data' => $garage
-            ], 201);
-        });
     }
 
     public function update(Request $request, $id)
     {
-        // 1. Find the Garage
+        $user = $request->user();
+
+        // 1. Critical Security Check: Ensure user is authenticated immediately
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.'
+            ], 401);
+        }
+
+        // 2. Find the Garage
         $garage = Garage::find($id);
 
         if (!$garage) {
@@ -362,24 +326,26 @@ class GarageController extends Controller
             ], 404);
         }
 
-        // 2. Pre-process multipart/form-data strings from Flutter
-        $input = $request->all();
+        // 3. Authorization Check (Fail fast before heavy processing)
+        if ($garage->owner_user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to update this garage.'
+            ], 403);
+        }
 
-        // Flutter multipart sends arrays as JSON strings
+        // 4. Pre-process multipart/form-data strings from Flutter
+        $input = $request->all();
         if (isset($input['other_phones']) && is_string($input['other_phones'])) {
             $input['other_phones'] = json_decode($input['other_phones'], true);
         }
 
-        // 3. Validate Data
+        // 5. Validate Data
         $validator = Validator::make($input, [
             'name' => 'required|string|max:255',
             'phone' => 'required|numeric|digits_between:8,15',
             'other_phones' => 'nullable|array',
-            'other_phones.*' => [
-                'nullable',
-                'string',
-                'regex:/^(0|\+855)(\d{8,9})$/',
-            ],
+            'other_phones.*' => 'nullable|string|regex:/^(0|\+855)(\d{8,10})$/',
             'short_description' => 'nullable|string|max:1000',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
@@ -399,62 +365,43 @@ class GarageController extends Controller
 
         $validated = $validator->validated();
 
-        // 4. Authorization Check
-        $userId = $request->user() ? $request->user()->id : 1;
+        // 6. Database Transaction with Try/Catch
+        try {
+            return DB::transaction(function () use ($request, $validated, $garage, $user) {
 
-        // Ensure the user updating the garage actually owns it
-        if ($garage->owner_user_id !== $userId) {
+                // Set the updater ID
+                $validated['updated_by'] = $user->id;
+
+                // Process Images
+                if ($request->hasFile('logo')) {
+                    // Tip: Add logic here to delete $garage->logo from storage if it exists
+                    $validated['logo'] = ImageHelper::uploadAndResizeImageWebp($request->file('logo'), 'assets/images/garages', 600);
+                } else {
+                    unset($validated['logo']); // Prevent overwriting existing logo with null
+                }
+
+                if ($request->hasFile('banner')) {
+                    // Tip: Add logic here to delete $garage->banner from storage if it exists
+                    $validated['banner'] = ImageHelper::uploadAndResizeImageWebp($request->file('banner'), 'assets/images/garages', 1200);
+                } else {
+                    unset($validated['banner']); // Prevent overwriting existing banner with null
+                }
+
+                // Update the existing Garage model
+                $garage->update($validated);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Garage updated successfully!',
+                    'data' => $garage->fresh()
+                ], 200);
+            });
+        } catch (\Exception $e) {
+            // Safely catch any errors and return a JSON response
             return response()->json([
                 'success' => false,
-                'message' => 'You are not authorized to update this garage.'
-            ], 403);
+                'message' => 'Failed to update garage. ' . $e->getMessage()
+            ], 500);
         }
-
-        // 5. Database Transaction
-        return DB::transaction(function () use ($request, $validated, $garage, $userId) {
-
-            // Clean empty strings to null
-            foreach ($validated as $key => $value) {
-                if (is_string($value) && trim($value) === '') {
-                    $validated[$key] = null;
-                }
-            }
-
-            // Only update the 'updated_by' field. 
-            // We DO NOT touch 'created_by', 'owner_user_id', 'status', or 'expired_at' on a standard update.
-            $validated['updated_by'] = $userId;
-
-            // Process Images
-            if ($request->hasFile('logo')) {
-                try {
-                    // Tip: You can optionally add code here to delete the old image using Storage::delete()
-                    $validated['logo'] = ImageHelper::uploadAndResizeImageWebp($request->file('logo'), 'assets/images/garages', 600);
-                } catch (\Exception $e) {
-                    throw new \Exception('Failed to upload logo: ' . $e->getMessage());
-                }
-            } else {
-                unset($validated['logo']); // Prevent overwriting the existing logo with null
-            }
-
-            if ($request->hasFile('banner')) {
-                try {
-                    // Tip: You can optionally add code here to delete the old image using Storage::delete()
-                    $validated['banner'] = ImageHelper::uploadAndResizeImageWebp($request->file('banner'), 'assets/images/garages', 1200);
-                } catch (\Exception $e) {
-                    throw new \Exception('Failed to upload banner: ' . $e->getMessage());
-                }
-            } else {
-                unset($validated['banner']); // Prevent overwriting the existing banner with null
-            }
-
-            // Update the existing Garage model
-            $garage->update($validated);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Garage updated successfully!',
-                'data' => $garage->fresh() // Returns the updated model
-            ], 200); // 200 OK is standard for successful updates
-        });
     }
 }

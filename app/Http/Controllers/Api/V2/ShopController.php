@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V2;
 use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Shop;
-use App\Models\User; 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -59,62 +59,22 @@ class ShopController extends Controller
         return response()->json($shop);
     }
 
+
     public function store(Request $request)
     {
-        // =========================================================================
-        // 🧪 RANDOM ERROR GENERATOR FOR FLUTTER TESTING
-        // Set to 'false' when you are done testing!
-        // =========================================================================
-        $testingMode = false;
-
-        if ($testingMode) {
-            $chance = rand(1, 100);
-
-            if ($chance <= 15) {
-                return response()->json(['message' => 'Unauthenticated.'], 401);
-            } elseif ($chance <= 30) {
-                return response()->json(['message' => 'This action is unauthorized.'], 403);
-            } elseif ($chance <= 45) {
-                return response()->json(['message' => 'The requested resource was not found.'], 404);
-            } elseif ($chance <= 60) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Server Error',
-                    'error' => 'SQLSTATE[HY000] [2002] Connection refused'
-                ], 500);
-            } elseif ($chance <= 100) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'The given data was invalid.',
-                    'errors' => [
-                        'phone' => ['The phone number must be between 8 and 15 digits.'],
-                        'logo' => ['The logo failed to upload.'],
-                    ]
-                ], 422);
-            }
-        }
-        // =========================================================================
-        // END TESTING BLOCK
-        // =========================================================================
-
-        // 1. Pre-process multipart/form-data strings from Flutter
         $input = $request->all();
 
-        // Flutter multipart often sends arrays as JSON strings
+        // 1. Flutter multipart workaround
         if (isset($input['other_phones']) && is_string($input['other_phones'])) {
             $input['other_phones'] = json_decode($input['other_phones'], true);
         }
 
-        // 2. Validate Data using Validator::make for custom JSON response
+        // 2. Validate Data
         $validator = Validator::make($input, [
             'name' => 'required|string|max:255',
             'phone' => 'required|numeric|digits_between:8,15',
             'other_phones' => 'nullable|array',
-            'other_phones.*' => [
-                'nullable',
-                'string',
-                'regex:/^(0|\+855)(\d{8,9})$/', // Validates Khmer format for each entry
-            ],
+            'other_phones.*' => 'nullable|string|regex:/^(0|\+855)(\d{8,10})$/',
             'short_description' => 'nullable|string|max:1000',
             'logo' => 'required|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
             'banner' => 'required|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
@@ -133,112 +93,102 @@ class ShopController extends Controller
         }
 
         $validated = $validator->validated();
+        $user = $request->user();
 
-        // 3. Pre-Database Logical Checks
-        $userId = $request->user() ? $request->user()->id : 1;
-        $owner = User::find($userId);
-
-        if (!$owner) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Owner user not found.'
-            ], 404);
+        // 3. Auth Check (Consider moving this to Route Middleware!)
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized.'], 401);
         }
 
-        if ($owner->shop_id !== null) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User already has a shop.'
-            ], 409); // 409 Conflict is standard for "already exists" states
+        // 4. Shop Existence Check (Fixed Null Bug)
+        if ($user->shop_id !== null) {
+            $shop = Shop::withTrashed()->find($user->shop_id);
+
+            if (!$shop) {
+                $user->update(['shop_id' => null]);
+            } elseif ($shop->trashed()) {
+                return response()->json(['success' => false, 'message' => 'You already have a shop, but it is currently disabled/deleted.'], 409);
+            } else {
+                return response()->json(['success' => false, 'message' => 'User already has an active shop.'], 409);
+            }
         }
 
-        // 4. Database Transaction
-        return DB::transaction(function () use ($request, $validated, $owner, $userId) {
+        // 5. Database Transaction
+        try {
+            return DB::transaction(function () use ($request, $validated, $user) {
 
-            // Clean empty strings to null
-            foreach ($validated as $key => $value) {
-                if (is_string($value) && trim($value) === '') {
-                    $validated[$key] = null;
-                }
-            }
+                // Assign Metadata
+                $validated['owner_user_id'] = $user->id;
+                $validated['created_by']    = $user->id;
+                $validated['updated_by']    = $user->id;
+                $validated['status']        = 'pending';
+                $validated['order_index']   = 10000;
+                $validated['expired_at']    = now()->addYears(2)->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
 
-            // Assign Authorship (Fallback to 1 if auth is bypassed during testing)
-            $validated['owner_user_id'] = $userId;
-            $validated['created_by'] = $userId;
-            $validated['updated_by'] = $userId;
-            $validated['status'] = 'pending';
-            $validated['order_index'] = 10000;
+                // Process Images (We know they exist because of the 'required' validation)
+                $validated['logo']   = ImageHelper::uploadAndResizeImageWebp($request->file('logo'), 'assets/images/shops', 600);
+                $validated['banner'] = ImageHelper::uploadAndResizeImageWebp($request->file('banner'), 'assets/images/shops', 1200);
 
-            $validated['expired_at'] = now()->addYears(2)->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
+                // Create the Shop
+                $shop = Shop::create($validated);
 
-            // Process Images
-            if ($request->hasFile('logo')) {
-                try {
-                    $validated['logo'] = ImageHelper::uploadAndResizeImageWebp($request->file('logo'), 'assets/images/shops', 600);
-                } catch (\Exception $e) {
-                    // Throwing an exception rolls back the DB transaction automatically
-                    throw new \Exception('Failed to upload logo: ' . $e->getMessage());
-                }
-            } else {
-                unset($validated['logo']); // Prevent null override if not required
-            }
+                // Update User
+                $user->update(['shop_id' => $shop->id]);
 
-            if ($request->hasFile('banner')) {
-                try {
-                    $validated['banner'] = ImageHelper::uploadAndResizeImageWebp($request->file('banner'), 'assets/images/shops', 1200);
-                } catch (\Exception $e) {
-                    throw new \Exception('Failed to upload banner: ' . $e->getMessage());
-                }
-            } else {
-                unset($validated['banner']);
-            }
-
-            // Create the Shop
-            $shop = Shop::create($validated);
-
-            // Update the User's shop_id (Using the $owner instance we already queried)
-            $owner->update([
-                'shop_id' => $shop->id,
-            ]);
-
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Shop created successfully!',
+                    'data' => $shop
+                ], 201);
+            });
+        } catch (\Exception $e) {
+            // Catch image upload errors or DB errors and return a clean JSON response
             return response()->json([
-                'success' => true,
-                'message' => 'Shop created successfully!',
-                'data' => $shop
-            ], 201);
-        });
+                'success' => false,
+                'message' => 'Failed to create shop. ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function update(Request $request, $id)
     {
-        // 1. Find the Shop
+        $user = $request->user();
+
+        // 1. Authentication Check (Critical Security Fix)
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.'
+            ], 401);
+        }
+
+        // 2. Find the Shop
         $shop = Shop::find($id);
 
         if (!$shop) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Shop not found.'
-            ], 404);
+            return response()->json(['success' => false, 'message' => 'Shop not found.'], 404);
         }
 
-        // 2. Pre-process multipart/form-data strings from Flutter
-        $input = $request->all();
+        // 3. Authorization Check (Fail fast before processing data)
+        if ($shop->owner_user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to update this shop.'
+            ], 403);
+        }
 
-        // Flutter multipart sends arrays as JSON strings
+        // 4. Pre-process Flutter multipart data
+        $input = $request->all();
         if (isset($input['other_phones']) && is_string($input['other_phones'])) {
             $input['other_phones'] = json_decode($input['other_phones'], true);
         }
 
-        // 3. Validate Data
+        // 5. Validate Data
         $validator = Validator::make($input, [
             'name' => 'required|string|max:255',
             'phone' => 'required|numeric|digits_between:8,15',
             'other_phones' => 'nullable|array',
-            'other_phones.*' => [
-                'nullable',
-                'string',
-                'regex:/^(0|\+855)(\d{8,9})$/',
-            ],
+            'other_phones.*' => 'nullable|string|regex:/^(0|\+855)(\d{8,10})$/',
             'short_description' => 'nullable|string|max:1000',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
@@ -258,62 +208,42 @@ class ShopController extends Controller
 
         $validated = $validator->validated();
 
-        // 4. Authorization Check
-        $userId = $request->user() ? $request->user()->id : 1;
+        // 6. Database Transaction with proper Try/Catch
+        try {
+            return DB::transaction(function () use ($request, $validated, $shop, $user) {
 
-        // Ensure the user updating the shop actually owns it
-        if ($shop->owner_user_id !== $userId) {
+                $validated['updated_by'] = $user->id;
+
+                // Process Images
+                if ($request->hasFile('logo')) {
+                    // Tip: Add logic here to delete $shop->logo from storage if it exists
+                    $validated['logo'] = ImageHelper::uploadAndResizeImageWebp($request->file('logo'), 'assets/images/shops', 600);
+                } else {
+                    unset($validated['logo']); // Prevent overwriting existing logo with null
+                }
+
+                if ($request->hasFile('banner')) {
+                    // Tip: Add logic here to delete $shop->banner from storage if it exists
+                    $validated['banner'] = ImageHelper::uploadAndResizeImageWebp($request->file('banner'), 'assets/images/shops', 1200);
+                } else {
+                    unset($validated['banner']); // Prevent overwriting existing banner with null
+                }
+
+                // Update the existing Shop model
+                $shop->update($validated);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Shop updated successfully!',
+                    'data' => $shop->fresh()
+                ], 200);
+            });
+        } catch (\Exception $e) {
+            // Catch any upload or DB errors and return clean JSON
             return response()->json([
                 'success' => false,
-                'message' => 'You are not authorized to update this shop.'
-            ], 403);
+                'message' => 'Failed to update shop. ' . $e->getMessage()
+            ], 500);
         }
-
-        // 5. Database Transaction
-        return DB::transaction(function () use ($request, $validated, $shop, $userId) {
-
-            // Clean empty strings to null
-            foreach ($validated as $key => $value) {
-                if (is_string($value) && trim($value) === '') {
-                    $validated[$key] = null;
-                }
-            }
-
-            // Only update the 'updated_by' field. 
-            // We DO NOT touch 'created_by', 'owner_user_id', 'status', or 'expired_at' on a standard update.
-            $validated['updated_by'] = $userId;
-
-            // Process Images
-            if ($request->hasFile('logo')) {
-                try {
-                    // Tip: You can optionally add code here to delete the old image using Storage::delete()
-                    $validated['logo'] = ImageHelper::uploadAndResizeImageWebp($request->file('logo'), 'assets/images/shops', 600);
-                } catch (\Exception $e) {
-                    throw new \Exception('Failed to upload logo: ' . $e->getMessage());
-                }
-            } else {
-                unset($validated['logo']); // Prevent overwriting the existing logo with null
-            }
-
-            if ($request->hasFile('banner')) {
-                try {
-                    // Tip: You can optionally add code here to delete the old image using Storage::delete()
-                    $validated['banner'] = ImageHelper::uploadAndResizeImageWebp($request->file('banner'), 'assets/images/shops', 1200);
-                } catch (\Exception $e) {
-                    throw new \Exception('Failed to upload banner: ' . $e->getMessage());
-                }
-            } else {
-                unset($validated['banner']); // Prevent overwriting the existing banner with null
-            }
-
-            // Update the existing Shop model
-            $shop->update($validated);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Shop updated successfully!',
-                'data' => $shop->fresh() // Returns the updated model
-            ], 200); // 200 OK is standard for successful updates
-        });
     }
 }

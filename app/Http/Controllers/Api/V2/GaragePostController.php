@@ -100,34 +100,39 @@ class GaragePostController extends Controller
 
     public function store(Request $request)
     {
-        // =========================================================================
-        // 🧪 RANDOM ERROR GENERATOR FOR FLUTTER TESTING
-        // =========================================================================
-        $testingMode = false;
-        if ($testingMode) {
-            $chance = rand(1, 100);
-            if ($chance <= 15) return response()->json(['message' => 'Unauthenticated.'], 401);
-            if ($chance <= 30) return response()->json(['message' => 'This action is unauthorized.'], 403);
-            if ($chance <= 45) return response()->json(['message' => 'The requested resource was not found.'], 404);
-            if ($chance <= 60) return response()->json(['success' => false, 'message' => 'Server Error'], 500);
-            if ($chance <= 100) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'The given data was invalid.',
-                    'errors' => [
-                        'title' => ['The title field is required.'],
-                        'images' => ['Please upload at least one image.']
-                    ]
-                ], 422);
-            }
+        $user = $request->user();
+
+        // 1. Critical Security Check: Ensure user is authenticated immediately
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.'
+            ], 401);
         }
 
-        // 1. Validate Data (Simplified for GaragePost)
+        // 2. Pre-Check: Does the user actually have a valid garage to post to?
+        if (!$user->garage_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You must own a garage before creating a post.'
+            ], 403);
+        }
+
+        // Optional but recommended: Verify their garage hasn't been soft-deleted
+        $garage = Garage::withTrashed()->find($user->garage_id);
+        if (!$garage || $garage->trashed()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your garage is missing or deactivated.'
+            ], 403);
+        }
+
+        // 3. Validate Data
         $validator = Validator::make($request->all(), [
             'title'             => 'required|string|max:255',
             'short_description' => 'nullable|string',
             'images'            => 'required|array|min:1',
-            'images.*'          => 'image|mimes:jpeg,png,jpg,webp|max:5120', // 5MB limit
+            'images.*'          => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', // Added 'required' to the array items
         ]);
 
         if ($validator->fails()) {
@@ -138,45 +143,65 @@ class GaragePostController extends Controller
             ], 422);
         }
 
-        // 2. Database Transaction
-        return DB::transaction(function () use ($request) {
+        $validated = $validator->validated();
 
-            // Create the GaragePost
-            $post = GaragePost::create([
-                'title'             => $request->title,
-                'short_description' => $request->short_description,
-                'status'            => 'active', // Default status
-                'updated_by'           => 1,
-                'created_by'           => 1,
-                'garage_id'           => 888,
-            ]);
+        // 4. Database Transaction with Try/Catch
+        try {
+            return DB::transaction(function () use ($request, $validated, $user) {
 
-            // 3. Handle Image Uploads
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    // Upload and Resize (Adjust path to garage_posts)
-                    $filename = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/garage_posts', 800);
+                // Create the GaragePost dynamically using the authenticated user's data
+                $post = GaragePost::create([
+                    'title'             => $validated['title'],
+                    'short_description' => $validated['short_description'] ?? null,
+                    'status'            => 'active',
+                    'garage_id'         => $user->garage_id, // Dynamically assigned!
+                    'created_by'        => $user->id,        // Dynamically assigned!
+                    'updated_by'        => $user->id,        // Dynamically assigned!
+                ]);
 
-                    // Save to your GaragePostImage model
-                    GaragePostImage::create([
-                        'post_id' => $post->id,
-                        'image'          => $filename,
-                    ]);
+                // 5. Handle Image Uploads
+                if ($request->hasFile('images')) {
+                    foreach ($request->file('images') as $image) {
+                        // Upload and Resize
+                        $filename = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/garage_posts', 800);
+
+                        // Save to your GaragePostImage model
+                        GaragePostImage::create([
+                            'post_id' => $post->id,
+                            'image'   => $filename,
+                        ]);
+                    }
                 }
-            }
 
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Garage post created successfully.',
+                    'data'    => $post->load('images') // Assuming you have a `public function images()` relation on GaragePost
+                ], 201);
+            });
+        } catch (\Exception $e) {
+            // Catch any image upload or DB errors safely
             return response()->json([
-                'success' => true,
-                'message' => 'Garage post created successfully.',
-                'data'    => $post->load('images')
-            ], 201);
-        });
+                'success' => false,
+                'message' => 'Failed to create garage post. ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function update(Request $request, string $id)
     {
-        // 1. Find the post
-        $post = GaragePost::where('id', $id)->first();
+        $user = $request->user();
+
+        // 1. Critical Security Check: Ensure user is authenticated
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.'
+            ], 401);
+        }
+
+        // 2. Find the post
+        $post = GaragePost::find($id); // find() is cleaner than where('id', $id)->first()
 
         if (!$post) {
             return response()->json([
@@ -185,14 +210,30 @@ class GaragePostController extends Controller
             ], 404);
         }
 
-        // 2. Validate Data
-        $validator = Validator::make($request->all(), [
-            'title'             => 'required|string|max:255',
-            'short_description' => 'nullable|string',
-            'images'            => 'nullable|array', // Optional during update
-            'images.*'          => 'image|mimes:jpeg,png,jpg,webp|max:5120',
+        // 3. Ownership Authorization Check (Fail Fast)
+        // Ensures the user updating the post is the one who created it (or owns the garage)
+        if ($post->created_by !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to update this post.'
+            ], 403);
+        }
 
-            'deleted_image_ids' => 'nullable|array',
+        // 4. Pre-process multipart/form-data strings from Flutter
+        $input = $request->all();
+
+        // Flutter often sends arrays as JSON strings in multipart requests
+        if (isset($input['deleted_image_ids']) && is_string($input['deleted_image_ids'])) {
+            $input['deleted_image_ids'] = json_decode($input['deleted_image_ids'], true);
+        }
+
+        // 5. Validate Data
+        $validator = Validator::make($input, [
+            'title'               => 'required|string|max:255',
+            'short_description'   => 'nullable|string',
+            'images'              => 'nullable|array',
+            'images.*'            => 'image|mimes:jpeg,png,jpg,webp|max:5120',
+            'deleted_image_ids'   => 'nullable|array',
             'deleted_image_ids.*' => 'integer|exists:garage_post_images,id',
         ]);
 
@@ -200,60 +241,123 @@ class GaragePostController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'The given data was invalid.',
-                'errors' => $validator->errors()
+                'errors'  => $validator->errors()
             ], 422);
         }
 
-        // 3. Database Transaction
-        return DB::transaction(function () use ($request, $post) {
+        $validated = $validator->validated();
 
-            // Update basic info
-            $post->update([
-                'title'             => $request->title,
-                'short_description' => $request->short_description,
-            ]);
+        // 6. Database Transaction with Try/Catch
+        try {
+            return DB::transaction(function () use ($request, $validated, $post, $user) {
 
-            // 4. Handle Image Uploads (Only if new images are provided)
-            if ($request->has('deleted_image_ids') && is_array($request->deleted_image_ids)) {
-                // Fetch images that belong to this specific item to prevent deleting other users' images
-                $imagesToDelete = GaragePostImage::where('post_id', $post->id)
-                    ->whereIn('id', $request->deleted_image_ids)
-                    ->get();
+                // Update basic info using VALIDATED data (not raw request data)
+                $post->update([
+                    'title'             => $validated['title'],
+                    'short_description' => $validated['short_description'] ?? null,
+                    'updated_by'        => $user->id, // Track who made the update
+                ]);
 
-                foreach ($imagesToDelete as $imageModel) {
-                    $imageModel->delete();
+                // 7. Handle Image Deletions
+                if (!empty($validated['deleted_image_ids'])) {
+                    // Fetch images securely scoped to this post
+                    $imagesToDelete = GaragePostImage::where('post_id', $post->id)
+                        ->whereIn('id', $validated['deleted_image_ids'])
+                        ->get();
+
+                    foreach ($imagesToDelete as $imageModel) {
+                        // Tip: You can add code here to physically delete the image from storage
+                        // Storage::delete($imageModel->image);
+                        $imageModel->delete();
+                    }
                 }
-            }
-            if ($request->hasFile('images')) {
 
+                // 8. Handle New Image Uploads
+                if ($request->hasFile('images')) {
+                    foreach ($request->file('images') as $image) {
+                        $filename = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/garage_posts', 1000);
 
-                foreach ($request->file('images') as $image) {
-                    $filename = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/garage_posts', 800);
-
-                    GaragePostImage::create([
-                        'post_id' => $post->id,
-                        'image'          => $filename,
-                    ]);
+                        GaragePostImage::create([
+                            'post_id' => $post->id,
+                            'image'   => $filename,
+                        ]);
+                    }
                 }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Garage post updated successfully.',
+                    'data'    => $post->load('images') // Returns the updated post with its fresh relationship
+                ], 200);
+            });
+        } catch (\Exception $e) {
+            // Safely catch any image upload or DB errors
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update garage post. ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function destroy(Request $request, string $id)
+    {
+        $user = $request->user();
+
+        // 1. Critical Security Check: Ensure user is authenticated
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.'
+            ], 401);
+        }
+
+        // 2. Find the post and eager load the images
+        $post = GaragePost::with('images')->find($id);
+
+        if (!$post) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Garage post not found.'
+            ], 404);
+        }
+
+        // 3. Ownership Authorization Check (Fail Fast)
+        if ($post->created_by !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to delete this post.'
+            ], 403);
+        }
+
+        // 4. Safely Delete Database Records First
+        try {
+            // Store image paths in an array in memory before we delete the DB records
+            $imagePaths = $post->images->pluck('image')->toArray();
+
+            DB::transaction(function () use ($post) {
+                // Delete the related image rows in the database (Prevents orphaned rows)
+                $post->images()->delete();
+
+                // Delete the main post
+                $post->delete();
+            });
+
+            // 5. Delete physical files ONLY after the DB transaction safely commits
+            foreach ($imagePaths as $path) {
+                ImageHelper::deleteImage($path, 'assets/images/garage_posts');
+                ImageHelper::deleteImage($path, 'assets/images/garage_posts/thumb');
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Garage post updated successfully.',
-                'data'    => $post->load('images')
+                'message' => 'Garage post and associated images deleted successfully.'
             ], 200);
-        });
-    }
-
-    public function destroy($id)
-    {
-        $item = GaragePost::findOrFail($id);
-
-        foreach ($item->images as $image) {
-            ImageHelper::deleteImage($image->image, 'assets/images/garage_posts');
+        } catch (\Exception $e) {
+            // Safely catch DB errors and prevent partial deletions
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete post. ' . $e->getMessage()
+            ], 500);
         }
-
-        $item->delete();
-        return response()->json(['success' => true, 'message' => 'Post deleted']);
     }
 }

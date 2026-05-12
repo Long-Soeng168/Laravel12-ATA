@@ -432,56 +432,11 @@ class ItemController extends Controller
      */
     public function store(Request $request)
     {
-        // =========================================================================
-        // 🧪 RANDOM ERROR GENERATOR FOR FLUTTER TESTING
-        // Set to 'false' when you are done testing!
-        // =========================================================================
-        $testingMode = false;
+        $user = $request->user();
 
-        if ($testingMode) {
-            $chance = rand(1, 100);
-
-            if ($chance <= 15) {
-                // 1. 401 Unauthorized (15% chance)
-                // Simulates an expired or missing Bearer token
-                return response()->json(['message' => 'Unauthenticated.'], 401);
-            } elseif ($chance <= 30) {
-                // 2. 403 Forbidden (15% chance)
-                // Simulates the user not having permission to post to this shop
-                return response()->json(['message' => 'This action is unauthorized.'], 403);
-            } elseif ($chance <= 45) {
-                // 3. 404 Not Found (15% chance)
-                // Simulates trying to link to a category or shop that was just deleted
-                return response()->json(['message' => 'The requested resource was not found.'], 404);
-            } elseif ($chance <= 60) {
-                // 4. 500 Internal Server Error (15% chance)
-                // Simulates a database crash or a syntax error in your PHP code
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Server Error',
-                    'error' => 'SQLSTATE[HY000] [2002] Connection refused'
-                ], 500);
-            } elseif ($chance <= 100) {
-                // 5. 422 Validation Error (25% chance)
-                // Simulates someone bypassing client-side validation, or failing a unique check
-                // Note: Includes a dynamic attribute error to test your UI mapping!
-                return response()->json([
-                    'success' => false,
-                    'message' => 'The given data was invalid.',
-                    'errors' => [
-                        'name' => ['The product name has already been taken in this shop.'],
-                        'price' => ['The price must be at least 0.01.'],
-                        'images' => ['The uploaded file is corrupt.'],
-                        'attributes.color' => ['The color specification is currently out of stock.']
-                    ]
-                ], 422);
-            }
-
-            // Remaining 15% chance: The code continues and succeeds!
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized.'], 401);
         }
-        // =========================================================================
-        // END TESTING BLOCK
-        // =========================================================================
 
         // 1. Pre-process multipart/form-data strings from Flutter
         $input = $request->all();
@@ -524,7 +479,7 @@ class ItemController extends Controller
             'is_free_delivery' => 'nullable|boolean', // Added the new field
             'attributes' => 'nullable|array',
             'images' => 'required|array|min:1',
-            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120', // 5MB limit
+            'images.*' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', // 5MB limit
             'discount' => [
                 'nullable',
                 'numeric',
@@ -556,44 +511,41 @@ class ItemController extends Controller
         $validated = $validator->validated();
 
         // 4. Database Transaction
-        return DB::transaction(function () use ($request, $validated) {
+        try {
+            return DB::transaction(function () use ($request, $validated, $user) {
 
-            // Clean empty strings to null
-            foreach ($validated as $key => $value) {
-                if (is_string($value) && trim($value) === '') {
-                    $validated[$key] = null;
+                $validated['created_by'] = $user->id;
+                $validated['user_id']    = $user->id;
+                $validated['shop_id']    = $user->shop_id ?? null;
+
+                // Prevent images array from hitting the items table insert
+                unset($validated['images']);
+
+                $item = Item::create($validated);
+
+                if ($request->hasFile('images')) {
+                    foreach ($request->file('images') as $image) {
+                        // Using 800px resize per your updated logic
+                        $filename = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/items', 800);
+                        ItemImage::create([
+                            'item_id' => $item->id,
+                            'image' => $filename,
+                        ]);
+                    }
                 }
-            }
 
-            // Add auth-dependent IDs
-            // $validated['created_by'] = $request->user()->id;
-            // $validated['shop_id'] = $request->user()->shop_id;
-            $validated['created_by'] = 1;
-            $validated['user_id'] = 1;
-            $validated['shop_id'] = 19;
-
-            // Prevent images array from hitting the items table insert
-            unset($validated['images']);
-
-            $item = Item::create($validated);
-
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    // Using 800px resize per your updated logic
-                    $filename = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/items', 800);
-                    ItemImage::create([
-                        'item_id' => $item->id,
-                        'image' => $filename,
-                    ]);
-                }
-            }
-
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Item created.',
+                    'data' => $item->load('images')
+                ], 201);
+            });
+        } catch (\Exception $e) {
             return response()->json([
-                'success' => true,
-                'message' => 'Item created.',
-                'data' => $item->load('images')
-            ], 201);
-        });
+                'success' => false,
+                'message' => 'Failed to create item. ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -601,13 +553,22 @@ class ItemController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // 1. Find the existing item
-        $item = Item::findOrFail($id);
+        $user = $request->user();
 
-        // Optional: Ensure the user actually owns this item before updating
-        // if ($item->shop_id !== $request->user()->shop_id) {
-        //     return response()->json(['message' => 'Unauthorized action.'], 403);
-        // }
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized.'], 401);
+        }
+
+        // 1. Find the existing item safely
+        $item = Item::find($id);
+
+        if (!$item) {
+            return response()->json(['success' => false, 'message' => 'Item not found.'], 404);
+        }
+
+        if ($item->user_id !== $request->user()->id) {
+            return response()->json(['message' => 'Unauthorized action.'], 403);
+        }
 
         // 2. Pre-process multipart/form-data strings from Flutter
         $input = $request->all();
@@ -701,57 +662,57 @@ class ItemController extends Controller
         $validated = $validator->validated();
 
         // 5. Database Transaction for safe updating
-        return DB::transaction(function () use ($request, $validated, $item) {
+        try {
+            return DB::transaction(function () use ($request, $validated, $item, $user) {
 
-            // Clean empty strings to null
-            foreach ($validated as $key => $value) {
-                if (is_string($value) && trim($value) === '') {
-                    $validated[$key] = null;
+                $validated['updated_by'] = $user->id;
+
+                // Prevent arrays from hitting the items table update
+                unset($validated['images']);
+                unset($validated['deleted_image_ids']);
+
+                // Update the core item record
+                $item->update($validated);
+
+                // --- HANDLE DELETED IMAGES ---
+                if ($request->has('deleted_image_ids') && is_array($request->deleted_image_ids)) {
+                    // Fetch images that belong to this specific item to prevent deleting other users' images
+                    $imagesToDelete = ItemImage::where('item_id', $item->id)
+                        ->whereIn('id', $request->deleted_image_ids)
+                        ->get();
+
+                    foreach ($imagesToDelete as $imageModel) {
+                        // Optional: Delete the physical file from your server storage to save space
+                        // \Illuminate\Support\Facades\Storage::disk('public')->delete($imageModel->image); // Adjust path if needed
+
+                        // Delete the database record
+                        $imageModel->delete();
+                    }
                 }
-            }
 
-            $validated['updated_by'] = 1; // Or: $request->user()->id;
-
-            // Prevent arrays from hitting the items table update
-            unset($validated['images']);
-            unset($validated['deleted_image_ids']);
-
-            // Update the core item record
-            $item->update($validated);
-
-            // --- HANDLE DELETED IMAGES ---
-            if ($request->has('deleted_image_ids') && is_array($request->deleted_image_ids)) {
-                // Fetch images that belong to this specific item to prevent deleting other users' images
-                $imagesToDelete = ItemImage::where('item_id', $item->id)
-                    ->whereIn('id', $request->deleted_image_ids)
-                    ->get();
-
-                foreach ($imagesToDelete as $imageModel) {
-                    // Optional: Delete the physical file from your server storage to save space
-                    // \Illuminate\Support\Facades\Storage::disk('public')->delete($imageModel->image); // Adjust path if needed
-
-                    // Delete the database record
-                    $imageModel->delete();
+                // --- HANDLE NEW IMAGES ---
+                if ($request->hasFile('images')) {
+                    foreach ($request->file('images') as $image) {
+                        $filename = \App\Helpers\ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/items', 800);
+                        ItemImage::create([
+                            'item_id' => $item->id,
+                            'image' => $filename,
+                        ]);
+                    }
                 }
-            }
 
-            // --- HANDLE NEW IMAGES ---
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    $filename = \App\Helpers\ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/items', 800);
-                    ItemImage::create([
-                        'item_id' => $item->id,
-                        'image' => $filename,
-                    ]);
-                }
-            }
-
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Item updated successfully.',
+                    'data' => $item->load('images')
+                ], 200); // 200 OK
+            });
+        } catch (\Exception $e) {
             return response()->json([
-                'success' => true,
-                'message' => 'Item updated successfully.',
-                'data' => $item->load('images')
-            ], 200); // 200 OK
-        });
+                'success' => false,
+                'message' => 'Failed to update item. ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -771,15 +732,52 @@ class ItemController extends Controller
     /**
      * DELETE ITEM
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $item = Item::findOrFail($id);
+        $user = $request->user();
 
-        foreach ($item->images as $image) {
-            ImageHelper::deleteImage($image->image, 'assets/images/items');
+        // 1. Critical Security Checks (Fail Fast)
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized.'], 401);
         }
 
-        $item->delete();
-        return response()->json(['success' => true, 'message' => 'Item deleted']);
+        // Use with('images') to prevent N+1 query problems when fetching paths
+        $item = Item::with('images')->find($id);
+
+        if (!$item) {
+            return response()->json(['success' => false, 'message' => 'Item not found.'], 404);
+        }
+
+        // Ensure the user owns the shop that this item belongs to
+        if ($item->user_id !== $user->id) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized action.'], 403);
+        }
+
+        // 2. Safe Deletion Process
+        try {
+            // $imagePaths = $item->images->pluck('image')->toArray();
+
+            // DB::transaction(function () use ($item) {
+            //     $item->images()->delete();
+
+            //     $item->delete();
+            // });
+
+            // foreach ($imagePaths as $path) {
+            //     ImageHelper::deleteImage($path, 'assets/images/items');
+            //     ImageHelper::deleteImage($path, 'assets/images/items/thumb');
+            // }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Item deleted successfully.'
+            ], 200);
+        } catch (\Exception $e) {
+            // Catch DB errors safely
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete item. ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

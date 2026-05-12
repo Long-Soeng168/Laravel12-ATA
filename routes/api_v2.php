@@ -22,9 +22,6 @@ use Illuminate\Http\Request;
 // http://127.0.0.1:8000/api/v2/items/123
 // http://127.0.0.1:8000/api/v2/items-form-data
 
-
-
-
 Route::prefix('v2')->group(function () {
     // === For Logined Route ===
     Route::middleware(['auth:sanctum'])->group(function () {
