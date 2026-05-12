@@ -23,26 +23,27 @@ use Illuminate\Http\Request;
 // http://127.0.0.1:8000/api/v2/items-form-data
 
 
-// === For Logined Route ===
-Route::middleware(['auth:sanctum'])->group(function () {
-    Route::post('/v2/update-users', [UserController::class, 'update']);
 
-    Route::post('/shops', [ShopController::class, 'store']);
-    Route::post('/shops/{id}', [ShopController::class, 'update']);
-
-    Route::post('/garages', [GarageController::class, 'store']);
-    Route::post('/garages/{id}', [GarageController::class, 'update']);
-
-    Route::post('/garage-posts', [GaragePostController::class, 'store']);
-    Route::post('/garage-posts/{id}', [GaragePostController::class, 'update']);
-    Route::delete('/garage-posts/{id}', [GaragePostController::class, 'destroy']);
-
-    Route::post('/items', [ItemController::class, 'store']);         // Store item
-    Route::post('/items/{id}', [ItemController::class, 'update']);   // Update (Use POST for images)
-    Route::delete('/items/{id}', [ItemController::class, 'destroy']); // Delete item
-});
 
 Route::prefix('v2')->group(function () {
+    // === For Logined Route ===
+    Route::middleware(['auth:sanctum'])->group(function () {
+        Route::post('/update-users', [UserController::class, 'update']);
+
+        Route::post('/shops', [ShopController::class, 'store']);
+        Route::post('/shops/{id}', [ShopController::class, 'update']);
+
+        Route::post('/garages', [GarageController::class, 'store']);
+        Route::post('/garages/{id}', [GarageController::class, 'update']);
+
+        Route::post('/garage-posts', [GaragePostController::class, 'store']);
+        Route::post('/garage-posts/{id}', [GaragePostController::class, 'update']);
+        Route::delete('/garage-posts/{id}', [GaragePostController::class, 'destroy']);
+
+        Route::post('/items', [ItemController::class, 'store']);         // Store item
+        Route::post('/items/{id}', [ItemController::class, 'update']);   // Update (Use POST for images)
+        Route::delete('/items/{id}', [ItemController::class, 'destroy']); // Delete item
+    });
 
     Route::get('/banners', [BannerController::class, 'index']);
 
