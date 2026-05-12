@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Helpers\ImageHelper;
-use App\Http\Controllers\Controller; 
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -57,22 +57,35 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         $user = Auth::user();
+
         if ($user) {
-            $user = Auth::user();
-            $userRoles = $user->getRoleNames();
-            // $userPermissions = $user->getPermissionsViaRoles()->pluck('name');
-            unset($user['roles']);
-            // $shop = Shop::where('id', $user->shop_id)->first();
-            // $garage = Garage::where('id', $user->garage_id)->with('expert')->first();
             return response()->json([
-                'user' => $user,
-                'userRoles' => $userRoles,
-                // 'userPermissions' => $userPermissions
+                'success' => true,
+                'user' => $user->load('shop', 'garage'),
             ], 200);
-        } else {
-            return response()->json(['error' => 'Unauthorized'], 401);
         }
+
+        return response()->json(['error' => 'Unauthorized'], 401);
     }
+    // public function user(Request $request)
+    // {
+    //     $user = Auth::user();
+    //     if ($user) {
+    //         $user = Auth::user();
+    //         $userRoles = $user->getRoleNames();
+    //         // $userPermissions = $user->getPermissionsViaRoles()->pluck('name');
+    //         unset($user['roles']);
+    //         // $shop = Shop::where('id', $user->shop_id)->first();
+    //         // $garage = Garage::where('id', $user->garage_id)->with('expert')->first();
+    //         return response()->json([
+    //             'user' => $user,
+    //             'userRoles' => $userRoles,
+    //             // 'userPermissions' => $userPermissions
+    //         ], 200);
+    //     } else {
+    //         return response()->json(['error' => 'Unauthorized'], 401);
+    //     }
+    // }
 
     public function register(Request $request)
     {
