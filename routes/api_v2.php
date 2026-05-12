@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V2\GarageController;
 use App\Http\Controllers\Api\V2\GaragePostController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V2\ItemController;
+use App\Http\Controllers\Api\V2\LinkController;
 use App\Http\Controllers\Api\V2\ShopController;
 use App\Http\Controllers\Api\V2\UserController;
 use App\Http\Controllers\Api\V2\VideoController;
@@ -43,6 +44,7 @@ Route::prefix('v2')->group(function () {
     });
 
     Route::get('/banners', [BannerController::class, 'index']);
+    Route::get('/links', [LinkController::class, 'index']);
 
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::post('/login', [UserController::class, 'login']);
