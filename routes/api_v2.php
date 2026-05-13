@@ -70,6 +70,7 @@ Route::prefix('v2')->group(function () {
 
     // Get all items (Supports ?category_id=10&condition=new etc.)
     Route::get('/items', [ItemController::class, 'index']);
+    Route::get('/highlight', [ItemController::class, 'highlight']);
     // Get a single item detail
     Route::get('/items/{id}', [ItemController::class, 'show']);
     Route::get('/items/{id}/related', [ItemController::class, 'related_items']);

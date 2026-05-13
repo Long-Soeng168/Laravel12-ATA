@@ -25,7 +25,7 @@ class ItemController extends Controller
     public function index(Request $request)
     {
         if ($request->is_owner == 1) {
-            //  No Implement Cach is is_owner == 1
+            //  No Implement Cach if is_owner == 1
         }
         $query = Item::with(['category', 'brand', 'images']);
 
@@ -99,6 +99,141 @@ class ItemController extends Controller
 
         // 2. Paginate & Sort (Removed latest() to prevent conflicting with orderByDesc)
         $items = $query->orderByDesc('id')->paginate(16);
+
+        // 3. Pre-fetch mappings for attributes (Optimized)
+        // We get the IDs from the already eager-loaded categories instead of running a new query!
+        $categoryIds = $items->pluck('category.id')->filter()->unique();
+
+        $categoryMaps = ItemCategoryField::whereIn('category_id', $categoryIds)
+            ->with('options')
+            ->get()
+            ->groupBy('category_id');
+
+        // 4. Transform Collection
+        $items->getCollection()->transform(function ($item) use ($categoryMaps) {
+
+            // --- Image Optimization for Flutter List ---
+            $firstImage = $item->images->first();
+
+            $item->image_url = $firstImage
+                ? asset('assets/images/items/' . $firstImage->image)
+                : asset('assets/images/placeholder.webp');
+
+            $item->total_images = $item->images->count();
+
+            $item->thumbnail_image = $firstImage ? [
+                'id' => $firstImage->id,
+                'image' => $firstImage->image,
+                'image_url' => asset('assets/images/items/' . $firstImage->image),
+            ] : null;
+
+            // --- Attribute Display Logic ---
+            $categoryId = $item->category?->id;
+            $fields = $categoryMaps->get($categoryId);
+            $displayAttributes = [];
+
+            if ($fields && is_array($item->attributes)) {
+                foreach ($item->attributes as $key => $storedValue) {
+                    $field = $fields->where('field_key', $key)->first();
+                    $option = $field ? $field->options->where('option_value', $storedValue)->first() : null;
+
+                    $displayAttributes[$key] = [
+                        'label' => $field->label ?? $key,
+                        'label_kh' => $field->label_kh ?? $key,
+                        'value' => $storedValue,
+                        'value_label_en' => $option->label_en ?? $storedValue,
+                        'value_label_kh' => $option->label_kh ?? $storedValue,
+                    ];
+                }
+            }
+
+            $item->display_attributes = $displayAttributes;
+
+            // Correct Laravel way to hide relationships from the final JSON payload
+            $item->makeHidden(['images']);
+
+            return $item;
+        });
+
+        return response()->json($items);
+    }
+    public function highlight(Request $request)
+    {
+        if ($request->is_owner == 1) {
+            //  No Implement Cach if is_owner == 1
+        }
+        $query = Item::with(['category', 'brand', 'images']);
+
+        $query->where('status', 'active');
+
+        // Filter by Category Code and Dynamic Attributes
+        if ($request->filled('category_code')) {
+            $categoryCode = $request->category_code;
+            $query->where('category_code', $categoryCode);
+
+            // Fetch valid fields for this category to prevent SQL injection or bad queries
+            $category = ItemCategory::where('code', $categoryCode)->first();
+
+            if ($category) {
+                $validFields = ItemCategoryField::where('category_id', $category->id)
+                    ->pluck('field_key')
+                    ->toArray();
+
+                // Loop through request inputs to match valid JSON attributes
+                foreach ($request->all() as $key => $value) {
+                    if (in_array($key, $validFields) && $request->filled($key)) {
+                        // Assuming 'attributes' is cast to an array/json in your Item model
+                        $query->where("attributes->$key", $value);
+                    }
+                }
+            }
+        }
+
+        // Standard Filters
+        if ($request->filled('shop_id')) {
+            $shop = Shop::find($request->shop_id);
+            if ($shop) {
+                $query->where(function ($q) use ($shop) {
+                    $q->where('user_id', $shop->owner_user_id)
+                        ->orWhere('shop_id', $shop->id);
+                });
+            } else {
+                $query->where('shop_id', $request->shop_id);
+            }
+        }
+        if ($request->filled('user_id')) {
+            $user = User::find($request->user_id);
+            if ($user) {
+                $query->where(function ($q) use ($user) {
+                    $q->where('shop_id', $user->shop_id)
+                        ->orWhere('user_id', $user->id);
+                });
+            } else {
+                $query->where('user_id', $request->user_id);
+            }
+        }
+
+        if ($request->filled('brand_code')) {
+            $query->where('brand_code', $request->brand_code);
+        }
+
+        if ($request->filled('model_code')) {
+            $query->where('model_code', $request->model_code);
+        }
+
+        if ($request->filled('body_type_code')) {
+            $query->where('body_type_code', $request->body_type_code);
+        }
+
+        if ($request->filled('q')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->q . '%')
+                    ->orWhere('name_kh', 'like', '%' . $request->q . '%');
+            });
+        }
+
+        // 2. Paginate & Sort (Removed latest() to prevent conflicting with orderByDesc)
+        $items = $query->inRandomOrder()->paginate(16);
 
         // 3. Pre-fetch mappings for attributes (Optimized)
         // We get the IDs from the already eager-loaded categories instead of running a new query!
