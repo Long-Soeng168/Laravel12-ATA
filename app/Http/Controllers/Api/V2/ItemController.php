@@ -308,7 +308,7 @@ class ItemController extends Controller
 
         // User (owner) Image/Avatar URL
         if ($item->owner) {
-            $formattedItem['owner']['image_url'] = $item->owner->image
+            $formattedItem['owner']['logo_url'] = $item->owner->image
                 ? asset('assets/images/users/thumb/' . $item->owner->image)
                 : null;
         }
