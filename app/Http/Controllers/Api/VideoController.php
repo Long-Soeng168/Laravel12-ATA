@@ -101,10 +101,10 @@ class VideoController extends Controller
                 'id' => $item->id,
                 'title' => $item->title,
                 'image' => $item->image,
-                'image_url' => 'https://atech-auto.com/assets/images/videos/thumb/' . $item->image,
+                'image_url' =>  env('APP_URL') . '/assets/images/videos/thumb/' . $item->image,
                 'description' => $item->short_description, // or $item->short_description_kh
                 'video_name' => $item->video_file,
-                'video_url' => 'https://atech-auto.com/assets/files/videos/' . $item->video_file,
+                'video_url' => env('APP_URL') . '/assets/files/videos/' . $item->video_file,
                 // 'video_url' => $videoUrl,
                 'playlist_id' => $playlist->id ?? null,
                 'playlist_code' => $item->playlist_code ?? null,
