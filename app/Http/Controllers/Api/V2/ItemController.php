@@ -223,12 +223,12 @@ class ItemController extends Controller
 
         if ($request->is_owner == 1) {
             //  No Implement Cach is is_owner == 1
-            $responseData = [
-                'success' => false,
-                'message' => 'Test Error',
-            ];
+            // $responseData = [
+            //     'success' => false,
+            //     'message' => 'Test Error',
+            // ];
 
-            return response()->json($responseData, 500);
+            // return response()->json($responseData, 500);
         } else {
             $item->increment('total_view_counts');
         }
