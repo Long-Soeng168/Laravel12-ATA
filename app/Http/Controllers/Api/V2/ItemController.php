@@ -25,6 +25,14 @@ class ItemController extends Controller
     public function index(Request $request)
     {
         // 1. Start the Query with relationships
+        if ($request->is_owner == 1) {
+            $responseData = [
+                'success' => false,
+                'message' => 'Test Error',
+            ];
+
+            return response()->json($responseData, 500);
+        }
         $query = Item::with(['category', 'brand', 'images']);
 
         $query->where('status', 'active');
@@ -755,6 +763,7 @@ class ItemController extends Controller
 
         // 2. Safe Deletion Process
         try {
+            // Don't delete the images as it just soft delete
             // $imagePaths = $item->images->pluck('image')->toArray();
 
             // DB::transaction(function () use ($item) {
