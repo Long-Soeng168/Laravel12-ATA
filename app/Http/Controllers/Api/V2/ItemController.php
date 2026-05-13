@@ -306,10 +306,10 @@ class ItemController extends Controller
                 : null;
         }
 
-        // User (user) Image/Avatar URL
-        if ($item->user) {
-            $formattedItem['user']['image_url'] = $item->user->image
-                ? asset('assets/images/users/thumb/' . $item->user->image)
+        // User (owner) Image/Avatar URL
+        if ($item->owner) {
+            $formattedItem['owner']['image_url'] = $item->owner->image
+                ? asset('assets/images/users/thumb/' . $item->owner->image)
                 : null;
         }
 
