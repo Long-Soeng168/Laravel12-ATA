@@ -299,26 +299,26 @@ class ItemController extends Controller
         // Shop Image URL
         if ($item->shop) {
             $formattedItem['shop']['logo_url'] = $item->shop->logo
-                ? asset('assets/images/shops/' . $item->shop->logo)
+                ? asset('assets/images/shops/thumb/' . $item->shop->logo)
                 : null;
             $formattedItem['shop']['banner_url'] = $item->shop->banner
-                ? asset('assets/images/shops/' . $item->shop->banner)
+                ? asset('assets/images/shops/thumb/' . $item->shop->banner)
                 : null;
         }
 
         // User (user) Image/Avatar URL
         if ($item->user) {
             $formattedItem['user']['image_url'] = $item->user->image
-                ? asset('assets/images/users/' . $item->user->image)
+                ? asset('assets/images/users/thumb/' . $item->user->image)
                 : null;
         }
 
         // Also handle Brand/Model/BodyType images if you have them
-        if ($item->brand) {
-            $formattedItem['brand']['image_url'] = $item->brand->image
-                ? asset('assets/images/brands/' . $item->brand->image)
-                : null;
-        }
+        // if ($item->brand) {
+        //     $formattedItem['brand']['image_url'] = $item->brand->image
+        //         ? asset('assets/images/brands/' . $item->brand->image)
+        //         : null;
+        // }
 
         return response()->json([
             'success' => true,
