@@ -42,7 +42,7 @@ class VideoController extends Controller
         // Retrieve request parameters with defaults
         $search = $request->input('search', '');
         $playlistId = $request->input('playlistId');
-        $sortBy = $request->input('sortBy', 'title'); // Default sort by 'title'
+        $sortBy = $request->input('sortBy', 'order_index'); // Default sort by 'title'
         $sortOrder = $request->input('sortOrder', 'asc'); // Default order 'asc'
         $perPage = $request->input('perPage', 100); // Default 50 items per page
 
