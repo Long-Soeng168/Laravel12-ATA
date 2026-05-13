@@ -24,14 +24,8 @@ class ItemController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. Start the Query with relationships
         if ($request->is_owner == 1) {
-            $responseData = [
-                'success' => false,
-                'message' => 'Test Error',
-            ];
-
-            return response()->json($responseData, 500);
+            //  No Implement Cach is is_owner == 1
         }
         $query = Item::with(['category', 'brand', 'images']);
 
@@ -222,12 +216,24 @@ class ItemController extends Controller
     /**
      * SHOW ITEM (Formatted for Mobile)
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        // Eager load everything needed, but we will selectively return data
+
         $item = Item::with(['images', 'brand', 'model', 'body_type', 'shop', 'owner', 'category.fields.options'])->findOrFail($id);
 
-        $item->increment('total_view_counts');
+        if ($request->is_owner == 1) {
+            //  No Implement Cach is is_owner == 1
+            $responseData = [
+                'success' => false,
+                'message' => 'Test Error',
+            ];
+
+            return response()->json($responseData, 500);
+        } else {
+            $item->increment('total_view_counts');
+        }
+
+
         // 1. Convert the basic item to an array
         $formattedItem = $item->toArray();
 
