@@ -286,6 +286,11 @@ class ShopController extends Controller implements HasMiddleware
                     ->update([
                         'shop_id' => $shop->id
                     ]);
+                Item::where('shop_id', $shop->id)
+                    ->whereNull('user_id') // Safety check: Only grab items that don't have a shop yet
+                    ->update([
+                        'user_id' => $shop->owner_user_id
+                    ]);
             }
 
             // B. Handle Shop Approval (scoop up floating items)
@@ -319,6 +324,11 @@ class ShopController extends Controller implements HasMiddleware
                     ->whereNull('shop_id') // Safety check: Only grab items that don't have a shop yet
                     ->update([
                         'shop_id' => $shop->id
+                    ]);
+                Item::where('shop_id', $shop->id)
+                    ->whereNull('user_id') // Safety check: Only grab items that don't have a shop yet
+                    ->update([
+                        'user_id' => $shop->owner_user_id
                     ]);
             }
 
