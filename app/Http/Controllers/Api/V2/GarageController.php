@@ -54,7 +54,7 @@ class GarageController extends Controller
     public function show(Request $request, string $id)
     {
         // 1. Find the specific shop by ID and ensure it is approved
-        $garage = Garage::find($id);
+        $garage = Garage::with('province')->where('id', $id)->first();
 
         // 2. Handle 404 if the shop doesn't exist or isn't approved
         if (!$garage) {
