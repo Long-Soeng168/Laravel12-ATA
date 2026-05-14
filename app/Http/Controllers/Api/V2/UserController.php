@@ -283,12 +283,12 @@ class UserController extends Controller
                 }
             }
 
-            // Clean out empty values to prevent overwriting existing data with null unnecessarily
-            foreach ($validated as $key => $value) {
-                if ($value === null || $value === '') {
-                    unset($validated[$key]);
-                }
-            }
+            // // Clean out empty values to prevent overwriting existing data with null unnecessarily
+            // foreach ($validated as $key => $value) {
+            //     if ($value === null || $value === '') {
+            //         unset($validated[$key]);
+            //     }
+            // }
 
             // Update the user details
             $user->update($validated);
