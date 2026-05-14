@@ -331,14 +331,13 @@ export default function Create({
                     />
                     <FormErrorLabel error={errors.location} />
 
-                    <FormField
+                    <FormFieldTextArea
                         id="address"
                         name="address"
-                        label={t('Address')}
+                        label="Address"
                         value={data.address}
-                        onChange={(val) => setData('address', val)}
+                        onChange={(val: string) => setData('address', val)}
                         error={errors.address}
-                        placeholder={t('Address')}
                     />
                 </div>
 
