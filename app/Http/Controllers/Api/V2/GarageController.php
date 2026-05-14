@@ -253,6 +253,7 @@ class GarageController extends Controller
             'location' => 'nullable|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
+            'province_code' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -353,6 +354,7 @@ class GarageController extends Controller
             'location' => 'nullable|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
+            'province_code' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
