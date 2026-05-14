@@ -31,7 +31,7 @@ class GarageController extends Controller
         $query->with('province');
         $query->where('status', 'approved');
         $query->orderBy('order_index');
-        $query->orderBy('id', 'desc');
+        $query->orderBy('name');
 
         if ($province_code) {
             $query->where('province_code', $province_code);

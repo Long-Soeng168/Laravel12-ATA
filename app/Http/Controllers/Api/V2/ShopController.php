@@ -27,7 +27,7 @@ class ShopController extends Controller
 
         $query->where('status', 'approved');
         $query->orderBy('order_index');
-        $query->orderBy('id', 'desc');
+        $query->orderBy('name');
 
         $shops = $query->paginate(20);
 
