@@ -39,9 +39,7 @@ class FileExploreR2FileController extends Controller
         });
 
         // 2. CACHE APP INFO: Only select the column we actually need
-        $appInfo = Cache::flexible('application_info_document_status', [3600, 7200], function () {
-            return ApplicationInfo::select('document_status')->first();
-        });
+        $appInfo =  ApplicationInfo::select('document_status')->first();
 
         $status = 'need_purchase';
 
