@@ -5,6 +5,7 @@ import UploadedImage from '@/components/Form/UploadedImageDisplay';
 import { FormCombobox } from '@/components/Input/FormCombobox';
 import { FormErrorLabel } from '@/components/Input/FormErrorLabel';
 import { FormField } from '@/components/Input/FormField';
+import { FormFieldTextArea } from '@/components/Input/FormFieldTextArea';
 import { FormLabel } from '@/components/Input/FormLabel';
 import LocationPicker from '@/components/LocationPicker';
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea';
