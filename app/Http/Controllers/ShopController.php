@@ -293,15 +293,6 @@ class ShopController extends Controller implements HasMiddleware
                     ]);
             }
 
-            // B. Handle Shop Approval (scoop up floating items)
-            if (!$wasApproved && $isBecomingApproved) {
-                Item::where('user_id', $newOwnerId)
-                    ->whereNull('shop_id') // Only grab items that don't have a shop yet
-                    ->update([
-                        'shop_id' => $shop->id
-                    ]);
-            }
-
             // C. Finally, update the Shop with all validated data
             $shop->update($validated);
         });
