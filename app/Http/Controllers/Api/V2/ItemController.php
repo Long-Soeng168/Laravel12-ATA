@@ -307,7 +307,7 @@ class ItemController extends Controller
                     ->orderBy('name')
                     ->get()
                     ->map(function ($item) {
-                        $item->image_url = $item->image ? asset('assets/images/item_categories/' . $item->image) : null;
+                        $item->image_url = $item->image ? asset('assets/images/item_categories/thumb/' . $item->image) : null;
                         $item->brand_ids = $item->brands->pluck('id')->toArray();
                         return $item;
                     }),
@@ -322,13 +322,13 @@ class ItemController extends Controller
                     ->map(function ($brand) {
                         // 1. Add image_url for the Brand
                         $brand->image_url = $brand->image
-                            ? asset('assets/images/item_brands/' . $brand->image)
+                            ? asset('assets/images/item_brands/thumb/' . $brand->image)
                             : null;
 
                         // 2. Map through the nested models to add their image_url
                         $brand->brand_models->map(function ($model) {
                             $model->image_url = $model->image
-                                ? asset('assets/images/item_models/' . $model->image)
+                                ? asset('assets/images/item_models/thumb/' . $model->image)
                                 : null;
                             return $model;
                         });
@@ -341,7 +341,7 @@ class ItemController extends Controller
                     ->orderBy('name')
                     ->get()
                     ->map(function ($item) {
-                        $item->image_url = $item->image ? asset('assets/images/item_body_types/' . $item->image) : null;
+                        $item->image_url = $item->image ? asset('assets/images/item_body_types/thumb/' . $item->image) : null;
                         return $item;
                     }),
             ]
