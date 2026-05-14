@@ -16,10 +16,10 @@ class LinkController extends Controller
         // Fetch data based on position presence
         $slides = Link::when($type_code, function ($query, $type_code) {
             return $query->where('type', $type_code);
-        })->where('status', 'active')->get();
+        })->where('status', 'active')->orderBy('order_index')->get();
 
         $data = $slides->map(function ($item) {
-            $item->image_url = $item->image ? asset('assets/images/links/' . $item->image) : null;
+            $item->image_url = $item->image ? asset('assets/images/links/thumb/' . $item->image) : null;
             return $item;
         });
 
