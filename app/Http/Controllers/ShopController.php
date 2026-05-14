@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ImageHelper;
+use App\Models\Item;
 use App\Models\Shop;
 use App\Models\User;
 use Carbon\Carbon;
@@ -11,6 +12,7 @@ use Inertia\Inertia;
 
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Support\Facades\DB;
 
 class ShopController extends Controller implements HasMiddleware
 {
@@ -210,15 +212,15 @@ class ShopController extends Controller implements HasMiddleware
             'other_phones.*' => [
                 'nullable',
                 'string',
-                'regex:/^(0|\+855)(\d{8,9})$/', // Validates Khmer format for each entry
+                'regex:/^(0|\+855)(\d{8,9})$/',
             ],
             'short_description' => 'nullable|string|max:1000',
             'short_description_kh' => 'nullable|string|max:1000',
             'order_index' => 'nullable|numeric',
             'expired_at' => 'nullable|date',
             'status' => 'nullable|string|in:pending,approved,suspended,rejected',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
-            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048', // Removed duplicate webp
+            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048', // Removed duplicate webp
             'is_verified' => 'nullable|boolean',
             'address' => 'nullable|string|max:255',
             'location' => 'nullable|string',
@@ -226,65 +228,66 @@ class ShopController extends Controller implements HasMiddleware
             'longitude' => 'nullable|numeric',
         ]);
 
+        // 1. Format Dates and Meta
         $validated['expired_at'] = isset($validated['expired_at'])
             ? Carbon::parse($validated['expired_at'])->setTimezone('Asia/Bangkok')->startOfDay()->toDateString()
             : now()->addYears(2)->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
 
-
         $validated['updated_by'] = $request->user()->id;
 
-        if ($validated['owner_user_id'] != $shop->owner_user_id) {
-            User::where('id', $shop->owner_user_id)->update([
-                'shop_id' => null,
-            ]);
-        }
-
+        // 2. Process File Uploads FIRST
         $image_file = $request->file('logo');
         $banner_file = $request->file('banner');
-        unset($validated['logo']);
-        unset($validated['banner']);
+        unset($validated['logo'], $validated['banner']);
 
-        foreach ($validated as $key => $value) {
-            if ($value === '') {
-                $validated[$key] = null;
-            }
-        }
-
-        if ($image_file) {
-            try {
+        try {
+            if ($image_file) {
                 $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/shops', 600);
                 $validated['logo'] = $created_image_name;
-
                 if ($shop->logo && $created_image_name) {
                     ImageHelper::deleteImage($shop->logo, 'assets/images/shops');
                 }
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
             }
-        }
-        if ($banner_file) {
-            try {
-                $created_image_name = ImageHelper::uploadAndResizeImageWebp($banner_file, 'assets/images/shops', 1200);
-                $validated['banner'] = $created_image_name;
 
-                if ($shop->banner && $created_image_name) {
+            if ($banner_file) {
+                $created_banner_name = ImageHelper::uploadAndResizeImageWebp($banner_file, 'assets/images/shops', 1200);
+                $validated['banner'] = $created_banner_name;
+                if ($shop->banner && $created_banner_name) {
                     ImageHelper::deleteImage($shop->banner, 'assets/images/shops');
                 }
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
             }
+        } catch (\Exception $e) {
+            // If uploads fail here, we return early. No database records were harmed!
+            return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
         }
 
-        $updated_success = $shop->update($validated);
+        // 3. Execute ALL Database writes inside ONE Transaction
+        DB::transaction(function () use ($validated, $shop) {
+            $oldOwnerId = $shop->owner_user_id;
+            $newOwnerId = $validated['owner_user_id'];
 
-        if ($updated_success) {
-            $user = User::where('id', $validated['owner_user_id'])->where('shop_id', null)->first();
-            if ($user)
-                $user->update([
-                    'shop_id' => $shop->id,
+            $wasApproved = $shop->status === 'approved';
+            $isBecomingApproved = isset($validated['status']) && $validated['status'] === 'approved';
+
+            // A. Unlink the old owner if the owner is being changed
+            if ($oldOwnerId != $newOwnerId) {
+                User::where('id', $oldOwnerId)->update(['shop_id' => null]);
+            }
+
+            // B. Update the Shop with all validated data at once
+            $shop->update($validated);
+
+            // C. Link the new owner to this shop
+            // Using update() directly is safer and cleaner than querying first
+            User::where('id', $newOwnerId)->update(['shop_id' => $shop->id]);
+
+            // D. Update items to the NEW owner ID if it just became approved
+            if (!$wasApproved && $isBecomingApproved) {
+                Item::where('shop_id', $shop->id)->update([
+                    'user_id' => $newOwnerId
                 ]);
-        }
-
+            }
+        });
 
         return redirect()->back()->with('success', 'Shop updated successfully!');
     }
@@ -295,9 +298,20 @@ class ShopController extends Controller implements HasMiddleware
         $request->validate([
             'status' => 'required|string|in:pending,approved,suspended,rejected',
         ]);
-        $shop->update([
-            'status' => $request->status,
-        ]);
+
+        DB::transaction(function () use ($request, $shop) {
+
+            // Optional optimization: Only run the update if it wasn't ALREADY approved
+            if ($request->status === 'approved' && $shop->status !== 'approved') {
+                Item::where('shop_id', $shop->id)->update([
+                    'user_id' => $shop->owner_user_id
+                ]);
+            }
+
+            $shop->update([
+                'status' => $request->status,
+            ]);
+        });
 
         return redirect()->back()->with('success', 'Status updated successfully!');
     }

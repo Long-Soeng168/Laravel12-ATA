@@ -134,7 +134,7 @@ class ItemController extends Controller implements HasMiddleware
                 return redirect()->back()->with('error', 'Failed to upload images: ' . $e->getMessage());
             }
         }
-        
+
         return redirect()->back()->with('success', 'Item Created Successfully!.');
     }
 
