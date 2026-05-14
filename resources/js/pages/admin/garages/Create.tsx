@@ -348,7 +348,7 @@ export default function Create({ editData, readOnly }: { editData?: any; readOnl
                         height="300px"
                     />
 
-                    <FormField
+                    <FormFieldTextArea
                         id="address"
                         name="address"
                         label="Address"
