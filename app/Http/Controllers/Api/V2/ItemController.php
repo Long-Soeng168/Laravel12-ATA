@@ -59,23 +59,14 @@ class ItemController extends Controller
             $shop = Shop::find($request->shop_id);
             if ($shop) {
                 $query->where(function ($q) use ($shop) {
-                    $q->where('user_id', $shop->owner_user_id)
-                        ->orWhere('shop_id', $shop->id);
+                    $q->where('user_id', $shop->owner_user_id);
                 });
             } else {
                 $query->where('shop_id', $request->shop_id);
             }
         }
         if ($request->filled('user_id')) {
-            $user = User::find($request->user_id);
-            if ($user) {
-                $query->where(function ($q) use ($user) {
-                    $q->where('shop_id', $user->shop_id)
-                        ->orWhere('user_id', $user->id);
-                });
-            } else {
-                $query->where('user_id', $request->user_id);
-            }
+            $query->where('user_id', $request->user_id);
         }
 
         if ($request->filled('brand_code')) {
