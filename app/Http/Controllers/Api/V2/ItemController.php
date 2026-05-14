@@ -891,7 +891,7 @@ class ItemController extends Controller
         }
 
         // Use with('images') to prevent N+1 query problems when fetching paths
-        $item = Item::with('images')->find($id);
+        $item = Item::find($id);
 
         if (!$item) {
             return response()->json(['success' => false, 'message' => 'Item not found.'], 404);
@@ -904,14 +904,13 @@ class ItemController extends Controller
 
         // 2. Safe Deletion Process
         try {
-            // Don't delete the images as it just soft delete
+            // === Don't delete the images as it just soft delete ===
+
             // $imagePaths = $item->images->pluck('image')->toArray();
-
-            // DB::transaction(function () use ($item) {
-            //     $item->images()->delete();
-
-            //     $item->delete();
-            // });
+            DB::transaction(function () use ($item) {
+                // $item->images()->delete();
+                $item->delete();
+            });
 
             // foreach ($imagePaths as $path) {
             //     ImageHelper::deleteImage($path, 'assets/images/items');
