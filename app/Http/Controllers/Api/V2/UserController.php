@@ -262,7 +262,8 @@ class UserController extends Controller
                 if (!Hash::check($validated['current_password'], $user->password)) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Current password is incorrect.'
+                        'message' => 'The given data was invalid.',
+                        'errors'  => ['current_password' => ['Current password is incorrect.']]
                     ], 422);
                 }
                 // Hash and store new password
