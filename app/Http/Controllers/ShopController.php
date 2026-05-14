@@ -219,8 +219,8 @@ class ShopController extends Controller implements HasMiddleware
             'order_index' => 'nullable|numeric',
             'expired_at' => 'nullable|date',
             'status' => 'nullable|string|in:pending,approved,suspended,rejected',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048', // Removed duplicate webp
-            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048', // Removed duplicate webp
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
+            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
             'is_verified' => 'nullable|boolean',
             'address' => 'nullable|string|max:255',
             'location' => 'nullable|string',
@@ -257,7 +257,6 @@ class ShopController extends Controller implements HasMiddleware
                 }
             }
         } catch (\Exception $e) {
-            // If uploads fail here, we return early. No database records were harmed!
             return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
         }
 
@@ -269,24 +268,37 @@ class ShopController extends Controller implements HasMiddleware
             $wasApproved = $shop->status === 'approved';
             $isBecomingApproved = isset($validated['status']) && $validated['status'] === 'approved';
 
-            // A. Unlink the old owner if the owner is being changed
+            // A. Handle Ownership Change
             if ($oldOwnerId != $newOwnerId) {
+                // Unlink the old owner
                 User::where('id', $oldOwnerId)->update(['shop_id' => null]);
-            }
 
-            // B. Update the Shop with all validated data at once
-            $shop->update($validated);
+                // Link the new owner
+                User::where('id', $newOwnerId)->update(['shop_id' => $shop->id]);
 
-            // C. Link the new owner to this shop
-            // Using update() directly is safer and cleaner than querying first
-            User::where('id', $newOwnerId)->update(['shop_id' => $shop->id]);
-
-            // D. Update items to the NEW owner ID if it just became approved
-            if (!$wasApproved && $isBecomingApproved) {
+                // Transfer ALL existing products in this shop to the new owner's user_id
                 Item::where('shop_id', $shop->id)->update([
                     'user_id' => $newOwnerId
                 ]);
+            } else {
+                Item::where('user_id', $shop->owner_user_id)
+                    ->whereNull('shop_id') // Safety check: Only grab items that don't have a shop yet
+                    ->update([
+                        'shop_id' => $shop->id
+                    ]);
             }
+
+            // B. Handle Shop Approval (scoop up floating items)
+            if (!$wasApproved && $isBecomingApproved) {
+                Item::where('user_id', $newOwnerId)
+                    ->whereNull('shop_id') // Only grab items that don't have a shop yet
+                    ->update([
+                        'shop_id' => $shop->id
+                    ]);
+            }
+
+            // C. Finally, update the Shop with all validated data
+            $shop->update($validated);
         });
 
         return redirect()->back()->with('success', 'Shop updated successfully!');
@@ -303,9 +315,11 @@ class ShopController extends Controller implements HasMiddleware
 
             // Optional optimization: Only run the update if it wasn't ALREADY approved
             if ($request->status === 'approved' && $shop->status !== 'approved') {
-                Item::where('shop_id', $shop->id)->update([
-                    'user_id' => $shop->owner_user_id
-                ]);
+                Item::where('user_id', $shop->owner_user_id)
+                    ->whereNull('shop_id') // Safety check: Only grab items that don't have a shop yet
+                    ->update([
+                        'shop_id' => $shop->id
+                    ]);
             }
 
             $shop->update([
