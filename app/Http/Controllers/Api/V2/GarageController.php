@@ -365,6 +365,10 @@ class GarageController extends Controller
 
         $validated = $validator->validated();
 
+        if (!$request->has('other_phones')) {
+            $validated['other_phones'] = null; // Note: Change to [] if your DB column requires an array instead of null
+        }
+
         // 6. Database Transaction with Try/Catch
         try {
             return DB::transaction(function () use ($request, $validated, $garage, $user) {

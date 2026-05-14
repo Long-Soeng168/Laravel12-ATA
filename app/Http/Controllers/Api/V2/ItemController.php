@@ -842,7 +842,7 @@ class ItemController extends Controller
                 // --- HANDLE NEW IMAGES ---
                 if ($request->hasFile('images')) {
                     foreach ($request->file('images') as $image) {
-                        $filename = \App\Helpers\ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/items', 800);
+                        $filename = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/items', 800);
                         ItemImage::create([
                             'item_id' => $item->id,
                             'image' => $filename,

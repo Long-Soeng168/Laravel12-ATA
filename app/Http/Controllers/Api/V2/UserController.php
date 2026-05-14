@@ -249,6 +249,10 @@ class UserController extends Controller
         // Extract the validated data (This was missing in your original code)
         $validated = $validator->validated();
 
+        if (!$request->has('other_phones')) {
+            $validated['other_phones'] = null; // Note: Change to [] if your DB column requires an array instead of null
+        }
+
         try {
             $validated['updated_by'] = $user->id;
 
