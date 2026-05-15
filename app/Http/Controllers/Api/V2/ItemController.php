@@ -9,6 +9,7 @@ use App\Models\ItemBodyType;
 use App\Models\ItemBrand;
 use App\Models\ItemCategory;
 use App\Models\ItemCategoryField;
+use App\Models\ItemDailyView;
 use App\Models\ItemImage;
 use App\Models\Shop;
 use App\Models\User;
@@ -347,6 +348,7 @@ class ItemController extends Controller
 
         $item = Item::with(['images', 'brand', 'model', 'body_type', 'shop', 'owner', 'category.fields.options'])->findOrFail($id);
 
+
         if ($request->is_owner == 1) {
             //  No Implement Cach is is_owner == 1
             // $responseData = [
@@ -356,6 +358,12 @@ class ItemController extends Controller
 
             // return response()->json($responseData, 500);
         } else {
+            $date = now()->toDateString();
+            $view = ItemDailyView::firstOrCreate(
+                ['item_id' => $id, 'view_date' => $date],
+                ['view_counts' => 0],
+            );
+            $view->increment('view_counts');
             $item->increment('total_view_counts');
         }
 
