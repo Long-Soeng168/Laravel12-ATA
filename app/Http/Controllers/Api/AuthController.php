@@ -140,11 +140,6 @@ class AuthController extends Controller
                 ], 422);
             }
 
-            // Delete user image if exists
-            if ($user->image) {
-                ImageHelper::deleteImage($user->image, 'assets/images/users');
-            }
-
             // Finally delete the user
             $user->delete();
 
