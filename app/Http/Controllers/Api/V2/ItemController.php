@@ -11,6 +11,7 @@ use App\Models\ItemCategory;
 use App\Models\ItemCategoryField;
 use App\Models\ItemDailyView;
 use App\Models\ItemImage;
+use App\Models\Province;
 use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -303,7 +304,7 @@ class ItemController extends Controller
                         $item->brand_ids = $item->brands->pluck('id')->toArray();
                         return $item;
                     }),
-
+                'provinces' => Province::orderBy('order_index')->orderBy('name_kh')->get(),
                 'itemBrands' => ItemBrand::where('status', 'active')
                     ->orderBy('order_index')
                     ->orderBy('name')
