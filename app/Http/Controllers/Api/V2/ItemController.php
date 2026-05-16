@@ -294,6 +294,7 @@ class ItemController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
+                'provinces' => Province::orderBy('order_index')->orderBy('name_kh')->get(),
                 'itemCategories' => ItemCategory::where('status', 'active')
                     ->with(['fields.options', 'brands'])
                     ->orderBy('order_index')
@@ -304,7 +305,6 @@ class ItemController extends Controller
                         $item->brand_ids = $item->brands->pluck('id')->toArray();
                         return $item;
                     }),
-                'provinces' => Province::orderBy('order_index')->orderBy('name_kh')->get(),
                 'itemBrands' => ItemBrand::where('status', 'active')
                     ->orderBy('order_index')
                     ->orderBy('name')
