@@ -348,7 +348,6 @@ class ItemController extends Controller
             ->get()
             ->map(function ($item) {
                 $item->image_url = $item->image ? asset('assets/images/item_categories/thumb/' . $item->image) : null;
-                $item->brand_ids = $item->brands->pluck('id')->toArray();
                 return $item;
             });
         return response()->json($itemCategories);
