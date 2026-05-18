@@ -76,6 +76,7 @@ Route::prefix('v2')->group(function () {
     Route::get('/items/{id}/related', [ItemController::class, 'related_items']);
 
     Route::get('/items-form-data', [ItemController::class, 'form_data']);
+    Route::get('/items-categories', [ItemController::class, 'item_categories']);
 
 
     // Specific Actions

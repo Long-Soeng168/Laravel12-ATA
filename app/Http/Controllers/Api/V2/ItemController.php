@@ -340,6 +340,19 @@ class ItemController extends Controller
             ]
         ]);
     }
+    public function item_categories()
+    {
+        $itemCategories = ItemCategory::where('status', 'active')
+            ->orderBy('order_index')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($item) {
+                $item->image_url = $item->image ? asset('assets/images/item_categories/thumb/' . $item->image) : null;
+                $item->brand_ids = $item->brands->pluck('id')->toArray();
+                return $item;
+            });
+        return response()->json($itemCategories);
+    }
 
     /**
      * SHOW ITEM (Formatted for Mobile)
