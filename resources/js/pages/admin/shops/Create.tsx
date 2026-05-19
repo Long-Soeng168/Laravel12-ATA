@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import MultipleSelector, { Option } from '@/components/ui/multiple-selector';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ProgressWithValue } from '@/components/ui/progress-with-value';
 import { Switch } from '@/components/ui/switch';
@@ -36,8 +37,8 @@ export default function Create({
     readOnly?: boolean;
     setIsOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-    const { t } = useTranslation();
-    const { all_users } = usePage<any>().props;
+    const { t, currentLocale } = useTranslation();
+    const { all_users, provinces, categories } = usePage<any>().props;
 
     const [files, setFiles] = useState<File[] | null>(null);
     const [filesBanner, setFilesBanner] = useState<File[] | null>(null);
@@ -55,11 +56,36 @@ export default function Create({
         logo: null as any,
         banner: null as any,
         expired_at: editData?.expired_at ? new Date(editData?.expired_at) : new Date(new Date().setFullYear(new Date().getFullYear() + 2)),
+        province_code: editData?.province_code?.toString() || '',
         location: editData?.location || '',
         latitude: editData?.latitude ?? null,
         longitude: editData?.longitude ?? null,
         is_verified: editData?.is_verified === 1 || editData?.is_verified === true || false,
+        category_codes: editData?.categories?.map((cat: any) => cat.code) || [],
     });
+
+    // 1. Format options for the selector
+    const categoryOptions: Option[] = categories.map((cat: any) => ({
+        label: currentLocale === 'kh' ? cat.name_kh : cat.name,
+        value: cat.code, // Use code as value
+    }));
+
+    // 2. Format initial selected options for UI state
+    const [selectedCategories, setSelectedCategories] = useState<Option[]>(
+        editData?.categories?.map((cat: any) => ({
+            label: currentLocale === 'kh' ? cat.name_kh : cat.name,
+            value: cat.code,
+        })) || [],
+    );
+
+    // 3. Update handler (Syncs UI state with Inertia data)
+    const handleCategoryChange = (selected: Option[]) => {
+        setSelectedCategories(selected);
+        setData(
+            'category_codes',
+            selected.map((item) => item.value),
+        );
+    };
 
     // Add Other Phones Logic
     const addOtherPhone = () => setData('other_phones', [...data.other_phones, '']);
@@ -247,16 +273,6 @@ export default function Create({
                         </div>
                     </div>
 
-                    <FormField
-                        id="order_index"
-                        name="order_index"
-                        label={t('Order Index')}
-                        value={data.order_index}
-                        onChange={(val) => setData('order_index', val)}
-                        error={errors.order_index}
-                        placeholder="ex: 1"
-                        description={t('Lower number is priority')}
-                    />
                     <div className="md:col-span-2">
                         <FormLabel id="short_description" label={t('Short Description')} />
                         <AutosizeTextarea
@@ -307,7 +323,43 @@ export default function Create({
                         </div>
                     </div>
                 </div>
-
+                {/* Categories Selection */}
+                <div className="space-y-2 md:col-span-2">
+                    <FormLabel id="categories" label={t('Categories')} />
+                    <MultipleSelector
+                        className="bg-background"
+                        value={selectedCategories}
+                        onChange={handleCategoryChange}
+                        defaultOptions={categoryOptions}
+                        placeholder={t('Select categories...')}
+                        emptyIndicator={<p className="text-center text-sm leading-10 text-gray-600 dark:text-gray-400">{t('No results found.')}</p>}
+                    />
+                    <FormErrorLabel error={errors.category_codes} />
+                </div>
+                <div className="form-field-container">
+                    {provinces?.length > 0 && (
+                        <FormCombobox
+                            name="province_code"
+                            label="Province"
+                            options={provinces.map((p: any) => ({
+                                value: p.code,
+                                label: currentLocale === 'kh' ? p.name_kh : p.name_en || p.name,
+                            }))}
+                            value={data.province_code || ''}
+                            onChange={(val) => setData('province_code', val)}
+                            error={errors.province_code}
+                        />
+                    )}
+                    <FormField
+                        id="order_index"
+                        name="order_index"
+                        type="number"
+                        label="Order Index"
+                        value={data.order_index}
+                        onChange={(val) => setData('order_index', val)}
+                        error={errors.order_index}
+                    />
+                </div>
                 {/* Location Section */}
                 <div className="space-y-4">
                     <LocationPicker

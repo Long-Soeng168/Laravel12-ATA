@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ImageHelper;
 use App\Models\Item;
+use App\Models\ItemCategory;
+use App\Models\Province;
 use App\Models\Shop;
 use App\Models\User;
 use Carbon\Carbon;
@@ -81,9 +83,13 @@ class ShopController extends Controller implements HasMiddleware
         // return ($all_users);
         // return $shop->load('owner');
         return Inertia::render('admin/shops/Create', [
-            'editData' => $shop->load('owner'),
+            'editData' => $shop->load('owner', 'categories'),
             'all_users' => $all_users,
             'readOnly' => true,
+            'provinces' => Province::orderBy('order_index')
+                ->orderBy('name')
+                ->get(),
+            'categories' => ItemCategory::orderByDesc('order_index')->orderBy('name')->get(),
         ]);
     }
     public function edit(Shop $shop)
@@ -93,8 +99,12 @@ class ShopController extends Controller implements HasMiddleware
                 ->orWhere('shop_id', $shop->id);
         })->orderByDesc('id')->get();
         return Inertia::render('admin/shops/Create', [
-            'editData' => $shop->load('owner'),
+            'editData' => $shop->load('owner', 'categories'),
             'all_users' => $all_users,
+            'provinces' => Province::orderBy('order_index')
+                ->orderBy('name')
+                ->get(),
+            'categories' => ItemCategory::orderByDesc('order_index')->orderBy('name')->get(),
         ]);
     }
 
@@ -106,6 +116,10 @@ class ShopController extends Controller implements HasMiddleware
         // return ($all_users);
         return Inertia::render('admin/shops/Create', [
             'all_users' => $all_users,
+            'provinces' => Province::orderBy('order_index')
+                ->orderBy('name')
+                ->get(),
+            'categories' => ItemCategory::orderByDesc('order_index')->orderBy('name')->get(),
         ]);
     }
 
@@ -133,10 +147,13 @@ class ShopController extends Controller implements HasMiddleware
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
             'is_verified' => 'nullable|boolean',
+            'province_code' => ['required', 'string', 'exists:provinces,code'],
             'address' => 'nullable|string|max:255',
             'location' => 'nullable|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
+            'category_codes' => ['required', 'array', 'min:1'],
+            'category_codes.*' => ['required', 'string', 'exists:item_categories,code'],
         ]);
 
         $validated['expired_at'] = isset($validated['expired_at'])
@@ -185,8 +202,12 @@ class ShopController extends Controller implements HasMiddleware
                 return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
             }
         }
+        $categoryCodes = $request->input('category_codes', []);
+        unset($validated['category_codes']);
 
         $shop = Shop::create($validated);
+
+        $shop->categories()->sync($categoryCodes);
 
         if ($shop) {
             $user = User::where('id', $validated['owner_user_id'])->where('shop_id', null)->first();
@@ -222,10 +243,13 @@ class ShopController extends Controller implements HasMiddleware
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
             'is_verified' => 'nullable|boolean',
+            'province_code' => ['required', 'string', 'exists:provinces,code'],
             'address' => 'nullable|string|max:255',
             'location' => 'nullable|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
+            'category_codes' => ['sometimes', 'required', 'array'],
+            'category_codes.*' => ['string', 'exists:item_categories,code'],
         ]);
 
         // 1. Format Dates and Meta
@@ -261,7 +285,7 @@ class ShopController extends Controller implements HasMiddleware
         }
 
         // 3. Execute ALL Database writes inside ONE Transaction
-        DB::transaction(function () use ($validated, $shop) {
+        DB::transaction(function () use ($validated, $shop, $request) {
             $oldOwnerId = $shop->owner_user_id;
             $newOwnerId = $validated['owner_user_id'];
 
@@ -293,8 +317,12 @@ class ShopController extends Controller implements HasMiddleware
                     ]);
             }
 
-            // C. Finally, update the Shop with all validated data
+            $categoryCodes = $request->input('category_codes', []);
+            unset($validated['category_codes']);
+
             $shop->update($validated);
+
+            $shop->categories()->sync($categoryCodes);
         });
 
         return redirect()->back()->with('success', 'Shop updated successfully!');
