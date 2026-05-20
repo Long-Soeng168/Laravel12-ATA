@@ -46,7 +46,7 @@ class ShopController extends Controller
     {
         // 1. Find the specific shop by ID and eager load categories 
         // (Add 'other_phones' to the array if it's a separate related table instead of a JSON column)
-        $shop = Shop::with(['categories'])->find($id);
+        $shop = Shop::with(['categories', 'province'])->find($id);
 
         // 2. Handle 404 if the shop doesn't exist
         if (!$shop) {
@@ -60,8 +60,10 @@ class ShopController extends Controller
         $shop->logo_url = $shop->logo ? asset('assets/images/shops/' . $shop->logo) : null;
         $shop->banner_url = $shop->banner ? asset('assets/images/shops/' . $shop->banner) : null;
 
-        // Note: $shop->province_code will be automatically included if it's a column on the shops table.
-        // The eager-loaded 'categories' will automatically be serialized as an array of objects.
+        $shop->categories->map(function ($category) {
+            $category->image_url = $category->image ? asset('assets/images/item_categories/thumb/' . $category->image) : null;
+            return $category;
+        });
 
         // 4. Return standardized response matching your Flutter logic
         return response()->json([
