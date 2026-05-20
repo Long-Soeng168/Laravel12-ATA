@@ -14,6 +14,7 @@ use App\Models\ItemImage;
 use App\Models\Province;
 use App\Models\Shop;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -27,6 +28,7 @@ class ItemController extends Controller
     public function index(Request $request)
     {
         if ($request->is_owner == 1) {
+            // Do later
             //  No Implement Cach if is_owner == 1
         }
         $query = Item::with(['category', 'brand', 'images']);
@@ -83,6 +85,50 @@ class ItemController extends Controller
             $query->where('body_type_code', $request->body_type_code);
         }
 
+        // Price Range Filters
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        // Discount Filter
+        if ($request->filled('is_discount')) {
+            if ($request->is_discount == '1') {
+                $query->whereNotNull('discount')->where('discount', '>', 0);
+            } elseif ($request->is_discount == '0') {
+                $query->where(function ($q) {
+                    $q->whereNull('discount')->orWhere('discount', 0);
+                });
+            }
+        }
+
+        // Free Delivery Filter
+        if ($request->filled('is_free_delivery')) {
+            $query->where('is_free_delivery', $request->is_free_delivery);
+        }
+
+        // Location / Province Filter (Assuming province_code is on the Shop relation)
+        if ($request->filled('province_code')) {
+            $query->where('province_code', $request->province_code);
+        }
+
+        // Date Added Filter
+        if ($request->filled('created_at')) {
+            $dateFilter = $request->created_at;
+            if ($dateFilter === 'today') {
+                $query->whereDate('created_at', Carbon::today());
+            } elseif ($dateFilter === 'last_7_days') {
+                $query->where('created_at', '>=', Carbon::now()->subDays(7));
+            } elseif ($dateFilter === 'last_15_days') {
+                $query->where('created_at', '>=', Carbon::now()->subDays(15));
+            } elseif ($dateFilter === 'last_30_days') {
+                $query->where('created_at', '>=', Carbon::now()->subDays(30));
+            }
+        }
+
         if ($request->filled('q')) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->q . '%')
@@ -91,7 +137,21 @@ class ItemController extends Controller
         }
 
         // 2. Paginate & Sort (Removed latest() to prevent conflicting with orderByDesc)
-        $items = $query->orderByDesc('id')->paginate(16);
+        if ($request->filled('sort')) {
+            $sort = $request->sort;
+            if ($sort === 'price_low_to_high') {
+                $query->orderBy('price', 'asc');
+            } elseif ($sort === 'price_high_to_low') {
+                $query->orderBy('price', 'desc');
+            } else {
+                $query->orderByDesc('id');
+            }
+        } else {
+            // Default sort
+            $query->orderByDesc('id');
+        }
+
+        $items = $query->paginate(16);
 
         // 3. Pre-fetch mappings for attributes (Optimized)
         // We get the IDs from the already eager-loaded categories instead of running a new query!
