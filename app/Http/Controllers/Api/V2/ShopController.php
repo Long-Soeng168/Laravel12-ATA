@@ -94,8 +94,8 @@ class ShopController extends Controller
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'province_code' => ['required', 'string', 'exists:provinces,code'],
-            'category_codes' => ['required', 'array', 'min:1'],
-            'category_codes.*' => ['required', 'string', 'exists:item_categories,code'],
+            'categories' => ['required', 'array', 'min:1'],
+            'categories.*' => ['required', 'string', 'exists:item_categories,code'],
         ]);
 
         if ($validator->fails()) {
@@ -143,8 +143,8 @@ class ShopController extends Controller
                 $validated['logo']   = ImageHelper::uploadAndResizeImageWebp($request->file('logo'), 'assets/images/shops', 600);
                 $validated['banner'] = ImageHelper::uploadAndResizeImageWebp($request->file('banner'), 'assets/images/shops', 1200);
 
-                $categoryCodes = $request->input('category_codes', []);
-                unset($validated['category_codes']);
+                $categoryCodes = $request->input('categories', []);
+                unset($validated['categories']);
 
                 $shop = Shop::create($validated);
 
@@ -215,8 +215,8 @@ class ShopController extends Controller
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'province_code' => ['required', 'string', 'exists:provinces,code'],
-            'category_codes' => ['sometimes', 'required', 'array'],
-            'category_codes.*' => ['string', 'exists:item_categories,code'],
+            'categories' => ['sometimes', 'required', 'array'],
+            'categories.*' => ['string', 'exists:item_categories,code'],
         ]);
 
         if ($validator->fails()) {
@@ -254,8 +254,8 @@ class ShopController extends Controller
                     unset($validated['banner']); // Prevent overwriting existing banner with null
                 }
 
-                $categoryCodes = $request->input('category_codes', []);
-                unset($validated['category_codes']);
+                $categoryCodes = $request->input('categories', []);
+                unset($validated['categories']);
 
                 $shop->update($validated);
 
