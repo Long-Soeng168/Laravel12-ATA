@@ -231,6 +231,7 @@ class UserController extends Controller
             ],
             'gender'           => 'nullable|string|in:male,female,other',
             'image'            => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048', // Removed duplicate webp
+            'province_code' => ['required', 'string', 'exists:provinces,code'],
             'address'          => 'nullable|string|max:255',
             'location'         => 'nullable|string',
             'latitude'         => 'nullable|numeric',

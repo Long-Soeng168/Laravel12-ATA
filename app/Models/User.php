@@ -43,6 +43,7 @@ class User extends Authenticatable
         'updated_by',
         'document_access_end_at',
         'is_verified',
+        'province_code',
     ];
 
     /**
