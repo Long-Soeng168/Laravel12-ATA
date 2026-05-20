@@ -14,9 +14,12 @@ class ShopController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->input('search');
         $query = Shop::query();
 
+        // FIELD: search (or q)
+        // TYPE: Free type (Text)
+        // OPTIONS: Any string typed by the user to search in name, address, or short_description
+        $search = $request->input('search') ?? $request->input('q');
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'LIKE', "%$search%")
@@ -25,9 +28,49 @@ class ShopController extends Controller
             });
         }
 
+        // FIELD: province_code
+        // TYPE: Exact Match (Text)
+        // OPTIONS: Dynamic codes from your provinces table (e.g., 'PP', 'SR')
+        if ($request->filled('province_code')) {
+            $query->where('province_code', $request->input('province_code'));
+        }
+
+        // FIELD: is_verified
+        // TYPE: Exact Match (Number)
+        // OPTIONS: '' (All Shops - ignores filter) or '1' (Verified Only)
+        if ($request->input('is_verified') == '1') {
+            $query->where('is_verified', 1);
+        }
+
+        // FIELD: category_code
+        // TYPE: Exact Match (Text)
+        // OPTIONS: Dynamic codes from your categories table
+        if ($request->filled('category_code')) {
+            $categoryCode = $request->input('category_code');
+
+            // Uses your belongsToMany 'categories' relationship
+            // and filters by the 'code' column on the ItemCategory model
+            $query->whereHas('categories', function ($q) use ($categoryCode) {
+                $q->where('code', $categoryCode);
+            });
+        }
+
+        // Always only show approved shops
         $query->where('status', 'approved');
-        $query->orderBy('order_index');
-        $query->orderBy('name');
+
+        // FIELD: sort
+        // TYPE: Exact Match (Text)
+        // OPTIONS: '' (Latest), 'name_asc' (Name: A-Z), 'name_desc' (Name: Z-A)
+        $sort = $request->input('sort');
+        if ($sort === 'name_asc') {
+            $query->orderBy('name', 'asc');
+        } elseif ($sort === 'name_desc') {
+            $query->orderBy('name', 'desc');
+        } else {
+            // Default Sort (Latest)
+            $query->orderBy('order_index', 'asc')
+                ->orderBy('created_at', 'desc');
+        }
 
         $shops = $query->paginate(20);
 
