@@ -44,19 +44,30 @@ class ShopController extends Controller
     }
     public function show(Request $request, string $id)
     {
-        // 1. Find the specific shop by ID and ensure it is approved
-        $shop = Shop::find($id);
+        // 1. Find the specific shop by ID and eager load categories 
+        // (Add 'other_phones' to the array if it's a separate related table instead of a JSON column)
+        $shop = Shop::with(['categories'])->find($id);
 
-        // 2. Handle 404 if the shop doesn't exist or isn't approved
+        // 2. Handle 404 if the shop doesn't exist
         if (!$shop) {
-            return response()->json(['message' => 'Shop not found'], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'Shop not found'
+            ], 404);
         }
 
-        // 3. Transform the single object (No need for transform() on a collection)
+        // 3. Transform the single object
         $shop->logo_url = $shop->logo ? asset('assets/images/shops/' . $shop->logo) : null;
         $shop->banner_url = $shop->banner ? asset('assets/images/shops/' . $shop->banner) : null;
 
-        return response()->json($shop);
+        // Note: $shop->province_code will be automatically included if it's a column on the shops table.
+        // The eager-loaded 'categories' will automatically be serialized as an array of objects.
+
+        // 4. Return standardized response matching your Flutter logic
+        return response()->json([
+            'success' => true,
+            'data'    => $shop
+        ]);
     }
 
 
@@ -82,6 +93,9 @@ class ShopController extends Controller
             'location' => 'nullable|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
+            'province_code' => ['required', 'string', 'exists:provinces,code'],
+            'category_codes' => ['required', 'array', 'min:1'],
+            'category_codes.*' => ['required', 'string', 'exists:item_categories,code'],
         ]);
 
         if ($validator->fails()) {
@@ -129,8 +143,12 @@ class ShopController extends Controller
                 $validated['logo']   = ImageHelper::uploadAndResizeImageWebp($request->file('logo'), 'assets/images/shops', 600);
                 $validated['banner'] = ImageHelper::uploadAndResizeImageWebp($request->file('banner'), 'assets/images/shops', 1200);
 
-                // Create the Shop
+                $categoryCodes = $request->input('category_codes', []);
+                unset($validated['category_codes']);
+
                 $shop = Shop::create($validated);
+
+                $shop->categories()->sync($categoryCodes);
 
                 // Update User
                 $user->update(['shop_id' => $shop->id]);
@@ -196,6 +214,9 @@ class ShopController extends Controller
             'location' => 'nullable|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
+            'province_code' => ['required', 'string', 'exists:provinces,code'],
+            'category_codes' => ['sometimes', 'required', 'array'],
+            'category_codes.*' => ['string', 'exists:item_categories,code'],
         ]);
 
         if ($validator->fails()) {
@@ -233,8 +254,12 @@ class ShopController extends Controller
                     unset($validated['banner']); // Prevent overwriting existing banner with null
                 }
 
-                // Update the existing Shop model
+                $categoryCodes = $request->input('category_codes', []);
+                unset($validated['category_codes']);
+
                 $shop->update($validated);
+
+                $shop->categories()->sync($categoryCodes);
 
                 return response()->json([
                     'success' => true,
