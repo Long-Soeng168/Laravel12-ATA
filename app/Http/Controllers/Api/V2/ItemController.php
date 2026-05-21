@@ -718,7 +718,7 @@ class ItemController extends Controller
                 },
             ],
             'discount_type' => 'nullable|in:percentage,amount|required_with:discount',
-            'province_code' => ['required', 'string', 'exists:provinces,code'],
+            'province_code' => ['nullable', 'string', 'exists:provinces,code'],
         ], $dynamicRules));
 
         if ($validator->fails()) {
@@ -871,7 +871,7 @@ class ItemController extends Controller
             // Images are NO LONGER strictly required here, because they might just be updating text
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
-            'province_code' => ['required', 'string', 'exists:provinces,code'],
+            'province_code' => ['nullable', 'string', 'exists:provinces,code'],
         ], $dynamicRules));
 
         if ($validator->fails()) {
