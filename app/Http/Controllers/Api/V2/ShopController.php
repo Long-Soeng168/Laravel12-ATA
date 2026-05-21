@@ -72,7 +72,7 @@ class ShopController extends Controller
                 ->orderBy('created_at', 'desc');
         }
 
-        $shops = $query->paginate(20);
+        $shops = $query->with('province')->paginate(20);
 
         // Transform the collection inside the paginator
         $shops->getCollection()->transform(function ($item) {
