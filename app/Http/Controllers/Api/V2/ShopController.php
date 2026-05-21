@@ -108,6 +108,8 @@ class ShopController extends Controller
             return $category;
         });
 
+        $shop->setAttribute('category_codes', $shop->categories->pluck('code')->toArray());
+
         // 4. Return standardized response matching your Flutter logic
         return response()->json([
             'success' => true,
