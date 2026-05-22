@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->string('province_code')->nullable()->after('location');
+            $table->foreign('province_code')
+                ->references('code')
+                ->on('provinces')
+                ->onUpdate('cascade')
+                ->onDelete('restrict');
         });
     }
 
@@ -22,6 +27,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign(['province_code']);
             $table->dropColumn('province_code');
         });
     }
