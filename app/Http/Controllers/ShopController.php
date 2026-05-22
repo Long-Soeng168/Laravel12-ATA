@@ -248,7 +248,7 @@ class ShopController extends Controller implements HasMiddleware
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'province_code' => ['required', 'string', 'exists:provinces,code'],
-            'category_codes' => ['nullable', 'required', 'array'],
+            'category_codes' => ['nullable', 'array'],
             'category_codes.*' => ['nullable', 'string', 'exists:item_categories,code'],
         ]);
 
