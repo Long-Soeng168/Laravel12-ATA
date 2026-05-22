@@ -141,8 +141,8 @@ class ShopController extends Controller
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'province_code' => ['required', 'string', 'exists:provinces,code'],
-            'categories' => ['required', 'array', 'min:1'],
-            'categories.*' => ['required', 'string', 'exists:item_categories,code'],
+            'categories' => ['nullable', 'array', 'min:1'],
+            'categories.*' => ['nullable', 'string', 'exists:item_categories,code'],
         ]);
 
         if ($validator->fails()) {
@@ -262,8 +262,8 @@ class ShopController extends Controller
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'province_code' => ['required', 'string', 'exists:provinces,code'],
-            'categories' => ['sometimes', 'required', 'array'],
-            'categories.*' => ['string', 'exists:item_categories,code'],
+            'categories' => ['nullable', 'required', 'array'],
+            'categories.*' => ['nullable', 'string', 'exists:item_categories,code'],
         ]);
 
         if ($validator->fails()) {

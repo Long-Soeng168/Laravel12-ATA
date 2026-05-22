@@ -152,8 +152,8 @@ class ShopController extends Controller implements HasMiddleware
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'province_code' => ['required', 'string', 'exists:provinces,code'],
-            'category_codes' => ['required', 'array', 'min:1'],
-            'category_codes.*' => ['required', 'string', 'exists:item_categories,code'],
+            'category_codes' => ['nullable', 'array', 'min:1'],
+            'category_codes.*' => ['nullable', 'string', 'exists:item_categories,code'],
         ]);
 
         $validated['expired_at'] = isset($validated['expired_at'])
@@ -248,8 +248,8 @@ class ShopController extends Controller implements HasMiddleware
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'province_code' => ['required', 'string', 'exists:provinces,code'],
-            'category_codes' => ['sometimes', 'required', 'array'],
-            'category_codes.*' => ['string', 'exists:item_categories,code'],
+            'category_codes' => ['nullable', 'required', 'array'],
+            'category_codes.*' => ['nullable', 'string', 'exists:item_categories,code'],
         ]);
 
         // 1. Format Dates and Meta
