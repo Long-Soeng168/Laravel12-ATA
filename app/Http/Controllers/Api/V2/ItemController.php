@@ -745,6 +745,15 @@ class ItemController extends Controller
 
                 $item = Item::create($validated);
 
+                // --- NEW LOGIC: Attach category to shop if it doesn't exist ---
+                if ($user->shop_id) {
+                    $shop = Shop::find($user->shop_id);
+
+                    if ($shop) {
+                        $shop->categories()->syncWithoutDetaching([$validated['category_code']]);
+                    }
+                }
+
                 if ($request->hasFile('images')) {
                     foreach ($request->file('images') as $image) {
                         // Using 800px resize per your updated logic
@@ -896,6 +905,15 @@ class ItemController extends Controller
 
                 // Update the core item record
                 $item->update($validated);
+
+                // --- NEW LOGIC: Attach category to shop if it doesn't exist ---
+                if ($user->shop_id) {
+                    $shop = Shop::find($user->shop_id);
+
+                    if ($shop) {
+                        $shop->categories()->syncWithoutDetaching([$validated['category_code']]);
+                    }
+                }
 
                 // --- HANDLE DELETED IMAGES ---
                 if ($request->has('deleted_image_ids') && is_array($request->deleted_image_ids)) {
