@@ -262,8 +262,8 @@ class ShopController extends Controller
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'province_code' => ['required', 'string', 'exists:provinces,code'],
-            'categories' => ['nullable', 'required', 'array'],
-            'categories.*' => ['nullable', 'string', 'exists:item_categories,code'],
+            'categories' => ['required', 'array'],
+            'categories.*' => ['required', 'string', 'exists:item_categories,code'],
         ]);
 
         if ($validator->fails()) {
@@ -287,20 +287,32 @@ class ShopController extends Controller
                 $validated['updated_by'] = $user->id;
 
                 // Process Images
-                if ($request->hasFile('logo')) {
-                    // Tip: Add logic here to delete $shop->logo from storage if it exists
-                    $validated['logo'] = ImageHelper::uploadAndResizeImageWebp($request->file('logo'), 'assets/images/shops', 600);
-                } else {
-                    unset($validated['logo']); // Prevent overwriting existing logo with null
+                $image_file = $request->file('logo');
+                $banner_file = $request->file('banner');
+                unset($validated['logo'], $validated['banner'], $validated['remove_banner']);
+
+                // FIX 3: Removed inner try/catch so errors bubble up
+                if ($image_file) {
+                    $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/shops', 600);
+                    $validated['logo'] = $created_image_name;
+                    if ($shop->logo && $created_image_name) {
+                        ImageHelper::deleteImage($shop->logo, 'assets/images/shops');
+                    }
                 }
 
-                if ($request->hasFile('banner')) {
-                    // Tip: Add logic here to delete $shop->banner from storage if it exists
-                    $validated['banner'] = ImageHelper::uploadAndResizeImageWebp($request->file('banner'), 'assets/images/shops', 1200);
-                } else {
-                    unset($validated['banner']); // Prevent overwriting existing banner with null
+                if ($banner_file) {
+                    $created_banner_name = ImageHelper::uploadAndResizeImageWebp($banner_file, 'assets/images/shops', 1200);
+                    $validated['banner'] = $created_banner_name;
+                    if ($shop->banner && $created_banner_name) {
+                        ImageHelper::deleteImage($shop->banner, 'assets/images/shops');
+                    }
+                } elseif ($request->input('remove_banner') == '1') {
+                    $validated['banner'] = null;
+                    if ($shop->banner) {
+                        ImageHelper::deleteImage($shop->banner, 'assets/images/shops');
+                    }
                 }
-
+                
                 $categoryCodes = $request->input('categories', []);
                 unset($validated['categories']);
 
