@@ -43,7 +43,7 @@ Route::get('/documents', [FrontPageController::class, 'documents']);
 Route::get('/garages_map', function () {
     $locationsData = Garage::get();
     // return $tableData;
-    return Inertia::render('nokor-texh/GaragesMap', [
+    return Inertia::render('frontpage/GaragesMap', [
         'locationsData' => $locationsData,
     ]);
 });

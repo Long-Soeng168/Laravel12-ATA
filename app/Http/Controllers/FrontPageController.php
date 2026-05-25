@@ -10,6 +10,7 @@ use App\Models\Item;
 use App\Models\ItemBodyType;
 use App\Models\ItemBrand;
 use App\Models\ItemCategory;
+use App\Models\ItemCategoryField;
 use App\Models\ItemDailyView;
 use App\Models\Page;
 use App\Models\Post;
@@ -29,14 +30,69 @@ class FrontPageController extends Controller
 
         $posts = Post::where('status', 'active')->with('images', 'category')->orderBy('id', 'desc')->limit(3)->get();
 
-        $products = Item::with('images', 'shop')
+        $products = Item::with(['images', 'shop', 'category'])
             ->where('status', 'active')
             ->inRandomOrder()
             ->take(12)
             ->get();
 
-        $newArrivalsProducts = Item::with('images', 'shop')->where('status', 'active')->orderBy('id', 'desc')->take(12)->get();
+        $newArrivalsProducts = Item::with(['images', 'shop', 'category'])
+            ->where('status', 'active')
+            ->orderBy('id', 'desc')
+            ->take(12)
+            ->get();
 
+        // Map Category Attributes based on API v2 Logic
+        $allItems = $products->merge($newArrivalsProducts);
+        $categoryIds = $allItems->pluck('category.id')->filter()->unique();
+
+        $categoryMaps = ItemCategoryField::whereIn('category_id', $categoryIds)
+            ->with('options')
+            ->get()
+            ->groupBy('category_id');
+
+        $transformItem = function ($item) use ($categoryMaps) {
+            $firstImage = $item->images->first();
+
+            $item->image_url = $firstImage
+                ? asset('assets/images/items/' . $firstImage->image)
+                : asset('assets/images/placeholder.webp');
+
+            $item->total_images = $item->images->count();
+
+            $item->thumbnail_image = $firstImage ? [
+                'id' => $firstImage->id,
+                'image' => $firstImage->image,
+                'image_url' => asset('assets/images/items/' . $firstImage->image),
+            ] : null;
+
+            $categoryId = $item->category?->id;
+            $fields = $categoryMaps->get($categoryId);
+            $displayAttributes = [];
+
+            if ($fields && is_array($item->attributes)) {
+                foreach ($item->attributes as $key => $storedValue) {
+                    $field = $fields->where('field_key', $key)->first();
+                    $option = $field ? $field->options->where('option_value', $storedValue)->first() : null;
+
+                    $displayAttributes[$key] = [
+                        'label' => $field->label ?? $key,
+                        'label_kh' => $field->label_kh ?? $key,
+                        'value' => $storedValue,
+                        'value_label_en' => $option->label_en ?? $storedValue,
+                        'value_label_kh' => $option->label_kh ?? $storedValue,
+                    ];
+                }
+            }
+
+            $item->display_attributes = $displayAttributes;
+            $item->makeHidden(['images', 'category']); // Clean up large nested relations
+
+            return $item;
+        };
+
+        $products->transform($transformItem);
+        $newArrivalsProducts->transform($transformItem);
 
         $shops = Shop::orderBy('order_index')->orderBy('id', 'desc')->limit(15)->get();
         return Inertia::render("frontpage/Index", [

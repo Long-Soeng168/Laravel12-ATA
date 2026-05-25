@@ -11,6 +11,7 @@ import FrontPageLayout from './layouts/frontpage-layout';
 
 const Index = () => {
     const { topBanners, middleBanners, posts, newArrivalsProducts, products, shops } = usePage<any>().props;
+    
     return (
         <FrontPageLayout>
             <Head>
@@ -21,50 +22,78 @@ const Index = () => {
                 />
             </Head>
 
-            <div className="mx-auto mb-10 max-w-[2000px]">
+            {/* Edge-to-edge top banner container for high-end immersion */}
+            <div className="mx-auto w-full max-w-[2000px] bg-zinc-50 dark:bg-zinc-950">
                 {topBanners?.length > 0 && <MySlide slides={topBanners} path="/assets/images/banners/thumb/" />}
             </div>
-            <main className="px-2">
-                <>
-                    <div className="mx-auto mb-10 max-w-screen-xl">
-                        {/* end slide */}
-                        <div className="mt-10 mb-4 space-y-4">{shops?.length > 0 && <MyShopList items={shops} />}</div>
 
-                        {products?.length > 0 ? (
-                            <>
-                                <MyProductListHeader title="Recomend Products" link="/products" />
-                                <MyProductList items={products} />
-                            </>
-                        ) : (
-                            <MyNoData />
-                        )}
-
-                        {middleBanners?.length > 0 && <MyMiddleSlide slides={middleBanners} path="/assets/images/banners/thumb/" />}
-
-                        {newArrivalsProducts?.length > 0 ? (
-                            <>
-                                <MyProductListHeader title="Latest Products" link="/products" />
-                                <MyProductList items={newArrivalsProducts} />
-                            </>
-                        ) : (
-                            <MyNoData />
-                        )}
-
-                        <div className="my-10 flex justify-center">
-                            <SeeMoreProducts />
+            <main className="flex flex-col gap-16 pb-24 pt-8 sm:gap-24 sm:pt-16">
+                
+                {/* Shops Section */}
+                <section className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+                    {shops?.length > 0 && (
+                        <div className="flex flex-col">
+                            <h2 className="mb-6 text-2xl font-bold tracking-tight text-zinc-900 dark:text-white sm:text-3xl">
+                                Trusted Partners
+                            </h2>
+                            <MyShopList items={shops} />
                         </div>
+                    )}
+                </section>
 
-                        {posts?.length > 0 && (
-                            <>
-                                <MyProductListHeader title="Blogs" />
-                                <MyBlogList posts={posts} />
-                            </>
-                        )}
+                {/* Recommended Products */}
+                <section className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+                    {products?.length > 0 ? (
+                        <div className="flex flex-col">
+                            <MyProductListHeader title="Recommended" link="/products" />
+                            <MyProductList items={products} />
+                        </div>
+                    ) : (
+                        <div className="flex flex-col">
+                            <MyProductListHeader title="Recommended" link="/products" />
+                            <MyNoData />
+                        </div>
+                    )}
+                </section>
 
-                        <div className="h-20"></div>
+                {/* Middle Slide Banner - Constrained to 7xl for editorial feel */}
+                {middleBanners?.length > 0 && (
+                    <section className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+                        <div className="overflow-hidden rounded-2xl shadow-xl ring-1 ring-black/5 dark:ring-white/5">
+                            <MyMiddleSlide slides={middleBanners} path="/assets/images/banners/thumb/" />
+                        </div>
+                    </section>
+                )}
+
+                {/* Latest Products */}
+                <section className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+                    {newArrivalsProducts?.length > 0 ? (
+                        <div className="flex flex-col">
+                            <MyProductListHeader title="New Arrivals" link="/products" />
+                            <MyProductList items={newArrivalsProducts} />
+                        </div>
+                    ) : (
+                        <div className="flex flex-col">
+                            <MyProductListHeader title="New Arrivals" link="/products" />
+                            <MyNoData />
+                        </div>
+                    )}
+                    
+                    <div className="mt-12 flex justify-center">
+                        <SeeMoreProducts />
                     </div>
-                    {/* <MyService /> */}
-                </>
+                </section>
+
+                {/* Blog Section */}
+                {posts?.length > 0 && (
+                    <section className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+                        <div className="flex flex-col">
+                            <MyProductListHeader title="Latest from Journal" link="/blogs" />
+                            <MyBlogList posts={posts} />
+                        </div>
+                    </section>
+                )}
+                
             </main>
         </FrontPageLayout>
     );

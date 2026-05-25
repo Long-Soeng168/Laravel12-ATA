@@ -37,123 +37,113 @@ const MyHeader = () => {
                 key={'link_key' + label + href}
                 prefetch
                 href={href}
-                className={`group relative mx-2 cursor-pointer ${isActive ? 'text-primary font-bold' : ''} hover:text-primary`}
+                className={`transition-colors duration-200 px-4 py-2 rounded-full text-sm font-medium ${
+                    isActive 
+                        ? 'bg-primary text-primary-foreground shadow-sm' 
+                        : 'text-foreground hover:bg-muted hover:text-primary'
+                }`}
             >
                 {label}
-                <span
-                    className={`bg-primary absolute -bottom-1 left-0 h-0.5 w-0 transition-all group-hover:w-full ${isActive ? 'w-full' : ''}`}
-                ></span>
             </Link>
         );
     };
 
     return (
         <>
-            {/* Top Bar */}
-            <nav className="bg-true-primary text-white">
-                <div className="mx-auto flex min-h-10 max-w-screen-xl flex-wrap items-center justify-between gap-y-2 px-4 py-2 text-sm">
-                    {application_info?.image && (
-                        <Link prefetch href="/" className="flex items-center gap-2">
-                            <img
-                                width={65}
-                                height={65}
-                                src={`/assets/images/application_info/thumb/${application_info.image}`}
-                                alt={`${application_info.name}'s logo`}
-                                className="size-12 rounded-full lg:size-16"
-                            />
-                            <span className="text-base font-bold lg:text-xl">{application_info.name}</span>
-                        </Link>
-                    )}
-                    <div className="hidden md:block lg:justify-self-center">
-                        <ul className="flex flex-col gap-1 text-white">
-                            <li className="flex">
-                                <span className="mr-2 font-semibold">Phone:</span>
-                                <a className="hover:underline" href={`tel:${application_info?.phone}`}>
-                                    {application_info?.phone}
-                                </a>
-                            </li>
-                            <li className="flex">
-                                <span className="mr-2 font-semibold">Address:</span>
-                                <a className="max-w-sm hover:underline" href={`mailto:${application_info?.email}`}>
-                                    {application_info?.address}
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div className="flex items-center gap-4 font-semibold">
-                        <Link prefetch href="/download-app" className="rainbow-button flex items-center gap-1 pr-4 pl-1 lg:gap-2 lg:text-lg">
-                            <img src="/assets/icons/phone-car.png" alt="Download App" className="aspect-square w-10 object-contain py-1 lg:w-12" />
-                            Download App
-                        </Link>
-                    </div>
-                </div>
-            </nav>
-
-            {/* Main Header */}
-            <div className="bg-background/50 sticky top-0 z-50 border-b border-white/20 backdrop-blur-md">
-                <header>
-                    <div className="mx-auto flex max-w-screen-xl items-center justify-between py-2 lg:py-4">
-                        {/* Mobile Menu */}
-                        <div className="flex items-center">
-                            <Sheet>
-                                <SheetTrigger>
-                                    <Menu className="text-primary mx-4 size-8 lg:hidden" />
-                                </SheetTrigger>
-                                <SheetContent side="left" className="w-64 bg-gray-100 p-6 shadow-md">
-                                    <SheetHeader>
-                                        <SheetTitle className="text-2xl font-bold text-gray-700">Menu</SheetTitle>
-                                    </SheetHeader>
-                                    <ul className="flex flex-col gap-6 font-semibold text-gray-600">
-                                        <hr />
-                                        {navItems.map(renderNavLink)}
-                                    </ul>
-                                </SheetContent>
-                            </Sheet>
-                        </div>
-
-                        {/* Desktop Nav */}
-                        <div className="hidden flex-1 pl-2 lg:flex">
-                            <ul className="flex items-center gap-2 font-semibold">
-                                {/* {item_categories?.length > 0 && (
-                                    <li>
-                                        <MyCategoriesNav />
-                                    </li>
-                                )} */}
-                                <li className="border-primary/5 bg-primary/50 h-6 border" />
-                                {navItems.map(renderNavLink)}
-                            </ul>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex shrink-0 items-center gap-4 px-4">
+            {/* Top Heading */}
+            <div className="bg-background text-foreground border-b border-border/40 pb-3 pt-4">
+                <div className="mx-auto flex flex-col md:flex-row max-w-screen-xl items-center justify-between px-4 gap-4">
+                    {/* Logo & Mobile Menu */}
+                    <div className="flex w-full md:w-auto items-center justify-between md:justify-start gap-4">
+                        <div className="flex items-center gap-3">
                             <Sheet>
                                 <SheetTrigger asChild>
-                                    <Button size="icon" variant="ghost" className="text-primary">
-                                        <Search className="size-6" />
+                                    <Button variant="ghost" size="icon" className="lg:hidden text-foreground">
+                                        <Menu className="size-6" />
                                     </Button>
                                 </SheetTrigger>
-                                <SheetContent side="top" className="w-full p-6 shadow-md">
+                                <SheetContent side="left" className="w-72 bg-background/95 backdrop-blur-lg border-r border-border/50 p-6 shadow-2xl">
                                     <SheetHeader>
-                                        <SheetTitle>Search Products</SheetTitle>
+                                        <SheetTitle className="text-2xl font-bold tracking-tight text-left">Menu</SheetTitle>
                                     </SheetHeader>
-                                    <MySearchProducts className="border-primary mx-auto max-w-full" />
+                                    <div className="flex flex-col gap-2 mt-8">
+                                        {navItems.map(renderNavLink)}
+                                    </div>
+                                    <div className="mt-8 pt-6 border-t border-border/50 flex flex-col gap-4">
+                                        <MySelectLanguageSwitch />
+                                        <ToggleModeSwitch />
+                                    </div>
                                 </SheetContent>
                             </Sheet>
+
+                            {application_info?.image && (
+                                <Link prefetch href="/" className="flex items-center gap-3 transition-transform hover:scale-105">
+                                    <img
+                                        width={45}
+                                        height={45}
+                                        src={`/assets/images/application_info/thumb/${application_info.image}`}
+                                        alt={`${application_info.name}'s logo`}
+                                        className="size-10 lg:size-12 rounded-xl shadow-sm border border-border/50 bg-white"
+                                    />
+                                    <span className="text-xl lg:text-2xl font-bold tracking-tight">{application_info.name}</span>
+                                </Link>
+                            )}
+                        </div>
+                        
+                        {/* Mobile Actions */}
+                        <div className="flex md:hidden items-center gap-2">
+                            <Link prefetch href="/download-app" className="flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/30 hover:shadow-primary/50 px-3.5 py-1.5 rounded-full font-bold text-xs transition-all hover:scale-105 active:scale-95 border border-primary/20 dark:border-primary-foreground/10">
+                                <img src="/assets/icons/phone-car.png" alt="Download App" className="w-3.5 h-3.5 object-contain" />
+                                <span>GET APP</span>
+                            </Link>
+
                             {auth?.user ? (
                                 <Link prefetch href={hasRole('User') || hasRole('Garage') || hasRole('Shop') ? '/user-dashboard' : '/dashboard'}>
-                                    <Avatar className="h-8 w-8 overflow-hidden rounded-full">
+                                    <Avatar className="h-8 w-8 overflow-hidden rounded-full border border-border/50 shadow-sm">
                                         <AvatarImage src={`/assets/images/users/thumb/${auth?.user?.image}`} alt={auth?.user?.name} />
-
-                                        <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                        <AvatarFallback className="bg-primary/10 text-primary font-medium">
                                             {getInitials(auth?.user?.name)}
                                         </AvatarFallback>
                                     </Avatar>
                                 </Link>
                             ) : (
                                 <Link prefetch href="/login">
-                                    <Button size="icon" variant="outline" className="text-primary">
-                                        {/* <User2Icon /> */}
-                                        <UserIconAnimated stroke="#0471c1" />
+                                    <Button size="icon" variant="outline" className="rounded-full bg-background/50 border-border/50 hover:bg-muted">
+                                        <UserIconAnimated stroke="currentColor" className="size-4" />
+                                    </Button>
+                                </Link>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Search Bar - Center */}
+                    <div className="w-full md:flex-1 md:max-w-md lg:max-w-xl mx-auto px-2">
+                        <div className="relative w-full">
+                            <MySearchProducts className="w-full" />
+                        </div>
+                    </div>
+
+                    {/* Right Actions */}
+                    <div className="hidden md:flex items-center gap-3 shrink-0">
+                        <Link prefetch href="/download-app" className="group flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 hover:shadow-primary/50 px-5 py-2.5 rounded-full font-bold text-sm transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 border border-primary/20 dark:border-primary-foreground/10">
+                            <img src="/assets/icons/phone-car.png" alt="Download App" className="w-4 h-4 object-contain transition-transform duration-300 group-hover:-rotate-12" />
+                            <span>GET APP</span>
+                        </Link>
+                        
+                        <div className="flex items-center gap-2 pl-4 ml-1 border-l border-border/50">
+                            {auth?.user ? (
+                                <Link prefetch href={hasRole('User') || hasRole('Garage') || hasRole('Shop') ? '/user-dashboard' : '/dashboard'}>
+                                    <Avatar className="h-9 w-9 overflow-hidden rounded-full border border-border/50 shadow-sm transition-transform hover:scale-105">
+                                        <AvatarImage src={`/assets/images/users/thumb/${auth?.user?.image}`} alt={auth?.user?.name} />
+                                        <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                                            {getInitials(auth?.user?.name)}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                </Link>
+                            ) : (
+                                <Link prefetch href="/login">
+                                    <Button size="icon" variant="outline" className="rounded-full bg-background/50 border-border/50 hover:bg-muted">
+                                        <UserIconAnimated stroke="currentColor" className="size-4" />
                                     </Button>
                                 </Link>
                             )}
@@ -161,7 +151,16 @@ const MyHeader = () => {
                             <ToggleModeSwitch />
                         </div>
                     </div>
-                </header>
+                </div>
+            </div>
+
+            {/* Main Sticky Navigation */}
+            <div className="bg-background/80 sticky top-0 z-50 border-b border-border/40 backdrop-blur-xl shadow-sm hidden lg:block">
+                <nav className="mx-auto flex max-w-screen-xl items-center py-2 px-4">
+                    <ul className="flex items-center gap-2 -ml-2">
+                        {navItems.map(renderNavLink)}
+                    </ul>
+                </nav>
             </div>
         </>
     );
