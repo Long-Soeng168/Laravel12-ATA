@@ -11,7 +11,6 @@ use App\Models\ItemBodyType;
 use App\Models\ItemBrand;
 use App\Models\ItemCategory;
 use App\Models\ItemDailyView;
-use App\Models\Link;
 use App\Models\Page;
 use App\Models\Post;
 use App\Models\PostCategory;
@@ -21,7 +20,7 @@ use App\Models\VideoPlayList;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class NokorTechController extends Controller
+class FrontPageController extends Controller
 {
     public function index()
     {
@@ -29,56 +28,6 @@ class NokorTechController extends Controller
         $middleBanners = Banner::where('position_code', 'HOME-16/9')->orderBy('order_index')->where('status', 'active')->get();
 
         $posts = Post::where('status', 'active')->with('images', 'category')->orderBy('id', 'desc')->limit(3)->get();
-
-
-        // $newArrivals = Item::with('images', 'shop')->where('status', 'active')->orderBy('id', 'desc')->take(12)->get();
-        // $bodyTypes = ItemBodyType::orderBy('order_index')->orderBy('name')
-        //     ->orderBy('name')
-        //     ->where('status', 'active')
-        //     ->get();
-
-        // $brandsWithItems = ItemBrand::with([
-        //     'items' => function ($query) {
-        //         $query->with('images', 'shop')
-        //             ->where('items.status', 'active') // Specify 'items' table for status
-        //             ->orderBy('id', 'desc')
-        //             ->take(12); // Limit to 12 items
-        //     },
-        // ])
-        //     ->orderBy('order_index')->orderBy('name')
-        //     ->where('item_brands.status', 'active') // Specify 'item_categories' table for status
-        //     ->get();
-
-
-        // $categoriesWithItems = ItemCategory::with([
-        //     'items' => function ($query) {
-        //         $query->with('images', 'shop')
-        //             ->where('items.status', 'active') // Specify 'items' table for status
-        //             ->orderBy('id', 'desc')
-        //             ->take(12); // Limit to 12 items
-        //     },
-        //     'children_items' => function ($query) {
-        //         $query->with('images',  'shop')
-        //             ->where('items.status', 'active') // Specify 'items' table for status
-        //             ->orderBy('id', 'desc')
-        //             ->take(12); // Limit to 12 child items
-        //     }
-        // ])
-        //     ->orderBy('order_index')->orderBy('name')
-        //     ->where('item_categories.status', 'active') // Specify 'item_categories' table for status
-        //     ->whereNull('parent_code') // Only main categories (no parent)
-        //     ->get();
-
-        // $categoriesWithItems->each(function ($category) {
-        //     $category->all_items = $category->items->merge($category->children_items)
-        //         ->sortByDesc('id') // Sort by item ID
-        //         ->take(12) // Limit to 12 items
-        //         ->values(); // Reset the keys to be sequential
-
-        //     unset($category->children_items);
-        //     unset($category->items);
-        // });
-
 
         $products = Item::with('images', 'shop')
             ->where('status', 'active')
@@ -90,18 +39,12 @@ class NokorTechController extends Controller
 
 
         $shops = Shop::orderBy('order_index')->orderBy('id', 'desc')->limit(15)->get();
-        // return $shops;
-        // return $brandsWithItems;
-        return Inertia::render("nokor-tech/Index", [
+        return Inertia::render("frontpage/Index", [
             'topBanners' => $topBanners,
             'middleBanners' => $middleBanners,
             'posts' => $posts,
             'products' => $products,
             'newArrivalsProducts' => $newArrivalsProducts,
-            // 'newArrivals' => $newArrivals,
-            // 'categoriesWithItems' => $categoriesWithItems,
-            // 'brandsWithItems' => $brandsWithItems,
-            // 'bodyTypes' => $bodyTypes,
             'shops' => $shops,
         ]);
     }
@@ -135,7 +78,7 @@ class NokorTechController extends Controller
         $tableData = $query->paginate(perPage: $perPage)->onEachSide(1);
 
         // return $tableData;
-        return Inertia::render('nokor-tech/shops/Index', [
+        return Inertia::render('frontpage/shops/Index', [
             'tableData' => $tableData,
         ]);
     }
@@ -171,7 +114,7 @@ class NokorTechController extends Controller
         $provinces = Province::orderBy('order_index')->withCount('garages')->orderBy('name')->get();
 
         // return $provinces;
-        return Inertia::render('nokor-tech/garages/Index', [
+        return Inertia::render('frontpage/garages/Index', [
             'tableData' => $tableData,
             'provinces' => $provinces,
         ]);
@@ -201,7 +144,7 @@ class NokorTechController extends Controller
 
         $tableData = $query->paginate(perPage: $perPage)->onEachSide(1);
 
-        return Inertia::render('nokor-tech/garages/Show', [
+        return Inertia::render('frontpage/garages/Show', [
             'garage' => Garage::findOrFail($id)->load('province'),
             'tableData' => $tableData,
         ]);
@@ -241,7 +184,7 @@ class NokorTechController extends Controller
         $postCategories = PostCategory::where('status', 'active')->orderBy('order_index')->get();
 
         $tableData = $query->paginate(perPage: 9)->onEachSide(1);
-        return Inertia::render('nokor-tech/blogs/Index', [
+        return Inertia::render('frontpage/blogs/Index', [
             'tableData' => $tableData,
             'postCategories' => $postCategories,
         ]);
@@ -253,7 +196,7 @@ class NokorTechController extends Controller
         $postCategories = PostCategory::where('status', 'active')->withCount('posts')->orderBy('order_index')->get();
         $relatedPosts = Post::with('category', 'images')->where('id', '!=', $id)->where('category_code', $post->category_code)->orderBy('id', 'desc')->limit(6)->get();
 
-        return Inertia::render("nokor-tech/blogs/Show", [
+        return Inertia::render("frontpage/blogs/Show", [
             "post" => $post->load('images', 'category'),
             'postCategories' => $postCategories,
             'relatedPosts' => $relatedPosts,
@@ -315,7 +258,7 @@ class NokorTechController extends Controller
             ->get();
         $productListBanners = Banner::where('position_code', 'PRODUCT_SEARCH')->orderBy('order_index')->where('status', 'active')->get();
 
-        return Inertia::render('nokor-tech/products/Index', [
+        return Inertia::render('frontpage/products/Index', [
             'tableData' => $tableData,
             'item_brands' => $item_brands,
             'item_body_types' => $item_body_types,
@@ -379,7 +322,7 @@ class NokorTechController extends Controller
         //     ->get();
         // $productListBanners = Banner::where('position_code', 'PRODUCT_SEARCH')->orderBy('order_index')->where('status', 'active')->get();
 
-        return Inertia::render('nokor-tech/shops/Show', [
+        return Inertia::render('frontpage/shops/Show', [
             'shop' => Shop::find($id),
             'tableData' => $tableData,
             // 'item_brands' => $item_brands,
@@ -419,7 +362,7 @@ class NokorTechController extends Controller
 
         $tableData = $query->paginate(perPage: $perPage)->onEachSide(1);
 
-        return Inertia::render('nokor-tech/online_trainings/Index', [
+        return Inertia::render('frontpage/online_trainings/Index', [
             'tableData' => $tableData,
         ]);
     }
@@ -429,7 +372,7 @@ class NokorTechController extends Controller
 
         $relatedPosts = Post::with('category', 'images')->where('id', '!=', $id)->orderBy('id', 'desc')->limit(6)->get();
 
-        return Inertia::render("nokor-tech/online_trainings/Show", [
+        return Inertia::render("frontpage/online_trainings/Show", [
             "videoPlaylist" => $videoPlaylist,
             'relatedPosts' => $relatedPosts,
         ]);
@@ -466,7 +409,7 @@ class NokorTechController extends Controller
             'total_view_counts' => $itemShow->total_view_counts + 1,
         ]);
 
-        return Inertia::render("nokor-tech/products/Show", [
+        return Inertia::render("frontpage/products/Show", [
             "itemShow" => $itemShow->load('created_by', 'updated_by', 'images', 'category', 'brand', 'shop'),
             'relatedItems' => $relatedItems,
         ]);
@@ -474,25 +417,25 @@ class NokorTechController extends Controller
 
     public function shopping_cart()
     {
-        return Inertia::render("nokor-tech/cart/ShoppingCart");
+        return Inertia::render("frontpage/cart/ShoppingCart");
     }
     public function checkout()
     {
-        return Inertia::render("nokor-tech/cart/Checkout");
+        return Inertia::render("frontpage/cart/Checkout");
     }
     public function success()
     {
-        return Inertia::render("nokor-tech/cart/Success");
+        return Inertia::render("frontpage/cart/Success");
     }
     public function download_app()
     {
-        return Inertia::render("nokor-tech/DownloadApp");
+        return Inertia::render("frontpage/DownloadApp");
     }
     public function privacy()
     {
         $privacies = Page::with('children')->where('code', 'PRIVACY-POLICY-PAGE')->where('status', 'active')->orderBy('order_index')->first();
         // return $privacies;
-        return Inertia::render("nokor-tech/Privacy", [
+        return Inertia::render("frontpage/Privacy", [
             'privacies' => $privacies,
         ]);
     }
@@ -500,7 +443,7 @@ class NokorTechController extends Controller
     {
         $privacies = Page::with('children')->where('code', 'PRIVACY-POLICY-PAGE')->where('status', 'active')->orderBy('order_index')->first();
         // return $privacies;
-        return Inertia::render("nokor-tech/web_view/PrivacyWebView", [
+        return Inertia::render("frontpage/web_view/PrivacyWebView", [
             'privacies' => $privacies,
         ]);
     }
@@ -513,7 +456,7 @@ class NokorTechController extends Controller
         $privacyPolicy = Page::with('children')->where('code', 'PRIVACY-POLICY')->where('status', 'active')->orderBy('order_index')->first();
         $getStartedNow = Page::with('children')->where('code', 'GET-STARTED-NOW')->where('status', 'active')->orderBy('order_index')->first();
         // return $about;
-        return Inertia::render("nokor-tech/About", [
+        return Inertia::render("frontpage/About", [
             "about" => $about,
             "whyChooseUs" => $whyChooseUs,
             "buildForEveryone" => $buildForEveryone,
@@ -531,7 +474,7 @@ class NokorTechController extends Controller
         $privacyPolicy = Page::with('children')->where('code', 'PRIVACY-POLICY')->where('status', 'active')->orderBy('order_index')->first();
         $getStartedNow = Page::with('children')->where('code', 'GET-STARTED-NOW')->where('status', 'active')->orderBy('order_index')->first();
         // return $about;
-        return Inertia::render("nokor-tech/web_view/AboutWebView", [
+        return Inertia::render("frontpage/web_view/AboutWebView", [
             "about" => $about,
             "whyChooseUs" => $whyChooseUs,
             "buildForEveryone" => $buildForEveryone,
@@ -545,7 +488,7 @@ class NokorTechController extends Controller
     {
         $contactPage = Page::with('images')->where('position_code', 'CONTACT')->where('status', 'active')->orderBy('order_index')->first();
 
-        return Inertia::render("nokor-tech/Contact", [
+        return Inertia::render("frontpage/Contact", [
             "contactPage" => $contactPage
         ]);
     }
@@ -553,12 +496,12 @@ class NokorTechController extends Controller
     {
         $contactPage = Page::with('images')->where('position_code', 'CONTACT')->where('status', 'active')->orderBy('order_index')->first();
 
-        return Inertia::render("nokor-tech/web_view/ContactWebView", [
+        return Inertia::render("frontpage/web_view/ContactWebView", [
             "contactPage" => $contactPage
         ]);
     }
     public function documents()
     {
-        return Inertia::render("nokor-tech/Documents");
+        return Inertia::render("frontpage/Documents");
     }
 }

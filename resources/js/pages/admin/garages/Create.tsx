@@ -17,7 +17,7 @@ import { Switch } from '@/components/ui/switch';
 import { shopStatusData } from '@/data/status-data';
 import useTranslation from '@/hooks/use-translation';
 import AppLayout from '@/layouts/app-layout';
-import { Label } from '@/pages/nokor-tech/components/ui/label';
+import { Label } from '@/pages/frontpage/components/ui/label';
 import { BreadcrumbItem } from '@/types';
 import { useForm, usePage } from '@inertiajs/react';
 import { PlusIcon, Trash2 } from 'lucide-react';

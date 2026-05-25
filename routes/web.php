@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\StreamFileController;
 use App\Http\Controllers\StreamR2FileController;
 use App\Models\Garage;
 use Illuminate\Support\Facades\Route;
@@ -9,7 +8,7 @@ use Inertia\Inertia;
 // Default Homepage
 Route::get('/', function () {
    // return Inertia::render('LaravelDefaultPage');
-   return redirect('/dashboard');
+   // return redirect('/dashboard');
 })->name('home');
 
 Route::get('/normal-blade', function () {
@@ -42,7 +41,7 @@ Route::get('/test_google_map_marker', function () {
 
 
 // ========= Client =========
-require __DIR__ . '/nokor_tech.php';
+require __DIR__ . '/frontpage.php';
 
 
 
@@ -67,4 +66,3 @@ Route::post('/r2/upload', [R2FileController::class, 'upload']);
 Route::delete('/r2/delete', [R2FileController::class, 'delete']);
 Route::post('/r2/folder', [R2FileController::class, 'createFolder']);
 Route::get('/r2/view', [R2FileController::class, 'view'])->name('r2.view');
-

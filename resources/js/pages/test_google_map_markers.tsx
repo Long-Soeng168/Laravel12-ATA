@@ -3,7 +3,7 @@ import { usePage } from '@inertiajs/react';
 import { GoogleMap, InfoWindow, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { XIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
-import NokorTechLayout from './nokor-tech/layouts/nokor-tech-layout';
+import NokorTechLayout from './frontpage/layouts/nokor-tech-layout';
 
 // Define default styles and center for the map
 const containerStyle = {

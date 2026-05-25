@@ -14,7 +14,7 @@ const Index = () => {
     return (
         <NokorTechLayout>
             <Head>
-                <title>A-Tech Auto - Smart Tools, Courses & Parts for Car Owners & Pros</title>
+                <title>A-Tech Auto - Smart Tools, Courses & Spare Parts for Car Owners</title>
                 <meta
                     name="description"
                     content="Your ultimate automotive companion in Cambodia. Find trusted garages in Cambodia, instantly decode errors, access repair guides, and source top-quality spare parts for your car. Built for local owners, engineers & garages."
