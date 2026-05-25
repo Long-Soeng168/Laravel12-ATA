@@ -147,9 +147,6 @@ const MyHeader = () => {
                                     <MySearchProducts className="border-primary mx-auto max-w-full" />
                                 </SheetContent>
                             </Sheet>
-                            <Link prefetch href="/shopping-cart">
-                                <CartButton />
-                            </Link>
                             {auth?.user ? (
                                 <Link prefetch href={hasRole('User') || hasRole('Garage') || hasRole('Shop') ? '/user-dashboard' : '/dashboard'}>
                                     <Avatar className="h-8 w-8 overflow-hidden rounded-full">
