@@ -9,21 +9,15 @@ import useRole from '@/hooks/use-role';
 import useTranslation from '@/hooks/use-translation';
 import { Link, usePage } from '@inertiajs/react';
 import { Menu, Search } from 'lucide-react';
-import CartButton from './cart-button';
-import { MyCategoriesNav } from './my-categories-nav';
 import { MySearchProducts } from './my-search-products';
 
 const MyHeader = () => {
     const { application_info, post_counts, item_categories } = usePage().props;
     const { t } = useTranslation();
-    const navItems1 = [
-        { label: t('Products'), href: '/products' },
-        // { label: t('Online Trainings'), href: '/online_trainings' },
-        // { label: t('Documents'), href: '/documents' },
-    ];
 
-    const navItems2 = [
+    const navItems = [
         { label: t('Home'), href: '/' },
+        { label: t('Products'), href: '/products' },
         { label: t('Shops'), href: '/shops' },
         { label: t('Garages'), href: '/garages' },
         // { label: t('Privacy'), href: '/privacy' },
@@ -111,24 +105,22 @@ const MyHeader = () => {
                                     </SheetHeader>
                                     <ul className="flex flex-col gap-6 font-semibold text-gray-600">
                                         <hr />
-                                        {navItems1.map(renderNavLink)}
-                                        {navItems2.map(renderNavLink)}
+                                        {navItems.map(renderNavLink)}
                                     </ul>
                                 </SheetContent>
                             </Sheet>
                         </div>
 
                         {/* Desktop Nav */}
-                        <div className="hidden flex-1 lg:flex pl-2">
+                        <div className="hidden flex-1 pl-2 lg:flex">
                             <ul className="flex items-center gap-2 font-semibold">
                                 {/* {item_categories?.length > 0 && (
                                     <li>
                                         <MyCategoriesNav />
                                     </li>
                                 )} */}
-                                {navItems1.map(renderNavLink)}
                                 <li className="border-primary/5 bg-primary/50 h-6 border" />
-                                {navItems2.map(renderNavLink)}
+                                {navItems.map(renderNavLink)}
                             </ul>
                         </div>
 
