@@ -7,7 +7,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { usePage } from '@inertiajs/react';
 import { FilterIcon } from 'lucide-react';
 import GarageCard from '../components/ui/my-garage-card';
-import NokorTechLayout from '../layouts/nokor-tech-layout';
+import FrontPageLayout from '../layouts/frontpage-layout';
 import MapFloatingButton from './components/MapFloatingButton';
 import ProvinceFilter from './components/ProvinceFilter';
 import SortBy from './components/sort-by';
@@ -15,7 +15,7 @@ import SortBy from './components/sort-by';
 const Index = () => {
     const { tableData } = usePage<any>().props;
     return (
-        <NokorTechLayout>
+        <FrontPageLayout>
             <div className="mx-auto mb-8 min-h-[80dvh] max-w-screen-xl">
                 <div className="my-4 flex flex-wrap items-center justify-end gap-4 px-4">
                     <div className="flex w-full items-center gap-2 md:flex-1">
@@ -60,7 +60,7 @@ const Index = () => {
                 </div>
             </div>
             <MapFloatingButton />
-        </NokorTechLayout>
+        </FrontPageLayout>
     );
 };
 

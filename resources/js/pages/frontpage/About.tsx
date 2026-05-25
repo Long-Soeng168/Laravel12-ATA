@@ -2,13 +2,13 @@ import { Button } from '@/components/ui/button';
 import useTranslation from '@/hooks/use-translation';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowUpRightIcon } from 'lucide-react';
-import NokorTechLayout from './layouts/nokor-tech-layout';
+import FrontPageLayout from './layouts/frontpage-layout';
 
 const About = () => {
     const { about, whyChooseUs, buildForEveryone, getInTouch, privacyPolicy, getStartedNow } = usePage().props;
     const { t, currentLocale } = useTranslation();
     return (
-        <NokorTechLayout>
+        <FrontPageLayout>
              <Head>
                 <title>{about?.title}</title>
                 <meta
@@ -243,7 +243,7 @@ const About = () => {
                     </section>
                 </main>
             </div>
-        </NokorTechLayout>
+        </FrontPageLayout>
     );
 };
 

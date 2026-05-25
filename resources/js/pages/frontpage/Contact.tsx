@@ -1,13 +1,13 @@
 import { Head, usePage } from '@inertiajs/react';
 import { Globe2Icon, MailIcon, MapPinIcon, PhoneIcon } from 'lucide-react';
 import ContactFormSubmit from './components/contact-form-submit';
-import NokorTechLayout from './layouts/nokor-tech-layout';
+import FrontPageLayout from './layouts/frontpage-layout';
 
 const ContactCamActivePage = () => {
     const { application_info, contactPage, app_url } = usePage().props;
 
     return (
-        <NokorTechLayout>
+        <FrontPageLayout>
             <Head>
                 <title>Contact A-Tech Auto - Get in Touch in Phnom Penh, Cambodia</title>
                 <meta
@@ -76,7 +76,7 @@ const ContactCamActivePage = () => {
                     <iframe className="h-[400px]" src={application_info?.google_map} width="100%" height="100%" loading="lazy"></iframe>
                 </div>
             )}
-        </NokorTechLayout>
+        </FrontPageLayout>
     );
 };
 

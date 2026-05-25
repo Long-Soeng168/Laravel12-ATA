@@ -1,8 +1,8 @@
-import NokorTechLayout from './layouts/nokor-tech-layout';
+import FrontPageLayout from './layouts/frontpage-layout';
 
 const DownloadApp = () => {
     return (
-        <NokorTechLayout>
+        <FrontPageLayout>
             <div className="my-10">
                 <div className="relative mx-auto h-[600px] w-[300px] rounded-[2.5rem] border-[14px] border-gray-800 bg-gray-800 dark:border-gray-800">
                     <div className="flex h-[572px] w-[272px] flex-col overflow-hidden rounded-[2rem] bg-white dark:bg-gray-800">
@@ -37,7 +37,7 @@ const DownloadApp = () => {
                     </div>
                 </div>
             </div>
-        </NokorTechLayout>
+        </FrontPageLayout>
     );
 };
 

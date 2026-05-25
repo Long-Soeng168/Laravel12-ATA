@@ -5,13 +5,13 @@ import { MySearchTableData } from '@/components/my-search-table-data';
 import { usePage } from '@inertiajs/react';
 import SortBy from '../components/sort-by';
 import MyGarageBlogCard from '../components/ui/my-garage-blog-card';
-import NokorTechLayout from '../layouts/nokor-tech-layout';
+import FrontPageLayout from '../layouts/frontpage-layout';
 import GarageProfileHeader from './components/GarageProfileHeader';
 
 const Show = () => {
     const { tableData, garage } = usePage<any>().props;
     return (
-        <NokorTechLayout>
+        <FrontPageLayout>
             <div className="mx-auto mb-8 max-w-screen-xl">
                 <GarageProfileHeader garage={garage} />
 
@@ -62,7 +62,7 @@ const Show = () => {
                     </div>
                 </div>
             </div>
-        </NokorTechLayout>
+        </FrontPageLayout>
     );
 };
 

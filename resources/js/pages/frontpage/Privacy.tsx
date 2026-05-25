@@ -1,13 +1,13 @@
 import { Separator } from '@/components/ui/separator';
 import useTranslation from '@/hooks/use-translation';
 import { Head, usePage } from '@inertiajs/react';
-import NokorTechLayout from './layouts/nokor-tech-layout';
+import FrontPageLayout from './layouts/frontpage-layout';
 
 const Privacy = () => {
     const { currentLocale } = useTranslation();
     const { privacies } = usePage().props;
     return (
-        <NokorTechLayout>
+        <FrontPageLayout>
             <Head>
                 <title>Privacy Policy | Your Data Protection Commitment</title>
                 <meta
@@ -55,7 +55,7 @@ const Privacy = () => {
                     </main>
                 )} */}
             </div>
-        </NokorTechLayout>
+        </FrontPageLayout>
     );
 };
 

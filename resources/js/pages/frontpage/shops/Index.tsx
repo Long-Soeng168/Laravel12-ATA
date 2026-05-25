@@ -7,13 +7,13 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { usePage } from '@inertiajs/react';
 import { FilterIcon } from 'lucide-react';
 import MyShopCard from '../components/ui/my-shop-card';
-import NokorTechLayout from '../layouts/nokor-tech-layout';
+import FrontPageLayout from '../layouts/frontpage-layout';
 import SortBy from './components/sort-by';
 
 const Index = () => {
     const { tableData } = usePage().props;
     return (
-        <NokorTechLayout>
+        <FrontPageLayout>
             <div className="mx-auto mb-8 max-w-screen-xl">
                 <div className="mb-4 flex flex-wrap items-center justify-end gap-4 px-4">
                     <div className="w-full md:flex-1">
@@ -56,7 +56,7 @@ const Index = () => {
                     {/* end pagination */}
                 </div>
             </div>
-        </NokorTechLayout>
+        </FrontPageLayout>
     );
 };
 

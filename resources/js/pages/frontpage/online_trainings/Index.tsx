@@ -6,13 +6,13 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { usePage } from '@inertiajs/react';
 import AddToCart from '../components/add-to-cart';
-import NokorTechLayout from '../layouts/nokor-tech-layout';
+import FrontPageLayout from '../layouts/frontpage-layout';
 import { MyFilterButton } from './my-filter-button';
 
 const Index = () => {
     const { tableData } = usePage().props;
     return (
-        <NokorTechLayout>
+        <FrontPageLayout>
             <div className="mx-auto max-w-screen-xl px-6 py-16 pt-6 xl:px-0">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                     <h2 className="text-3xl font-bold tracking-tight">Online Training</h2>
@@ -99,7 +99,7 @@ const Index = () => {
                 </div>
                 <MyPagination />
             </div>
-        </NokorTechLayout>
+        </FrontPageLayout>
     );
 };
 

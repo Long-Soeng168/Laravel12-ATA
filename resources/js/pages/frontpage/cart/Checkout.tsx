@@ -2,12 +2,12 @@ import MyStepper from '@/components/my-stepper';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 import React from 'react';
-import NokorTechLayout from '../layouts/nokor-tech-layout';
+import FrontPageLayout from '../layouts/frontpage-layout';
 import CartItemFormCheckout from './components/CartItemFormCheckout';
 import CartItemSummary from './components/CartItemSummary';
 const CheckoutPage: React.FC = () => {
     return (
-        <NokorTechLayout>
+        <FrontPageLayout>
             <div className="mx-auto my-10 max-w-screen-xl px-4">
                 <MyStepper steps={['Cart', 'Checkout', 'Complete']} currentStep={1} />
                 <div className="flex flex-col gap-12 px-2 lg:flex-row">
@@ -20,7 +20,7 @@ const CheckoutPage: React.FC = () => {
                     <CartItemSummary />
                 </div>
             </div>
-        </NokorTechLayout>
+        </FrontPageLayout>
     );
 };
 

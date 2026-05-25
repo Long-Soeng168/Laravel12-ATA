@@ -5,13 +5,13 @@ import { MySearchTableData } from '@/components/my-search-table-data';
 import { usePage } from '@inertiajs/react';
 import SortBy from '../components/sort-by';
 import MyProductCard from '../components/ui/my-product-card';
-import NokorTechLayout from '../layouts/nokor-tech-layout';
+import FrontPageLayout from '../layouts/frontpage-layout';
 import ShopProfileHeader from './components/ShopProfileHeader';
 
 const Show = () => {
     const { tableData, shop } = usePage().props;
     return (
-        <NokorTechLayout>
+        <FrontPageLayout>
             <div className="mx-auto mb-8 max-w-screen-xl">
                 <ShopProfileHeader shop={shop} />
 
@@ -85,7 +85,7 @@ const Show = () => {
                 </div>
                 {/* end list products */}
             </div>
-        </NokorTechLayout>
+        </FrontPageLayout>
     );
 };
 

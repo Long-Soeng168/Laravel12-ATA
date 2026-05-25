@@ -3,7 +3,7 @@ import { usePage } from '@inertiajs/react';
 import { GoogleMap, InfoWindow, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { XIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
-import NokorTechLayout from './frontpage/layouts/nokor-tech-layout';
+import FrontPageLayout from './frontpage/layouts/frontpage-layout';
 
 // Define default styles and center for the map
 const containerStyle = {
@@ -44,7 +44,7 @@ function LocationsMapDisplay() {
     }
 
     return (
-        <NokorTechLayout>
+        <FrontPageLayout>
             <div className="map-container flex flex-col" style={{ height: '80vh', width: '100%' }}>
                 <div className="flex-1">
                     <GoogleMap
@@ -122,7 +122,7 @@ function LocationsMapDisplay() {
                     </GoogleMap>
                 </div>
             </div>
-        </NokorTechLayout>
+        </FrontPageLayout>
     );
 }
 

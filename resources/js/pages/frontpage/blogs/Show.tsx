@@ -4,13 +4,13 @@ import useTranslation from '@/hooks/use-translation';
 import { cn } from '@/lib/utils';
 import { Link, usePage } from '@inertiajs/react';
 import { Calendar } from 'lucide-react';
-import NokorTechLayout from '../layouts/nokor-tech-layout';
+import FrontPageLayout from '../layouts/frontpage-layout';
 
 const Show = () => {
     const { currentLocale } = useTranslation();
     const { post, relatedPosts, postCategories } = usePage().props;
     return (
-        <NokorTechLayout>
+        <FrontPageLayout>
             <div className="mx-auto flex max-w-screen-xl flex-col items-start gap-12 px-6 py-6 lg:flex-row lg:py-8 xl:px-0">
                 <div>
                     <h3 className="line-clamp-2 py-4 text-4xl font-semibold">{post?.title}</h3>
@@ -79,7 +79,7 @@ const Show = () => {
                     </div>
                 </aside>
             </div>
-        </NokorTechLayout>
+        </FrontPageLayout>
     );
 };
 

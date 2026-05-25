@@ -7,12 +7,12 @@ import MyProductList from './components/my-product-list';
 import MyProductListHeader from './components/my-product-list-header';
 import MyShopList from './components/my-shop-list';
 import MySlide from './components/my-slide';
-import NokorTechLayout from './layouts/nokor-tech-layout';
+import FrontPageLayout from './layouts/frontpage-layout';
 
 const Index = () => {
     const { topBanners, middleBanners, posts, newArrivalsProducts, products, shops } = usePage<any>().props;
     return (
-        <NokorTechLayout>
+        <FrontPageLayout>
             <Head>
                 <title>A-Tech Auto - Smart Tools, Courses & Spare Parts for Car Owners</title>
                 <meta
@@ -66,7 +66,7 @@ const Index = () => {
                     {/* <MyService /> */}
                 </>
             </main>
-        </NokorTechLayout>
+        </FrontPageLayout>
     );
 };
 

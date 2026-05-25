@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { Link } from '@inertiajs/react';
 import { Undo2Icon } from 'lucide-react';
-import NokorTechLayout from '../layouts/nokor-tech-layout';
+import FrontPageLayout from '../layouts/frontpage-layout';
 
 const Success = () => {
     return (
-        <NokorTechLayout>
+        <FrontPageLayout>
             {/* <div className="mx-auto my-10 max-w-screen-xl px-4">
                 <MyStepper steps={['Cart', 'Checkout', 'Complete']} currentStep={3} />
             </div> */}
@@ -22,7 +22,7 @@ const Success = () => {
                     </Button>
                 </Link>
             </div>
-        </NokorTechLayout>
+        </FrontPageLayout>
     );
 };
 

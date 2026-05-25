@@ -4,11 +4,11 @@ import { PhoneIcon } from 'lucide-react';
 import CarouselWithThumbs from '../components/CarouselWithThumbs';
 import MyProductList from '../components/my-product-list';
 import MyProductListHeader from '../components/my-product-list-header';
-import NokorTechLayout from '../layouts/nokor-tech-layout';
+import FrontPageLayout from '../layouts/frontpage-layout';
 const ProductDetailPage = () => {
     const { itemShow, relatedItems } = usePage().props;
     return (
-        <NokorTechLayout>
+        <FrontPageLayout>
             <Head>
                 <title>{itemShow?.name}</title>
                 <meta name="description" content={itemShow?.short_description} />
@@ -113,7 +113,7 @@ const ProductDetailPage = () => {
                     )}
                 </div>
             </div>
-        </NokorTechLayout>
+        </FrontPageLayout>
     );
 };
 

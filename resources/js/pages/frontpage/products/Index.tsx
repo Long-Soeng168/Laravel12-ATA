@@ -8,13 +8,13 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { FilterIcon } from 'lucide-react';
 import SortBy from '../components/sort-by';
 import MyProductCard from '../components/ui/my-product-card';
-import NokorTechLayout from '../layouts/nokor-tech-layout';
+import FrontPageLayout from '../layouts/frontpage-layout';
 import Filters from './filters';
 
 const Index = () => {
     const { tableData, productListBanners } = usePage().props;
     return (
-        <NokorTechLayout>
+        <FrontPageLayout>
             <Head>
                 <title>Our Products | Quality Parts & Accessories</title>
                 <meta
@@ -96,7 +96,7 @@ const Index = () => {
 
                 {/* end list products */}
             </div>
-        </NokorTechLayout>
+        </FrontPageLayout>
     );
 };
 

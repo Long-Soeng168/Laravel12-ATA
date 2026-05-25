@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { CircleCheck } from 'lucide-react';
-import NokorTechLayout from './layouts/nokor-tech-layout';
+import FrontPageLayout from './layouts/frontpage-layout';
 import HeroDocuments from './components/hero-documents';
 
 const Documents = () => {
@@ -49,7 +49,7 @@ const Documents = () => {
     ];
 
     return (
-        <NokorTechLayout>
+        <FrontPageLayout>
             <div className="my-10 mx-2">
                 <HeroDocuments />
                 <h1 id='pricing' className="scroll-mt-28 text-center text-5xl font-bold tracking-tight">Pricing</h1>
@@ -81,7 +81,7 @@ const Documents = () => {
                     ))}
                 </div>
             </div>
-        </NokorTechLayout>
+        </FrontPageLayout>
     );
 };
 

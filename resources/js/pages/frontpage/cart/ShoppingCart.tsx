@@ -1,11 +1,11 @@
 import MyStepper from '@/components/my-stepper';
-import NokorTechLayout from '../layouts/nokor-tech-layout';
+import FrontPageLayout from '../layouts/frontpage-layout';
 import CartItemList from './components/CartItemList';
 import CartItemSummary from './components/CartItemSummary';
 
 const ShoppingCart = () => {
     return (
-        <NokorTechLayout>
+        <FrontPageLayout>
             <div className="mx-auto my-10 max-w-screen-xl px-4">
                 {/* <h1 className="mb-8 text-2xl font-bold lg:text-2xl">Shopping Cart</h1> */}
                 <MyStepper steps={['Cart', 'Checkout', 'Complete']} currentStep={0} />
@@ -17,7 +17,7 @@ const ShoppingCart = () => {
                     <CartItemSummary />
                 </div>
             </div>
-        </NokorTechLayout>
+        </FrontPageLayout>
     );
 };
 
