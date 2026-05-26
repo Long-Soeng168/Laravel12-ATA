@@ -12,7 +12,7 @@ const Privacy = () => {
                 <title>Privacy Policy | Your Data Protection Commitment</title>
                 <meta
                     name="description"
-                    content="Understand how ATech Auto protects your personal data. We are committed to securing your information and never share or sell it to third parties. Your trust is our priority."
+                    content="Understand how A-Tech Auto protects your personal data. We are committed to securing your information and never share or sell it to third parties. Your trust is our priority."
                 />
             </Head>
             <div className="mx-auto max-w-4xl space-y-8 p-8">

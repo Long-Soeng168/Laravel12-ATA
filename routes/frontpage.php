@@ -3,13 +3,248 @@
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\FrontPageController;
 use App\Models\Garage;
+use App\Models\Item;
+use App\Models\ItemBodyType;
+use App\Models\ItemBrand;
+use App\Models\ItemCategory;
+use App\Models\ItemCategoryField;
+use App\Models\Province;
+use App\Models\Shop;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Http\Request;
 
 Route::get('/', [FrontPageController::class, 'index']);
 
-Route::get('/products', function () {
-    return Inertia::render('frontpage/ProductListingPage', []);
+Route::get('/products', function (Request $request) {
+    $form_data = [
+        'provinces' => Province::orderBy('order_index')->orderBy('name_kh')->get(),
+        'itemCategories' => ItemCategory::where('status', 'active')
+            ->with(['fields.options', 'brands'])
+            ->orderBy('order_index')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($item) {
+                $item->image_url = $item->image ? asset('assets/images/item_categories/thumb/' . $item->image) : null;
+                $item->brand_ids = $item->brands->pluck('id')->toArray();
+                return $item;
+            }),
+        'itemBrands' => ItemBrand::where('status', 'active')
+            ->orderBy('order_index')
+            ->orderBy('name')
+            ->with(['brand_models' => function ($query) {
+                $query->where('status', 'active')->orderBy('name');
+            }])
+            ->get()
+            ->map(function ($brand) {
+                // 1. Add image_url for the Brand
+                $brand->image_url = $brand->image
+                    ? asset('assets/images/item_brands/thumb/' . $brand->image)
+                    : null;
+
+                // 2. Map through the nested models to add their image_url
+                $brand->brand_models->map(function ($model) {
+                    $model->image_url = $model->image
+                        ? asset('assets/images/item_models/thumb/' . $model->image)
+                        : null;
+                    return $model;
+                });
+
+                return $brand;
+            }),
+
+        'itemBodyTypes' => ItemBodyType::where('status', 'active')
+            ->orderBy('order_index')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($item) {
+                $item->image_url = $item->image ? asset('assets/images/item_body_types/thumb/' . $item->image) : null;
+                return $item;
+            }),
+    ];
+
+    $query = Item::with(['category', 'brand', 'images']);
+
+    $query->where('status', 'active');
+
+    // Filter by Category Code and Dynamic Attributes
+    if ($request->filled('category_code')) {
+        $categoryCode = $request->category_code;
+        $query->where('category_code', $categoryCode);
+
+        // Fetch valid fields for this category to prevent SQL injection or bad queries
+        $category = ItemCategory::where('code', $categoryCode)->first();
+
+        if ($category) {
+            $validFields = ItemCategoryField::where('category_id', $category->id)
+                ->pluck('field_key')
+                ->toArray();
+
+            // Loop through request inputs to match valid JSON attributes
+            foreach ($request->all() as $key => $value) {
+                if (in_array($key, $validFields) && $request->filled($key)) {
+                    // Assuming 'attributes' is cast to an array/json in your Item model
+                    $query->where("attributes->$key", $value);
+                }
+            }
+        }
+    }
+
+    // Standard Filters
+    if ($request->filled('shop_id')) {
+        $shop = Shop::find($request->shop_id);
+        if ($shop) {
+            $query->where(function ($q) use ($shop) {
+                $q->where('user_id', $shop->owner_user_id);
+            });
+        } else {
+            $query->where('shop_id', $request->shop_id);
+        }
+    }
+    if ($request->filled('user_id')) {
+        $query->where('user_id', $request->user_id);
+    }
+
+    if ($request->filled('brand_code')) {
+        $query->where('brand_code', $request->brand_code);
+    }
+
+    if ($request->filled('model_code')) {
+        $query->where('model_code', $request->model_code);
+    }
+
+    if ($request->filled('body_type_code')) {
+        $query->where('body_type_code', $request->body_type_code);
+    }
+
+    // Price Range Filters
+    if ($request->filled('min_price')) {
+        $query->where('price', '>=', $request->min_price);
+    }
+
+    if ($request->filled('max_price')) {
+        $query->where('price', '<=', $request->max_price);
+    }
+
+    // Discount Filter
+    if ($request->filled('is_discount')) {
+        if ($request->is_discount == '1') {
+            $query->whereNotNull('discount')->where('discount', '>', 0);
+        } elseif ($request->is_discount == '0') {
+            $query->where(function ($q) {
+                $q->whereNull('discount')->orWhere('discount', 0);
+            });
+        }
+    }
+
+    // Free Delivery Filter
+    if ($request->filled('is_free_delivery')) {
+        $query->where('is_free_delivery', $request->is_free_delivery);
+    }
+
+    // Location / Province Filter (Assuming province_code is on the Shop relation)
+    if ($request->filled('province_code')) {
+        $query->where('province_code', $request->province_code);
+    }
+
+    // Date Added Filter
+    if ($request->filled('created_at')) {
+        $dateFilter = $request->created_at;
+        if ($dateFilter === 'today') {
+            $query->whereDate('created_at', Carbon::today());
+        } elseif ($dateFilter === 'last_7_days') {
+            $query->where('created_at', '>=', Carbon::now()->subDays(7));
+        } elseif ($dateFilter === 'last_15_days') {
+            $query->where('created_at', '>=', Carbon::now()->subDays(15));
+        } elseif ($dateFilter === 'last_30_days') {
+            $query->where('created_at', '>=', Carbon::now()->subDays(30));
+        }
+    }
+
+    if ($request->filled('q')) {
+        $query->where(function ($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->q . '%')
+                ->orWhere('name_kh', 'like', '%' . $request->q . '%');
+        });
+    }
+
+    // 2. Paginate & Sort (Removed latest() to prevent conflicting with orderByDesc)
+    if ($request->filled('sort')) {
+        $sort = $request->sort;
+        if ($sort === 'price_low_to_high') {
+            $query->orderBy('price', 'asc');
+        } elseif ($sort === 'price_high_to_low') {
+            $query->orderBy('price', 'desc');
+        } else {
+            $query->orderByDesc('id');
+        }
+    } else {
+        // Default sort
+        $query->orderByDesc('id');
+    }
+
+    $items = $query->paginate(20);
+
+    // 3. Pre-fetch mappings for attributes (Optimized)
+    // We get the IDs from the already eager-loaded categories instead of running a new query!
+    $categoryIds = $items->pluck('category.id')->filter()->unique();
+
+    $categoryMaps = ItemCategoryField::whereIn('category_id', $categoryIds)
+        ->with('options')
+        ->get()
+        ->groupBy('category_id');
+
+    // 4. Transform Collection
+    $items->getCollection()->transform(function ($item) use ($categoryMaps) {
+
+        // --- Image Optimization for Flutter List ---
+        $firstImage = $item->images->first();
+
+        $item->image_url = $firstImage
+            ? asset('assets/images/items/' . $firstImage->image)
+            : asset('assets/images/placeholder.webp');
+
+        $item->total_images = $item->images->count();
+
+        $item->thumbnail_image = $firstImage ? [
+            'id' => $firstImage->id,
+            'image' => $firstImage->image,
+            'image_url' => asset('assets/images/items/' . $firstImage->image),
+        ] : null;
+
+        // --- Attribute Display Logic ---
+        $categoryId = $item->category?->id;
+        $fields = $categoryMaps->get($categoryId);
+        $displayAttributes = [];
+
+        if ($fields && is_array($item->attributes)) {
+            foreach ($item->attributes as $key => $storedValue) {
+                $field = $fields->where('field_key', $key)->first();
+                $option = $field ? $field->options->where('option_value', $storedValue)->first() : null;
+
+                $displayAttributes[$key] = [
+                    'label' => $field->label ?? $key,
+                    'label_kh' => $field->label_kh ?? $key,
+                    'value' => $storedValue,
+                    'value_label_en' => $option->label_en ?? $storedValue,
+                    'value_label_kh' => $option->label_kh ?? $storedValue,
+                ];
+            }
+        }
+
+        $item->display_attributes = $displayAttributes;
+
+        // Correct Laravel way to hide relationships from the final JSON payload
+        $item->makeHidden(['images']);
+
+        return $item;
+    });
+    // return $items;
+    return Inertia::render('frontpage/shops/ProductListingPage', [
+        'form_data' => $form_data,
+        'tableData' => $items,
+    ]);
 });
 Route::get('/shops', function () {
     return Inertia::render('frontpage/ShopListingPage', []);

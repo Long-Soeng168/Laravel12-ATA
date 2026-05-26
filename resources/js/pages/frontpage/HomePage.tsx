@@ -72,9 +72,9 @@ const HERO_SLIDES = [
         desc: 'Discover high-quality aftermarket components and OEM direct parts. Precision engineered for exact fitment and maximum reliability.',
         btnText: 'Shop Catalog',
         btnLink: '/products',
-        background_color: '#1b3358',
-        forground_color: '#fff',
-        img: '/assets/images/sample/spare_parts_banner3.png',
+        background_color: '#75BEEA',
+        forground_color: '#293A4A',
+        img: '/assets/images/sample/spare_parts_banner4.png',
     },
     {
         id: 'slide-2',
@@ -109,7 +109,7 @@ const APP_EXCLUSIVE_BANNERS = [
         btnLink: '/download',
         background_color: '#0f172a',
         forground_color: '#ffffff',
-        img: '/assets/images/sample/training_online_banner1.jpg',
+        img: '/assets/images/sample/training_online_banner1.webp',
     },
     {
         id: 'b2',
@@ -194,6 +194,9 @@ export default function HomePage() {
                                 className={`absolute inset-0 h-full w-full transition-opacity duration-[1000ms] ease-in-out ${
                                     currentSlide === index ? 'z-10 opacity-100' : 'pointer-events-none z-0 opacity-0'
                                 }`}
+                                style={{
+                                    backgroundColor: slide.background_color,
+                                }}
                             >
                                 {/* Full Background Image */}
                                 <img
@@ -213,7 +216,8 @@ export default function HomePage() {
                                     <div
                                         className="absolute inset-0 z-10 md:hidden"
                                         style={{
-                                            backgroundImage: `linear-gradient(to bottom, ${slide.background_color}f2 0%, ${slide.background_color}cc 70%, transparent 100%)`,
+                                            backgroundColor: slide.background_color,
+                                            opacity: 0.90,
                                         }}
                                     ></div>
                                     <h1

@@ -1,5 +1,7 @@
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { SwitchDarkModeSingleIcon } from '@/components/SwitchDarkModeSingleIcon';
 import useTranslation from '@/hooks/use-translation';
-import { Camera, Facebook, Globe, Mail, MapPin, Menu, MessageCircle, Moon, Phone, Search, Send, Smartphone, User, Wrench, X } from 'lucide-react';
+import { Camera, Facebook, Mail, MapPin, Menu, MessageCircle, Phone, Search, Send, Smartphone, User, Wrench, X } from 'lucide-react';
 import React, { useState, type ReactNode } from 'react';
 
 // --- Shared Flat UI Primitives ---
@@ -62,28 +64,28 @@ const FrontPageLayout = ({ children }: FrontPageLayoutProps) => {
 
                         {/* Right Menu */}
                         <div className="text-muted-foreground flex items-center gap-3">
-                            <div className="hover:text-foreground flex cursor-pointer items-center gap-1 transition-colors">
+                            {/* <div className="hover:text-foreground flex cursor-pointer items-center gap-1 transition-colors">
                                 <Globe className="h-3.5 w-3.5" />
                                 <select className="cursor-pointer appearance-none border-none bg-transparent pr-1 text-xs font-medium uppercase outline-none">
-                                    <option value="en">English</option>
-                                    <option value="km">Khmer</option>
+                                    <option value="en">
+                                        <a href="lange/en">English</a>
+                                    </option>
+                                    <option value="km">
+                                        <a href="lange/kh">Khmer</a>
+                                    </option>
                                 </select>
-                            </div>
+                            </div> */}
+                            <LanguageSwitcher />
 
-                            <div className="bg-border mx-1 h-3.5 w-px"></div>
+                            <div className="bg-border ml-1 h-3.5 w-px"></div>
 
-                            <button
-                                className="hover:text-foreground flex items-center justify-center transition-colors"
-                                aria-label="Toggle Dark Mode"
-                            >
-                                <Moon className="h-3.5 w-3.5" />
-                            </button>
+                            <SwitchDarkModeSingleIcon />
 
-                            <div className="bg-border mx-1 h-3.5 w-px"></div>
+                            <div className="bg-border mr-1 h-3.5 w-px"></div>
 
                             <a
                                 href="/login"
-                                className="flex items-center gap-1.5 bg-[#FF6D00] px-3.5 py-1 text-[11px] font-bold tracking-wider text-white uppercase transition-colors hover:bg-[#e66200]"
+                                className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-1.5 px-3.5 py-2.5 text-sm font-medium transition-colors"
                             >
                                 <User className="h-3.5 w-3.5" /> Login
                             </a>
@@ -100,7 +102,7 @@ const FrontPageLayout = ({ children }: FrontPageLayoutProps) => {
                                 <a href="/" className="flex items-center gap-2 text-2xl font-bold tracking-tight">
                                     <Wrench className="h-7 w-7 text-[#FF6D00]" />
                                     <span>
-                                        ATECH <span className="text-[#FF6D00]">AUTO</span>
+                                        A-Tech <span className="text-[#FF6D00]">Auto</span>
                                     </span>
                                 </a>
                                 {/* Mobile Menu Toggle */}
@@ -314,7 +316,7 @@ const FrontPageLayout = ({ children }: FrontPageLayoutProps) => {
 
                     {/* Copyright Area */}
                     <div className="border-border text-muted-foreground mt-12 flex flex-col items-center justify-between border-t pt-6 text-xs md:flex-row">
-                        <p>&copy; 2025 ATech Auto. All rights reserved.</p>
+                        <p>&copy; 2025 A-Tech Auto. All rights reserved.</p>
                         <div className="mt-4 flex gap-4 md:mt-0">
                             <a href="#" className="hover:text-foreground transition-colors">
                                 Privacy

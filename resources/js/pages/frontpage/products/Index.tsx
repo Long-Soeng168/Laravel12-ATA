@@ -12,14 +12,14 @@ import FrontPageLayout from '../layouts/frontpage-layout';
 import Filters from './filters';
 
 const Index = () => {
-    const { tableData, productListBanners } = usePage().props;
+    const { tableData, productListBanners } = usePage<any>().props;
     return (
         <FrontPageLayout>
             <Head>
                 <title>Our Products | Quality Parts & Accessories</title>
                 <meta
                     name="description"
-                    content="Browse a wide selection of high-quality auto parts and accessories at ATech Auto. Trusted products for every vehicle. Shop with confidence and get the best for your ride."
+                    content="Browse a wide selection of high-quality auto parts and accessories at A-Tech Auto. Trusted products for every vehicle. Shop with confidence and get the best for your ride."
                 />
             </Head>
 
@@ -31,7 +31,7 @@ const Index = () => {
                         {/* end brand */}
                         <div className="mt-8 flex w-full flex-col gap-0.5">
                             {productListBanners?.length > 0 &&
-                                productListBanners?.map((banner) => (
+                                productListBanners?.map((banner: any) => (
                                     <Link href={banner?.link ? banner.link : '#'} prefetch>
                                         <img
                                             className="h-auto w-full transition-all duration-300 hover:scale-95"
@@ -81,7 +81,7 @@ const Index = () => {
                             {/* start list products */}
                             <div>{tableData?.data?.length == 0 && <MyNoData />}</div>
                             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                                {tableData?.data?.map((product) => <MyProductCard key={product.id} product={product} />)}
+                                {tableData?.data?.map((product: any) => <MyProductCard key={product.id} product={product} />)}
                             </div>
                             {/* end list products */}
                             {/* start pagination */}

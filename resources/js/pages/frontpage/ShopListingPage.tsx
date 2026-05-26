@@ -1,21 +1,22 @@
-import { MapPin, Star } from 'lucide-react';
+import FrontPageLayout from '@/pages/frontpage/layouts/frontpage-layout';
+import { CheckCircleIcon, MapPin, Phone, Search, Store } from 'lucide-react';
 import React from 'react';
-import FrontPageLayout from './layouts/frontpage-layout';
 
 // --- Shared Flat UI Primitives ---
-const getButtonStyles = (variant: 'default' | 'outline' = 'default', className = '') => {
+const getButtonStyles = (variant: 'default' | 'outline' | 'accent' = 'default', className = '') => {
     const baseStyle =
-        'inline-flex items-center justify-center text-sm font-medium transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 rounded-none border border-transparent';
+        'inline-flex items-center justify-center text-sm font-bold tracking-widest uppercase transition-all duration-150 ease-out focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 h-[42px] px-6 rounded-none border cursor-pointer active:scale-[0.97]';
     const variants = {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
-        outline: 'border-border bg-transparent hover:bg-accent hover:text-accent-foreground',
+        default: 'border-black bg-black text-white hover:bg-neutral-800 hover:border-neutral-800',
+        accent: 'border-[#FF6D00] bg-[#FF6D00] text-white hover:bg-black hover:border-black',
+        outline: 'border-border bg-transparent text-foreground hover:border-[#FF6D00] hover:text-[#FF6D00]',
     };
     return `${baseStyle} ${variants[variant]} ${className}`;
 };
 
 const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = ({ className = '', children, ...props }) => (
     <select
-        className={`border-border bg-card placeholder:text-muted-foreground focus:border-primary flex h-9 w-full appearance-none items-center justify-between rounded-none border px-3 py-2 text-sm focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+        className={`border-border bg-card placeholder:text-muted-foreground flex h-[42px] w-full appearance-none items-center justify-between rounded-none border px-4 text-sm font-medium focus:border-[#FF6D00] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
         {...props}
     >
         {children}
@@ -23,141 +24,159 @@ const Select: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = ({ class
 );
 
 // --- Mock Data ---
-const SHOPS = [
+type Shop = {
+    id: string;
+    name: string;
+    isVerified: boolean;
+    province: string;
+    address: string;
+    phone: string;
+    description: string;
+    banner: string;
+    logo: string;
+};
+
+const SHOPS: Shop[] = [
     {
         id: 's1',
-        initials: 'PP',
-        name: 'Performance Parts Inc.',
-        rating: '4.9',
-        desc: 'Specializing in high-performance aftermarket upgrades for domestic and import vehicles.',
-        tags: ['Turbochargers', 'Exhaust Systems', 'ECU Tuning'],
-        loc: 'Detroit, MI',
-        stats: 'Est. 2010 • 15k+ Sales',
+        name: 'AutoParts Hub',
+        isVerified: true,
+        province: 'Phnom Penh',
+        address: 'Toul Kork, Street 289',
+        phone: '012 334 556',
+        description: 'Premium supplier of genuine OEM parts, filters, and synthetic engine oils for all major brands.',
+        banner: '/assets/images/shops/shop-banner-1.jpg',
+        logo: '/assets/images/shops/shop-logo-1.jpg',
     },
     {
         id: 's2',
-        initials: 'OD',
-        name: 'OEM Direct Warehouse',
-        rating: '4.8',
-        desc: 'Direct-from-factory replacement parts guaranteeing fit and function.',
-        tags: ['Factory Replacements', 'Body Panels', 'OEM Filters'],
-        loc: 'Dallas, TX',
-        stats: 'Est. 2015 • 42k+ Sales',
+        name: 'GearHead Accessories',
+        isVerified: false,
+        province: 'Siem Reap',
+        address: 'Sok San Road, Svay Dangkum',
+        phone: '098 776 554',
+        description: 'High-quality aftermarket accessories, LED lighting, custom floor mats, and interior detailing supplies.',
+        banner: '/assets/images/shops/shop-banner-2.jpg',
+        logo: '/assets/images/shops/shop-logo-2.jpg',
     },
     {
         id: 's3',
-        initials: 'EA',
-        name: 'EuroAuto Imports',
-        rating: '4.7',
-        desc: 'Specialists in hard-to-find parts for European makes including BMW, Audi, and Mercedes.',
-        tags: ['European Makes', 'Sensors', 'Cooling'],
-        loc: 'Los Angeles, CA',
-        stats: 'Est. 2018 • 8k+ Sales',
+        name: 'ProTool Equipment',
+        isVerified: true,
+        province: 'Battambang',
+        address: 'Street 3, Near Central Market',
+        phone: '085 112 233',
+        description: 'Heavy-duty mechanic tools, hydraulic jacks, OBD2 scanners, and professional garage equipment.',
+        banner: '/assets/images/shops/shop-banner-3.jpg',
+        logo: '/assets/images/shops/shop-logo-3.jpg',
+    },
+    {
+        id: 's4',
+        name: 'Tire & Wheel Center',
+        isVerified: false,
+        province: 'Phnom Penh',
+        address: 'Dangkao, Street 217',
+        phone: '099 888 777',
+        description: 'Wide selection of off-road and highway tires, custom alloy wheels, and alignment kits.',
+        banner: '/assets/images/shops/shop-banner-4.jpg',
+        logo: '/assets/images/shops/shop-logo-4.jpg',
     },
 ];
 
-export default function ShopListingPage() {
+export default function ShopPage() {
     return (
         <FrontPageLayout>
-            <div className="container mx-auto px-4 py-8 md:px-6">
-                <div className="animate-in fade-in space-y-6 duration-300">
-                    <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-                        <div>
-                            <h1 className="mb-2 text-2xl font-bold tracking-tight uppercase">Vendor Directory</h1>
-                            <p className="text-muted-foreground text-sm">Browse independent sellers and specialist warehouses on the platform.</p>
-                        </div>
-                        <Select className="w-full md:w-auto">
-                            <option>Sort by: Rating</option>
-                            <option>Sort by: Name (A-Z)</option>
-                            <option>Sort by: Distance</option>
+            <div className="relative container mx-auto mt-6 px-4 pb-20 md:px-6">
+                {/* Header & Search Section */}
+                <section className="border-border bg-card mb-12 flex flex-col items-center border p-6 md:p-10">
+                    <h1 className="text-foreground mb-6 text-3xl font-black tracking-tighter uppercase md:text-4xl">
+                        Shop <span className="text-[#FF6D00]">Directory</span>
+                    </h1>
+
+                    <div className="flex w-full max-w-3xl flex-col gap-3 sm:flex-row">
+                        <input
+                            className="border-border bg-background flex-1 rounded-none border px-4 py-2 text-sm font-medium focus:border-[#FF6D00] focus:outline-none"
+                            placeholder="Search by shop name, parts, or address..."
+                        />
+                        <Select className="bg-background w-full sm:w-48">
+                            <option>All Provinces</option>
+                            <option>Phnom Penh</option>
+                            <option>Siem Reap</option>
+                            <option>Battambang</option>
                         </Select>
+                        <button className={getButtonStyles('default', 'w-full sm:w-auto')}>
+                            <Search className="mr-2 h-4 w-4" strokeWidth={2.5} /> Search
+                        </button>
                     </div>
+                </section>
 
-                    <div className="flex flex-col gap-6 md:flex-row">
-                        {/* Static Expanded Sidebar */}
-                        <aside className="w-full flex-shrink-0 md:w-64">
-                            <div className="bg-card border-border sticky top-40 border p-4">
-                                <h3 className="border-border mb-4 border-b pb-2 text-sm font-bold tracking-wider uppercase">Filter Shops</h3>
+                {/* Shops Grid (4 Columns) */}
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    {SHOPS.map((shop) => (
+                        <a
+                            href={`/shop/${shop.id}`} // Direct navigation, no pop-up
+                            key={shop.id}
+                            className="bg-card border-border group flex w-full flex-col border transition-colors duration-200 hover:border-[#FF6D00] active:scale-[0.99]"
+                        >
+                            {/* Banner Image with Bottom Info Overlay */}
+                            <div className="border-border bg-muted relative h-[180px] w-full border-b">
+                                <img
+                                    src={shop.banner}
+                                    alt="Shop Banner"
+                                    className="h-full w-full object-cover"
+                                    onError={(e) => (e.currentTarget.style.display = 'none')}
+                                />
 
-                                <div className="mb-6">
-                                    <h4 className="text-muted-foreground mb-2 text-xs font-medium uppercase">Specialty</h4>
-                                    <div className="flex flex-col space-y-2">
-                                        {['OEM Parts (42)', 'Aftermarket (85)', 'Performance (24)', 'Salvage/Used (18)'].map((label) => (
-                                            <label key={label} className="flex cursor-pointer items-center gap-2">
-                                                <input
-                                                    type="checkbox"
-                                                    className="bg-background border-border h-4 w-4 rounded-none accent-[#FF6D00]"
-                                                />
-                                                <span className="text-sm">{label}</span>
-                                            </label>
-                                        ))}
+                                {/* Dark Gradient Overlay */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+
+                                {/* Bottom Info Row (Logo + Text) */}
+                                <div className="absolute right-3 bottom-3 left-3 flex items-end gap-3">
+                                    {/* Logo */}
+                                    <div className="border-border bg-background relative flex h-14 w-14 shrink-0 items-center justify-center border p-1">
+                                        <img
+                                            src={shop.logo}
+                                            alt="Shop Logo"
+                                            className="z-10 h-full w-full object-contain"
+                                            onError={(e) => {
+                                                e.currentTarget.style.display = 'none';
+                                            }}
+                                        />
+                                        {/* Fallback Icon */}
+                                        <Store className="absolute h-5 w-5 text-[#FF6D00] opacity-40" strokeWidth={2} />
                                     </div>
-                                </div>
 
-                                <div>
-                                    <h4 className="text-muted-foreground mb-2 text-xs font-medium uppercase">Region</h4>
-                                    <Select className="bg-background border-border w-full">
-                                        <option>All Regions</option>
-                                        <option>Midwest</option>
-                                        <option>West Coast</option>
-                                        <option>East Coast</option>
-                                        <option>South</option>
-                                    </Select>
+                                    {/* Info Column */}
+                                    <div className="flex min-w-0 flex-1 flex-col">
+                                        <div className="mb-1 flex items-center justify-between gap-2">
+                                            <h3 className="truncate text-[15px] font-semibold text-white">{shop.name}</h3>
+                                            {shop.isVerified && <CheckCircleIcon className="h-5 w-5 fill-blue-500 text-white" />}
+                                        </div>
+
+                                        <div className="flex flex-col gap-0.5">
+                                            <p className="flex items-center gap-1.5 text-[11px] font-medium text-white/80">
+                                                <MapPin className="h-3 w-3" strokeWidth={2.5} />
+                                                <span className="truncate">{shop.province}</span>
+                                            </p>
+                                            <p className="flex items-center gap-1.5 text-[11px] font-medium text-white/80">
+                                                <Phone className="h-3 w-3" strokeWidth={2.5} />
+                                                <span className="truncate">{shop.phone}</span>
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </aside>
 
-                        {/* Shop List */}
-                        <div className="flex flex-1 flex-col gap-4">
-                            {SHOPS.map((shop) => (
-                                <a
-                                    href="/products"
-                                    key={shop.id}
-                                    className="bg-card border-border group text-foreground block flex cursor-pointer flex-col items-start gap-6 border p-4 transition-colors hover:border-[#FF6D00] md:flex-row md:items-center"
-                                >
-                                    <div className="bg-background border-border flex h-16 w-16 flex-shrink-0 items-center justify-center border text-xl font-bold text-[#FF6D00] transition-colors group-hover:bg-[#FF6D00] group-hover:text-[#121212]">
-                                        {shop.initials}
-                                    </div>
-
-                                    <div className="flex-1">
-                                        <div className="mb-1 flex items-center gap-3">
-                                            <h3 className="text-lg font-bold">{shop.name}</h3>
-                                            <div className="bg-background border-border flex items-center gap-1 border px-2 py-0.5">
-                                                <Star className="h-3 w-3 fill-[#FF6D00] text-[#FF6D00]" />
-                                                <span className="text-xs font-bold">{shop.rating}</span>
-                                            </div>
-                                        </div>
-                                        <p className="text-muted-foreground mb-2 text-sm">{shop.desc}</p>
-                                        <div className="flex flex-wrap gap-2">
-                                            {shop.tags.map((tag) => (
-                                                <span
-                                                    key={tag}
-                                                    className="bg-background border-border text-muted-foreground border px-2 py-1 text-[10px] tracking-wider uppercase"
-                                                >
-                                                    {tag}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="flex w-full flex-col gap-2 md:w-auto md:text-right">
-                                        <span className="text-muted-foreground flex items-center gap-1 text-xs md:justify-end">
-                                            <MapPin className="h-3 w-3" /> {shop.loc}
-                                        </span>
-                                        <span className="text-muted-foreground text-xs">{shop.stats}</span>
-                                        <div
-                                            className={getButtonStyles(
-                                                'outline',
-                                                'mt-2 h-8 text-xs group-hover:border-[#FF6D00] group-hover:text-[#FF6D00]',
-                                            )}
-                                        >
-                                            View Inventory
-                                        </div>
-                                    </div>
-                                </a>
-                            ))}
-                        </div>
-                    </div>
+                            {/* Content Area (Address & Description) */}
+                            <div className="flex flex-1 flex-col p-4">
+                                <div className="text-foreground mb-2 flex items-start gap-1.5 text-[12px] font-bold">
+                                    <MapPin className="text-muted-foreground mt-0.5 h-3.5 w-3.5 shrink-0" strokeWidth={2.5} />
+                                    <span className="truncate">{shop.address}</span>
+                                </div>
+                                <p className="text-muted-foreground line-clamp-2 text-[11px] leading-relaxed">{shop.description}</p>
+                            </div>
+                        </a>
+                    ))}
                 </div>
             </div>
         </FrontPageLayout>
