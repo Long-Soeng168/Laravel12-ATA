@@ -8,7 +8,7 @@ import { useInitials } from '@/hooks/use-initials';
 import useRole from '@/hooks/use-role';
 import useTranslation from '@/hooks/use-translation';
 import { Link, usePage } from '@inertiajs/react';
-import { Menu, Search } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { MySearchProducts } from './my-search-products';
 
 const MyHeader = () => {
@@ -37,10 +37,8 @@ const MyHeader = () => {
                 key={'link_key' + label + href}
                 prefetch
                 href={href}
-                className={`transition-colors duration-200 px-4 py-2 rounded-full text-sm font-medium ${
-                    isActive 
-                        ? 'bg-primary text-primary-foreground shadow-sm' 
-                        : 'text-foreground hover:bg-muted hover:text-primary'
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200 ${
+                    isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-foreground hover:bg-muted hover:text-primary'
                 }`}
             >
                 {label}
@@ -51,25 +49,23 @@ const MyHeader = () => {
     return (
         <>
             {/* Top Heading */}
-            <div className="bg-background text-foreground border-b border-border/40 pb-3 pt-4">
-                <div className="mx-auto flex flex-col md:flex-row max-w-screen-xl items-center justify-between px-4 gap-4">
+            <div className="bg-background text-foreground border-border/40 border-b pt-4 pb-3">
+                <div className="mx-auto flex max-w-screen-xl flex-col items-center justify-between gap-4 px-4 md:flex-row">
                     {/* Logo & Mobile Menu */}
-                    <div className="flex w-full md:w-auto items-center justify-between md:justify-start gap-4">
+                    <div className="flex w-full items-center justify-between gap-4 md:w-auto md:justify-start">
                         <div className="flex items-center gap-3">
                             <Sheet>
                                 <SheetTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="lg:hidden text-foreground">
+                                    <Button variant="ghost" size="icon" className="text-foreground lg:hidden">
                                         <Menu className="size-6" />
                                     </Button>
                                 </SheetTrigger>
-                                <SheetContent side="left" className="w-72 bg-background/95 backdrop-blur-lg border-r border-border/50 p-6 shadow-2xl">
+                                <SheetContent side="left" className="bg-background/95 border-border/50 w-72 border-r p-6 shadow-2xl backdrop-blur-lg">
                                     <SheetHeader>
-                                        <SheetTitle className="text-2xl font-bold tracking-tight text-left">Menu</SheetTitle>
+                                        <SheetTitle className="text-left text-2xl font-bold tracking-tight">Menu</SheetTitle>
                                     </SheetHeader>
-                                    <div className="flex flex-col gap-2 mt-8">
-                                        {navItems.map(renderNavLink)}
-                                    </div>
-                                    <div className="mt-8 pt-6 border-t border-border/50 flex flex-col gap-4">
+                                    <div className="mt-8 flex flex-col gap-2">{navItems.map(renderNavLink)}</div>
+                                    <div className="border-border/50 mt-8 flex flex-col gap-4 border-t pt-6">
                                         <MySelectLanguageSwitch />
                                         <ToggleModeSwitch />
                                     </div>
@@ -83,23 +79,27 @@ const MyHeader = () => {
                                         height={45}
                                         src={`/assets/images/application_info/thumb/${application_info.image}`}
                                         alt={`${application_info.name}'s logo`}
-                                        className="size-10 lg:size-12 rounded-xl shadow-sm border border-border/50 bg-white"
+                                        className="border-border/50 size-10 rounded-xl border bg-white shadow-sm lg:size-12"
                                     />
-                                    <span className="text-xl lg:text-2xl font-bold tracking-tight">{application_info.name}</span>
+                                    <span className="text-xl font-bold tracking-tight lg:text-2xl">{application_info.name}</span>
                                 </Link>
                             )}
                         </div>
-                        
+
                         {/* Mobile Actions */}
-                        <div className="flex md:hidden items-center gap-2">
-                            <Link prefetch href="/download-app" className="flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/30 hover:shadow-primary/50 px-3.5 py-1.5 rounded-full font-bold text-xs transition-all hover:scale-105 active:scale-95 border border-primary/20 dark:border-primary-foreground/10">
-                                <img src="/assets/icons/phone-car.png" alt="Download App" className="w-3.5 h-3.5 object-contain" />
+                        <div className="flex items-center gap-2 md:hidden">
+                            <Link
+                                prefetch
+                                href="/download-app"
+                                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-primary/30 hover:shadow-primary/50 border-primary/20 dark:border-primary-foreground/10 flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-bold shadow-md transition-all hover:scale-105 active:scale-95"
+                            >
+                                <img src="/assets/icons/phone-car.png" alt="Download App" className="h-3.5 w-3.5 object-contain" />
                                 <span>GET APP</span>
                             </Link>
 
                             {auth?.user ? (
                                 <Link prefetch href={hasRole('User') || hasRole('Garage') || hasRole('Shop') ? '/user-dashboard' : '/dashboard'}>
-                                    <Avatar className="h-8 w-8 overflow-hidden rounded-full border border-border/50 shadow-sm">
+                                    <Avatar className="border-border/50 h-8 w-8 overflow-hidden rounded-full border shadow-sm">
                                         <AvatarImage src={`/assets/images/users/thumb/${auth?.user?.image}`} alt={auth?.user?.name} />
                                         <AvatarFallback className="bg-primary/10 text-primary font-medium">
                                             {getInitials(auth?.user?.name)}
@@ -108,7 +108,7 @@ const MyHeader = () => {
                                 </Link>
                             ) : (
                                 <Link prefetch href="/login">
-                                    <Button size="icon" variant="outline" className="rounded-full bg-background/50 border-border/50 hover:bg-muted">
+                                    <Button size="icon" variant="outline" className="bg-background/50 border-border/50 hover:bg-muted rounded-full">
                                         <UserIconAnimated stroke="currentColor" className="size-4" />
                                     </Button>
                                 </Link>
@@ -117,23 +117,31 @@ const MyHeader = () => {
                     </div>
 
                     {/* Search Bar - Center */}
-                    <div className="w-full md:flex-1 md:max-w-md lg:max-w-xl mx-auto px-2">
+                    <div className="mx-auto w-full px-2 md:max-w-md md:flex-1 lg:max-w-xl">
                         <div className="relative w-full">
                             <MySearchProducts className="w-full" />
                         </div>
                     </div>
 
                     {/* Right Actions */}
-                    <div className="hidden md:flex items-center gap-3 shrink-0">
-                        <Link prefetch href="/download-app" className="group flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 hover:shadow-primary/50 px-5 py-2.5 rounded-full font-bold text-sm transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 border border-primary/20 dark:border-primary-foreground/10">
-                            <img src="/assets/icons/phone-car.png" alt="Download App" className="w-4 h-4 object-contain transition-transform duration-300 group-hover:-rotate-12" />
+                    <div className="hidden shrink-0 items-center gap-3 md:flex">
+                        <Link
+                            prefetch
+                            href="/download-app"
+                            className="group bg-primary hover:bg-primary/90 text-primary-foreground shadow-primary/30 hover:shadow-primary/50 border-primary/20 dark:border-primary-foreground/10 flex transform items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-bold shadow-lg transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
+                        >
+                            <img
+                                src="/assets/icons/phone-car.png"
+                                alt="Download App"
+                                className="h-4 w-4 object-contain transition-transform duration-300 group-hover:-rotate-12"
+                            />
                             <span>GET APP</span>
                         </Link>
-                        
-                        <div className="flex items-center gap-2 pl-4 ml-1 border-l border-border/50">
+
+                        <div className="border-border/50 ml-1 flex items-center gap-2 border-l pl-4">
                             {auth?.user ? (
                                 <Link prefetch href={hasRole('User') || hasRole('Garage') || hasRole('Shop') ? '/user-dashboard' : '/dashboard'}>
-                                    <Avatar className="h-9 w-9 overflow-hidden rounded-full border border-border/50 shadow-sm transition-transform hover:scale-105">
+                                    <Avatar className="border-border/50 h-9 w-9 overflow-hidden rounded-full border shadow-sm transition-transform hover:scale-105">
                                         <AvatarImage src={`/assets/images/users/thumb/${auth?.user?.image}`} alt={auth?.user?.name} />
                                         <AvatarFallback className="bg-primary/10 text-primary font-medium">
                                             {getInitials(auth?.user?.name)}
@@ -142,7 +150,7 @@ const MyHeader = () => {
                                 </Link>
                             ) : (
                                 <Link prefetch href="/login">
-                                    <Button size="icon" variant="outline" className="rounded-full bg-background/50 border-border/50 hover:bg-muted">
+                                    <Button size="icon" variant="outline" className="bg-background/50 border-border/50 hover:bg-muted rounded-full">
                                         <UserIconAnimated stroke="currentColor" className="size-4" />
                                     </Button>
                                 </Link>
@@ -155,11 +163,9 @@ const MyHeader = () => {
             </div>
 
             {/* Main Sticky Navigation */}
-            <div className="bg-background/80 sticky top-0 z-50 border-b border-border/40 backdrop-blur-xl shadow-sm hidden lg:block">
-                <nav className="mx-auto flex max-w-screen-xl items-center py-2 px-4">
-                    <ul className="flex items-center gap-2 -ml-2">
-                        {navItems.map(renderNavLink)}
-                    </ul>
+            <div className="bg-background/80 border-border/40 sticky top-0 z-50 hidden border-b shadow-sm backdrop-blur-xl lg:block">
+                <nav className="mx-auto flex max-w-screen-xl items-center px-4 py-2">
+                    <ul className="-ml-2 flex items-center gap-2">{navItems.map(renderNavLink)}</ul>
                 </nav>
             </div>
         </>

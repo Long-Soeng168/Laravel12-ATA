@@ -55,7 +55,7 @@
     @inertiaHead
 </head>
 
-<body class="font-poppins-regular antialiased scroll-smooth">
+<body class="antialiased scroll-smooth">
     @inertia
 </body>
 

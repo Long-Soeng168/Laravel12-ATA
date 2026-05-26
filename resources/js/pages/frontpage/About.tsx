@@ -1,250 +1,131 @@
-import { Button } from '@/components/ui/button';
-import useTranslation from '@/hooks/use-translation';
-import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowUpRightIcon } from 'lucide-react';
+import { ArrowRight, FileText, GraduationCap, MapPin, Phone, Search, SendIcon, ShoppingCart } from 'lucide-react';
 import FrontPageLayout from './layouts/frontpage-layout';
 
-const About = () => {
-    const { about, whyChooseUs, buildForEveryone, getInTouch, privacyPolicy, getStartedNow } = usePage().props;
-    const { t, currentLocale } = useTranslation();
+const FeatureCard = ({ icon: Icon, title, desc }: { icon: any; title: string; desc: string }) => (
+    <div className="bg-card border-border flex flex-col items-center gap-4 border p-8 text-center transition-colors hover:border-[#FF6D00]">
+        <div className="flex h-16 w-16 items-center justify-center border border-[#FF6D00]/20 bg-[#FF6D00]/10 text-[#FF6D00]">
+            <Icon className="h-8 w-8" />
+        </div>
+        <h3 className="text-foreground text-lg font-bold tracking-tight uppercase">{title}</h3>
+        <p className="text-muted-foreground text-sm leading-relaxed">{desc}</p>
+    </div>
+);
+
+export default function AboutPage() {
     return (
         <FrontPageLayout>
-             <Head>
-                <title>{about?.title}</title>
-                <meta
-                    name="description"
-                    content={about?.short_description}
-                />
-            </Head>
-            <div className="text-foreground bg-background">
-                {/* Main Content */}
-                <main className="mx-auto max-w-7xl px-4 py-20">
-                    {/* About */}
-                    <section>
-                        <div className="text-center">
-                            <h2 className="text-foreground mb-6 text-4xl font-bold">{currentLocale == 'kh' ? about.title_kh : about.title}</h2>
-                            <p
-                                className="mx-auto mb-8 max-w-3xl text-lg text-gray-400"
-                                dangerouslySetInnerHTML={{ __html: currentLocale == 'kh' ? about.short_description_kh : about.short_description }}
-                            ></p>
-                        </div>
+            <div className="container mx-auto px-4 py-12 md:px-6">
+                {/* Hero Section */}
+                <section className="mb-20 text-center">
+                    <h1 className="text-foreground mb-6 text-4xl font-black tracking-tighter uppercase md:text-5xl">
+                        About <span className="text-[#FF6D00]">ATech Auto</span>
+                    </h1>
+                    <p className="text-muted-foreground mx-auto max-w-2xl text-lg leading-relaxed">
+                        ATech Auto is your ultimate companion for all things automotive. Designed for car owners, auto engineers, garage
+                        professionals, and passionate enthusiasts, our platform offers everything you need to maintain, repair, and enjoy your vehicle
+                        to the fullest.
+                    </p>
+                </section>
 
-                        {about?.children?.length > 0 && (
-                            <div className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
-                                {about?.children?.map((item) => (
-                                    <div className="bg-card rounded-3xl p-8 shadow-xl">
-                                        <h3 className="text-card-foreground mb-2 text-2xl font-bold">
-                                            {currentLocale == 'kh' ? item.title_kh : item.title}
-                                        </h3>
-                                        <p
-                                            className="text-gray-500"
-                                            dangerouslySetInnerHTML={{
-                                                __html: currentLocale == 'kh' ? item.short_description_kh : item.short_description,
-                                            }}
-                                        ></p>
-                                    </div>
-                                ))}
+                {/* Core Pillars */}
+                <section className="mb-20 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <FeatureCard
+                        icon={Search}
+                        title="Smart Tools & Decoders"
+                        desc="Instantly decode vehicle error codes, manage diagnostics, and access essential repair documentation."
+                    />
+                    <FeatureCard
+                        icon={GraduationCap}
+                        title="Learn & Grow"
+                        desc="Boost your skills with curated automotive courses tailored for beginners, professionals, and enthusiasts alike."
+                    />
+                    <FeatureCard
+                        icon={ShoppingCart}
+                        title="Product Marketplace"
+                        desc="Discover top-quality automotive products, tools, and accessories carefully selected for performance."
+                    />
+                </section>
+
+                {/* Why Choose Us */}
+                <section className="bg-card border-border mb-20 border p-8 md:p-12">
+                    <h2 className="text-foreground mb-10 text-center text-2xl font-bold tracking-tight uppercase">Why Choose Us?</h2>
+                    <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+                        {[
+                            { icon: ShoppingCart, title: 'Shop Products', desc: 'Top-quality automotive tools, parts & accessories.' },
+                            { icon: GraduationCap, title: 'Learn & Grow', desc: 'Expert-crafted courses to boost your diagnostic skills.' },
+                            { icon: Search, title: 'DTC Decoder', desc: 'Decode vehicle error codes instantly and fix issues fast.' },
+                            { icon: FileText, title: 'Docs & Manuals', desc: 'Access essential guides, manuals and repair docs.' },
+                            { icon: MapPin, title: 'Garage Finder', desc: 'Find trusted garages with real reviews near you.' },
+                        ].map((item, i) => (
+                            <div key={i} className="flex gap-4">
+                                <item.icon className="h-6 w-6 shrink-0 text-[#FF6D00]" />
+                                <div>
+                                    <h4 className="text-foreground font-bold">{item.title}</h4>
+                                    <p className="text-muted-foreground text-sm">{item.desc}</p>
+                                </div>
                             </div>
-                        )}
+                        ))}
+                    </div>
+                </section>
 
-                        <div className="mt-16 text-center">
-                            <p
-                                className="mx-auto max-w-3xl text-lg text-gray-400"
-                                dangerouslySetInnerHTML={{ __html: currentLocale == 'kh' ? about.long_description_kh : about.long_description }}
-                            ></p>
-                        </div>
-                    </section>
-
-                    <section className="mt-20">
-                        <div className="text-center">
-                            <h2 className="text-foreground mb-6 text-4xl font-bold">
-                                {currentLocale == 'kh' ? whyChooseUs.title_kh : whyChooseUs.title}
-                            </h2>
-                            <p
-                                className="mx-auto mb-8 max-w-3xl text-lg text-gray-400"
-                                dangerouslySetInnerHTML={{
-                                    __html: currentLocale == 'kh' ? whyChooseUs.short_description_kh : whyChooseUs.short_description,
-                                }}
-                            ></p>
-                        </div>
-
-                        {whyChooseUs?.children?.length > 0 && (
-                            <div className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
-                                {whyChooseUs?.children?.map((item) => (
-                                    <div className="bg-card rounded-3xl p-8 shadow-xl">
-                                        <h3 className="text-card-foreground mb-2 text-2xl font-bold">
-                                            {currentLocale == 'kh' ? item.title_kh : item.title}
-                                        </h3>
-                                        <p
-                                            className="text-gray-500"
-                                            dangerouslySetInnerHTML={{
-                                                __html: currentLocale == 'kh' ? item.short_description_kh : item.short_description,
-                                            }}
-                                        ></p>
-                                    </div>
-                                ))}
+                {/* Target Audience */}
+                <section className="mb-20">
+                    <h2 className="text-foreground mb-10 text-center text-2xl font-bold tracking-tight uppercase">Built for Everyone</h2>
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                        {[
+                            { title: 'Car Owners', desc: 'Stay ahead with smart tools for maintenance.' },
+                            { title: 'Auto Engineers', desc: 'Take your skills further with industry-focused learning.' },
+                            { title: 'Garage Owners', desc: 'Manage smarter, reach more customers & grow.' },
+                            { title: 'Car Enthusiasts', desc: 'Dive deep into tools, docs & your passion.' },
+                        ].map((item, i) => (
+                            <div key={i} className="border-border bg-background border p-6 text-center">
+                                <h4 className="text-foreground mb-2 font-bold">{item.title}</h4>
+                                <p className="text-muted-foreground text-sm">{item.desc}</p>
                             </div>
-                        )}
+                        ))}
+                    </div>
+                </section>
 
-                        <div className="mt-16 text-center">
-                            <p
-                                className="mx-auto max-w-3xl text-lg text-gray-400"
-                                dangerouslySetInnerHTML={{
-                                    __html: currentLocale == 'kh' ? whyChooseUs.long_description_kh : whyChooseUs.long_description,
-                                }}
-                            ></p>
-                        </div>
-                    </section>
-
-                    <section className="mt-20">
-                        <div>
-                            <h2 className="text-foreground mb-6 text-center text-4xl font-bold">
-                                {currentLocale == 'kh' ? buildForEveryone.title_kh : buildForEveryone.title}
-                            </h2>
-                            <p
-                                className="mx-auto mb-8 max-w-3xl text-lg text-gray-400"
-                                dangerouslySetInnerHTML={{
-                                    __html: currentLocale == 'kh' ? buildForEveryone.short_description_kh : buildForEveryone.short_description,
-                                }}
-                            ></p>
-                        </div>
-
-                        {buildForEveryone?.children?.length > 0 && (
-                            <div className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
-                                {buildForEveryone?.children?.map((item) => (
-                                    <div className="bg-card rounded-3xl p-8 shadow-xl">
-                                        <h3 className="text-card-foreground mb-2 text-2xl font-bold">
-                                            {currentLocale == 'kh' ? item.title_kh : item.title}
-                                        </h3>
-                                        <p
-                                            className="text-gray-500"
-                                            dangerouslySetInnerHTML={{
-                                                __html: currentLocale == 'kh' ? item.short_description_kh : item.short_description,
-                                            }}
-                                        ></p>
-                                    </div>
-                                ))}
+                {/* Privacy & Contact */}
+                <section className="mb-20 grid grid-cols-1 gap-12 md:grid-cols-2">
+                    <div className="bg-card border-border border p-8">
+                        <h2 className="text-foreground mb-6 text-xl font-bold uppercase">Privacy Policy</h2>
+                        <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
+                            We respect your privacy and are committed to protecting your personal data. We do not share or sell your data to third
+                            parties. Your trust is important to us, and we take security seriously.
+                        </p>
+                        <a href="#" className="inline-flex items-center text-sm font-bold text-[#FF6D00] hover:underline">
+                            More about privacy <ArrowRight className="ml-1 h-4 w-4" />
+                        </a>
+                    </div>
+                    <div className="bg-card border-border border p-8">
+                        <h2 className="text-foreground mb-6 text-xl font-bold uppercase">Get in Touch</h2>
+                        <div className="text-muted-foreground space-y-4 text-sm">
+                            <div className="flex items-center gap-3">
+                                <Phone className="h-4 w-4 text-[#FF6D00]" /> 085 839 881
                             </div>
-                        )}
-
-                        <div className="mt-16 text-center">
-                            <p
-                                className="mx-auto max-w-3xl text-lg text-gray-400"
-                                dangerouslySetInnerHTML={{
-                                    __html: currentLocale == 'kh' ? buildForEveryone.long_description_kh : buildForEveryone.long_description,
-                                }}
-                            ></p>
-                        </div>
-                    </section>
-                    <section className="mt-20">
-                        <div>
-                            <h2 className="text-foreground mb-6 text-center text-4xl font-bold">
-                                {currentLocale == 'kh' ? getInTouch.title_kh : getInTouch.title}
-                            </h2>
-                            <p
-                                className="mx-auto mb-8 max-w-3xl text-lg text-gray-400"
-                                dangerouslySetInnerHTML={{
-                                    __html: currentLocale == 'kh' ? getInTouch.short_description_kh : getInTouch.short_description,
-                                }}
-                            ></p>
-                        </div>
-
-                        {getInTouch?.children?.length > 0 && (
-                            <div className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
-                                {getInTouch?.children?.map((item) => (
-                                    <div className="bg-card rounded-3xl p-8 shadow-xl">
-                                        <h3 className="text-card-foreground mb-2 text-2xl font-bold">
-                                            {currentLocale == 'kh' ? item.title_kh : item.title}
-                                        </h3>
-                                        <p
-                                            className="text-gray-500"
-                                            dangerouslySetInnerHTML={{
-                                                __html: currentLocale == 'kh' ? item.short_description_kh : item.short_description,
-                                            }}
-                                        ></p>
-                                    </div>
-                                ))}
+                            <div className="flex items-center gap-3">
+                                <SendIcon className="h-4 w-4 text-[#FF6D00]" />
+                                <a href="https://t.me/atechauto086" target="_blank" className="hover:text-[#FF6D00]">
+                                    Telegram: @atechauto086
+                                </a>
                             </div>
-                        )}
-
-                        <div className="mt-16 text-center">
-                            <p
-                                className="mx-auto max-w-3xl text-lg text-gray-400"
-                                dangerouslySetInnerHTML={{
-                                    __html: currentLocale == 'kh' ? getInTouch.long_description_kh : getInTouch.long_description,
-                                }}
-                            ></p>
                         </div>
-                    </section>
-                    <section className="mt-20">
-                        <div className="mx-auto mb-8 max-w-3xl">
-                            <h2 className="text-foreground mb-6 text-center text-4xl font-bold">
-                                {currentLocale == 'kh' ? privacyPolicy.title_kh : privacyPolicy.title}
-                            </h2>
-                            <p
-                                className="mx-auto mb-8 max-w-3xl text-lg text-gray-400"
-                                dangerouslySetInnerHTML={{
-                                    __html: currentLocale == 'kh' ? privacyPolicy.short_description_kh : privacyPolicy.short_description,
-                                }}
-                            ></p>
-                            <Link href={`/privacy`} prefetch>
-                                <Button variant="outline" size="lg">
-                                    More about privacy <ArrowUpRightIcon />
-                                </Button>
-                            </Link>
-                        </div>
+                    </div>
+                </section>
 
-                        {privacyPolicy?.children?.length > 0 && (
-                            <div className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
-                                {privacyPolicy?.children?.map((item) => (
-                                    <div className="bg-card rounded-3xl p-8 shadow-xl">
-                                        <h3 className="text-card-foreground mb-2 text-2xl font-bold">
-                                            {currentLocale == 'kh' ? item.title_kh : item.title}
-                                        </h3>
-                                        <p
-                                            className="text-gray-500"
-                                            dangerouslySetInnerHTML={{
-                                                __html: currentLocale == 'kh' ? item.short_description_kh : item.short_description,
-                                            }}
-                                        ></p>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        <div className="mt-16 text-center">
-                            <p
-                                className="mx-auto max-w-3xl text-lg text-gray-400"
-                                dangerouslySetInnerHTML={{
-                                    __html: currentLocale == 'kh' ? privacyPolicy.long_description_kh : privacyPolicy.long_description,
-                                }}
-                            ></p>
-                        </div>
-                    </section>
-
-                    {/* Download Call-to-Action */}
-                    <section className="text-center">
-                        <h2 className="text-foreground mb-6 text-center text-4xl font-bold">
-                            {currentLocale == 'kh' ? getStartedNow.title_kh : getStartedNow.title}
-                        </h2>
-                        <p
-                            className="mx-auto mb-8 max-w-3xl text-lg text-gray-400"
-                            dangerouslySetInnerHTML={{
-                                __html: currentLocale == 'kh' ? getStartedNow.short_description_kh : getStartedNow.short_description,
-                            }}
-                        ></p>
-                        <Link
-                            href="/download-app"
-                            prefetch
-                            className="from-true-primary hover:from-true-primary rounded-full bg-gradient-to-r to-purple-600 px-10 py-4 font-semibold text-white transition hover:to-purple-700"
-                        >
-                            Download the App
-                        </Link>
-                    </section>
-                </main>
+                {/* Call to Action */}
+                <section className="bg-[#FF6D00] p-12 text-center text-white">
+                    <h2 className="mb-4 text-3xl font-black tracking-tight uppercase">Get Started Now</h2>
+                    <p className="mx-auto mb-8 max-w-lg font-medium opacity-90">Download the app and drive your automotive knowledge forward.</p>
+                    <a
+                        href="/download"
+                        className="inline-block bg-[#121212] px-8 py-4 font-bold tracking-wider text-[#FF6D00] uppercase transition-colors hover:bg-neutral-900"
+                    >
+                        Download the App
+                    </a>
+                </section>
             </div>
         </FrontPageLayout>
     );
-};
-
-export default About;
+}

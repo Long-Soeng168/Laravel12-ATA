@@ -89,7 +89,7 @@ export default function MyFooter() {
                                 </Link>
                             </li>
                             <li>
-                                <Link prefetch href="/about-us" className="hover:underline">
+                                <Link prefetch href="/about" className="hover:underline">
                                     {t('About')}
                                 </Link>
                             </li>

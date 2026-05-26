@@ -1,83 +1,109 @@
-import { Head, usePage } from '@inertiajs/react';
-import { Globe2Icon, MailIcon, MapPinIcon, PhoneIcon } from 'lucide-react';
-import ContactFormSubmit from './components/contact-form-submit';
+import { Mail, MapPin, Phone, Send } from 'lucide-react';
+import React from 'react';
 import FrontPageLayout from './layouts/frontpage-layout';
 
-const ContactCamActivePage = () => {
-    const { application_info, contactPage, app_url } = usePage().props;
+// --- Shared Flat UI Primitives ---
+const getButtonStyles = (variant: 'default' | 'accent' = 'default', className = '') => {
+    const baseStyle =
+        'inline-flex items-center justify-center text-sm font-medium transition-colors h-10 px-6 py-2 rounded-none border border-transparent cursor-pointer';
+    const variants = {
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        accent: 'bg-[#FF6D00] text-white hover:bg-[#e66200]',
+    };
+    return `${baseStyle} ${variants[variant]} ${className}`;
+};
 
+const Input = ({ className = '', ...props }: React.InputHTMLAttributes<HTMLInputElement>) => (
+    <input
+        className={`border-border bg-card h-10 w-full rounded-none border px-4 py-2 text-sm focus:border-[#FF6D00] focus:outline-none ${className}`}
+        {...props}
+    />
+);
+
+const TextArea = ({ className = '', ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => (
+    <textarea
+        className={`border-border bg-card min-h-[120px] w-full rounded-none border px-4 py-3 text-sm focus:border-[#FF6D00] focus:outline-none ${className}`}
+        {...props}
+    />
+);
+
+export default function ContactPage() {
     return (
         <FrontPageLayout>
-            <Head>
-                <title>Contact A-Tech Auto - Get in Touch in Phnom Penh, Cambodia</title>
-                <meta
-                    name="description"
-                    content="Reach out to A-Tech Auto for inquiries about automotive tools, courses, garage services, or spare parts in Phnom Penh, Cambodia. We're here to help car owners and professionals."
-                />
-            </Head>
-            <div className="flex min-h-screen items-start justify-center">
-                <div className="mx-auto w-full max-w-screen-xl px-4">
-                    {/* <div className="text-center">
-                        <SectionHeader label="Contact Us" title={contactPage?.title} />
-                        <div className={`prose ck-content mx-auto mt-4 max-w-xl text-center text-lg lg:text-xl`}>
-                            <div dangerouslySetInnerHTML={{ __html: contactPage?.long_description }} />
+            <div className="container mx-auto px-4 py-12 md:px-6">
+                {/* Header */}
+                <div className="mb-12">
+                    <h1 className="text-foreground mb-4 text-3xl font-black tracking-tighter uppercase">Get in Touch</h1>
+                    <p className="text-muted-foreground max-w-xl text-lg">
+                        Have questions about our products, services, or how ATech Auto can support your automotive journey? Reach out to our team.
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
+                    {/* Contact Form */}
+                    <div className="bg-card border-border border p-8 lg:col-span-2">
+                        <h2 className="text-foreground mb-6 text-xl font-bold uppercase">Send a Message</h2>
+                        <form className="space-y-4">
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <Input placeholder="Full Name" />
+                                <Input type="email" placeholder="Email Address" />
+                            </div>
+                            <Input placeholder="Subject" />
+                            <TextArea placeholder="How can we help you?" />
+                            <button type="submit" className={getButtonStyles('accent', 'w-full md:w-auto')}>
+                                Send Message <Send className="ml-2 h-4 w-4" />
+                            </button>
+                        </form>
+                    </div>
+
+                    {/* Contact Info Sidebar */}
+                    <div className="space-y-8">
+                        <div className="bg-card border-border border p-8">
+                            <h2 className="text-foreground mb-6 text-xl font-bold uppercase">Contact Channels</h2>
+                            <div className="text-muted-foreground space-y-6 text-sm">
+                                <div className="flex items-start gap-4">
+                                    <Phone className="h-5 w-5 shrink-0 text-[#FF6D00]" />
+                                    <div>
+                                        <p className="text-foreground font-bold">Phone</p>
+                                        <a href="tel:+85585839881" className="hover:text-[#FF6D00]">
+                                            +855 85 839 881
+                                        </a>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-4">
+                                    <Send className="h-5 w-5 shrink-0 text-[#FF6D00]" />
+                                    <div>
+                                        <p className="text-foreground font-bold">Telegram</p>
+                                        <a href="https://t.me/atechauto086" target="_blank" className="hover:text-[#FF6D00]">
+                                            @atechauto086
+                                        </a>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-4">
+                                    <Mail className="h-5 w-5 shrink-0 text-[#FF6D00]" />
+                                    <div>
+                                        <p className="text-foreground font-bold">Email</p>
+                                        <a href="mailto:longsoeng017@gmail.com" className="hover:text-[#FF6D00]">
+                                            longsoeng017@gmail.com
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div> */}
 
-                    <div className="my-20 grid gap-16 md:gap-10 lg:grid-cols-1">
-                        {/* Contact Info */}
-                        <div className="grid h-auto grid-cols-1 content-start gap-x-8 gap-y-12 sm:grid-cols-2">
-                            <div className="flex flex-col items-center justify-center sm:items-start">
-                                <div className="bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-full">
-                                    <MapPinIcon />
+                        {/* Location Mini-Card */}
+                        <div className="bg-card border-border border p-8">
+                            <div className="flex items-start gap-4">
+                                <MapPin className="h-5 w-5 shrink-0 text-[#FF6D00]" />
+                                <div>
+                                    <p className="text-foreground mb-1 font-bold">Our Office</p>
+                                    <p className="text-muted-foreground text-sm">ភូមិគោកឪឡឹក, សង្កាត់ស្ពានថ្ម, ខណ្ឌដង្កោ, រាជធានីភ្នំពេញ</p>
                                 </div>
-                                <h3 className="mt-6 text-xl font-semibold">Address</h3>
-                                <a className="text-primary font-medium" href={`#`}>
-                                    {application_info?.address}
-                                </a>
-                            </div>
-                            <div className="flex flex-col items-center justify-center sm:items-start">
-                                <div className="bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-full">
-                                    <PhoneIcon />
-                                </div>
-                                <h3 className="mt-6 text-xl font-semibold">Phone</h3>
-                                <a className="text-primary font-medium" href={`tel:${application_info?.phone}`}>
-                                    {application_info?.phone}
-                                </a>
-                            </div>
-                            <div className="flex flex-col items-center justify-center sm:items-start">
-                                <div className="bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-full">
-                                    <MailIcon />
-                                </div>
-                                <h3 className="mt-6 text-xl font-semibold">Email</h3>
-                                <a className="text-primary font-medium" href={`mailto:${application_info?.email}`}>
-                                    {application_info?.email}
-                                </a>
-                            </div>
-
-                            <div className="flex flex-col items-center justify-center sm:items-start">
-                                <div className="bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-full">
-                                    <Globe2Icon />
-                                </div>
-                                <h3 className="mt-6 text-xl font-semibold">Website</h3>
-                                <a className="text-primary font-medium" href={app_url}>
-                                    {app_url}
-                                </a>
                             </div>
                         </div>
-
-                        {/* Contact Form */}
-                        {/* <ContactFormSubmit /> */}
                     </div>
                 </div>
             </div>
-            {application_info?.google_map && (
-                <div>
-                    <iframe className="h-[400px]" src={application_info?.google_map} width="100%" height="100%" loading="lazy"></iframe>
-                </div>
-            )}
         </FrontPageLayout>
     );
-};
-
-export default ContactCamActivePage;
+}

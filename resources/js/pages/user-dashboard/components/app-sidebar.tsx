@@ -72,7 +72,7 @@ export function AppSidebar() {
         // },
     ];
     return (
-        <Sidebar collapsible="icon" variant="inset" className={`${currentLocale == 'kh' ? 'font-siemreap-regular' : 'font-poppins-regular'}`}>
+        <Sidebar collapsible="icon" variant="inset" className={``}>
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>

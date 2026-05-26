@@ -95,7 +95,7 @@ class FrontPageController extends Controller
         $newArrivalsProducts->transform($transformItem);
 
         $shops = Shop::orderBy('order_index')->orderBy('id', 'desc')->limit(15)->get();
-        return Inertia::render("frontpage/Index", [
+        return Inertia::render("frontpage/HomePage", [
             'topBanners' => $topBanners,
             'middleBanners' => $middleBanners,
             'posts' => $posts,

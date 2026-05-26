@@ -50,10 +50,8 @@ export default function Page() {
                         <ResizablePanel defaultSize={100}>
                             <div ref={panelRef}>
                                 <TabsContent value="preview" className="prose ck-content max-w-none">
-                                    <div
-                                        className={`text-muted-foreground mb-4 text-base ${currentLocale == 'kh' ? 'font-koulen-regular leading-[2]' : 'font-semibold'}`}
-                                    >
-                                        {t('Viewport width')}: <span className="text-primary font-poppins-regular">{panelWidth} px</span>
+                                    <div className={`text-muted-foreground mb-4 text-base`}>
+                                        {t('Viewport width')}: <span className="text-primary">{panelWidth} px</span>
                                     </div>
                                     <div dangerouslySetInnerHTML={{ __html: data }} />
                                 </TabsContent>

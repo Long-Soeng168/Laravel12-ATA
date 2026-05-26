@@ -49,36 +49,15 @@ html {
         width: 0%;
     }
 }
-/* Start Long Soeng Font */
-@font-face {
-    font-family: PoppinsRegular;
-    src: url('/assets/fonts/Poppins/Poppins-Regular.ttf') format('truetype');
-}
-@font-face {
-    font-family: Siemreap;
-    src: url('/assets/fonts/Siemreap/Siemreap-Regular.ttf') format('truetype');
-}
-@font-face {
-    font-family: Koulen;
-    src: url('/assets/fonts/Koulen/Koulen-Regular.ttf') format('truetype');
-}
-/* End Long Soeng Font */
 
-/*End Western font */
+@font-face {
+    font-family: KantumruyPro;
+    src: url('/assets/fonts/KantumruyPro/KantumruyPro.ttf') format('truetype');
+}
 
 @theme {
-    /* Start Long Soeng */
-    --font-poppins-regular:
-        'PoppinsRegular', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-    --font-koulen-regular:
-        'Koulen', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-    --font-siemreap-regular:
-        'Siemreap', 'PoppinsRegular', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-        'Noto Color Emoji';
-    /* End Long Soeng */
-
     --font-sans:
-        'PoppinsRegular', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'KantumruyPro', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
     --font-moul-regular: MoulRegular;
     --font-now-black: NowBlack, 'Poppins';
