@@ -23,85 +23,27 @@ use Inertia\Inertia;
 
 class FrontPageController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $topBanners = Banner::where('position_code', 'HOME-21/9')->orderBy('order_index')->where('status', 'active')->get();
-        $middleBanners = Banner::where('position_code', 'HOME-16/9')->orderBy('order_index')->where('status', 'active')->get();
+        // 1. Fetch the limited categories and append the image URL in-place
+        // $itemCategories = ItemCategory::where('status', 'active')
+        //     ->orderBy('order_index')
+        //     ->orderBy('name')
+        //     ->limit(2)
+        //     ->get()
+        //     ->each(function ($category) {
+        //         $category->image_url = $category->image
+        //             ? asset('assets/images/item_categories/thumb/' . $category->image)
+        //             : null;
+        //     });
 
-        $posts = Post::where('status', 'active')->with('images', 'category')->orderBy('id', 'desc')->limit(3)->get();
+        // 2. Simply grab the first item from the collection you already loaded
 
-        $products = Item::with(['images', 'shop', 'category'])
-            ->where('status', 'active')
-            ->inRandomOrder()
-            ->take(12)
-            ->get();
-
-        $newArrivalsProducts = Item::with(['images', 'shop', 'category'])
-            ->where('status', 'active')
-            ->orderBy('id', 'desc')
-            ->take(12)
-            ->get();
-
-        // Map Category Attributes based on API v2 Logic
-        $allItems = $products->merge($newArrivalsProducts);
-        $categoryIds = $allItems->pluck('category.id')->filter()->unique();
-
-        $categoryMaps = ItemCategoryField::whereIn('category_id', $categoryIds)
-            ->with('options')
-            ->get()
-            ->groupBy('category_id');
-
-        $transformItem = function ($item) use ($categoryMaps) {
-            $firstImage = $item->images->first();
-
-            $item->image_url = $firstImage
-                ? asset('assets/images/items/' . $firstImage->image)
-                : asset('assets/images/placeholder.webp');
-
-            $item->total_images = $item->images->count();
-
-            $item->thumbnail_image = $firstImage ? [
-                'id' => $firstImage->id,
-                'image' => $firstImage->image,
-                'image_url' => asset('assets/images/items/' . $firstImage->image),
-            ] : null;
-
-            $categoryId = $item->category?->id;
-            $fields = $categoryMaps->get($categoryId);
-            $displayAttributes = [];
-
-            if ($fields && is_array($item->attributes)) {
-                foreach ($item->attributes as $key => $storedValue) {
-                    $field = $fields->where('field_key', $key)->first();
-                    $option = $field ? $field->options->where('option_value', $storedValue)->first() : null;
-
-                    $displayAttributes[$key] = [
-                        'label' => $field->label ?? $key,
-                        'label_kh' => $field->label_kh ?? $key,
-                        'value' => $storedValue,
-                        'value_label_en' => $option->label_en ?? $storedValue,
-                        'value_label_kh' => $option->label_kh ?? $storedValue,
-                    ];
-                }
-            }
-
-            $item->display_attributes = $displayAttributes;
-            $item->makeHidden(['images', 'category']); // Clean up large nested relations
-
-            return $item;
-        };
-
-        $products->transform($transformItem);
-        $newArrivalsProducts->transform($transformItem);
-
-        $shops = Shop::orderBy('order_index')->orderBy('id', 'desc')->limit(15)->get();
+        // return [
+        //     'itemCategories'   => $itemCategories,
+        // ];
         return Inertia::render("frontpage/HomePage", [
-            'topBanners' => $topBanners,
-            'middleBanners' => $middleBanners,
-            'posts' => $posts,
-            'products' => $products,
-            'newArrivalsProducts' => $newArrivalsProducts,
-            'shops' => $shops,
+            // 'itemCategories'   => $itemCategories,
         ]);
     }
     public function shops(Request $request)

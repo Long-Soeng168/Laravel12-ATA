@@ -240,10 +240,14 @@ Route::get('/products', function (Request $request) {
 
         return $item;
     });
-    // return $items;
+
+    $selectedCategory = ItemCategory::where('code', $request->category_code)->first() ?? null;
+
+    // return $selectedCategory;
     return Inertia::render('frontpage/shops/ProductListingPage', [
         'form_data' => $form_data,
         'tableData' => $items,
+        'selectedCategory' => $selectedCategory,
     ]);
 });
 Route::get('/shops', function () {

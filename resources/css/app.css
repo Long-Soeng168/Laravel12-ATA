@@ -243,8 +243,8 @@ html {
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.54 0.15 249.67);
-    --true-primary: oklch(0.54 0.15 249.67);
+    --primary: #194fad;
+    --true-primary: #194fad;
     /* --primary: oklch(0.59 0.23 278.87);
     --true-primary: oklch(0.59 0.23 278.87); */
     --true-primary-two: oklch(0.39 0.15 266.19);
@@ -292,7 +292,7 @@ html {
     --popover: oklch(0.145 0 0);
     --popover-foreground: oklch(0.985 0 0);
     --primary: oklch(0.985 0 0);
-    --true-primary: oklch(0.54 0.15 249.67);
+    --true-primary: #3e82ff;
     /* --true-primary: oklch(0.59 0.23 278.87); */
     --true-primary-two: oklch(0.39 0.15 266.19);
     --true-primary-three: oklch(0.38 0.03 237.56);

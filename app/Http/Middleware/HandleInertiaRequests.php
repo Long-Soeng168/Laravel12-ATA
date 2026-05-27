@@ -44,8 +44,9 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
+        // [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        // dd();
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -69,8 +70,15 @@ class HandleInertiaRequests extends Middleware
 
             'application_info' => ApplicationInfo::first(),
             'links' => Link::where('status', 'active')->orderBy('order_index')->get(),
-            'item_categories' => ItemCategory::with('children')->withCount('items')->where('status', 'active')->where('parent_code', null)->orderBy('order_index')->orderBy('name')->get() ?? [],
-            'post_counts' => Post::where('status', 'active')->count(),
+            'itemCategories' => ItemCategory::where('status', 'active')
+                ->orderBy('order_index')
+                ->orderBy('name')
+                ->get()
+                ->each(function ($category) {
+                    $category->image_url = $category->image
+                        ? asset('assets/images/item_categories/thumb/' . $category->image)
+                        : null;
+                }) ?? [],
 
             'flash' => [
                 'success' => session('success'),

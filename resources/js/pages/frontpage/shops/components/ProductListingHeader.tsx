@@ -2,11 +2,13 @@ import useTranslation from '@/hooks/use-translation';
 import { router, usePage } from '@inertiajs/react';
 import {
     ArrowDownUp,
-    Car,
     Check,
+    CheckCircle2,
     ChevronDown,
+    ChevronRightIcon,
     DollarSign,
     Image as ImageIcon,
+    Layers3Icon,
     LayoutGridIcon,
     MapPin,
     Search,
@@ -21,6 +23,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
+import HeaderSearchInput from '../../layouts/components/HeaderSearchInput';
 
 // --- Standard Select Filter (For select/radio <= 5 Options) ---
 
@@ -38,7 +41,7 @@ const SelectFilter: React.FC<SelectFilterProps> = ({ icon, label, value, onChang
             className={`relative flex shrink-0 items-center rounded-none border transition-colors focus-within:border-gray-900 hover:border-gray-500 dark:focus-within:border-gray-100 dark:hover:border-gray-400 ${
                 value
                     ? 'border-gray-900 bg-gray-900 text-white dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900'
-                    : 'border-gray-300 bg-white/90 text-gray-700 dark:border-gray-700 dark:bg-gray-900/90 dark:text-gray-300'
+                    : 'border-gray-300 bg-white/90 text-gray-700 dark:border-gray-700 dark:bg-white/5 dark:text-gray-300'
             }`}
         >
             {icon && (
@@ -99,7 +102,7 @@ const ListSelectSheet: React.FC<ListSelectSheetProps> = ({ icon, title, value, o
                     className={`flex shrink-0 items-center gap-1.5 rounded-none border px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-1 focus-visible:ring-gray-900 focus-visible:outline-none dark:focus-visible:ring-gray-100 ${
                         value
                             ? 'border-gray-900 bg-gray-900 text-white dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900'
-                            : 'border-gray-300 bg-white/90 text-gray-700 hover:border-gray-500 hover:bg-gray-50/90 dark:border-gray-700 dark:bg-gray-900/90 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:bg-gray-800/90'
+                            : 'border-gray-300 bg-white/90 text-gray-700 hover:border-gray-500 hover:bg-gray-50/90 dark:border-gray-700 dark:bg-white/5 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:bg-white/5'
                     }`}
                 >
                     {icon && <span className={value ? 'text-gray-300 dark:text-gray-600' : 'text-gray-500 dark:text-gray-400'}>{icon}</span>}
@@ -191,7 +194,7 @@ const TextFilterSheet: React.FC<TextFilterSheetProps> = ({ title, value, type, o
                     className={`flex shrink-0 items-center gap-1.5 rounded-none border px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-1 focus-visible:ring-gray-900 focus-visible:outline-none dark:focus-visible:ring-gray-100 ${
                         value
                             ? 'border-gray-900 bg-gray-900 text-white dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900'
-                            : 'border-gray-300 bg-white/90 text-gray-700 hover:border-gray-500 hover:bg-gray-50/90 dark:border-gray-700 dark:bg-gray-900/90 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:bg-gray-800/90'
+                            : 'border-gray-300 bg-white/90 text-gray-700 hover:border-gray-500 hover:bg-gray-50/90 dark:border-gray-700 dark:bg-white/5 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:bg-white/5'
                     }`}
                 >
                     <span>{value ? `${title}: ${value}` : title}</span>
@@ -288,7 +291,7 @@ const PriceFilterSheet: React.FC<PriceFilterSheetProps> = ({ min, max, onChange 
                     className={`flex shrink-0 items-center gap-1.5 rounded-none border px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-1 focus-visible:ring-gray-900 focus-visible:ring-offset-1 focus-visible:outline-none dark:focus-visible:ring-gray-100 ${
                         hasActivePrice
                             ? 'border-gray-900 bg-gray-900 text-white dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900'
-                            : 'border-gray-300 bg-white/90 text-gray-700 hover:border-gray-500 hover:bg-gray-50/90 dark:border-gray-700 dark:bg-gray-900/90 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:bg-gray-800/90'
+                            : 'border-gray-300 bg-white/90 text-gray-700 hover:border-gray-500 hover:bg-gray-50/90 dark:border-gray-700 dark:bg-white/5 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:bg-white/5'
                     }`}
                 >
                     <DollarSign
@@ -392,19 +395,29 @@ const SeeMoreSheet: React.FC<SeeMoreSheetProps> = ({ title, items, activeCode, o
     return (
         <Sheet>
             <SheetTrigger asChild>
-                <button className="group flex flex-col items-center gap-1.5 outline-none">
-                    <div className="relative flex h-14 w-14 items-center justify-center rounded-none border border-transparent bg-gray-200/80 transition-all hover:bg-gray-300/80 focus-visible:ring-1 focus-visible:ring-gray-900 focus-visible:ring-offset-1 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus-visible:ring-gray-100">
+                <button className="group flex cursor-pointer flex-col items-center gap-1.5 outline-none">
+                    <div
+                        className={`relative flex size-[45px] items-center justify-center rounded-full border border-transparent transition-all focus-visible:ring-1 focus-visible:ring-offset-1 sm:size-[60px] ${
+                            hasHiddenActiveFilter
+                                ? 'bg-blue-50 ring ring-blue-500 dark:bg-blue-950/40 dark:ring-blue-400'
+                                : 'bg-gray-200/80 hover:bg-gray-300/80 dark:bg-gray-800 dark:hover:bg-gray-700'
+                        } focus-visible:ring-gray-900 dark:focus-visible:ring-gray-100`}
+                    >
                         <LayoutGridIcon
-                            className={`h-5 w-5 transition-colors group-hover:text-gray-900 dark:group-hover:text-gray-100 ${
-                                hasHiddenActiveFilter ? 'text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'
+                            className={`size-[18px] transition-colors sm:size-[24px] ${
+                                hasHiddenActiveFilter
+                                    ? 'text-blue-600 dark:text-blue-400'
+                                    : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-200'
                             }`}
                         />
-                        {hasHiddenActiveFilter && <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-none bg-red-500" />}
+                        {hasHiddenActiveFilter && (
+                            <span className="absolute top-2.5 right-2.5 h-2 w-2 animate-pulse rounded-full bg-red-500 dark:bg-red-400" />
+                        )}
                     </div>
                     <span
-                        className={`text-center text-xs transition-colors ${
+                        className={`text-center text-[13px] transition-colors ${
                             hasHiddenActiveFilter
-                                ? 'font-medium text-gray-900 dark:text-gray-100'
+                                ? 'font-medium text-blue-600 dark:text-blue-400'
                                 : 'text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-200'
                         }`}
                     >
@@ -445,7 +458,7 @@ const SeeMoreSheet: React.FC<SeeMoreSheetProps> = ({ title, items, activeCode, o
                                 }`}
                             >
                                 <span>
-                                    {t('All')} {title}
+                                    {t(`All ${title}`)} {}
                                 </span>
                                 {!activeCode && <Check className="h-4 w-4 text-gray-900 dark:text-gray-100" />}
                             </button>
@@ -457,13 +470,15 @@ const SeeMoreSheet: React.FC<SeeMoreSheetProps> = ({ title, items, activeCode, o
                                 <SheetClose asChild key={item.id}>
                                     <button
                                         onClick={() => onSelect(isActive ? '' : item.code)}
-                                        className={`flex w-full items-center gap-3 border-b border-gray-100 p-4 text-left transition-colors hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-900 ${
+                                        className={`flex w-full items-center gap-3 border-b border-gray-100 px-4 py-1.5 text-left transition-colors hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-900 ${
                                             isActive ? 'bg-gray-50 dark:bg-gray-900' : ''
                                         }`}
                                     >
-                                        <div className={`flex h-12 w-12 shrink-0 items-center justify-center bg-white`}>
+                                        <div
+                                            className={`flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white p-1`}
+                                        >
                                             {item.image_url ? (
-                                                <img src={item.image_url} alt={item.name} className="h-11 w-11 object-contain" loading="lazy" />
+                                                <img src={item.image_url} alt={item.name} className="object-contain" loading="lazy" />
                                             ) : (
                                                 <ImageIcon className="h-6 w-6 text-gray-400" />
                                             )}
@@ -473,7 +488,7 @@ const SeeMoreSheet: React.FC<SeeMoreSheetProps> = ({ title, items, activeCode, o
                                         >
                                             {getLocalizedName(item)}
                                         </span>
-                                        {isActive && <Check className="h-4 w-4 text-gray-900 dark:text-gray-100" />}
+                                        {isActive && <Check className="size-5 text-gray-900 dark:text-gray-100" />}
                                     </button>
                                 </SheetClose>
                             );
@@ -498,22 +513,22 @@ interface CategoryItemProps {
 }
 
 const CategoryItem: React.FC<CategoryItemProps> = ({ name, imageUrl, isActive, onClick }) => (
-    <button onClick={onClick} className="group flex flex-col items-center gap-1.5 outline-none">
+    <button onClick={onClick} className="group relative flex cursor-pointer flex-col items-center gap-1.5 outline-none">
         <div
-            className={`flex h-15 w-15 items-center justify-center rounded-none bg-white transition-all focus-visible:ring-1 focus-visible:ring-gray-900 focus-visible:ring-offset-1 dark:focus-visible:ring-gray-100 ${
+            className={`flex size-[45px] items-center justify-center overflow-hidden rounded-full bg-white transition-all focus-visible:ring-1 focus-visible:ring-gray-900 focus-visible:ring-offset-1 sm:size-[60px] dark:focus-visible:ring-gray-100 ${
                 isActive
                     ? 'border-gray-900 dark:border-gray-100'
                     : 'border-gray-300 hover:border-gray-500 dark:border-gray-700 dark:hover:border-gray-400'
             }`}
         >
             {imageUrl ? (
-                <img src={imageUrl} alt={name} className="h-14 w-14 object-contain" loading="lazy" />
+                <img src={imageUrl} alt={name} className="size-[40px] object-contain sm:size-[50px]" loading="lazy" />
             ) : (
                 <ImageIcon className="h-6 w-6 text-gray-400 transition-colors group-hover:text-gray-600" />
             )}
         </div>
         <span
-            className={`line-clamp-2 text-center text-[12px] transition-colors ${
+            className={`line-clamp-2 text-center text-[13px] transition-colors ${
                 isActive
                     ? 'font-medium text-gray-900 dark:text-gray-100'
                     : 'text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-200'
@@ -521,6 +536,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({ name, imageUrl, isActive, o
         >
             {name}
         </span>
+        {isActive && <CheckCircle2 className="absolute top-0 right-5 size-5 rounded-full bg-blue-500 text-white" />}
     </button>
 );
 
@@ -537,11 +553,12 @@ interface InertiaProps {
 }
 
 export default function ProductListingHeader() {
-    const { form_data } = usePage<InertiaProps>().props;
+    const { props, url } = usePage<InertiaProps>();
+    const { form_data, selectedCategory } = props;
     const { t, currentLocale } = useTranslation();
 
     const MAX_BRAND_ITEMS = 10;
-    const MAX_MODEL_ITEMS = 5;
+    const MAX_MODEL_ITEMS = 10;
 
     const [filters, setFilters] = useState<Record<string, string>>(() => {
         const searchParams = new URLSearchParams(window.location.search);
@@ -551,6 +568,18 @@ export default function ProductListingHeader() {
         });
         return initial;
     });
+
+    const [brandSearchQuery, setBrandSearchQuery] = useState('');
+
+    // --- Added: Synchronize filters when URL changes dynamically via Inertia ---
+    useEffect(() => {
+        const searchParams = new URLSearchParams((url || '').split('?')[1] || '');
+        const updatedFilters: Record<string, string> = {};
+        searchParams.forEach((val, key) => {
+            updatedFilters[key] = val;
+        });
+        setFilters(updatedFilters);
+    }, [url]);
 
     const categories = form_data?.itemCategories || [];
     const allBrands = form_data?.itemBrands || [];
@@ -566,6 +595,16 @@ export default function ProductListingHeader() {
     const dynamicFields = activeCategory?.fields || [];
 
     const displayedBrands = activeCategory ? allBrands.filter((brand) => (activeCategory.brand_ids || []).includes(brand.id)) : allBrands;
+
+    const filteredBrands = useMemo(() => {
+        if (!brandSearchQuery.trim()) return displayedBrands;
+        const query = brandSearchQuery.toLowerCase();
+        return displayedBrands.filter((brand) => {
+            const nameEn = (brand.name || '').toLowerCase();
+            const nameKh = (brand.name_kh || '').toLowerCase();
+            return nameEn.includes(query) || nameKh.includes(query);
+        });
+    }, [displayedBrands, brandSearchQuery]);
 
     const activeBrand = displayedBrands.find((b) => b.code === filters.brand_code);
     const brandModels = activeBrand?.brand_models || [];
@@ -590,7 +629,7 @@ export default function ProductListingHeader() {
         }
 
         if (key === 'category_code') {
-            const keysToKeep = ['province_code', 'sort', 'min_price', 'max_price', 'category_code'];
+            const keysToKeep = ['province_code', 'sort', 'min_price', 'max_price', 'category_code', 'q'];
             Object.keys(newFilters).forEach((k) => {
                 if (!keysToKeep.includes(k)) delete newFilters[k];
             });
@@ -598,6 +637,10 @@ export default function ProductListingHeader() {
 
         if (key === 'brand_code') {
             delete newFilters['model_code'];
+        }
+
+        if (key === 'model_code') {
+            delete newFilters['body_type_code'];
         }
 
         setFilters(newFilters);
@@ -629,22 +672,83 @@ export default function ProductListingHeader() {
         return !visibleItems.some((i) => i.code === activeCode);
     };
 
+    const showCategories = categories.length > 0 && !selectedCategory;
+    const showBrands = displayedBrands.length > 0 && !!selectedCategory;
+    const showBodyTypes = hasBodyType && allBodyTypes.length > 0 && displayedBrands.length > 0 && !!selectedCategory && !filters.model_code;
+    const hasContentToShow = showCategories || showBrands || showBodyTypes;
+
+    // --- ADDED: Breadcrumb Logic ---
+    const activeModel = activeBrand?.brand_models?.find((m: any) => m.code === filters.model_code);
+
+    const breadcrumbs = [
+        { label: t('Home'), action: () => router.get('/') },
+        { label: t('Products'), action: clearFilters },
+    ];
+
+    if (activeCategory) {
+        breadcrumbs.push({
+            label: getLocalizedName(activeCategory),
+            action: () => updateFilter('category_code', activeCategory.code),
+        });
+    }
+
+    if (activeBrand) {
+        breadcrumbs.push({
+            label: getLocalizedName(activeBrand),
+            action: () => updateFilter('brand_code', activeBrand.code),
+        });
+    }
+
+    if (activeModel) {
+        breadcrumbs.push({
+            label: getLocalizedName(activeModel),
+            action: () => updateFilter('model_code', activeModel.code),
+        });
+    }
+    // --------------------------------
+
     return (
         <div>
             <header className="section-container">
+                {/* --- ADDED: Breadcrumb UI --- */}
+                <nav aria-label="Breadcrumb" className="mb-2 flex items-center text-[13px] text-gray-500 dark:text-gray-400">
+                    <ol className="flex flex-wrap items-center gap-1.5">
+                        {breadcrumbs.map((crumb, index) => {
+                            const isLast = index === breadcrumbs.length - 1;
+                            return (
+                                <li key={index} className="flex items-center gap-1.5">
+                                    <button
+                                        onClick={crumb.action}
+                                        disabled={isLast}
+                                        className={`transition-colors hover:text-gray-900 focus-visible:outline-none dark:hover:text-gray-100 ${
+                                            isLast ? 'pointer-events-none font-medium text-gray-900 dark:text-gray-100' : 'cursor-pointer'
+                                        }`}
+                                    >
+                                        {crumb.label}
+                                    </button>
+                                    {!isLast && <ChevronRightIcon className="h-3.5 w-3.5 shrink-0" />}
+                                </li>
+                            );
+                        })}
+                    </ol>
+                </nav>
+                <div className="mb-2 md:hidden">
+                    <HeaderSearchInput showCategories={false} />
+                </div>
+                {/* ----------------------------- */}
                 <div className="bg-white p-4 shadow dark:bg-white/5">
                     <div className="mb-3 flex items-center justify-between">
                         {/* --- Dynamic Main Title Area --- */}
                         <div className="flex items-center gap-2">
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-none bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
+                            <div className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
                                 {activeCategory?.image_url ? (
                                     <img
                                         src={activeCategory.image_url}
                                         alt={getLocalizedName(activeCategory)}
-                                        className="h-full w-full bg-white object-contain p-0.5"
+                                        className="h-full w-full bg-white object-contain p-1"
                                     />
                                 ) : (
-                                    <Car className="h-4 w-4" />
+                                    <Layers3Icon className="h-4 w-4" />
                                 )}
                             </div>
                             <h1 className="text-base font-medium text-gray-900 dark:text-gray-100">
@@ -656,7 +760,7 @@ export default function ProductListingHeader() {
                         {hasActiveFilters && (
                             <button
                                 onClick={clearFilters}
-                                className="group flex items-center gap-1 bg-red-50 px-2.5 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-600 hover:text-white focus-visible:outline-none dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-white"
+                                className="group flex cursor-pointer items-center gap-1 bg-red-50 px-2.5 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-600 hover:text-white focus-visible:outline-none dark:bg-red-600/30 dark:text-white dark:hover:bg-red-600 dark:hover:text-white"
                             >
                                 <X className="h-3.5 w-3.5 transition-transform group-hover:rotate-90" />
                                 <span>{t('Clear Filters')}</span>
@@ -665,7 +769,7 @@ export default function ProductListingHeader() {
                     </div>
 
                     <nav className={`flex gap-1.5 overflow-x-auto pb-1 ${hideScrollbar}`}>
-                        <button className="flex shrink-0 items-center gap-1.5 rounded-none border border-gray-300 bg-white/90 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:border-gray-500 focus-visible:outline-none dark:border-gray-700 dark:bg-gray-900/90 dark:text-gray-300 dark:hover:border-gray-500">
+                        <button className="flex shrink-0 items-center gap-1.5 rounded-none border border-gray-300 bg-white/90 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:border-gray-500 focus-visible:outline-none dark:border-gray-700 dark:bg-white/5 dark:text-gray-300 dark:hover:border-gray-500">
                             <SlidersHorizontal className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
                             <span>{t('All Filters')}</span>
                         </button>
@@ -743,7 +847,7 @@ export default function ProductListingHeader() {
                                         className={`flex shrink-0 items-center gap-1.5 rounded-none border px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-1 focus-visible:ring-gray-900 focus-visible:outline-none dark:focus-visible:ring-gray-100 ${
                                             currentValue
                                                 ? 'border-gray-900 bg-gray-900 text-white dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900'
-                                                : 'border-gray-300 bg-white/90 text-gray-700 hover:border-gray-500 hover:bg-gray-50/90 dark:border-gray-700 dark:bg-gray-900/90 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:bg-gray-800/90'
+                                                : 'border-gray-300 bg-white/90 text-gray-700 hover:border-gray-500 hover:bg-gray-50/90 dark:border-gray-700 dark:bg-white/5 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:bg-white/5'
                                         }`}
                                     >
                                         <span>{labelStr}</span>
@@ -758,9 +862,9 @@ export default function ProductListingHeader() {
                 </div>
             </header>
 
-            <main className="section-container">
-                <div className="mt-2 space-y-6 bg-white p-4 shadow dark:bg-white/5">
-                    {categories.length > 0 && (
+            <main className={`section-container mt-2 ${!hasContentToShow ? 'hidden' : ''}`}>
+                <div className="space-y-6 bg-white p-4 shadow dark:bg-white/5">
+                    {showCategories && (
                         <section>
                             <h2 className="mb-2.5 text-sm font-medium text-gray-900 dark:text-gray-100">{t('Product Categories')}</h2>
                             <div className="grid grid-cols-5 gap-x-2 gap-y-3 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10">
@@ -787,16 +891,16 @@ export default function ProductListingHeader() {
                         </section>
                     )}
 
-                    {displayedBrands.length > 0 && (
+                    {showBrands && (
                         <section>
                             {activeBrand && brandModels.length > 0 ? (
                                 <div className="flex flex-col gap-3">
                                     <Sheet>
                                         <SheetTrigger asChild>
-                                            <button className="flex w-max items-center gap-2 border border-transparent bg-white p-1.5 transition-colors hover:border-gray-300 focus-visible:outline-none dark:bg-gray-950 dark:hover:border-gray-700">
-                                                <div className="flex h-10 w-10 items-center justify-center border border-gray-200 bg-white dark:border-gray-700">
+                                            <button className="flex w-max cursor-pointer items-center gap-2 rounded-sm border border-transparent bg-gray-50 p-1.5 transition-colors hover:border-gray-200 focus-visible:outline-none dark:bg-white/5 dark:hover:border-gray-700">
+                                                <div className="flex size-7 items-center justify-center overflow-hidden rounded-full bg-white">
                                                     {activeBrand.image_url ? (
-                                                        <img src={activeBrand.image_url} alt={activeBrand.name} className="h-6 w-6 object-contain" />
+                                                        <img src={activeBrand.image_url} alt={activeBrand.name} className="size-6 object-contain" />
                                                     ) : (
                                                         <ImageIcon className="h-5 w-5 text-gray-400" />
                                                     )}
@@ -817,6 +921,16 @@ export default function ProductListingHeader() {
                                                         {t('Popular Brands')}
                                                     </SheetTitle>
                                                 </SheetHeader>
+                                                <div className="relative">
+                                                    <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                                    <Input
+                                                        type="search"
+                                                        placeholder={`${t('Search')}...`}
+                                                        value={brandSearchQuery}
+                                                        onChange={(e) => setBrandSearchQuery(e.target.value)}
+                                                        className="h-9 rounded-none border-gray-300 bg-transparent pl-9 text-sm text-gray-900 dark:border-gray-700 dark:text-gray-100"
+                                                    />
+                                                </div>
                                             </div>
                                             <div className="hide-scrollbar flex-1 overflow-y-auto">
                                                 <div className="flex flex-col pb-4">
@@ -830,23 +944,23 @@ export default function ProductListingHeader() {
                                                             </span>
                                                         </button>
                                                     </SheetClose>
-                                                    {displayedBrands.map((brand) => (
+                                                    {filteredBrands.map((brand) => (
                                                         <SheetClose asChild key={brand.id}>
                                                             <button
                                                                 onClick={() => updateFilter('brand_code', brand.code)}
-                                                                className={`flex w-full items-center gap-3 border-b border-gray-100 p-4 text-left transition-colors hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-900 ${
+                                                                className={`flex w-full items-center gap-3 border-b border-gray-100 px-4 py-1.5 text-left transition-colors hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-900 ${
                                                                     activeBrand.code === brand.code ? 'bg-gray-50 dark:bg-gray-900' : ''
                                                                 }`}
                                                             >
                                                                 <div
-                                                                    className={`flex h-12 w-12 shrink-0 items-center justify-center border bg-white ${
+                                                                    className={`flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white p-1 ${
                                                                         activeBrand.code === brand.code
                                                                             ? 'border-gray-900 dark:border-gray-100'
                                                                             : 'border-gray-200 dark:border-gray-700'
                                                                     }`}
                                                                 >
                                                                     {brand.image_url ? (
-                                                                        <img src={brand.image_url} className="h-8 w-8 object-contain" />
+                                                                        <img src={brand.image_url} className="object-contain" />
                                                                     ) : (
                                                                         <ImageIcon className="h-6 w-6 text-gray-400" />
                                                                     )}
@@ -866,6 +980,11 @@ export default function ProductListingHeader() {
                                                             </button>
                                                         </SheetClose>
                                                     ))}
+                                                    {filteredBrands.length === 0 && (
+                                                        <div className="py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                                                            {t('No items found.')}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </SheetContent>
@@ -922,7 +1041,7 @@ export default function ProductListingHeader() {
                         </section>
                     )}
 
-                    {hasBodyType && allBodyTypes.length > 0 && (
+                    {showBodyTypes && (
                         <section>
                             <h2 className="mb-2.5 text-sm font-medium text-gray-900 dark:text-gray-100">{t('Body Types')}</h2>
                             <div className="grid grid-cols-5 gap-x-2 gap-y-3 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10">

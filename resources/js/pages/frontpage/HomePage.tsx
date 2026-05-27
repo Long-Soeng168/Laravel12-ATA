@@ -4,18 +4,19 @@ import {
     CheckCircle2,
     Disc,
     Filter,
-    Fuel,
-    Layers,
+    ListOrderedIcon,
     MapPin,
     MoveUpRight,
     Settings,
-    ShieldCheck,
     Star,
+    StoreIcon,
     Thermometer,
     Wind,
     Zap,
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { SectionHeader } from './components/headers/HeaderSection';
+import CategorySections from './components/sections/CategorySection';
 import FrontPageLayout from './layouts/frontpage-layout';
 
 // --- Shared Flat UI Primitives ---
@@ -184,133 +185,92 @@ export default function HomePage() {
 
     return (
         <FrontPageLayout>
-            <div className="section-container flex-grow py-8">
-                <div className="animate-in fade-in space-y-12 duration-300">
-                    {/* Full-Width Background Slideshow Hero Section */}
-                    <div className="border-border bg-card relative min-h-[450px] overflow-hidden border md:min-h-[550px]">
-                        {HERO_SLIDES.map((slide, index) => (
-                            <div
-                                key={slide.id}
-                                className={`absolute inset-0 h-full w-full transition-opacity duration-[1000ms] ease-in-out ${
-                                    currentSlide === index ? 'z-10 opacity-100' : 'pointer-events-none z-0 opacity-0'
+            <div className="section-container flex-grow pb-8 max-md:px-0 md:pt-4">
+                {/* Full-Width Background Slideshow Hero Section */}
+                <div className="border-border bg-card relative min-h-[450px] overflow-hidden border md:min-h-[550px]">
+                    {HERO_SLIDES.map((slide, index) => (
+                        <div
+                            key={slide.id}
+                            className={`absolute inset-0 h-full w-full transition-opacity duration-[1000ms] ease-in-out ${
+                                currentSlide === index ? 'z-10 opacity-100' : 'pointer-events-none z-0 opacity-0'
+                            }`}
+                            style={{
+                                backgroundColor: slide.background_color,
+                            }}
+                        >
+                            {/* Full Background Image */}
+                            <img
+                                src={slide.img}
+                                alt={slide.titleLine2}
+                                className={`absolute inset-0 h-full w-full object-cover object-right transition-transform duration-[6000ms] ease-linear ${
+                                    currentSlide === index ? 'scale-105' : 'scale-100'
                                 }`}
-                                style={{
-                                    backgroundColor: slide.background_color,
-                                }}
-                            >
-                                {/* Full Background Image */}
-                                <img
-                                    src={slide.img}
-                                    alt={slide.titleLine2}
-                                    className={`absolute inset-0 h-full w-full object-cover object-right transition-transform duration-[6000ms] ease-linear ${
-                                        currentSlide === index ? 'scale-105' : 'scale-100'
-                                    }`}
-                                />
-                                <div className="absolute inset-0 z-20 flex max-w-3xl flex-col justify-center p-8 md:p-12 lg:p-16">
-                                    <div
-                                        className="absolute inset-0 z-10 hidden w-3/4 md:block"
-                                        style={{
-                                            backgroundImage: `linear-gradient(to right, ${slide.background_color}f2 0%, ${slide.background_color}99 60%, transparent 100%)`,
-                                        }}
-                                    ></div>
-                                    <div
-                                        className="absolute inset-0 z-10 md:hidden"
-                                        style={{
-                                            backgroundColor: slide.background_color,
-                                            opacity: 0.9,
-                                        }}
-                                    ></div>
-                                    <h1
-                                        className="z-20 mb-4 text-4xl leading-[1.05] font-black tracking-tighter uppercase md:text-5xl lg:text-6xl"
-                                        style={{ color: slide.forground_color }}
-                                    >
-                                        {slide.titleLine1} <br />
-                                        <span className="mt-1 block text-[#FF6D00]">{slide.titleLine2}</span>
-                                    </h1>
-                                    <p
-                                        className="z-20 mb-8 max-w-lg text-base leading-relaxed font-medium md:text-lg md:font-normal"
-                                        style={{ color: slide.forground_color, opacity: 0.9 }}
-                                    >
-                                        {slide.desc}
-                                    </p>
-                                    <a href={slide.btnLink} className={getButtonStyles('accent', 'z-20 w-max gap-2 px-8 py-6 text-base shadow-none')}>
-                                        {slide.btnText} <ArrowRight className="ml-1 h-5 w-5" />
-                                    </a>
-                                </div>
-                            </div>
-                        ))}
-
-                        {/* Slideshow Navigation Controls */}
-                        <div className="absolute bottom-6 left-8 z-30 flex gap-2 md:bottom-10 md:left-12 lg:left-16">
-                            {HERO_SLIDES.map((_, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => setCurrentSlide(idx)}
-                                    className={`h-1.5 cursor-pointer rounded-none transition-all duration-300 ${
-                                        currentSlide === idx ? 'w-8 bg-[#FF6D00]' : 'w-4 bg-white/50 hover:bg-white/80'
-                                    }`}
-                                    aria-label={`Go to slide ${idx + 1}`}
-                                />
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Browse By Category */}
-                    <section>
-                        <div className="border-border mb-8 flex flex-col justify-between gap-4 border-b pb-4 md:flex-row md:items-center">
-                            <div className="flex items-center gap-4">
-                                <div className="flex h-12 w-12 items-center justify-center border border-[#FF6D00]/20 bg-[#FF6D00]/10 text-[#FF6D00]">
-                                    <Layers className="h-6 w-6" />
-                                </div>
-                                <div>
-                                    <h2 className="text-foreground text-xl font-black tracking-tight uppercase">Browse by Category</h2>
-                                    <p className="text-muted-foreground mt-0.5 text-sm">Explore our wide selection of automotive components</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                            {[
-                                { icon: Disc, label: 'Brakes & Rotors' },
-                                { icon: Settings, label: 'Engine Components' },
-                                { icon: MoveUpRight, label: 'Suspension & Steering' },
-                                { icon: Zap, label: 'Electrical & Lighting' },
-                                { icon: Thermometer, label: 'Cooling & Climate' },
-                                { icon: Wind, label: 'Exhaust Systems' },
-                                { icon: Filter, label: 'Filters & PCV' },
-                                { icon: Fuel, label: 'Fuel Delivery' },
-                            ].map((category, idx) => (
-                                <a
-                                    href="/products"
-                                    key={idx}
-                                    className="bg-card border-border hover:bg-muted/50 group text-foreground flex flex-col items-center justify-center gap-4 border p-6 transition-colors hover:border-[#FF6D00]"
+                            />
+                            <div className="absolute inset-0 z-20 flex max-w-3xl flex-col justify-center p-8 md:p-12 lg:p-16">
+                                <div
+                                    className="absolute inset-0 z-10 hidden w-3/4 md:block"
+                                    style={{
+                                        backgroundImage: `linear-gradient(to right, ${slide.background_color}f2 0%, ${slide.background_color}99 60%, transparent 100%)`,
+                                    }}
+                                ></div>
+                                <div
+                                    className="absolute inset-0 z-10 md:hidden"
+                                    style={{
+                                        backgroundColor: slide.background_color,
+                                        opacity: 0.9,
+                                    }}
+                                ></div>
+                                <h1
+                                    className="z-20 mb-4 text-4xl leading-[1.05] font-black tracking-tighter uppercase md:text-5xl lg:text-6xl"
+                                    style={{ color: slide.forground_color }}
                                 >
-                                    <category.icon className="text-muted-foreground h-10 w-10 transition-colors group-hover:text-[#FF6D00]" />
-                                    <span className="text-center text-sm font-medium">{category.label}</span>
+                                    {slide.titleLine1} <br />
+                                    <span className="mt-1 block text-[#FF6D00]">{slide.titleLine2}</span>
+                                </h1>
+                                <p
+                                    className="z-20 mb-8 max-w-lg text-base leading-relaxed font-medium md:text-lg md:font-normal"
+                                    style={{ color: slide.forground_color, opacity: 0.9 }}
+                                >
+                                    {slide.desc}
+                                </p>
+                                <a href={slide.btnLink} className={getButtonStyles('accent', 'z-20 w-max gap-2 px-8 py-6 text-base shadow-none')}>
+                                    {slide.btnText} <ArrowRight className="ml-1 h-5 w-5" />
                                 </a>
-                            ))}
+                            </div>
                         </div>
-                    </section>
+                    ))}
+
+                    {/* Slideshow Navigation Controls */}
+                    <div className="absolute bottom-6 left-8 z-30 flex gap-2 md:bottom-10 md:left-12 lg:left-16">
+                        {HERO_SLIDES.map((_, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => setCurrentSlide(idx)}
+                                className={`h-1.5 cursor-pointer rounded-none transition-all duration-300 ${
+                                    currentSlide === idx ? 'w-8 bg-[#FF6D00]' : 'w-4 bg-white/50 hover:bg-white/80'
+                                }`}
+                                aria-label={`Go to slide ${idx + 1}`}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
+            <div className="section-container flex-grow pb-8">
+                <div className="animate-in fade-in space-y-12 duration-300">
+                    {/* Browse By Category */}
+
+                    <CategorySections />
 
                     {/* Highlight Products */}
                     <section>
-                        <div className="border-border mb-8 flex flex-col justify-between gap-4 border-b pb-4 md:flex-row md:items-center">
-                            <div className="flex items-center gap-4">
-                                <div className="flex h-12 w-12 items-center justify-center border border-[#FF6D00]/20 bg-[#FF6D00]/10 text-[#FF6D00]">
-                                    <Star className="h-6 w-6" />
-                                </div>
-                                <div>
-                                    <h2 className="text-foreground text-xl font-black tracking-tight uppercase">Highlight Products</h2>
-                                    <p className="text-muted-foreground mt-0.5 text-sm">Top rated parts and accessories</p>
-                                </div>
-                            </div>
-                            <a
-                                href="/products"
-                                className="group text-muted-foreground flex items-center gap-1 text-sm font-bold tracking-wider uppercase transition-colors hover:text-[#FF6D00]"
-                            >
-                                View All <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                            </a>
-                        </div>
+                        <SectionHeader
+                            icon={<Star className="size-5" />}
+                            title="Highlight Products"
+                            action={{
+                                label: 'View All',
+                                href: '/products',
+                            }}
+                        />
 
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                             {HIGHLIGHT_PRODUCTS.map((product) => renderHomeProductCard(product))}
@@ -399,23 +359,14 @@ export default function HomePage() {
 
                     {/* Latest Products */}
                     <section>
-                        <div className="border-border mb-8 flex flex-col justify-between gap-4 border-b pb-4 md:flex-row md:items-center">
-                            <div className="flex items-center gap-4">
-                                <div className="flex h-12 w-12 items-center justify-center border border-[#FF6D00]/20 bg-[#FF6D00]/10 text-[#FF6D00]">
-                                    <Zap className="h-6 w-6" />
-                                </div>
-                                <div>
-                                    <h2 className="text-foreground text-xl font-black tracking-tight uppercase">Latest Products</h2>
-                                    <p className="text-muted-foreground mt-0.5 text-sm">Newly added inventory to our catalog</p>
-                                </div>
-                            </div>
-                            <a
-                                href="/products"
-                                className="group text-muted-foreground flex items-center gap-1 text-sm font-bold tracking-wider uppercase transition-colors hover:text-[#FF6D00]"
-                            >
-                                View All <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                            </a>
-                        </div>
+                        <SectionHeader
+                            icon={<ListOrderedIcon className="size-5" />}
+                            title="Latest Products"
+                            action={{
+                                label: 'View All',
+                                href: '/products',
+                            }}
+                        />
 
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                             {LATEST_PRODUCTS.map((product) => renderHomeProductCard(product, 'warning'))}
@@ -424,23 +375,14 @@ export default function HomePage() {
 
                     {/* Shops */}
                     <section>
-                        <div className="border-border mb-8 flex flex-col justify-between gap-4 border-b pb-4 md:flex-row md:items-center">
-                            <div className="flex items-center gap-4">
-                                <div className="flex h-12 w-12 items-center justify-center border border-[#FF6D00]/20 bg-[#FF6D00]/10 text-[#FF6D00]">
-                                    <ShieldCheck className="h-6 w-6" />
-                                </div>
-                                <div>
-                                    <h2 className="text-foreground text-xl font-black tracking-tight uppercase">Trusted Shops</h2>
-                                    <p className="text-muted-foreground mt-0.5 text-sm">Explore independent sellers and specialist warehouses</p>
-                                </div>
-                            </div>
-                            <a
-                                href="/shops"
-                                className="group text-muted-foreground flex items-center gap-1 text-sm font-bold tracking-wider uppercase transition-colors hover:text-[#FF6D00]"
-                            >
-                                View Directory <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                            </a>
-                        </div>
+                        <SectionHeader
+                            icon={<StoreIcon className="size-5" />}
+                            title="Shops"
+                            action={{
+                                label: 'All Shops',
+                                href: '/shops',
+                            }}
+                        />
 
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                             {[

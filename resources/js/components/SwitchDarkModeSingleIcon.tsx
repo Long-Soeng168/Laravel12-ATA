@@ -14,7 +14,7 @@ export const SwitchDarkModeSingleIcon = ({ className }: Props) => {
     };
 
     return (
-        <button onClick={toggleTheme} className="hover:text-foreground flex cursor-pointer items-center justify-center p-2 transition-colors">
+        <button onClick={toggleTheme} className="hover:text-foreground flex cursor-pointer items-center justify-center py-2 transition-colors">
             {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
         </button>
     );
