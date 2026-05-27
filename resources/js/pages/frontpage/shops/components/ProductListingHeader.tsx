@@ -631,7 +631,7 @@ export default function ProductListingHeader() {
 
     return (
         <div>
-            <header className="container mx-auto px-4 md:px-6">
+            <header className="section-container">
                 <div className="bg-white p-4 shadow dark:bg-white/5">
                     <div className="mb-3 flex items-center justify-between">
                         {/* --- Dynamic Main Title Area --- */}
@@ -758,7 +758,7 @@ export default function ProductListingHeader() {
                 </div>
             </header>
 
-            <main className="container mx-auto px-4 md:px-6">
+            <main className="section-container">
                 <div className="mt-2 space-y-6 bg-white p-4 shadow dark:bg-white/5">
                     {categories.length > 0 && (
                         <section>

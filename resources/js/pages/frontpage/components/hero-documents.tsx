@@ -5,7 +5,7 @@ import { ArrowDown, PhoneCall } from 'lucide-react';
 function HeroDocuments() {
     return (
         <div className="w-full pb-20">
-            <div className="container mx-auto">
+            <div className="section-container">
                 <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2">
                     <div className="flex flex-col gap-4">
                         <div className="flex flex-col gap-4">

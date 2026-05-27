@@ -110,7 +110,7 @@ export default function GaragePage() {
 
     return (
         <FrontPageLayout>
-            <div className="relative container mx-auto mt-6 px-4 pb-20 md:px-6">
+            <div className="section-container relative mt-6 pb-20">
                 {/* Header & Search Section */}
                 <section className="border-border bg-card mb-12 flex flex-col items-center border p-6 md:p-10">
                     <h1 className="text-foreground mb-6 text-3xl font-black tracking-tighter uppercase md:text-4xl">

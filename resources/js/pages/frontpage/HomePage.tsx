@@ -153,7 +153,7 @@ export default function HomePage() {
         <a
             href="/products"
             key={product.id}
-            className="bg-card border-border group relative block flex flex-col border transition-colors hover:border-[#FF6D00]"
+            className="bg-card border-border group relative flex flex-col border transition-colors hover:border-[#FF6D00]"
         >
             <div className="absolute top-2 left-2 z-10">
                 {fitmentStatus === 'success' ? (
@@ -184,7 +184,7 @@ export default function HomePage() {
 
     return (
         <FrontPageLayout>
-            <div className="container mx-auto flex-grow px-4 py-8 md:px-6">
+            <div className="section-container flex-grow py-8">
                 <div className="animate-in fade-in space-y-12 duration-300">
                     {/* Full-Width Background Slideshow Hero Section */}
                     <div className="border-border bg-card relative min-h-[450px] overflow-hidden border md:min-h-[550px]">
@@ -217,7 +217,7 @@ export default function HomePage() {
                                         className="absolute inset-0 z-10 md:hidden"
                                         style={{
                                             backgroundColor: slide.background_color,
-                                            opacity: 0.90,
+                                            opacity: 0.9,
                                         }}
                                     ></div>
                                     <h1

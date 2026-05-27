@@ -43,7 +43,7 @@ const FrontPageLayout = ({ children }: FrontPageLayoutProps) => {
             <div>
                 {/* Top Utility Bar - Hidden on mobile */}
                 <div className="bg-card border-border hidden border-b py-1.5 text-xs md:block">
-                    <div className="container mx-auto flex items-center justify-between px-4 md:px-6">
+                    <div className="section-container flex items-center justify-between">
                         {/* Left Menu */}
                         <div className="text-muted-foreground flex h-full items-center gap-3">
                             <a
@@ -95,7 +95,7 @@ const FrontPageLayout = ({ children }: FrontPageLayoutProps) => {
 
                 {/* Main Navigation Header */}
                 <header className="bg-background border-border sticky top-0 z-40 border-b">
-                    <div className="container mx-auto px-4 py-4 md:px-6">
+                    <div className="section-container py-4">
                         <div className="flex items-center justify-between gap-6">
                             {/* Logo */}
                             <div className="flex w-full shrink-0 items-center justify-between md:w-auto">
@@ -197,7 +197,7 @@ const FrontPageLayout = ({ children }: FrontPageLayoutProps) => {
 
                     {/* Secondary Navigation - Left Aligned (Desktop only) */}
                     <div className="bg-card border-border hidden border-b md:block">
-                        <div className="container mx-auto flex items-center justify-start gap-8 px-4 py-3 md:px-6">
+                        <div className="section-container flex items-center justify-start gap-8 py-3">
                             <a href="/" className="text-foreground text-sm font-medium transition-colors">
                                 Home
                             </a>
@@ -220,7 +220,7 @@ const FrontPageLayout = ({ children }: FrontPageLayoutProps) => {
 
             {/* --- Footer Section --- */}
             <footer className="bg-card border-border mt-auto border-t">
-                <div className="container mx-auto px-4 py-12 md:px-6">
+                <div className="section-container py-12">
                     <div className="grid grid-cols-1 gap-12 md:grid-cols-4 md:gap-8">
                         {/* Logo & Description */}
                         <div className="col-span-1 md:col-span-1">

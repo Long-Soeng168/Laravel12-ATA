@@ -8,7 +8,7 @@ export default function DownloadAppPage() {
 
     return (
         <FrontPageLayout>
-            <div className="container mx-auto mt-6 px-4 pb-12 md:px-6">
+            <div className="section-container mt-6 pb-12">
                 {/* Hero Section - Stacks flush on mobile/tablet, boxes out on desktop (lg) */}
                 <section className="lg:border-border lg:bg-card mb-12 flex flex-col lg:flex-row lg:border">
                     {/* Left Column: Copy & Actions */}

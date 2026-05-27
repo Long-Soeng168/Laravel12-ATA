@@ -4,7 +4,7 @@ import FrontPageLayout from './layouts/frontpage-layout';
 export default function ContactPage() {
     return (
         <FrontPageLayout>
-            <div className="container mx-auto mt-6 px-4 pb-12 md:px-6">
+            <div className="section-container mt-6 pb-12">
                 {/* Header Section */}
                 <section className="mb-16 flex flex-col items-center text-center">
                     <h1 className="text-foreground mb-6 text-4xl font-black tracking-tighter uppercase md:text-5xl lg:text-6xl">

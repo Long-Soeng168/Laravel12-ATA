@@ -173,7 +173,7 @@ html {
     }
 
     .section-container {
-        @apply container mx-auto px-4;
+        @apply mx-auto max-w-[1536px] px-4 md:px-6;
     }
     /* .section-container {
         @apply mx-auto max-w-7xl px-4;
