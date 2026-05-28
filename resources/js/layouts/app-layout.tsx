@@ -1,5 +1,7 @@
+import '../../css/ckeditor-custom.css';
+// import 'ckeditor5/ckeditor5.css';
+
 import { Toaster } from '@/components/ui/sonner';
-import useTranslation from '@/hooks/use-translation';
 import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
 import { type BreadcrumbItem } from '@/types';
 import { type ReactNode } from 'react';
