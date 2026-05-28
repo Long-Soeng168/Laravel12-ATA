@@ -59,11 +59,12 @@ export default function Header() {
     return (
         <div>
             {/* ROW 1: Top Utility Bar - Now visible on mobile */}
-            <div className="bg-card border-border border-b py-1.5 text-xs">
+            <div className="bg-card border-border border-b py-1.5 text-sm">
                 <div className="section-container flex items-center justify-between">
                     {/* Left Menu */}
                     <div className="text-muted-foreground flex h-full items-center gap-3">
                         <Link
+                            prefetch
                             href="/download-app"
                             className={`relative flex cursor-pointer items-center gap-1.5 py-1 font-semibold transition-colors before:absolute before:bottom-0 before:left-0 before:h-[2px] before:w-full before:transition-transform before:duration-200 ${
                                 isActive('/download-app')
@@ -78,6 +79,7 @@ export default function Header() {
                         {/* Hide About/Contact on mobile, show on md and up */}
                         <div className="bg-border hidden h-3.5 w-px md:block"></div>
                         <Link
+                            prefetch
                             href="/about"
                             className={`relative hidden cursor-pointer px-2 py-1 font-medium transition-colors before:absolute before:bottom-0 before:left-0 before:h-[2px] before:w-full before:transition-transform before:duration-200 md:inline-flex ${
                                 isActive('/about')
@@ -89,6 +91,7 @@ export default function Header() {
                         </Link>
                         <div className="bg-border hidden h-3.5 w-px md:block"></div>
                         <Link
+                            prefetch
                             href="/contact"
                             className={`relative hidden cursor-pointer px-2 py-1 font-medium transition-colors before:absolute before:bottom-0 before:left-0 before:h-[2px] before:w-full before:transition-transform before:duration-200 md:inline-flex ${
                                 isActive('/contact')
@@ -107,8 +110,9 @@ export default function Header() {
                         <SwitchDarkModeSingleIcon />
                         <div className="bg-border h-3.5 w-px"></div>
                         <Link
+                            prefetch
                             href="/login"
-                            className="bg-primary text-primary-foreground hover:bg-primary/90 flex cursor-pointer items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors sm:px-3.5 sm:py-2 sm:text-sm"
+                            className="bg-primary text-primary-foreground hover:bg-primary/90 flex cursor-pointer items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors sm:px-3.5 sm:py-2 sm:text-sm"
                         >
                             <User className="h-3.5 w-3.5 max-[455px]:hidden" />
                             <span className="text-center">{t('Login')}</span>
@@ -123,7 +127,7 @@ export default function Header() {
                     <div className="flex items-center justify-between gap-4 md:gap-6">
                         {/* Logo */}
                         <div className="flex shrink-0 items-center">
-                            <Link href="/" className="flex cursor-pointer items-center gap-2 font-bold">
+                            <Link prefetch href="/" className="text-primary flex cursor-pointer items-center gap-2 font-bold">
                                 <img src="/android-chrome-512x512.png" className="size-12 rounded-full md:size-16" alt="A-Tech Auto Logo" />
                                 <div>
                                     <p className="text-[20px] md:text-[24px]">
@@ -188,6 +192,7 @@ export default function Header() {
                         <nav className="flex flex-col gap-1 pb-4">
                             {navLinks.map((link) => (
                                 <Link
+                                    prefetch
                                     key={link.path}
                                     href={link.path}
                                     className={`cursor-pointer px-4 py-3 text-sm font-medium transition-colors ${
@@ -206,6 +211,7 @@ export default function Header() {
                         {/* Secondary Links (About / Contact) styled like main nav links */}
                         <div className="flex flex-col gap-1 py-4">
                             <Link
+                                prefetch
                                 href="/about"
                                 className={`cursor-pointer px-4 py-3 text-sm font-medium transition-colors ${
                                     isActive('/about')
@@ -216,6 +222,7 @@ export default function Header() {
                                 {t('About')}
                             </Link>
                             <Link
+                                prefetch
                                 href="/contact"
                                 className={`cursor-pointer px-4 py-3 text-sm font-medium transition-colors ${
                                     isActive('/contact')
@@ -243,6 +250,7 @@ export default function Header() {
                     <div className="section-container flex items-center justify-start gap-5">
                         {navLinks.map((link) => (
                             <Link
+                                prefetch
                                 key={link.path}
                                 href={link.path}
                                 className={`relative cursor-pointer px-2 py-3 text-sm font-medium transition-colors before:absolute before:bottom-0 before:left-0 before:h-[2px] before:w-full before:transition-transform before:duration-200 ${

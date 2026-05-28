@@ -15,7 +15,7 @@ export interface SectionHeaderProps {
 }
 
 export function SectionHeader({ icon, title, subtitle, action }: SectionHeaderProps) {
-    const { t } = useTranslation();
+    const { t, currentLocale } = useTranslation(); //currentLocale == 'end', 'kh'
 
     return (
         <header className="border-border mb-8 flex items-center justify-between gap-3 border-b pb-4 sm:gap-4">

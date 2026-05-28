@@ -26,7 +26,7 @@ const FeatureCard = ({ icon: Icon, title, desc }: { icon: LucideIcon; title: str
 export default function AboutPage() {
     return (
         <FrontPageLayout>
-            <div className="section-container mt-6 pb-12">
+            <div className="section-container mt-8 pb-12">
                 {/* Hero Section */}
                 <section className="mb-20 flex flex-col items-center text-center">
                     <h1 className="text-foreground mb-6 text-4xl font-black tracking-tighter uppercase md:text-5xl lg:text-6xl">

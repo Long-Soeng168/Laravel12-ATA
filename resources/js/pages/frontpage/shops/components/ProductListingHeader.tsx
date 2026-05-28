@@ -116,7 +116,7 @@ const ListSelectSheet: React.FC<ListSelectSheetProps> = ({ icon, title, value, o
                 className="flex flex-col gap-0 overflow-hidden rounded-none border-gray-200 bg-white p-0 sm:max-w-sm dark:border-gray-800 dark:bg-gray-950"
             >
                 <div className="border-b border-gray-200 p-4 pb-3 dark:border-gray-800">
-                    <SheetHeader className="mb-3">
+                    <SheetHeader className="mb-0 px-0">
                         <SheetTitle className="text-left text-base font-medium text-gray-900 dark:text-gray-100">{title}</SheetTitle>
                     </SheetHeader>
                     <div className="relative">
@@ -435,7 +435,7 @@ const SeeMoreSheet: React.FC<SeeMoreSheetProps> = ({ title, items, activeCode, o
                 className="flex flex-col gap-0 overflow-hidden rounded-none border-gray-200 bg-white p-0 sm:max-w-md dark:border-gray-800 dark:bg-gray-950"
             >
                 <div className="border-b border-gray-200 p-4 pb-3 dark:border-gray-800">
-                    <SheetHeader className="mb-3">
+                    <SheetHeader className="mb-0 px-0">
                         <SheetTitle className="text-left text-base font-medium text-gray-900 dark:text-gray-100">{title}</SheetTitle>
                     </SheetHeader>
                     <div className="relative">
@@ -921,7 +921,7 @@ export default function ProductListingHeader() {
                                             className="flex flex-col gap-0 overflow-hidden rounded-none border-gray-200 bg-white p-0 sm:max-w-md dark:border-gray-800 dark:bg-gray-950"
                                         >
                                             <div className="border-b border-gray-200 p-4 pb-3 dark:border-gray-800">
-                                                <SheetHeader className="mb-3">
+                                                <SheetHeader className="mb-0 px-0">
                                                     <SheetTitle className="text-left text-base font-medium text-gray-900 dark:text-gray-100">
                                                         {t('Popular Brands')}
                                                     </SheetTitle>
