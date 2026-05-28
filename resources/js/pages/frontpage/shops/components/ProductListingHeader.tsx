@@ -6,7 +6,6 @@ import {
     CheckCircle2,
     ChevronDown,
     ChevronRightIcon,
-    DollarSign,
     Image as ImageIcon,
     Layers3Icon,
     LayoutGridIcon,
@@ -296,9 +295,6 @@ const PriceFilterSheet: React.FC<PriceFilterSheetProps> = ({ min, max, onChange 
                             : 'border-gray-300 bg-white/90 text-gray-700 hover:border-gray-500 hover:bg-gray-50/90 dark:border-gray-700 dark:bg-white/5 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:bg-white/5'
                     }`}
                 >
-                    <DollarSign
-                        className={`h-3.5 w-3.5 ${hasActivePrice ? 'text-gray-300 dark:text-gray-600' : 'text-gray-500 dark:text-gray-400'}`}
-                    />
                     <span>{priceLabel}</span>
                     <ChevronDown className={`h-3.5 w-3.5 ${hasActivePrice ? 'text-gray-300 dark:text-gray-600' : 'text-gray-400'}`} />
                 </button>
