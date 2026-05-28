@@ -66,6 +66,7 @@ const SeeMoreSheet: React.FC<SeeMoreSheetProps> = ({ title, items, onSelect, get
             </SheetTrigger>
 
             <SheetContent
+                onOpenAutoFocus={(e) => e.preventDefault()}
                 side="left"
                 className="flex flex-col gap-0 overflow-hidden rounded-none border-gray-200 bg-white p-0 sm:max-w-md dark:border-gray-800 dark:bg-gray-950"
             >
@@ -77,6 +78,7 @@ const SeeMoreSheet: React.FC<SeeMoreSheetProps> = ({ title, items, onSelect, get
                         <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
                         <Input
                             type="search"
+                            autoFocus={false}
                             placeholder={`${t('Search')}...`}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}

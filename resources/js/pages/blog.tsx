@@ -58,7 +58,7 @@ const blog = () => {
                                     <Search size={24} className="h-6 w-6" />
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="top">
+                            <SheetContent onOpenAutoFocus={(e) => e.preventDefault()} side="top">
                                 <MySearch />
                             </SheetContent>
                         </Sheet>
@@ -96,7 +96,7 @@ const blog = () => {
                                     <AlignRight stroke="white" className="h-7 w-7" />
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="left" className="bg-gradient">
+                            <SheetContent onOpenAutoFocus={(e) => e.preventDefault()} side="left" className="bg-gradient">
                                 <h1 className="mt-5 text-center text-xl text-white">Menu</h1>
                                 <div className="flex flex-col space-y-8 p-4">
                                     <a href="#" className="offset-2 text-sm font-medium text-white hover:border-blue-900 hover:underline">
@@ -135,15 +135,15 @@ const blog = () => {
             {/* End Slide */}
             {/* content */}
             <div className="mx-auto max-w-screen-2xl px-4 sm:px-10 md:px-20">
-                <div className='flex flex-col-reverse lg:flex-row gap-15 mt-10'>
+                <div className="mt-10 flex flex-col-reverse gap-15 lg:flex-row">
                     {/* Card */}
                     <div className="flex-1 space-y-10">
                         {/*Card 1 */}
-                        <div className="overflow-hidden rounded-2xl  bg-white shadow-lg">
+                        <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
                             {/* Image Section */}
 
                             <div className="relative p-4">
-                                <img src="assets/images/imageBlog1.png" alt="Blog Image" className="aspect-video w-full object-cover rounded-md" />
+                                <img src="assets/images/imageBlog1.png" alt="Blog Image" className="aspect-video w-full rounded-md object-cover" />
                                 <span className="bg-gradient bg-gradient-hover absolute right-8 bottom-8 rounded-full px-3 py-1 text-sm text-white shadow-md">
                                     Application Testing
                                 </span>
@@ -181,11 +181,11 @@ const blog = () => {
                         </div>
                         {/*end Card 1 */}
                         {/*Card 2 */}
-                        <div className="overflow-hidden rounded-2xl  bg-white shadow-lg">
+                        <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
                             {/* Image Section */}
 
                             <div className="relative p-4">
-                                <img src="assets/images/imageBlog2.png" alt="Blog Image" className="aspect-video w-full object-cover rounded-md" />
+                                <img src="assets/images/imageBlog2.png" alt="Blog Image" className="aspect-video w-full rounded-md object-cover" />
                                 <span className="bg-gradient bg-gradient-hover absolute right-8 bottom-8 rounded-full px-3 py-1 text-sm text-white shadow-md">
                                     Application Testing
                                 </span>
@@ -223,11 +223,11 @@ const blog = () => {
                         </div>
                         {/*end Card 2 */}
                         {/*Card 2 */}
-                        <div className="overflow-hidden rounded-2xl  bg-white shadow-lg">
+                        <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
                             {/* Image Section */}
 
                             <div className="relative p-4">
-                                <img src="assets/images/imageBlog3.png" alt="Blog Image" className="aspect-video w-full object-cover rounded-md" />
+                                <img src="assets/images/imageBlog3.png" alt="Blog Image" className="aspect-video w-full rounded-md object-cover" />
                                 <span className="bg-gradient bg-gradient-hover absolute right-8 bottom-8 rounded-full px-3 py-1 text-sm text-white shadow-md">
                                     Application Testing
                                 </span>
@@ -267,72 +267,72 @@ const blog = () => {
                     </div>
                     {/*End Card */}
                     {/* Right Contect */}
-                    <div className="max-w-full lg:mx-auto lg:max-w-sm space-y-15">
-                            {/* Search Box */}
-                            <div className="rounded-xl bg-white p-4 shadow-lg">
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        placeholder="Searching..."
-                                        className="w-full rounded-lg border border-gray-300 py-2 pr-10 pl-4 outline-none focus:border-blue-900 focus:ring focus:ring-blue-900"
-                                    />
-                                    <span className="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-400"><Search/></span>
-                                </div>
+                    <div className="max-w-full space-y-15 lg:mx-auto lg:max-w-sm">
+                        {/* Search Box */}
+                        <div className="rounded-xl bg-white p-4 shadow-lg">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    placeholder="Searching..."
+                                    className="w-full rounded-lg border border-gray-300 py-2 pr-10 pl-4 outline-none focus:border-blue-900 focus:ring focus:ring-blue-900"
+                                />
+                                <span className="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-400">
+                                    <Search />
+                                </span>
                             </div>
+                        </div>
 
-                            {/* Latest Posts Section */}
-                            <div className="rounded-xl bg-white p-4 shadow-lg">
-                                <h3 className="text-lg font-semibold text-gray-900">Latest Posts</h3>
-                                <div className="my-2 w-12 border-b-4 border-blue-900"></div>
+                        {/* Latest Posts Section */}
+                        <div className="rounded-xl bg-white p-4 shadow-lg">
+                            <h3 className="text-lg font-semibold text-gray-900">Latest Posts</h3>
+                            <div className="my-2 w-12 border-b-4 border-blue-900"></div>
 
-                                <div className="space-y-4">
-                                    {[
-                                        'Pen Source Job Report Show More Openings Fewer',
-                                        'Tech Products That Makes Its Easier to Stay at Home',
-                                        'Necessity May Give Us Your Best Virtual Court System',
-                                        'Servo Project Joins The Linux Foundation Fold Desco',
-                                    ].map((post, index) => (
-
-                                        <div key={index} className="flex items-center space-x-3 space-y-3">
-
-                                            <img src="assets/images/imageBlog2.png" alt="Thumbnail" className="h-14 w-14 rounded-lg object-cover" />
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-800">{post}</p>
-                                                <span className="flex items-center text-xs text-gray-500">📅 January 21, 2020</span>
-                                            </div>
+                            <div className="space-y-4">
+                                {[
+                                    'Pen Source Job Report Show More Openings Fewer',
+                                    'Tech Products That Makes Its Easier to Stay at Home',
+                                    'Necessity May Give Us Your Best Virtual Court System',
+                                    'Servo Project Joins The Linux Foundation Fold Desco',
+                                ].map((post, index) => (
+                                    <div key={index} className="flex items-center space-y-3 space-x-3">
+                                        <img src="assets/images/imageBlog2.png" alt="Thumbnail" className="h-14 w-14 rounded-lg object-cover" />
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-800">{post}</p>
+                                            <span className="flex items-center text-xs text-gray-500">📅 January 21, 2020</span>
                                         </div>
-                                    ))}
-                                </div>
+                                    </div>
+                                ))}
                             </div>
+                        </div>
 
-                            {/* Categories Section */}
-                            <div className="rounded-xl bg-white p-4 shadow-lg">
-                                <h3 className="text-lg font-semibold text-gray-900">Categories</h3>
-                                <div className="my-2 w-12 border-b-4 border-blue-900"></div>
+                        {/* Categories Section */}
+                        <div className="rounded-xl bg-white p-4 shadow-lg">
+                            <h3 className="text-lg font-semibold text-gray-900">Categories</h3>
+                            <div className="my-2 w-12 border-b-4 border-blue-900"></div>
 
-                                <ul className="space-y-4 text-gray-800">
-                                    {[
-                                        'Application Testing',
-                                        'Artificial Intelligence',
-                                        'Digital Technology',
-                                        'IT Services',
-                                        'Software Development',
-                                        'Web Development',
-                                    ].map((category, index) => (
-                                        <li key={index} className="cursor-pointer border-b border-gray-200 pb-2 last:border-none hover:text-blue-600">
-                                            {category}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
+                            <ul className="space-y-4 text-gray-800">
+                                {[
+                                    'Application Testing',
+                                    'Artificial Intelligence',
+                                    'Digital Technology',
+                                    'IT Services',
+                                    'Software Development',
+                                    'Web Development',
+                                ].map((category, index) => (
+                                    <li key={index} className="cursor-pointer border-b border-gray-200 pb-2 last:border-none hover:text-blue-600">
+                                        {category}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     </div>
                     {/*End Right Contect */}
                 </div>
             </div>
             {/*End content */}
 
-             {/* Footer */}
-             <footer className="bg-gradient-to-b from-blue-100 to-white mt-10 pt-10 pb-5">
+            {/* Footer */}
+            <footer className="mt-10 bg-gradient-to-b from-blue-100 to-white pt-10 pb-5">
                 <div className="mx-auto max-w-screen-2xl px-5 sm:px-10 md:px-20">
                     <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
                         {/* Logo & Description */}
@@ -436,7 +436,7 @@ const blog = () => {
                                 Services
                             </a>
                             <span>•</span>
-                            <a href="#" className="text-blue-600 underline underline-offset-4 offset-2">
+                            <a href="#" className="offset-2 text-blue-600 underline underline-offset-4">
                                 Blogs
                             </a>
                             <span>•</span>

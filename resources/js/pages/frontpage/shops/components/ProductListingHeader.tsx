@@ -111,6 +111,7 @@ const ListSelectSheet: React.FC<ListSelectSheetProps> = ({ icon, title, value, o
                 </button>
             </SheetTrigger>
             <SheetContent
+                onOpenAutoFocus={(e) => e.preventDefault()}
                 side="left"
                 className="flex flex-col gap-0 overflow-hidden rounded-none border-gray-200 bg-white p-0 sm:max-w-sm dark:border-gray-800 dark:bg-gray-950"
             >
@@ -202,6 +203,7 @@ const TextFilterSheet: React.FC<TextFilterSheetProps> = ({ title, value, type, o
                 </button>
             </SheetTrigger>
             <SheetContent
+                onOpenAutoFocus={(e) => e.preventDefault()}
                 side="left"
                 className="flex flex-col gap-4 rounded-none border-gray-200 bg-white p-4 sm:max-w-md dark:border-gray-800 dark:bg-gray-950"
             >
@@ -302,6 +304,7 @@ const PriceFilterSheet: React.FC<PriceFilterSheetProps> = ({ min, max, onChange 
                 </button>
             </SheetTrigger>
             <SheetContent
+                onOpenAutoFocus={(e) => e.preventDefault()}
                 side="left"
                 className="flex flex-col gap-4 rounded-none border-gray-200 bg-white p-4 sm:max-w-md dark:border-gray-800 dark:bg-gray-950"
             >
@@ -427,6 +430,7 @@ const SeeMoreSheet: React.FC<SeeMoreSheetProps> = ({ title, items, activeCode, o
             </SheetTrigger>
 
             <SheetContent
+                onOpenAutoFocus={(e) => e.preventDefault()}
                 side="left"
                 className="flex flex-col gap-0 overflow-hidden rounded-none border-gray-200 bg-white p-0 sm:max-w-md dark:border-gray-800 dark:bg-gray-950"
             >
@@ -912,6 +916,7 @@ export default function ProductListingHeader() {
                                             </button>
                                         </SheetTrigger>
                                         <SheetContent
+                                            onOpenAutoFocus={(e) => e.preventDefault()}
                                             side="left"
                                             className="flex flex-col gap-0 overflow-hidden rounded-none border-gray-200 bg-white p-0 sm:max-w-md dark:border-gray-800 dark:bg-gray-950"
                                         >

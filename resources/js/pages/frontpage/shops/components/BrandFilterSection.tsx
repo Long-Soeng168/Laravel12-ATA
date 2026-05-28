@@ -75,6 +75,7 @@ export default function BrandFilterSection({
                             </button>
                         </SheetTrigger>
                         <SheetContent
+                            onOpenAutoFocus={(e) => e.preventDefault()}
                             side="left"
                             className="flex flex-col gap-0 overflow-hidden rounded-none border-gray-200 bg-white p-0 sm:max-w-md dark:border-gray-800 dark:bg-gray-950"
                         >

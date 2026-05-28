@@ -57,7 +57,7 @@ const blog = () => {
                                     <Search size={24} className="h-6 w-6" />
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="top">
+                            <SheetContent onOpenAutoFocus={(e) => e.preventDefault()} side="top">
                                 <MySearch />
                             </SheetContent>
                         </Sheet>
@@ -95,7 +95,7 @@ const blog = () => {
                                     <AlignRight stroke="white" className="h-7 w-7" />
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="left" className="bg-gradient">
+                            <SheetContent onOpenAutoFocus={(e) => e.preventDefault()} side="left" className="bg-gradient">
                                 <h1 className="mt-5 text-center text-xl text-white">Menu</h1>
                                 <div className="flex flex-col space-y-8 p-4">
                                     <a href="#" className="offset-2 text-sm font-medium text-white hover:border-blue-900 hover:underline">
@@ -130,7 +130,7 @@ const blog = () => {
             </div>
             {/*End Navbar */}
             {/* Slide */}
-            <section className="relative pb-0.5 bg-white overflow-hidden text-white">
+            <section className="relative overflow-hidden bg-white pb-0.5 text-white">
                 <div className="absolute inset-0 bg-white opacity-50"></div>
                 <div
                     className="absolute inset-0 aspect-[19/6] bg-cover bg-center"
@@ -154,11 +154,11 @@ const blog = () => {
 
             {/* End Slide */}
             {/* content */}
-            <div className="mx-auto max-w-screen-2xl px-4 sm:px-10 md:px-20 mt-10">
+            <div className="mx-auto mt-10 max-w-screen-2xl px-4 sm:px-10 md:px-20">
                 <div className="justify-cente flex min-h-screen items-center">
-                    <div className="flex flex-col lg:flex-row w-full overflow-hidden">
+                    <div className="flex w-full flex-col overflow-hidden lg:flex-row">
                         {/* Left Section */}
-                        <div className="bg-gradient w-full lg:w-1/3 rounded-md p-8 text-white">
+                        <div className="bg-gradient w-full rounded-md p-8 text-white lg:w-1/3">
                             <h2 className="mt-2 text-2xl font-bold">Contact Us</h2>
                             <div className="mt-6 space-y-4">
                                 <div className="flex items-center space-x-3">
@@ -186,7 +186,7 @@ const blog = () => {
                         </div>
 
                         {/* Right Section */}
-                        <div className="w-full lg:w-2/3 py-8 lg:p-8">
+                        <div className="w-full py-8 lg:w-2/3 lg:p-8">
                             <h4 className="text-sm text-blue-900 uppercase">Get in Touch</h4>
                             <h2 className="mt-1 text-2xl font-bold">Fill The Form Below</h2>
                             <form className="mt-6 space-y-4">

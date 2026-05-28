@@ -9,7 +9,6 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { AlignRight, Search } from 'lucide-react';
 
 const welcome = () => {
-    
     return (
         <div>
             <div className="mx-auto mt-5 hidden max-w-screen-2xl px-10 md:px-20 lg:block">
@@ -61,7 +60,7 @@ const welcome = () => {
                                     <Search size={24} className="h-6 w-6" />
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="top">
+                            <SheetContent onOpenAutoFocus={(e) => e.preventDefault()} side="top">
                                 <MySearch />
                             </SheetContent>
                         </Sheet>
@@ -99,7 +98,7 @@ const welcome = () => {
                                     <AlignRight stroke="white" className="h-7 w-7" />
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="left" className="bg-gradient">
+                            <SheetContent onOpenAutoFocus={(e) => e.preventDefault()} side="left" className="bg-gradient">
                                 <h1 className="mt-5 text-center text-xl text-white">Menu</h1>
                                 <div className="flex flex-col space-y-8 p-4">
                                     <a href="/" className="offset-2 text-sm font-medium text-white underline underline-offset-4">
@@ -168,7 +167,7 @@ const welcome = () => {
                     </svg>
                 </div>
 
-                <div className="mx-auto max-w-screen-2xl bg-white px-4 sm:px-10 pt-12 sm:pt-11 md:px-20 dark:bg-gray-800">
+                <div className="mx-auto max-w-screen-2xl bg-white px-4 pt-12 sm:px-10 sm:pt-11 md:px-20 dark:bg-gray-800">
                     <div className="container mx-auto">
                         <div className="h-full">
                             <div className="grid gap-14 md:grid-cols-2 md:gap-16">
@@ -398,7 +397,7 @@ const welcome = () => {
                     <div className="mt-8 flex flex-col items-center justify-between border-t pt-4 text-center text-gray-600 sm:flex-row">
                         <p>&copy; 2025 Vectorasoft | Designed by Vectorasoft</p>
                         <div className="mt-3 flex flex-wrap justify-center space-x-4 sm:mt-0">
-                            <a href="#" className="text-blue-600 underline underline-offset-4 offset-2">
+                            <a href="#" className="offset-2 text-blue-600 underline underline-offset-4">
                                 Home
                             </a>
                             <span>•</span>

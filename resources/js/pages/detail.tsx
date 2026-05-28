@@ -57,7 +57,7 @@ const detail = ({ id }: { id: string }) => {
                                     <Search size={24} className="h-6 w-6" />
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="top">
+                            <SheetContent onOpenAutoFocus={(e) => e.preventDefault()} side="top">
                                 <MySearch />
                             </SheetContent>
                         </Sheet>
@@ -95,7 +95,7 @@ const detail = ({ id }: { id: string }) => {
                                     <AlignRight stroke="white" className="h-7 w-7" />
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="left" className="bg-gradient">
+                            <SheetContent onOpenAutoFocus={(e) => e.preventDefault()} side="left" className="bg-gradient">
                                 <h1 className="mt-5 text-center text-xl text-white">Menu</h1>
                                 <div className="flex flex-col space-y-8 p-4">
                                     <a href="/" className="offset-2 text-sm font-medium text-white underline underline-offset-4">

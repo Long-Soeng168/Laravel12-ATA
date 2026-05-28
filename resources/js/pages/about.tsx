@@ -57,7 +57,7 @@ const about = () => {
                                     <Search size={24} className="h-6 w-6" />
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="top">
+                            <SheetContent onOpenAutoFocus={(e) => e.preventDefault()} side="top">
                                 <MySearch />
                             </SheetContent>
                         </Sheet>
@@ -95,7 +95,7 @@ const about = () => {
                                     <AlignRight stroke="white" className="h-7 w-7" />
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="left" className="bg-gradient">
+                            <SheetContent onOpenAutoFocus={(e) => e.preventDefault()} side="left" className="bg-gradient">
                                 <h1 className="mt-5 text-center text-xl text-white">Menu</h1>
                                 <div className="flex flex-col space-y-8 p-4">
                                     <a href="/" className="offset-2 text-sm font-medium text-white hover:border-blue-900 hover:underline">
@@ -129,7 +129,7 @@ const about = () => {
                 </div>
             </div>
             {/*End Navbar */}
-            <section className="relative pb-0.5 bg-white overflow-hidden text-white">
+            <section className="relative overflow-hidden bg-white pb-0.5 text-white">
                 <div className="absolute inset-0 bg-white opacity-50"></div>
                 <div
                     className="absolute inset-0 aspect-[19/6] bg-cover bg-center"
@@ -193,16 +193,16 @@ const about = () => {
             {/*End Hero section */}
 
             {/* Profile team */}
-            <div className="mt-16 max-w-screen-2xl px-4 sm:px-10 md:px-20 mx-auto">
+            <div className="mx-auto mt-16 max-w-screen-2xl px-4 sm:px-10 md:px-20">
                 <div className="flex items-center justify-center gap-4">
                     <span className="rounded-full bg-blue-100 px-4 py-2 text-sm text-blue-600 uppercase">Team</span>
                 </div>
-                <p className="text-center text-2xl font-bold text-gray-700 sm:text-3xl dark:text-gray-200 mt-8">Expert IT Consultants</p>
+                <p className="mt-8 text-center text-2xl font-bold text-gray-700 sm:text-3xl dark:text-gray-200">Expert IT Consultants</p>
                 <div className="grid grid-cols-1 gap-8 text-center sm:grid-cols-2 md:grid-cols-4">
                     {/* 1 */}
                     <div className="mt-5 flex flex-col items-center justify-center px-2 py-4 text-center">
                         <img
-                            className="inline-flex scale-100 rounded-full border-4 border-[#ffffff] bg-indigo-50 object-cover text-indigo-600 shadow-[5px_5px_0_0_rgba(0,0,0,1)] shadow-[#002D62] transition-all hover:scale-105 hover:cursor-pointer aspect-square w-52"
+                            className="inline-flex aspect-square w-52 scale-100 rounded-full border-4 border-[#ffffff] bg-indigo-50 object-cover text-indigo-600 shadow-[5px_5px_0_0_rgba(0,0,0,1)] shadow-[#002D62] transition-all hover:scale-105 hover:cursor-pointer"
                             src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHwyfHxoZWFkc2hvdHxlbnwwfDB8fHwxNjk1ODE3MjEzfDA&ixlib=rb-4.0.3&q=80&w=1080"
                             alt="Profile"
                         />
@@ -238,7 +238,7 @@ const about = () => {
                     {/* 2 */}
                     <div className="mt-5 flex flex-col items-center justify-center px-2 py-4 text-center">
                         <img
-                            className="inline-flex scale-100 rounded-full border-4 border-[#ffffff] bg-indigo-50 object-cover text-indigo-600 shadow-[5px_5px_0_0_rgba(0,0,0,1)] shadow-[#002D62] transition-all hover:scale-105 hover:cursor-pointer aspect-square w-52"
+                            className="inline-flex aspect-square w-52 scale-100 rounded-full border-4 border-[#ffffff] bg-indigo-50 object-cover text-indigo-600 shadow-[5px_5px_0_0_rgba(0,0,0,1)] shadow-[#002D62] transition-all hover:scale-105 hover:cursor-pointer"
                             src="/assets/images/girl.png"
                             alt="Profile"
                         />
@@ -272,8 +272,8 @@ const about = () => {
                     {/* 2 */}
                     {/* 2 */}
                     <div className="mt-5 flex flex-col items-center justify-center px-2 py-4 text-center">
-                    <img
-                            className="inline-flex scale-100 rounded-full border-4 border-[#ffffff] bg-indigo-50 object-cover text-indigo-600 shadow-[5px_5px_0_0_rgba(0,0,0,1)] shadow-[#002D62] transition-all hover:scale-105 hover:cursor-pointer aspect-square w-52"
+                        <img
+                            className="inline-flex aspect-square w-52 scale-100 rounded-full border-4 border-[#ffffff] bg-indigo-50 object-cover text-indigo-600 shadow-[5px_5px_0_0_rgba(0,0,0,1)] shadow-[#002D62] transition-all hover:scale-105 hover:cursor-pointer"
                             src="/assets/images/image.png"
                             alt="Profile"
                         />
@@ -308,7 +308,7 @@ const about = () => {
                     {/* 2 */}
                     <div className="mt-5 flex flex-col items-center justify-center px-2 py-4 text-center">
                         <img
-                            className="inline-flex scale-100 rounded-full border-4 border-[#ffffff] bg-indigo-50 object-cover text-indigo-600 shadow-[5px_5px_0_0_rgba(0,0,0,1)] shadow-[#002D62] transition-all hover:scale-105 hover:cursor-pointer aspect-square w-52"
+                            className="inline-flex aspect-square w-52 scale-100 rounded-full border-4 border-[#ffffff] bg-indigo-50 object-cover text-indigo-600 shadow-[5px_5px_0_0_rgba(0,0,0,1)] shadow-[#002D62] transition-all hover:scale-105 hover:cursor-pointer"
                             src="/assets/images/image3.png"
                             alt="Profile"
                         />
@@ -345,11 +345,11 @@ const about = () => {
             {/*End Profile team */}
 
             {/*  */}
-            <section className="py-12 max-w-screen-2xl px-4 sm:px-10 md:px-20 mx-auto">
+            <section className="mx-auto max-w-screen-2xl px-4 py-12 sm:px-10 md:px-20">
                 {/* Section Header */}
                 <div className="mb-8 text-center">
                     <span className="rounded-full bg-blue-100 px-4 py-2 text-sm text-blue-600 uppercase">PROCESS</span>
-                    <h2 className="text-center text-2xl font-bold text-gray-700 sm:text-3xl dark:text-gray-200 mt-8">Our Working Process</h2>
+                    <h2 className="mt-8 text-center text-2xl font-bold text-gray-700 sm:text-3xl dark:text-gray-200">Our Working Process</h2>
                 </div>
 
                 {/* Steps Grid */}
@@ -377,9 +377,8 @@ const about = () => {
             </section>
             {/*  */}
 
-
-             {/* Footer */}
-             <footer className="bg-gradient-to-b from-blue-100 to-white pt-10 pb-5">
+            {/* Footer */}
+            <footer className="bg-gradient-to-b from-blue-100 to-white pt-10 pb-5">
                 <div className="mx-auto max-w-screen-2xl px-5 md:px-10">
                     <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
                         {/* Logo & Description */}

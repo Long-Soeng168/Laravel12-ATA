@@ -65,7 +65,7 @@ const services = () => {
                                     <Search size={24} className="h-6 w-6" />
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="top">
+                            <SheetContent onOpenAutoFocus={(e) => e.preventDefault()} side="top">
                                 <MySearch />
                             </SheetContent>
                         </Sheet>
@@ -103,7 +103,7 @@ const services = () => {
                                     <AlignRight stroke="white" className="h-7 w-7" />
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="left" className="bg-gradient">
+                            <SheetContent onOpenAutoFocus={(e) => e.preventDefault()} side="left" className="bg-gradient">
                                 <h1 className="mt-5 text-center text-xl text-white">Menu</h1>
                                 <div className="flex flex-col space-y-8 p-4">
                                     <a href="/" className="offset-2 text-sm font-medium text-white hover:border-blue-900 hover:underline">
@@ -137,7 +137,7 @@ const services = () => {
                 </div>
             </div>
             {/*End Navbar */}
-            <section className="relative pb-0.5 bg-white overflow-hidden text-white">
+            <section className="relative overflow-hidden bg-white pb-0.5 text-white">
                 <div className="absolute inset-0 bg-white opacity-50"></div>
                 <div
                     className="absolute inset-0 aspect-[19/6] bg-cover bg-center"
@@ -158,7 +158,6 @@ const services = () => {
                     </svg>
                 </div>
             </section>
-
 
             {/* Hero section */}
 
@@ -205,8 +204,8 @@ const services = () => {
                 </div>
             </div>
             {/*End Hero section */}
-            <div className=" bg-gray-100 mt-10">
-                <div className="mx-auto max-w-screen-2xl px-4 sm:px-10 md:px-20 flex flex-col gap-10 items-center justify-between rounded-2xl  p-8 md:flex-row">
+            <div className="mt-10 bg-gray-100">
+                <div className="mx-auto flex max-w-screen-2xl flex-col items-center justify-between gap-10 rounded-2xl p-8 px-4 sm:px-10 md:flex-row md:px-20">
                     {/* Left Section: Illustration */}
                     <div className="flex w-full justify-center md:w-1/2">
                         <img src="assets/images/imageBlog1.png" alt="Business Illustration" className="aspect-video" />
@@ -240,7 +239,7 @@ const services = () => {
                 </div>
             </div>
 
-             {/* Partner */}
+            {/* Partner */}
             <div className="bg-gradient">
                 <div className="mx-auto max-w-screen-2xl px-10 md:px-20">
                     {/* Scrollable container for small screens */}

@@ -60,7 +60,11 @@ const MyHeader = () => {
                                         <Menu className="size-6" />
                                     </Button>
                                 </SheetTrigger>
-                                <SheetContent side="left" className="bg-background/95 border-border/50 w-72 border-r p-6 shadow-2xl backdrop-blur-lg">
+                                <SheetContent
+                                    onOpenAutoFocus={(e) => e.preventDefault()}
+                                    side="left"
+                                    className="bg-background/95 border-border/50 w-72 border-r p-6 shadow-2xl backdrop-blur-lg"
+                                >
                                     <SheetHeader>
                                         <SheetTitle className="text-left text-2xl font-bold tracking-tight">Menu</SheetTitle>
                                     </SheetHeader>

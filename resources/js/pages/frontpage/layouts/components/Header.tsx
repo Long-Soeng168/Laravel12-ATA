@@ -151,7 +151,11 @@ export default function Header() {
                                                 <Search className="h-5 w-5" />
                                             </button>
                                         </SheetTrigger>
-                                        <SheetContent side="top" className="border-border bg-background border-b p-4 pt-12 shadow-none">
+                                        <SheetContent
+                                            onOpenAutoFocus={(e) => e.preventDefault()}
+                                            side="top"
+                                            className="border-border bg-background border-b p-4 pt-12 shadow-none"
+                                        >
                                             <SheetTitle className="sr-only">Search Products</SheetTitle>
                                             <HeaderSearchInput />
                                         </SheetContent>

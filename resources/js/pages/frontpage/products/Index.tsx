@@ -65,7 +65,7 @@ const Index = () => {
                                                 </Button>
                                             </div>
                                         </SheetTrigger>
-                                        <SheetContent side="left">
+                                        <SheetContent onOpenAutoFocus={(e) => e.preventDefault()} side="left">
                                             <SheetHeader className="hidden">
                                                 <SheetTitle></SheetTitle>
                                                 <SheetDescription></SheetDescription>

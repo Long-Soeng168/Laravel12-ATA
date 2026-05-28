@@ -24,7 +24,7 @@ const FilterSheet = ({ children, handleFilter, resetFilter, isFiltered }: Filter
                             variant="outline"
                             size="icon"
                             className={cn(
-                                'relative size-11 rounded shadow-none hover:bg-primary hover:text-white',
+                                'hover:bg-primary relative size-11 rounded shadow-none hover:text-white',
                                 isFiltered && 'border-primary text-primary dark:border-primary',
                             )}
                         >
@@ -42,7 +42,7 @@ const FilterSheet = ({ children, handleFilter, resetFilter, isFiltered }: Filter
                     </SheetTrigger>
                 </TooltipButton>
                 {sheetOpen && <div className="fixed inset-0 z-40 bg-black/55" />}
-                <SheetContent side="left" className="z-50 w-[85vw] gap-0">
+                <SheetContent onOpenAutoFocus={(e) => e.preventDefault()} side="left" className="z-50 w-[85vw] gap-0">
                     <SheetHeader className="gap-0">
                         <SheetTitle>{t('Filter')}</SheetTitle>
                         <SheetDescription></SheetDescription>
