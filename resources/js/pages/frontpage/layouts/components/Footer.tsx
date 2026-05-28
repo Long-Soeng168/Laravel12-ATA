@@ -118,7 +118,7 @@ export default function Footer() {
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         title={displayTitle}
-                                        className="group bg-background relative flex flex-col items-center justify-center gap-1.5 rounded-md py-2 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_20px_-6px_rgba(255,109,0,0.3)] hover:ring-2 hover:ring-[#FF6D00]"
+                                        className="group bg-background relative flex flex-col items-center justify-center gap-1.5 rounded-md py-2 shadow-sm ring-white/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_20px_-6px_rgba(255,109,0,0.3)] hover:ring-2 hover:ring-[#FF6D00] dark:bg-white/5 dark:ring"
                                     >
                                         {/* Subtle inner glow on hover */}
                                         <div className="absolute inset-0 rounded-xl bg-gradient-to-tr from-[#FF6D00]/0 to-[#FF6D00]/0 transition-colors group-hover:from-[#FF6D00]/5 group-hover:to-transparent"></div>
