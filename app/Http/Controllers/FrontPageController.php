@@ -25,25 +25,107 @@ class FrontPageController extends Controller
 {
     public function index(Request $request)
     {
-        // 1. Fetch the limited categories and append the image URL in-place
-        // $itemCategories = ItemCategory::where('status', 'active')
-        //     ->orderBy('order_index')
-        //     ->orderBy('name')
-        //     ->limit(2)
-        //     ->get()
-        //     ->each(function ($category) {
-        //         $category->image_url = $category->image
-        //             ? asset('assets/images/item_categories/thumb/' . $category->image)
-        //             : null;
-        //     });
+        $query = Item::with(['category', 'brand', 'images']);
 
-        // 2. Simply grab the first item from the collection you already loaded
+        $query->where('status', 'active');
+
+        // Filter by Category Code and Dynamic Attributes
+        if ($request->filled('category_code')) {
+            $categoryCode = $request->category_code;
+            $query->where('category_code', $categoryCode);
+
+            // Fetch valid fields for this category to prevent SQL injection or bad queries
+            $category = ItemCategory::where('code', $categoryCode)->first();
+
+            if ($category) {
+                $validFields = ItemCategoryField::where('category_id', $category->id)
+                    ->pluck('field_key')
+                    ->toArray();
+
+                // Loop through request inputs to match valid JSON attributes
+                foreach ($request->all() as $key => $value) {
+                    if (in_array($key, $validFields) && $request->filled($key)) {
+                        // Assuming 'attributes' is cast to an array/json in your Item model
+                        $query->where("attributes->$key", $value);
+                    }
+                }
+            }
+        }
+
+        // Clone the base query to prevent ordering clauses from overlapping
+        $latest_products = (clone $query)->orderByDesc('id')->limit(10)->get();
+        $highlight_products = (clone $query)->inRandomOrder()->limit(10)->get();
+
+        // 3. Pre-fetch mappings for attributes (Optimized)
+        // Merge category IDs from both collections to pre-fetch once
+        $categoryIds = $latest_products->pluck('category.id')
+            ->merge($highlight_products->pluck('category.id'))
+            ->filter()
+            ->unique();
+
+        $categoryMaps = ItemCategoryField::whereIn('category_id', $categoryIds)
+            ->with('options')
+            ->get()
+            ->groupBy('category_id');
+
+        // 4. Transform Collection Logic
+        // Define the transformation logic as a closure so we can apply it to both collections
+        $transformItem = function ($item) use ($categoryMaps) {
+
+            // --- Image Optimization for Flutter List ---
+            $firstImage = $item->images->first();
+
+            $item->image_url = $firstImage
+                ? asset('assets/images/items/' . $firstImage->image)
+                : asset('assets/images/placeholder.webp');
+
+            $item->total_images = $item->images->count();
+
+            $item->thumbnail_image = $firstImage ? [
+                'id' => $firstImage->id,
+                'image' => $firstImage->image,
+                'image_url' => asset('assets/images/items/' . $firstImage->image),
+            ] : null;
+
+            // --- Attribute Display Logic ---
+            $categoryId = $item->category?->id;
+            $fields = $categoryMaps->get($categoryId);
+            $displayAttributes = [];
+
+            if ($fields && is_array($item->attributes)) {
+                foreach ($item->attributes as $key => $storedValue) {
+                    $field = $fields->where('field_key', $key)->first();
+                    $option = $field ? $field->options->where('option_value', $storedValue)->first() : null;
+
+                    $displayAttributes[$key] = [
+                        'label' => $field->label ?? $key,
+                        'label_kh' => $field->label_kh ?? $key,
+                        'value' => $storedValue,
+                        'value_label_en' => $option->label_en ?? $storedValue,
+                        'value_label_kh' => $option->label_kh ?? $storedValue,
+                    ];
+                }
+            }
+
+            $item->display_attributes = $displayAttributes;
+
+            // Correct Laravel way to hide relationships from the final JSON payload
+            $item->makeHidden(['images']);
+
+            return $item;
+        };
+
+        // Apply the transformation directly (get() returns a standard Eloquent Collection, so ->getCollection() is removed)
+        $latest_products->transform($transformItem);
+        $highlight_products->transform($transformItem);
 
         // return [
-        //     'itemCategories'   => $itemCategories,
+        //     'latest_products'   => $latest_products,
+        //     'highlight_products'   => $highlight_products,
         // ];
         return Inertia::render("frontpage/HomePage", [
-            // 'itemCategories'   => $itemCategories,
+            'latest_products'   => $latest_products,
+            'highlight_products'   => $highlight_products,
         ]);
     }
     public function shops(Request $request)

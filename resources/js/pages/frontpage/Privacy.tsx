@@ -3,24 +3,8 @@ import { Head, usePage } from '@inertiajs/react';
 import FrontPageLayout from './layouts/frontpage-layout';
 
 const Privacy = () => {
-    const { currentLocale } = useTranslation();
     const { privacies } = usePage<any>().props;
-
-    // Helper to wrap the last word of the title in the brand orange color
-    const renderTitle = (title: string) => {
-        if (!title) return null;
-        const words = title.split(' ');
-        if (words.length === 1) return <span className="text-[#FF6D00]">{title}</span>;
-
-        const lastWord = words.pop();
-        return (
-            <>
-                {words.join(' ')} <span className="text-[#FF6D00]">{lastWord}</span>
-            </>
-        );
-    };
-
-    const displayTitle = currentLocale === 'kh' ? privacies?.title_kh : privacies?.title;
+    const { t, currentLocale } = useTranslation();
 
     return (
         <FrontPageLayout>
@@ -34,9 +18,10 @@ const Privacy = () => {
 
             <div className="section-container mx-auto mt-6 max-w-4xl pb-12">
                 {/* Header Section */}
-                <section className="mb-16 flex flex-col items-center text-center">
-                    <h1 className="text-foreground mb-6 text-4xl font-black tracking-tighter uppercase md:text-5xl lg:text-6xl">
-                        {renderTitle(displayTitle)}
+                <section className="mb-12 flex flex-col items-center text-center">
+                    <h1 className="text-foreground mb-6 text-4xl font-black md:text-5xl lg:text-6xl">
+                        {currentLocale === 'kh' ? 'គោលការណ៍' : 'Privacy'}{' '}
+                        <span className="text-[#FF6D00]">{currentLocale === 'kh' ? 'ឯកជនភាព' : 'Policy'}</span>
                     </h1>
                     <div
                         className="text-muted-foreground mx-auto max-w-2xl text-lg leading-relaxed"

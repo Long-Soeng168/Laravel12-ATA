@@ -46,14 +46,14 @@ export default function Footer() {
                                 />
                             </div>
                             <div className="flex flex-col justify-center text-left">
-                                <p className="text-primary text-[20px] font-extrabold md:text-[24px]">អេ ធិច អូតូ</p>
+                                <p className="text-primary text-[22px] font-bold md:text-[24px]">អេ ធិច អូតូ</p>
                                 <p className="text-[15px] font-bold text-[#FF6D00] md:text-[17px]">A-Tech Auto</p>
                                 <div className="mt-1 h-[3px] w-8 rounded-full bg-[#FF6D00] transition-all duration-500 ease-out group-hover:w-full"></div>
                             </div>
                         </Link>
                         <p className="text-muted-foreground mt-2 text-sm">
                             {t(
-                                'Your all-in-one automotive platform. Buy & sell parts, locate garages & EV stations, decode DTC errors, access repair documents, and learn through our video tutorials and in-person courses.',
+                                'A-Tech Auto is the all-in-one automotive platform. Buy & sell cars or spare-parts, locate garages & EV stations, find DTC errors, access repair documents, and learn through our video tutorials and in-person courses.',
                             )}
                         </p>
                     </div>
@@ -63,13 +63,13 @@ export default function Footer() {
                         <h4 className="text-foreground mb-8 text-sm font-semibold">{t('Information')}</h4>
                         <div className="text-muted-foreground space-y-3 text-sm">
                             <div className="group hover:text-foreground flex items-start gap-3 transition-colors">
-                                <div className="bg-background flex h-8 w-8 shrink-0 items-center justify-center rounded-full shadow-sm transition-all group-hover:bg-[#FF6D00]/5 group-hover:ring-2 group-hover:ring-[#FF6D00]">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full shadow-sm transition-all group-hover:bg-[#FF6D00]/5 group-hover:ring-2 group-hover:ring-[#FF6D00] dark:bg-[#FF6D00]/10">
                                     <MapPin className="h-4 w-4 text-[#FF6D00] transition-transform group-hover:scale-110" />
                                 </div>
                                 <span className="pt-1">{application_info?.address}</span>
                             </div>
                             <div className="group hover:text-foreground flex items-center gap-3 transition-colors">
-                                <div className="bg-background flex h-8 w-8 shrink-0 items-center justify-center rounded-full shadow-sm transition-all group-hover:bg-[#FF6D00]/5 group-hover:ring-2 group-hover:ring-[#FF6D00]">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full shadow-sm transition-all group-hover:bg-[#FF6D00]/5 group-hover:ring-2 group-hover:ring-[#FF6D00] dark:bg-[#FF6D00]/10">
                                     <Phone className="h-4 w-4 text-[#FF6D00] transition-transform group-hover:rotate-12" />
                                 </div>
                                 <a href={`tel:${application_info?.phone}`} className="pt-1">
@@ -77,7 +77,7 @@ export default function Footer() {
                                 </a>
                             </div>
                             <div className="group hover:text-foreground flex items-center gap-3 transition-colors">
-                                <div className="bg-background flex h-8 w-8 shrink-0 items-center justify-center rounded-full shadow-sm transition-all group-hover:bg-[#FF6D00]/5 group-hover:ring-2 group-hover:ring-[#FF6D00]">
+                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full shadow-sm transition-all group-hover:bg-[#FF6D00]/5 group-hover:ring-2 group-hover:ring-[#FF6D00] dark:bg-[#FF6D00]/10">
                                     <Mail className="h-4 w-4 text-[#FF6D00] transition-transform group-hover:-rotate-12" />
                                 </div>
                                 <a href={`mailto:${application_info?.email}`} className="pt-1">
@@ -94,7 +94,9 @@ export default function Footer() {
                             {quickLinks.map((item) => (
                                 <li key={item.name}>
                                     <Link prefetch href={item.path} className="group hover:text-foreground flex items-center gap-3 transition-colors">
-                                        <item.icon className="h-4 w-4 shrink-0 text-[#FF6D00]/70 transition-all group-hover:text-[#FF6D00]" />
+                                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full shadow-sm transition-all group-hover:bg-[#FF6D00]/5 group-hover:ring-2 group-hover:ring-[#FF6D00] dark:bg-[#FF6D00]/10">
+                                            <item.icon className="h-4 w-4 shrink-0 text-[#FF6D00]/70 transition-all group-hover:text-[#FF6D00]" />
+                                        </div>
                                         <span className="font-medium transition-transform group-hover:translate-x-1">{t(item.name)}</span>
                                     </Link>
                                 </li>
@@ -106,7 +108,7 @@ export default function Footer() {
                     <div className="md:col-span-3 md:pl-4">
                         <h4 className="text-foreground mb-8 text-sm font-semibold">{t('Connect With Us')}</h4>
                         {/* Box layout for social media with image above text */}
-                        <div className="grid grid-cols-3 gap-2 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="grid grid-cols-3 gap-3 md:grid-cols-2 lg:grid-cols-3">
                             {links?.map((item: any) => {
                                 // Simple ternary logic for links display title using only title and title_kh
                                 const displayTitle = currentLocale === 'kh' ? item?.title_kh || item?.title : item?.title;

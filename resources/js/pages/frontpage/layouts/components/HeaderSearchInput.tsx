@@ -108,7 +108,7 @@ export default function HeaderSearchInput({ showCategories = true, className = '
                                                     : 'border-l-4 border-transparent'
                                             }`}
                                         >
-                                            <div className="bg-accent flex size-6 shrink-0 items-center justify-center rounded-full">
+                                            <div className="bg-white flex size-6 shrink-0 items-center justify-center rounded-full">
                                                 <LayoutGrid className="text-muted-foreground size-3.5" />
                                             </div>
                                             <span className="truncate">{t('All Categories')}</span>
