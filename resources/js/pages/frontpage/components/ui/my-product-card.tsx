@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { ChevronRight } from 'lucide-react';
 import React from 'react';
 
 interface MyProductCardProps {
@@ -27,20 +28,13 @@ const MyProductCard: React.FC<MyProductCardProps> = ({ product }) => {
                         />
                     ) : (
                         <div className="flex h-full w-full items-center justify-center bg-zinc-100 dark:bg-zinc-800">
-                            <span className="text-xs font-medium uppercase tracking-widest text-zinc-400">
-                                No Image
-                            </span>
+                            <span className="text-xs font-medium tracking-widest text-zinc-400 uppercase">No Image</span>
                         </div>
                     )}
                 </Link>
 
                 {/* Soft gradient overlay on hover to make badge pop */}
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                
-                {/* Floating Action Badge - Glassmorphism */}
-                <div className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2 translate-y-4 rounded-full bg-white/95 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-black opacity-0 shadow-lg backdrop-blur-md transition-all duration-500 ease-out group-hover:translate-y-0 group-hover:opacity-100 dark:bg-zinc-900/95 dark:text-white">
-                    View Details
-                </div>
             </div>
 
             {/* Content Section */}
@@ -48,7 +42,7 @@ const MyProductCard: React.FC<MyProductCardProps> = ({ product }) => {
                 <Link prefetch href={`/products/${product.id}`} className="flex flex-1 flex-col">
                     <div className="mb-4 flex flex-col gap-1.5">
                         {/* High-end minimalist typography for product name */}
-                        <h3 className="line-clamp-2 text-base font-medium leading-snug tracking-tight text-zinc-800 transition-colors group-hover:text-black dark:text-zinc-200 dark:group-hover:text-white">
+                        <h3 className="line-clamp-2 text-xs leading-snug font-medium tracking-tight text-zinc-800 transition-colors group-hover:text-black dark:text-zinc-200 dark:group-hover:text-white">
                             {product.name}
                         </h3>
                     </div>
@@ -61,18 +55,13 @@ const MyProductCard: React.FC<MyProductCardProps> = ({ product }) => {
                                     ${parseFloat(product.price).toFixed(2)}
                                 </span>
                             ) : (
-                                <span className="text-[15px] font-medium tracking-tight text-zinc-500 dark:text-zinc-400">
-                                    Complimentary
-                                </span>
+                                <span className="text-[15px] font-medium tracking-tight text-zinc-500 dark:text-zinc-400">Complimentary</span>
                             )}
                         </div>
-                        
+
                         {/* Minimalist interactive arrow indicator */}
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-50 text-zinc-400 transition-all duration-300 group-hover:bg-black group-hover:text-white dark:bg-zinc-800/50 dark:text-zinc-500 dark:group-hover:bg-white dark:group-hover:text-black">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-300 group-hover:translate-x-0.5">
-                                <path d="M5 12h14"></path>
-                                <path d="m12 5 7 7-7 7"></path>
-                            </svg>
+                        <div className="flex size-8 items-center justify-center rounded-full bg-zinc-50 text-zinc-400 transition-all duration-300 group-hover:bg-black group-hover:text-white dark:bg-zinc-800/50 dark:text-zinc-500 dark:group-hover:bg-white dark:group-hover:text-black">
+                            <ChevronRight className="translate-x-[1px]" />
                         </div>
                     </div>
                 </Link>

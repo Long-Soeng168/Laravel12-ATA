@@ -9,7 +9,7 @@ import FrontPageLayout from '../layouts/frontpage-layout';
 import ShopProfileHeader from './components/ShopProfileHeader';
 
 const Show = () => {
-    const { tableData, shop } = usePage().props;
+    const { tableData, shop } = usePage<any>().props;
     return (
         <FrontPageLayout>
             <div className="mx-auto mb-8 max-w-screen-xl">

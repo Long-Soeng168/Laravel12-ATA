@@ -283,69 +283,6 @@ class FrontPageController extends Controller
         ]);
     }
 
-    public function products(Request $request)
-    {
-        $search = $request->input('search', '');
-        $brand_code = $request->input('brand_code', '');
-        $perPage = $request->input('perPage', 25);
-        $sortBy = $request->input('sortBy', 'id');
-        $sortDirection = $request->input('sortDirection', 'desc');
-        $category_code = $request->input('category_code', '');
-        $body_type_code = $request->input('body_type_code', '');
-
-        $query = Item::query();
-        $query->with('created_by', 'updated_by', 'images', 'category', 'shop');
-
-        if ($category_code) {
-            // get category and its children codes
-            $category = ItemCategory::with('children')->where('code', $category_code)->first();
-
-            if ($category) {
-                $categoryCodes = collect([$category->code])
-                    ->merge($category->children->pluck('code'))
-                    ->toArray();
-
-                $query->whereIn('category_code', $categoryCodes);
-            }
-        }
-
-        if ($brand_code) {
-            $query->where('brand_code', $brand_code);
-        }
-        if ($body_type_code) {
-            $query->where('body_type_code', $body_type_code);
-        }
-
-        if ($search) {
-            $query->where(function ($sub_query) use ($search) {
-                return $sub_query->where('name', 'LIKE', "%{$search}%")
-                    ->orWhere('name_kh', 'LIKE', "%{$search}%");
-            });
-        }
-
-        $query->orderBy($sortBy, $sortDirection);
-        $query->where('status', 'active');
-
-        $tableData = $query->paginate(perPage: $perPage)->onEachSide(1);
-
-        $item_brands = ItemBrand::orderBy('order_index')->orderBy('name')
-            ->withCount('items')
-            ->where('status', 'active') // Specify 'item_categories' table for status
-            ->get();
-        $item_body_types = ItemBodyType::orderBy('order_index')->orderBy('name')
-            ->withCount('items')
-            ->where('status', 'active') // Specify 'item_categories' table for status
-            ->get();
-        $productListBanners = Banner::where('position_code', 'PRODUCT_SEARCH')->orderBy('order_index')->where('status', 'active')->get();
-
-        return Inertia::render('frontpage/products/Index', [
-            'tableData' => $tableData,
-            'item_brands' => $item_brands,
-            'item_body_types' => $item_body_types,
-            'productListBanners' => $productListBanners,
-        ]);
-    }
-
     public function shop_show($id, Request $request)
     {
         $search = $request->input('search', '');
@@ -458,42 +395,6 @@ class FrontPageController extends Controller
         ]);
     }
 
-    public function product_show($id)
-    {
-        $itemShow = Item::find($id);
-
-        $relatedItemsQuery = Item::query();
-
-        $relatedItemsQuery->with(['category', 'images', 'shop']);
-
-        $relatedItemsQuery->where('id', '!=', $id);
-        $relatedItemsQuery->where('status', 'active');
-
-        if ($itemShow->category_code) {
-            $relatedItemsQuery->where('category_code', $itemShow->category_code);
-        }
-
-        $relatedItems = $relatedItemsQuery
-            ->orderByDesc('id')
-            ->limit(12)
-            ->get();
-
-        $date = now()->toDateString();
-        $view = ItemDailyView::firstOrCreate(
-            ['item_id' => $id, 'view_date' => $date],
-            ['view_counts' => 0],
-        );
-        $view->increment('view_counts');
-
-        $itemShow->update([
-            'total_view_counts' => $itemShow->total_view_counts + 1,
-        ]);
-
-        return Inertia::render("frontpage/products/Show", [
-            "itemShow" => $itemShow->load('created_by', 'updated_by', 'images', 'category', 'brand', 'shop'),
-            'relatedItems' => $relatedItems,
-        ]);
-    }
 
     public function shopping_cart()
     {

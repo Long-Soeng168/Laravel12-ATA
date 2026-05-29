@@ -5,9 +5,8 @@ import { SectionHeader } from './components/headers/HeaderSection';
 import MiniHeroSection from './components/heroes/MiniHeroSection';
 import SlideHeroSection from './components/heroes/SlideHeroSection';
 import CategorySections from './components/sections/CategorySection';
-import ShopSection from './components/sections/ShopSection';
 import FrontPageLayout from './layouts/frontpage-layout';
-import LatestProductsSections from './shops/components/ProductsSections';
+import LatestProductsSections from './products/components/ProductsSections';
 
 export default function HomePage() {
     const { highlight_products, latest_products } = usePage<any>().props;

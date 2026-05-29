@@ -1,12 +1,13 @@
 import { Button } from '@/components/ui/button';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { PhoneIcon } from 'lucide-react';
+import { Layers3Icon, PhoneIcon } from 'lucide-react';
 import CarouselWithThumbs from '../components/CarouselWithThumbs';
-import MyProductList from '../components/my-product-list';
-import MyProductListHeader from '../components/my-product-list-header';
+import { SectionHeader } from '../components/headers/HeaderSection';
 import FrontPageLayout from '../layouts/frontpage-layout';
+import ProductsSections from '../products/components/ProductsSections';
+import ProductDetail from './components/ProductDetail';
 const ProductDetailPage = () => {
-    const { itemShow, relatedItems } = usePage().props;
+    const { itemShow, relatedItems } = usePage<any>().props;
     return (
         <FrontPageLayout>
             <Head>
@@ -14,9 +15,10 @@ const ProductDetailPage = () => {
                 <meta name="description" content={itemShow?.short_description} />
             </Head>
 
-            <div>
-                <div className="mx-auto max-w-screen-xl overflow-hidden">
-                    <div className="flex flex-col md:flex-row">
+            <main className="pb-20">
+                <div>
+                    <ProductDetail />
+                    <div className="flex hidden flex-col pb-10 md:flex-row">
                         {/* Product Image */}
                         {itemShow?.images?.length > 0 && (
                             <div className="flex flex-col items-center p-4 md:w-[40%]">
@@ -81,38 +83,21 @@ const ProductDetailPage = () => {
                             )}
                         </div>
                     </div>
-                    {/* <div className="mt-4 border-t p-4">
-                        <p className="mb-2 text-xl font-semibold text-gray-700">Videos:</p>
-                        <MyVideoGallery />
-                    </div> */}
-
-                    {/* {itemShow?.long_description && (
-                        <div className="px-2">
-                            <Accordion defaultValue="description" type="single" collapsible>
-                                <AccordionItem value="description" className="border-none">
-                                    <AccordionTrigger className="border-primary my-4 rounded-none border-b-2 p-0 hover:no-underline">
-                                        <span className="bg-primary text-primary-foreground rounded-md rounded-bl-none px-8 py-1 text-lg font-bold">
-                                            Descriptions
-                                        </span>
-                                    </AccordionTrigger>
-                                    <AccordionContent className="text-base">
-                                        <div className="prose ck-content max-w-none">
-                                            <div dangerouslySetInnerHTML={{ __html: itemShow?.long_description }} />
-                                        </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-                            </Accordion>
-                        </div>
-                    )} */}
-
-                    {relatedItems?.length > 0 && (
-                        <div>
-                            <MyProductListHeader title="Related" link={`/products?category_code=${itemShow?.category_code}`} />
-                            <MyProductList items={relatedItems} />
-                        </div>
-                    )}
                 </div>
-            </div>
+                {relatedItems?.length > 0 && (
+                    <div className="section-container mt-10">
+                        <SectionHeader
+                            icon={<Layers3Icon className="size-5" />}
+                            title="Related"
+                            action={{
+                                label: 'See More',
+                                href: `/products?category_code=${itemShow?.category_code}`,
+                            }}
+                        />
+                        <ProductsSections products={relatedItems} />
+                    </div>
+                )}
+            </main>
         </FrontPageLayout>
     );
 };
