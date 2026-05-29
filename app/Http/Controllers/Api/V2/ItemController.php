@@ -17,6 +17,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class ItemController extends Controller
@@ -732,9 +733,32 @@ class ItemController extends Controller
         // Use only validated data moving forward to prevent mass-assignment vulnerabilities
         $validated = $validator->validated();
 
-        // 4. Database Transaction
+        // Array to keep track of uploaded files so we can delete them if something goes wrong
+        $uploadedImages = [];
+
+        // 1. Process Images OUTSIDE the transaction
         try {
-            return DB::transaction(function () use ($request, $validated, $user) {
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $filename = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/items', 800);
+                    $uploadedImages[] = $filename; // Store the path
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Item image processing failed: ' . $e->getMessage());
+
+            // CLEANUP: If the loop fails halfway through, delete the ones that succeeded
+            foreach ($uploadedImages as $uploadedImage) {
+                if (file_exists(public_path($uploadedImage))) {
+                    unlink(public_path($uploadedImage));
+                }
+            }
+            return response()->json(['success' => false, 'message' => 'Image processing failed.'], 500);
+        }
+
+        // 2. Database Transaction
+        try {
+            $newItem = DB::transaction(function () use ($validated, $user, $uploadedImages) {
 
                 $validated['created_by'] = $user->id;
                 $validated['user_id']    = $user->id;
@@ -745,7 +769,7 @@ class ItemController extends Controller
 
                 $item = Item::create($validated);
 
-                // --- NEW LOGIC: Attach category to shop if it doesn't exist ---
+                // --- Attach category to shop if it doesn't exist ---
                 if ($user->shop_id) {
                     $shop = Shop::find($user->shop_id);
 
@@ -754,24 +778,36 @@ class ItemController extends Controller
                     }
                 }
 
-                if ($request->hasFile('images')) {
-                    foreach ($request->file('images') as $image) {
-                        // Using 800px resize per your updated logic
-                        $filename = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/items', 800);
-                        ItemImage::create([
-                            'item_id' => $item->id,
-                            'image' => $filename,
-                        ]);
-                    }
+                // Insert the image records using our pre-uploaded array
+                foreach ($uploadedImages as $filename) {
+                    ItemImage::create([
+                        'item_id' => $item->id,
+                        'image' => $filename,
+                    ]);
                 }
 
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Item created.',
-                    'data' => $item->load('images')
-                ], 201);
+                return $item;
             });
+
+            // 3. Eager load the images for the API response
+            $newItem->load('images');
+
+            // 4. Return HTTP Response OUTSIDE the transaction
+            return response()->json([
+                'success' => true,
+                'message' => 'Item created successfully.',
+                'data' => $newItem
+            ], 201);
         } catch (\Exception $e) {
+            // 5. ROLLBACK CLEANUP: If the DB fails, delete EVERY image we just uploaded in the loop
+            foreach ($uploadedImages as $uploadedImage) {
+                if (file_exists(public_path($uploadedImage))) {
+                    unlink(public_path($uploadedImage));
+                }
+            }
+
+            Log::error('Failed to create item in DB: ' . $e->getMessage());
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create item. ' . $e->getMessage()
@@ -893,9 +929,45 @@ class ItemController extends Controller
 
         $validated = $validator->validated();
 
-        // 5. Database Transaction for safe updating
+        // Arrays to keep track of file states
+        $uploadedImages = [];
+        $oldImagePathsToDelete = [];
+
+        // 1. Process NEW Images and identify OLD Images OUTSIDE the transaction
         try {
-            return DB::transaction(function () use ($request, $validated, $item, $user) {
+            // A. Identify old images to delete (Fetch their paths BEFORE the DB deletes the rows)
+            if ($request->has('deleted_image_ids') && is_array($request->deleted_image_ids)) {
+                $imagesToDelete = ItemImage::where('item_id', $item->id)
+                    ->whereIn('id', $request->deleted_image_ids)
+                    ->get();
+
+                foreach ($imagesToDelete as $imgModel) {
+                    $oldImagePathsToDelete[] = $imgModel->image; // Store paths for safe deletion later
+                }
+            }
+
+            // B. Upload new images safely
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $filename = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/items', 800);
+                    $uploadedImages[] = $filename;
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Item image processing failed during update: ' . $e->getMessage());
+
+            // CLEANUP: If uploading failed halfway through, delete the ones that succeeded
+            foreach ($uploadedImages as $uploadedImage) {
+                if (file_exists(public_path($uploadedImage))) {
+                    unlink(public_path($uploadedImage));
+                }
+            }
+            return response()->json(['success' => false, 'message' => 'Image processing failed.'], 500);
+        }
+
+        // 2. Database Transaction
+        try {
+            $updatedItem = DB::transaction(function () use ($validated, $user, $item, $request, $uploadedImages) {
 
                 $validated['updated_by'] = $user->id;
 
@@ -906,49 +978,59 @@ class ItemController extends Controller
                 // Update the core item record
                 $item->update($validated);
 
-                // --- NEW LOGIC: Attach category to shop if it doesn't exist ---
+                // --- Attach category to shop if it doesn't exist ---
                 if ($user->shop_id) {
                     $shop = Shop::find($user->shop_id);
-
                     if ($shop) {
                         $shop->categories()->syncWithoutDetaching([$validated['category_code']]);
                     }
                 }
 
-                // --- HANDLE DELETED IMAGES ---
+                // --- HANDLE DELETED IMAGES (Database Only) ---
                 if ($request->has('deleted_image_ids') && is_array($request->deleted_image_ids)) {
-                    // Fetch images that belong to this specific item to prevent deleting other users' images
-                    $imagesToDelete = ItemImage::where('item_id', $item->id)
+                    ItemImage::where('item_id', $item->id)
                         ->whereIn('id', $request->deleted_image_ids)
-                        ->get();
-
-                    foreach ($imagesToDelete as $imageModel) {
-                        // Optional: Delete the physical file from your server storage to save space
-                        // \Illuminate\Support\Facades\Storage::disk('public')->delete($imageModel->image); // Adjust path if needed
-
-                        // Delete the database record
-                        $imageModel->delete();
-                    }
+                        ->delete();
                 }
 
-                // --- HANDLE NEW IMAGES ---
-                if ($request->hasFile('images')) {
-                    foreach ($request->file('images') as $image) {
-                        $filename = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/items', 800);
-                        ItemImage::create([
-                            'item_id' => $item->id,
-                            'image' => $filename,
-                        ]);
-                    }
+                // --- HANDLE NEW IMAGES (Database Only) ---
+                foreach ($uploadedImages as $filename) {
+                    ItemImage::create([
+                        'item_id' => $item->id,
+                        'image' => $filename,
+                    ]);
                 }
 
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Item updated successfully.',
-                    'data' => $item->load('images')
-                ], 200); // 200 OK
+                return $item; // Return the data, NOT the response
             });
+
+            // Eager load images for the API response
+            $updatedItem->load('images');
+
+            // 3. SUCCESS CLEANUP: DB committed successfully, so we safely delete the OLD physical files
+            foreach ($oldImagePathsToDelete as $oldImagePath) {
+                // Adjust this if your paths are stored differently or if you use ImageHelper::deleteImage()
+                if (file_exists(public_path($oldImagePath))) {
+                    unlink(public_path($oldImagePath));
+                }
+            }
+
+            // Return HTTP Response OUTSIDE the transaction
+            return response()->json([
+                'success' => true,
+                'message' => 'Item updated successfully.',
+                'data' => $updatedItem
+            ], 200);
         } catch (\Exception $e) {
+            // 4. ROLLBACK CLEANUP: DB failed, delete the NEW physical files we just uploaded to prevent orphans
+            foreach ($uploadedImages as $uploadedImage) {
+                if (file_exists(public_path($uploadedImage))) {
+                    unlink(public_path($uploadedImage));
+                }
+            }
+
+            Log::error('Failed to update item DB: ' . $e->getMessage());
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update item. ' . $e->getMessage()
@@ -964,7 +1046,7 @@ class ItemController extends Controller
         $image = ItemImage::find($imageId);
         if (!$image) return response()->json(['success' => false, 'message' => 'Not found'], 404);
 
-        ImageHelper::deleteImage($image->image, 'assets/images/items');
+        // ImageHelper::deleteImage($image->image, 'assets/images/items');
         $image->delete();
 
         return response()->json(['success' => true, 'message' => 'Image removed']);

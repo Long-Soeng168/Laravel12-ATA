@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Api\V2;
 
 use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
+use App\Models\Item;
 use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ShopController extends Controller
 {
@@ -174,40 +176,61 @@ class ShopController extends Controller
             }
         }
 
-        // 5. Database Transaction
+        // 1. Process Images OUTSIDE the transaction
         try {
-            return DB::transaction(function () use ($request, $validated, $user) {
+            $logoPath = ImageHelper::uploadAndResizeImageWebp($request->file('logo'), 'assets/images/shops', 600);
+            $bannerPath = ImageHelper::uploadAndResizeImageWebp($request->file('banner'), 'assets/images/shops', 1200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Image processing failed.'], 500);
+        }
+
+        // 2. Database Transaction
+        try {
+            $newShop = DB::transaction(function () use ($request, $validated, $user, $logoPath, $bannerPath) {
 
                 // Assign Metadata
                 $validated['owner_user_id'] = $user->id;
                 $validated['created_by']    = $user->id;
                 $validated['updated_by']    = $user->id;
-                $validated['status']        = 'pending';
+                $validated['status']        = 'approved';
                 $validated['order_index']   = 10000;
                 $validated['expired_at']    = now()->addYears(2)->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
 
-                // Process Images (We know they exist because of the 'required' validation)
-                $validated['logo']   = ImageHelper::uploadAndResizeImageWebp($request->file('logo'), 'assets/images/shops', 600);
-                $validated['banner'] = ImageHelper::uploadAndResizeImageWebp($request->file('banner'), 'assets/images/shops', 1200);
+                // Process Images
+                $validated['logo']   = $logoPath;
+                $validated['banner'] = $bannerPath;
 
                 $categoryCodes = $request->input('categories', []);
                 unset($validated['categories']);
 
-                $shop = Shop::create($validated);
+                $newShop = Shop::create($validated);
 
-                $shop->categories()->sync($categoryCodes);
+                $newShop->categories()->sync($categoryCodes);
 
-                // Update User
-                $user->update(['shop_id' => $shop->id]);
+                // Update User & all items created when not having a shop
+                $user->update(['shop_id' => $newShop->id]);
+                Item::where('user_id', $user->id)->update([
+                    'shop_id' => $newShop->id
+                ]);
 
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Shop created successfully!',
-                    'data' => $shop
-                ], 201);
+                return $newShop;
             });
+
+            // 3. Return HTTP Response
+            return response()->json([
+                'success' => true,
+                'message' => 'Shop created successfully!',
+                'data' => $newShop
+            ], 201);
         } catch (\Exception $e) {
-            // Catch image upload errors or DB errors and return a clean JSON response
+            // 4. ROLLBACK CLEANUP: Delete the images if the DB fails!
+            if (isset($logoPath) && file_exists(public_path($logoPath))) {
+                unlink(public_path($logoPath));
+            }
+            if (isset($bannerPath) && file_exists(public_path($bannerPath))) {
+                unlink(public_path($bannerPath));
+            }
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create shop. ' . $e->getMessage()
@@ -280,54 +303,76 @@ class ShopController extends Controller
             $validated['other_phones'] = null; // Note: Change to [] if your DB column requires an array instead of null
         }
 
-        // 6. Database Transaction with proper Try/Catch
+        // Variables to track file states
+        $newLogoPath = null;
+        $newBannerPath = null;
+        $oldLogoToDelete = null;
+        $oldBannerToDelete = null;
+
+        // 1. Process NEW Images OUTSIDE the transaction
         try {
-            return DB::transaction(function () use ($request, $validated, $shop, $user) {
+            if ($request->hasFile('logo')) {
+                $newLogoPath = ImageHelper::uploadAndResizeImageWebp($request->file('logo'), 'assets/images/shops', 600);
+                $validated['logo'] = $newLogoPath;
+                $oldLogoToDelete = $shop->logo; // Queue the old one for deletion
+            }
+
+            if ($request->hasFile('banner')) {
+                $newBannerPath = ImageHelper::uploadAndResizeImageWebp($request->file('banner'), 'assets/images/shops', 1200);
+                $validated['banner'] = $newBannerPath;
+                $oldBannerToDelete = $shop->banner; // Queue the old one for deletion
+            } elseif ($request->input('remove_banner') == '1') {
+                $validated['banner'] = null;
+                $oldBannerToDelete = $shop->banner; // Queue the old one for deletion
+            }
+
+            // Clean up validated array before DB insertion
+            unset($validated['remove_banner']);
+            $categoryCodes = $request->input('categories', []);
+            unset($validated['categories']);
+        } catch (\Exception $e) {
+            Log::error('Image processing failed during update: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Image processing failed.'], 500);
+        }
+
+        // 2. Database Transaction
+        try {
+            $updatedShop = DB::transaction(function () use ($validated, $shop, $user, $categoryCodes) {
 
                 $validated['updated_by'] = $user->id;
 
-                // Process Images
-                $image_file = $request->file('logo');
-                $banner_file = $request->file('banner');
-                unset($validated['logo'], $validated['banner'], $validated['remove_banner']);
-
-                // FIX 3: Removed inner try/catch so errors bubble up
-                if ($image_file) {
-                    $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/shops', 600);
-                    $validated['logo'] = $created_image_name;
-                    if ($shop->logo && $created_image_name) {
-                        ImageHelper::deleteImage($shop->logo, 'assets/images/shops');
-                    }
-                }
-
-                if ($banner_file) {
-                    $created_banner_name = ImageHelper::uploadAndResizeImageWebp($banner_file, 'assets/images/shops', 1200);
-                    $validated['banner'] = $created_banner_name;
-                    if ($shop->banner && $created_banner_name) {
-                        ImageHelper::deleteImage($shop->banner, 'assets/images/shops');
-                    }
-                } elseif ($request->input('remove_banner') == '1') {
-                    $validated['banner'] = null;
-                    if ($shop->banner) {
-                        ImageHelper::deleteImage($shop->banner, 'assets/images/shops');
-                    }
-                }
-                
-                $categoryCodes = $request->input('categories', []);
-                unset($validated['categories']);
-
                 $shop->update($validated);
-
                 $shop->categories()->sync($categoryCodes);
 
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Shop updated successfully!',
-                    'data' => $shop->fresh()
-                ], 200);
+                return $shop->fresh(); // Return the fresh model instance, NOT the HTTP response
             });
+
+            // 3. SUCCESS CLEANUP: The DB updated successfully, so delete the OLD files
+            if ($oldLogoToDelete) {
+                ImageHelper::deleteImage($oldLogoToDelete, 'assets/images/shops');
+            }
+            if ($oldBannerToDelete) {
+                ImageHelper::deleteImage($oldBannerToDelete, 'assets/images/shops');
+            }
+
+            // 4. Return HTTP Response
+            return response()->json([
+                'success' => true,
+                'message' => 'Shop updated successfully!',
+                'data' => $updatedShop
+            ], 200);
         } catch (\Exception $e) {
-            // Catch any upload or DB errors and return clean JSON
+            // 5. ROLLBACK CLEANUP: The DB failed, so delete the NEW files we just uploaded
+            if ($newLogoPath && file_exists(public_path($newLogoPath))) {
+                unlink(public_path($newLogoPath));
+                // Note: Or use ImageHelper::deleteImage($newLogoPath) if it handles public_path automatically
+            }
+            if ($newBannerPath && file_exists(public_path($newBannerPath))) {
+                unlink(public_path($newBannerPath));
+            }
+
+            Log::error('Failed to update shop DB: ' . $e->getMessage());
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update shop. ' . $e->getMessage()

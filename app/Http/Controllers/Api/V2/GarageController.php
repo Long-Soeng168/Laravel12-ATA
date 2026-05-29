@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class GarageController extends Controller
 {
@@ -266,21 +267,30 @@ class GarageController extends Controller
 
         $validated = $validator->validated();
 
-        // 5. Database Transaction
+        // 1. Process Images OUTSIDE the transaction
         try {
-            return DB::transaction(function () use ($request, $validated, $user) {
+            $logoPath = ImageHelper::uploadAndResizeImageWebp($request->file('logo'), 'assets/images/garages', 600);
+            $bannerPath = ImageHelper::uploadAndResizeImageWebp($request->file('banner'), 'assets/images/garages', 1200);
+        } catch (\Exception $e) {
+            Log::error('Garage image processing failed: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Image processing failed.'], 500);
+        }
+
+        // 2. Database Transaction
+        try {
+            $newGarage = DB::transaction(function () use ($validated, $user, $logoPath, $bannerPath) {
 
                 // Assign Authorship
                 $validated['owner_user_id'] = $user->id;
                 $validated['created_by']    = $user->id;
                 $validated['updated_by']    = $user->id;
-                $validated['status']        = 'pending';
+                $validated['status']        = 'approved';
                 $validated['order_index']   = 10000;
                 $validated['expired_at']    = now()->addYears(2)->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
 
-                // Process Images (No 'else' needed because validation guarantees they exist)
-                $validated['logo']   = ImageHelper::uploadAndResizeImageWebp($request->file('logo'), 'assets/images/garages', 600);
-                $validated['banner'] = ImageHelper::uploadAndResizeImageWebp($request->file('banner'), 'assets/images/garages', 1200);
+                // Assign pre-processed images
+                $validated['logo']   = $logoPath;
+                $validated['banner'] = $bannerPath;
 
                 // Create the Garage
                 $garage = Garage::create($validated);
@@ -290,14 +300,27 @@ class GarageController extends Controller
                     'garage_id' => $garage->id,
                 ]);
 
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Garage created successfully!',
-                    'data' => $garage
-                ], 201);
+                // Return the data, NOT the HTTP response
+                return $garage;
             });
+
+            // 3. Return HTTP Response OUTSIDE the transaction
+            return response()->json([
+                'success' => true,
+                'message' => 'Garage created successfully!',
+                'data' => $newGarage
+            ], 201);
         } catch (\Exception $e) {
-            // Safely catch any upload or DB errors and return a proper JSON response
+            // 4. ROLLBACK CLEANUP: Delete the newly uploaded images if the DB fails!
+            if (isset($logoPath) && file_exists(public_path($logoPath))) {
+                unlink(public_path($logoPath));
+            }
+            if (isset($bannerPath) && file_exists(public_path($bannerPath))) {
+                unlink(public_path($bannerPath));
+            }
+
+            Log::error('Failed to create garage DB: ' . $e->getMessage());
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create garage. ' . $e->getMessage()
@@ -371,39 +394,75 @@ class GarageController extends Controller
             $validated['other_phones'] = null; // Note: Change to [] if your DB column requires an array instead of null
         }
 
-        // 6. Database Transaction with Try/Catch
+        // Variables to track file states for safe cleanup
+        $newLogoPath = null;
+        $newBannerPath = null;
+        $oldLogoToDelete = null;
+        $oldBannerToDelete = null;
+
+        // 1. Process NEW Images OUTSIDE the transaction
         try {
-            return DB::transaction(function () use ($request, $validated, $garage, $user) {
+            if ($request->hasFile('logo')) {
+                $newLogoPath = ImageHelper::uploadAndResizeImageWebp($request->file('logo'), 'assets/images/garages', 600);
+                $validated['logo'] = $newLogoPath;
+                $oldLogoToDelete = $garage->logo; // Queue the old one for deletion
+            } else {
+                unset($validated['logo']); // Prevent overwriting existing logo with null
+            }
+
+            if ($request->hasFile('banner')) {
+                $newBannerPath = ImageHelper::uploadAndResizeImageWebp($request->file('banner'), 'assets/images/garages', 1200);
+                $validated['banner'] = $newBannerPath;
+                $oldBannerToDelete = $garage->banner; // Queue the old one for deletion
+            } else {
+                unset($validated['banner']); // Prevent overwriting existing banner with null
+            }
+        } catch (\Exception $e) {
+            Log::error('Garage image processing failed during update: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Image processing failed.'], 500);
+        }
+
+        // 2. Database Transaction
+        try {
+            // Capture the fresh data returned by the closure
+            $updatedGarage = DB::transaction(function () use ($validated, $garage, $user) {
 
                 // Set the updater ID
                 $validated['updated_by'] = $user->id;
 
-                // Process Images
-                if ($request->hasFile('logo')) {
-                    // Tip: Add logic here to delete $garage->logo from storage if it exists
-                    $validated['logo'] = ImageHelper::uploadAndResizeImageWebp($request->file('logo'), 'assets/images/garages', 600);
-                } else {
-                    unset($validated['logo']); // Prevent overwriting existing logo with null
-                }
-
-                if ($request->hasFile('banner')) {
-                    // Tip: Add logic here to delete $garage->banner from storage if it exists
-                    $validated['banner'] = ImageHelper::uploadAndResizeImageWebp($request->file('banner'), 'assets/images/garages', 1200);
-                } else {
-                    unset($validated['banner']); // Prevent overwriting existing banner with null
-                }
-
                 // Update the existing Garage model
                 $garage->update($validated);
 
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Garage updated successfully!',
-                    'data' => $garage->fresh()
-                ], 200);
+                // Return the data, NOT the HTTP response
+                return $garage->fresh();
             });
+
+            // 3. SUCCESS CLEANUP: The DB updated successfully, so it is now safe to delete the OLD files
+            if ($oldLogoToDelete) {
+                // Assuming ImageHelper::deleteImage handles your specific deletion logic correctly
+                ImageHelper::deleteImage($oldLogoToDelete, 'assets/images/garages');
+            }
+            if ($oldBannerToDelete) {
+                ImageHelper::deleteImage($oldBannerToDelete, 'assets/images/garages');
+            }
+
+            // 4. Return HTTP Response OUTSIDE the transaction
+            return response()->json([
+                'success' => true,
+                'message' => 'Garage updated successfully!',
+                'data' => $updatedGarage
+            ], 200);
         } catch (\Exception $e) {
-            // Safely catch any errors and return a JSON response
+            // 5. ROLLBACK CLEANUP: The DB failed, so delete the NEW files we just uploaded to prevent orphans
+            if ($newLogoPath && file_exists(public_path($newLogoPath))) {
+                unlink(public_path($newLogoPath));
+            }
+            if ($newBannerPath && file_exists(public_path($newBannerPath))) {
+                unlink(public_path($newBannerPath));
+            }
+
+            Log::error('Failed to update garage DB: ' . $e->getMessage());
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update garage. ' . $e->getMessage()
