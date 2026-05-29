@@ -1,5 +1,6 @@
 import useTranslation from '@/hooks/use-translation';
-import { ArrowRight } from 'lucide-react';
+import { Link } from '@inertiajs/react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 // --- Shared Flat UI Primitives ---
@@ -22,7 +23,7 @@ const HERO_SLIDES = [
         id: 'slide-1',
         titleLine1: 'The Ultimate',
         titleLine1_kh: 'ផ្សារទិញនិងលក់',
-        titleLine2: 'Parts Marketplace',
+        titleLine2: 'Car Parts Marketplace',
         titleLine2_kh: 'គ្រឿងបន្លាស់គ្រប់ប្រភេទ',
         desc: 'Discover everything you need in our dedicated parts marketplace. Buy high-quality spare parts from trusted sellers or easily list your own products for sale.',
         desc_kh:
@@ -36,11 +37,11 @@ const HERO_SLIDES = [
     },
     {
         id: 'slide-2',
-        titleLine1: 'Discover Trusted',
+        titleLine1: 'Discover',
         titleLine1_kh: 'ស្វែងរក',
-        titleLine2: 'Auto Shops',
-        titleLine2_kh: 'ហាងយានយន្តឈានមុខ',
-        desc: 'Explore our comprehensive directory of verified dealerships, specialist warehouses, and local sellers for all your automotive needs.',
+        titleLine2: 'Spare Parts Shops',
+        titleLine2_kh: 'ហាងគ្រឿងបន្លាស់យានយន្ត',
+        desc: 'Explore our comprehensive directory of shops, and local sellers for all your automotive needs.',
         desc_kh:
             'ស្វែងរកបញ្ជីឈ្មោះដ៏ទូលំទូលាយរបស់យើងដែលមានភ្នាក់ងារលក់ ឃ្លាំងឯកទេស និងអ្នកលក់ក្នុងស្រុកដែលគួរឱ្យទុកចិត្តសម្រាប់គ្រប់តម្រូវការយានយន្តរបស់អ្នក។',
         btnText: 'All Shops',
@@ -52,13 +53,13 @@ const HERO_SLIDES = [
     },
     {
         id: 'slide-3',
-        titleLine1: 'Live Map For',
-        titleLine1_kh: 'ផែនទីផ្ទាល់សម្រាប់',
+        titleLine1: 'Find',
+        titleLine1_kh: 'ស្វែងរក',
         titleLine2: 'Nearby Garages',
         titleLine2_kh: 'យានដ្ឋាននៅក្បែរអ្នក',
-        desc: 'Use our live integrated map to instantly find verified auto repair shops, professional mechanics, and EV charging stations near your current location.',
+        desc: 'Use our live integrated map to instantly find garages, professional mechanics, and EV charging stations near your current location.',
         desc_kh: 'ប្រើប្រាស់ផែនទីផ្ទាល់របស់យើងដើម្បីស្វែងរកទីតាំងយានដ្ឋានជួសជុលដែលបានបញ្ជាក់ ជាងជំនាញអាជីព និងស្ថានីយសាក EV នៅជិតអ្នកបានយ៉ាងរហ័ស។',
-        btnText: 'Find Garages',
+        btnText: 'All Garages',
         btnText_kh: 'ស្វែងរកយានដ្ឋាន',
         btnLink: '/garages',
         background_color: '#438ba9',
@@ -67,18 +68,34 @@ const HERO_SLIDES = [
     },
 ];
 
+const SLIDE_DURATION = 4000;
+
 export default function SlideHeroSection() {
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [progress, setProgress] = useState(0);
     const { currentLocale } = useTranslation();
     const isKh = currentLocale === 'kh';
 
-    // Auto-play slideshow
+    const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+
+    // Auto-play and Progress Bar logic
     useEffect(() => {
-        const timer = setInterval(() => {
-            setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
-        }, 6000);
-        return () => clearInterval(timer);
-    }, []);
+        setProgress(0);
+
+        const progressTimer = setTimeout(() => {
+            setProgress(100);
+        }, 50);
+
+        const slideTimer = setTimeout(() => {
+            nextSlide();
+        }, SLIDE_DURATION);
+
+        return () => {
+            clearTimeout(progressTimer);
+            clearTimeout(slideTimer);
+        };
+    }, [currentSlide]);
 
     return (
         <div className="border-border bg-card relative min-h-[450px] overflow-hidden border md:min-h-[550px]">
@@ -124,25 +141,78 @@ export default function SlideHeroSection() {
                         >
                             {isKh ? slide.desc_kh : slide.desc}
                         </p>
-                        <a href={slide.btnLink} className={getButtonStyles('accent', 'z-20 w-max gap-2 px-8 py-6 text-base shadow-none')}>
-                            {isKh ? slide.btnText_kh : slide.btnText} <ArrowRight className="ml-1 h-5 w-5" />
-                        </a>
+
+                        {/* Dynamic Link Rendering Logic */}
+                        {slide.btnLink.startsWith('http') ? (
+                            <a
+                                href={slide.btnLink}
+                                className={getButtonStyles('accent', 'z-20 w-max gap-2 px-8 py-6 text-base shadow-none')}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                {isKh ? slide.btnText_kh : slide.btnText} <ArrowRight className="ml-1 h-5 w-5" />
+                            </a>
+                        ) : (
+                            <Link
+                                prefetch
+                                href={slide.btnLink}
+                                className={getButtonStyles('accent', 'z-20 w-max gap-2 px-8 py-6 text-base shadow-none')}
+                            >
+                                {isKh ? slide.btnText_kh : slide.btnText} <ArrowRight className="ml-1 h-5 w-5" />
+                            </Link>
+                        )}
                     </div>
                 </div>
             ))}
 
-            {/* Slideshow Navigation Controls */}
-            <div className="absolute bottom-6 left-8 z-30 flex gap-2 md:bottom-10 md:left-12 lg:left-16">
-                {HERO_SLIDES.map((_, idx) => (
+            {/* Slideshow Navigation Controls (Dots with Progress & Arrows) */}
+            <div className="absolute right-8 bottom-6 left-8 z-30 flex items-center justify-between md:right-12 md:bottom-8 md:left-12 lg:right-16 lg:left-16">
+                {/* Dots with inline progress */}
+                <div className="flex gap-2">
+                    {HERO_SLIDES.map((_, idx) => {
+                        const isActive = currentSlide === idx;
+                        return (
+                            <button
+                                key={idx}
+                                onClick={() => setCurrentSlide(idx)}
+                                // Button itself acts as the background track
+                                className={`relative h-1.5 cursor-pointer overflow-hidden rounded-none transition-all duration-300 ${
+                                    isActive ? 'w-12 bg-white/30' : 'w-4 bg-white/50 hover:bg-white/80'
+                                }`}
+                                aria-label={`Go to slide ${idx + 1}`}
+                            >
+                                {/* Inner progress bar fill */}
+                                <div
+                                    className={`absolute top-0 left-0 h-full bg-[#FF6D00] ${
+                                        progress === 0 ? 'transition-none' : 'transition-all ease-linear'
+                                    }`}
+                                    style={{
+                                        width: isActive ? `${progress}%` : '0%',
+                                        transitionDuration: progress === 0 ? '0ms' : `${SLIDE_DURATION}ms`,
+                                    }}
+                                />
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* Arrows */}
+                <div className="flex gap-3">
                     <button
-                        key={idx}
-                        onClick={() => setCurrentSlide(idx)}
-                        className={`h-1.5 cursor-pointer rounded-none transition-all duration-300 ${
-                            currentSlide === idx ? 'w-8 bg-[#FF6D00]' : 'w-4 bg-white/50 hover:bg-white/80'
-                        }`}
-                        aria-label={`Go to slide ${idx + 1}`}
-                    />
-                ))}
+                        onClick={prevSlide}
+                        className="flex h-10 w-10 items-center justify-center rounded-none bg-black/10 text-white backdrop-blur transition-colors hover:bg-black/40"
+                        aria-label="Previous slide"
+                    >
+                        <ArrowLeft className="h-5 w-5" />
+                    </button>
+                    <button
+                        onClick={nextSlide}
+                        className="flex h-10 w-10 items-center justify-center rounded-none bg-black/10 text-white backdrop-blur transition-colors hover:bg-black/40"
+                        aria-label="Next slide"
+                    >
+                        <ArrowRight className="h-5 w-5" />
+                    </button>
+                </div>
             </div>
         </div>
     );
