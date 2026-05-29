@@ -49,8 +49,8 @@ export default function Header() {
     const navLinks = [
         { name: 'Home', path: '/' },
         { name: 'Products', path: '/products' },
-        { name: 'Shops', path: '/shops' },
-        { name: 'Garages', path: '/garages' },
+        // { name: 'Shops', path: '/shops' },
+        // { name: 'Garages', path: '/garages' },
     ];
 
     // Determine if we should show the mobile search icon
@@ -176,11 +176,11 @@ export default function Header() {
                             </div>
 
                             {/* Desktop Sell Button */}
-                            <div className="hidden md:block">
+                            <Link href={`/login`} className="hidden md:block">
                                 <Button variant="accent" className="gap-2 px-6">
                                     <ImagePlusIcon className="h-4 w-4" /> {t('Sell Your Products')}
                                 </Button>
-                            </div>
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -237,11 +237,11 @@ export default function Header() {
                         <div className="border-border border-t"></div>
 
                         {/* Action Buttons */}
-                        <div className="flex flex-col pt-4">
+                        <Link href={`/login`} className="flex flex-col pt-4">
                             <Button variant="accent" className="w-full justify-center gap-2">
                                 <ImagePlusIcon className="h-4 w-4" /> {t('Sell Your Products')}
                             </Button>
-                        </div>
+                        </Link>
                     </div>
                 )}
 

@@ -56,7 +56,7 @@ export default function HomePage() {
                     </section>
 
                     {/* Shops */}
-                    <ShopSection />
+                    {/* <ShopSection /> */}
                     <SeeAllProductsButton />
                 </div>
             </div>
