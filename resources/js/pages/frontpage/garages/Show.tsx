@@ -1,144 +1,403 @@
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import useTranslation from '@/hooks/use-translation';
 import { usePage } from '@inertiajs/react';
-import { Camera, CheckCircle, Clock, MapPin, Phone, Store } from 'lucide-react';
-import React, { useState } from 'react';
+import {
+    Camera,
+    CheckCircle2Icon,
+    ChevronRightIcon,
+    Clock,
+    ImageOff,
+    MapIcon,
+    MapPin,
+    Maximize2Icon,
+    Minimize2Icon,
+    NavigationIcon,
+    Phone,
+    RotateCwSquareIcon,
+    Store,
+    XIcon,
+    ZoomInIcon,
+    ZoomOutIcon,
+} from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { PhotoProvider, PhotoView } from 'react-photo-view';
+import 'react-photo-view/dist/react-photo-view.css';
 import FrontPageLayout from '../layouts/frontpage-layout';
 
-// Standard Shadcn UI Imports (Adjust paths if yours differ)
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+// --- 1. Localization Helper ---
+const getLocalizedText = (item: any, key: any, currentLocale: any): any => {
+    if (!item) return '';
 
-// --- 1. Types & Interfaces ---
-interface PostImage {
-    id: number;
-    image: string;
-    url: string;
-}
+    const locale =
+        typeof currentLocale === 'object' && currentLocale !== null
+            ? currentLocale.code || currentLocale.locale || currentLocale.name || 'en'
+            : currentLocale;
 
-interface Post {
-    id: number;
-    title: string;
-    short_description: string;
-    image_url: string;
-    total_images: number;
-    created_at: string;
-    images?: PostImage[];
-}
+    const khKey = `${key}_kh`;
+    return locale === 'kh' && item[khKey] ? item[khKey] : item[key] || '';
+};
 
-interface GarageBlogCardProps {
-    post: Post;
-}
+// --- 2. Production-Grade Reusable Safe Image Component ---
+const SafeImage = React.forwardRef<HTMLImageElement | HTMLDivElement, any>(
+    ({ src, alt, className, fallbackSrc = '/assets/images/placeholder.webp', ...props }, ref) => {
+        const [imgSrc, setImgSrc] = useState<any>(src);
+        const [isError, setIsError] = useState<boolean>(false);
 
-// --- 2. GarageBlogCard Component (Product Detail Style) ---
-const GarageBlogCard: React.FC<GarageBlogCardProps> = ({ post }) => {
-    // State to handle the interactive image preview in the modal
-    const [activeImage, setActiveImage] = useState(post.image_url);
+        useEffect(() => {
+            setImgSrc(src);
+            setIsError(false);
+        }, [src]);
 
-    // The API's `post.images` already contains the main image as its first item,
-    // so we just use it directly without injecting a duplicate.
+        if (isError || !imgSrc) {
+            return (
+                <div
+                    ref={ref as React.Ref<HTMLDivElement>}
+                    className={`bg-muted text-muted-foreground flex items-center justify-center ${className}`}
+                >
+                    <ImageOff className="h-5 w-5 opacity-40" />
+                </div>
+            );
+        }
+
+        return (
+            <img
+                ref={ref as React.Ref<HTMLImageElement>}
+                src={imgSrc}
+                alt={alt || 'Image'}
+                className={className}
+                onError={() => {
+                    if (fallbackSrc && imgSrc !== fallbackSrc) {
+                        setImgSrc(fallbackSrc);
+                    } else {
+                        setIsError(true);
+                    }
+                }}
+                {...props}
+            />
+        );
+    },
+);
+SafeImage.displayName = 'SafeImage';
+
+// --- 3. Sub-Component: Garage Header Layout ---
+const GarageHeader: React.FC<any> = ({ garage }) => {
+    const { t, currentLocale } = useTranslation() as any;
+    const bannerPath = `/assets/images/garages/${garage.banner}`;
+    const logoPath = `/assets/images/garages/${garage.logo}`;
+
+    const [isFullScreen, setIsFullScreen] = useState(false);
+
+    const toggleFullScreen = () => {
+        const doc = document;
+        const el = doc.documentElement;
+        if (!doc.fullscreenElement) {
+            el.requestFullscreen()
+                .then(() => setIsFullScreen(true))
+                .catch(() => {});
+        } else {
+            doc.exitFullscreen()
+                .then(() => setIsFullScreen(false))
+                .catch(() => {});
+        }
+    };
+
+    const handleVisibleChange = (visible: boolean) => {
+        if (!visible && document.fullscreenElement) {
+            document
+                .exitFullscreen()
+                .then(() => setIsFullScreen(false))
+                .catch(() => {});
+        }
+    };
+
+    const handleOpenMap = (lat?: any, lng?: any) => {
+        if (lat && lng) {
+            window.open(`https://maps.google.com/?q=${lat},${lng}`, '_blank');
+        } else {
+            alert(t('Location coordinates not available for this garage.'));
+        }
+    };
+
+    return (
+        <PhotoProvider
+            onVisibleChange={handleVisibleChange}
+            maskOpacity={0.9}
+            toolbarRender={({ scale, onScale, rotate, onRotate }) => (
+                <div className="mx-2 flex h-[44px] items-center gap-2 rounded-md bg-black/50 px-2">
+                    <button onClick={() => onScale(scale + 0.25)} className="rounded bg-white/15 p-2 transition-colors hover:bg-white/20">
+                        <ZoomInIcon size={16} className="text-white" />
+                    </button>
+                    <button onClick={() => onScale(scale - 0.25)} className="rounded bg-white/15 p-2 transition-colors hover:bg-white/20">
+                        <ZoomOutIcon size={16} className="text-white" />
+                    </button>
+                    <button onClick={() => onRotate(rotate + 90)} className="rounded bg-white/15 p-2 transition-colors hover:bg-white/20">
+                        <RotateCwSquareIcon size={16} className="text-white" />
+                    </button>
+                    <button onClick={toggleFullScreen} className="rounded bg-white/15 p-2 transition-colors hover:bg-white/20">
+                        {isFullScreen ? <Minimize2Icon size={16} className="text-white" /> : <Maximize2Icon size={16} className="text-white" />}
+                    </button>
+                </div>
+            )}
+        >
+            <div className="border-border bg-card relative mb-8 overflow-hidden rounded-none shadow">
+                <div className="bg-muted relative h-64 w-full overflow-hidden lg:h-96">
+                    <PhotoView src={bannerPath}>
+                        <SafeImage
+                            src={bannerPath}
+                            alt={`${getLocalizedText(garage, 'name', currentLocale)} Banner`}
+                            className="h-full w-full cursor-pointer object-cover"
+                        />
+                    </PhotoView>
+                </div>
+
+                <div className="flex flex-col items-center gap-5 p-6 sm:flex-row sm:items-end">
+                    <div className="border-background bg-background relative -mt-16 h-28 w-28 shrink-0 overflow-hidden rounded-none border-4 shadow-md sm:-mt-20">
+                        <PhotoView src={logoPath}>
+                            <SafeImage
+                                src={logoPath}
+                                alt={`${getLocalizedText(garage, 'name', currentLocale)} Logo`}
+                                className="h-full w-full cursor-pointer object-cover"
+                            />
+                        </PhotoView>
+                        {/* pointer-events-none ensures the Store icon doesn't block the user's click */}
+                        <Store className="pointer-events-none absolute inset-0 m-auto h-8 w-8 text-orange-600/10 mix-blend-multiply" />
+                    </div>
+
+                    <div className="mb-2 text-center sm:text-left">
+                        <h1 className="flex flex-wrap items-center justify-center gap-2 text-2xl font-black tracking-tight sm:justify-start md:text-3xl">
+                            {getLocalizedText(garage, 'name', currentLocale)}
+                            {garage.is_verified === 1 && (
+                                <CheckCircle2Icon className="h-6 w-6 rounded-full bg-blue-500 text-white" aria-label="Verified Garage" />
+                            )}
+                        </h1>
+                        <p className="text-muted-foreground mt-1 text-sm font-medium">{getLocalizedText(garage, 'address', currentLocale)}</p>
+
+                        {/* MAP LINK BUTTON ADDED HERE */}
+                        <button
+                            onClick={() => handleOpenMap(garage.latitude, garage.longitude)}
+                            className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-semibold text-[#FF6D00] transition-colors hover:bg-orange-200 dark:bg-orange-500/10 dark:text-orange-500 dark:hover:bg-orange-500/20"
+                        >
+                            <MapPin className="h-3.5 w-3.5" />
+                            {t('Open In Google Map')}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </PhotoProvider>
+    );
+};
+
+// --- 4. Sub-Component: Contact Sidebar ---
+const ContactSidebar: React.FC<any> = ({ garage }) => {
+    const { t, currentLocale } = useTranslation() as any;
+
+    const handleCallPhone = (phone: any) => {
+        window.location.href = `tel:${phone}`;
+    };
+
+    const handleOpenMap = (lat?: any, lng?: any) => {
+        if (lat && lng) {
+            window.open(`https://maps.google.com/?q=${lat},${lng}`, '_blank');
+        } else {
+            alert(t('Location coordinates not available for this garage.'));
+        }
+    };
+
+    return (
+        <div className="bg-card rounded-lg p-6 shadow">
+            <div className="space-y-6">
+                {garage.short_description && (
+                    <section>
+                        <p className="text-muted-foreground text-base leading-relaxed whitespace-pre-line">
+                            {getLocalizedText(garage, 'short_description', currentLocale)}
+                        </p>
+                    </section>
+                )}
+                <section>
+                    <div className="mb-3 flex items-center gap-2 border-b border-gray-100 pb-2 dark:border-gray-800">
+                        <Phone className="h-4 w-4 text-[#FF6D00]" />
+                        <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">{t('Contact')}</h3>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <button
+                            onClick={() => handleCallPhone(garage.phone)}
+                            className="group flex w-full cursor-pointer items-center justify-between bg-gray-50 px-4 py-3 text-left transition-colors hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10"
+                        >
+                            <span className="text-base font-medium text-gray-900 dark:text-white">{garage.phone}</span>
+                            <ChevronRightIcon className="h-4 w-4 text-gray-400 transition-transform group-hover:translate-x-1" />
+                        </button>
+
+                        {garage.other_phones?.map((phone: any, idx: any) => (
+                            <button
+                                key={idx}
+                                onClick={() => handleCallPhone(phone)}
+                                className="group flex w-full cursor-pointer items-center justify-between px-4 py-2 text-left transition-colors hover:bg-gray-50 dark:hover:bg-white/5"
+                            >
+                                <span className="text-base text-gray-600 dark:text-gray-400">{phone}</span>
+                                <ChevronRightIcon className="h-4 w-4 text-gray-300 transition-transform group-hover:translate-x-1 dark:text-gray-600" />
+                            </button>
+                        ))}
+                    </div>
+                </section>
+                <section className="mb-8 lg:mb-0">
+                    <div className="mb-3 flex items-center gap-2 border-b border-gray-100 pb-2 dark:border-gray-800">
+                        <MapIcon className="h-4 w-4 text-[#FF6D00]" />
+                        <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">{t('Location')}</h3>
+                    </div>
+                    <div className="flex items-start gap-3 bg-gray-50 p-4 dark:bg-white/5">
+                        <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-gray-400 dark:text-gray-500" />
+                        <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                            {getLocalizedText(garage, 'address', currentLocale)}
+                        </span>
+                    </div>
+                    <button
+                        onClick={() => handleOpenMap(garage.latitude, garage.longitude)}
+                        className="mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-none border border-[#FF6D00] bg-[#FF6D00] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white hover:text-[#FF6D00] focus-visible:outline-none dark:hover:bg-gray-950 dark:hover:text-[#FF6D00]"
+                    >
+                        <NavigationIcon className="h-4 w-4" />
+                        {t('Open In Google Map')}
+                    </button>
+                </section>
+            </div>
+        </div>
+    );
+};
+
+// --- 5. Sub-Component: Post Card Trigger ---
+const PostCard: React.FC<any> = ({ post, onViewDetails }) => {
+    const { t, currentLocale } = useTranslation() as any;
+
+    const formattedDate = useMemo(() => {
+        return new Date(post.created_at).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+        });
+    }, [post.created_at]);
+
+    return (
+        <div
+            onClick={() => onViewDetails(post)}
+            className="border-border bg-card group flex w-full cursor-pointer flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:border-orange-500 hover:shadow-md"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e: any) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onViewDetails(post);
+                }
+            }}
+        >
+            <div className="bg-muted relative aspect-video w-full overflow-hidden">
+                <SafeImage
+                    src={post.image_url}
+                    alt={getLocalizedText(post, 'title', currentLocale)}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-103"
+                />
+                {post.total_images > 1 && (
+                    <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-black/75 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-sm">
+                        <Camera className="h-3 w-3" />
+                        {post.total_images}
+                    </div>
+                )}
+            </div>
+
+            <div className="flex flex-1 flex-col p-5">
+                <h3 className="text-foreground mb-2 line-clamp-1 text-base leading-tight font-bold group-hover:text-orange-600">
+                    {getLocalizedText(post, 'title', currentLocale)}
+                </h3>
+                <p className="text-muted-foreground mb-4 line-clamp-2 text-sm leading-relaxed">
+                    {getLocalizedText(post, 'short_description', currentLocale)}
+                </p>
+                <div className="border-border mt-auto flex items-center justify-between border-t pt-4">
+                    <div className="text-muted-foreground flex items-center gap-1.5 text-[10px] tracking-widest">
+                        <Clock className="h-3 w-3" />
+                        {formattedDate}
+                    </div>
+                    <span className="text-[11px] font-bold text-orange-600 group-hover:underline">{t('View Details')}</span>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- 6. Sub-Component: Centralized Detail Modal Container ---
+const DetailModal: React.FC<any> = ({ post, onClose }) => {
+    const { t, currentLocale } = useTranslation() as any;
+    const [activeImage, setActiveImage] = useState<any>('');
+
+    useEffect(() => {
+        if (post) {
+            setActiveImage(post.image_url);
+        }
+    }, [post]);
+
+    if (!post) return null;
     const galleryImages = post.images || [];
 
     return (
-        <Dialog>
-            {/* --- The Trigger (Main Card) --- */}
-            <DialogTrigger asChild>
-                <div className="border-border bg-card group flex w-full cursor-pointer flex-col overflow-hidden rounded-xl border transition-all hover:border-[#FF6D00]">
-                    {/* Image Section */}
-                    <div className="bg-muted relative h-[200px] w-full overflow-hidden">
-                        <img
-                            src={post.image_url}
-                            alt={post.title}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            onError={(e) => {
-                                e.currentTarget.src = '/assets/images/placeholder.webp';
-                            }}
-                        />
+        <Dialog open={!!post} onOpenChange={(open: any) => !open && onClose()}>
+            <DialogContent className="max-w-3xl border-none p-0 shadow-2xl sm:max-w-4xl sm:rounded-[2rem] [&>button]:hidden">
+                <div className="bg-background flex max-h-[90vh] w-full flex-col overflow-y-auto [scrollbar-width:thin]">
+                    {/* Floating Glass Close Button - Light Themed */}
+                    <button
+                        onClick={onClose}
+                        className="bg-background/60 text-foreground hover:bg-background absolute top-4 right-4 z-50 flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 hover:scale-105 sm:top-5 sm:right-5"
+                        aria-label={t('Close modal')}
+                    >
+                        <XIcon className="h-5 w-5" />
+                    </button>
 
-                        {/* Image Count Badge */}
-                        {post.total_images > 1 && (
-                            <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-sm">
-                                <Camera className="h-3 w-3" />
-                                {post.total_images}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Content Section */}
-                    <div className="flex flex-1 flex-col p-5">
-                        <h3 className="text-foreground mb-2 line-clamp-1 text-base leading-tight font-bold">{post.title}</h3>
-
-                        <p className="text-muted-foreground mb-4 line-clamp-1 text-xs leading-relaxed">{post.short_description}</p>
-
-                        <div className="border-border mt-auto flex items-center justify-between border-t pt-4">
-                            <div className="text-muted-foreground flex items-center gap-1.5 text-[10px] tracking-widest uppercase">
-                                <Clock className="h-3 w-3" />
-                                {new Date(post.created_at).toLocaleDateString()}
-                            </div>
-
-                            <span className="text-[11px] font-bold text-[#FF6D00] group-hover:underline">View Details</span>
-                        </div>
-                    </div>
-                </div>
-            </DialogTrigger>
-
-            {/* --- The Modal Content (Premium Product Style Layout) --- */}
-            {/* Increased max-width to 6xl for a beautifully wide presentation */}
-            <DialogContent className="max-w-4xl overflow-hidden p-0 shadow-2xl sm:max-w-5xl sm:rounded-2xl">
-                {/* Responsive Container: Stack on mobile, Side-by-side on desktop */}
-                <div className="bg-background flex max-h-[90vh] flex-col overflow-y-auto md:flex-row md:overflow-hidden">
-                    {/* Left Column: Interactive Image Gallery (55% width on desktop) */}
-                    <div className="border-border bg-muted/20 flex w-full flex-col md:w-[55%] md:border-r">
-                        {/* Main Active Image Container */}
-                        <div className="relative flex min-h-[300px] w-full flex-1 shrink-0 items-center justify-center p-6 sm:min-h-[400px] md:min-h-[500px]">
-                            <img
+                    {/* TOP STACK: High-End Light Image Viewer */}
+                    <div className="bg-background flex w-full flex-col">
+                        {/* Main Image Area */}
+                        <div className="relative flex h-[300px] w-full items-center justify-center sm:h-[400px] md:h-[500px]">
+                            <SafeImage
                                 src={activeImage}
-                                alt={post.title}
-                                className="h-full w-full object-contain drop-shadow-sm"
-                                onError={(e) => {
-                                    e.currentTarget.src = '/assets/images/placeholder.webp';
-                                }}
+                                alt={getLocalizedText(post, 'title', currentLocale)}
+                                className="h-full w-full object-cover drop-shadow-2xl"
                             />
                         </div>
 
-                        {/* Thumbnail Row (Scrollable) */}
+                        {/* Thumbnail Strip (Lighter Background & Borders) */}
                         {galleryImages.length > 1 && (
-                            <div className="border-border bg-background/50 hide-scrollbar flex gap-3 overflow-x-auto border-t p-4">
-                                {galleryImages.map((img) => (
-                                    <button
-                                        key={img.id}
-                                        onClick={() => setActiveImage(img.url)}
-                                        className={`border-border bg-muted relative h-16 w-20 shrink-0 overflow-hidden rounded-md border-2 transition-all ${
-                                            activeImage === img.url
-                                                ? 'border-[#FF6D00] opacity-100 ring-2 ring-[#FF6D00]/20 ring-offset-1'
-                                                : 'border-transparent opacity-60 hover:opacity-100'
-                                        }`}
-                                    >
-                                        <img
-                                            src={img.url}
-                                            alt="Thumbnail"
-                                            className="h-full w-full object-cover"
-                                            onError={(e) => {
-                                                e.currentTarget.style.display = 'none';
-                                            }}
-                                        />
-                                    </button>
-                                ))}
+                            <div className="flex h-24 shrink-0 items-center gap-3 overflow-x-auto overflow-y-hidden border-y p-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                                {galleryImages.map((img: any) => {
+                                    const isSelected = activeImage === img.url;
+                                    return (
+                                        <button
+                                            key={img.id}
+                                            onClick={() => setActiveImage(img.url)}
+                                            className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-sm transition-all duration-300 ${
+                                                isSelected
+                                                    ? 'border-2 border-orange-500 opacity-100 shadow-[0_0_15px_rgba(249,115,22,0.4)]'
+                                                    : 'border-2 border-transparent opacity-40 hover:scale-105 hover:opacity-100'
+                                            }`}
+                                            aria-label={t('View asset dynamic thumbnail')}
+                                        >
+                                            <SafeImage src={img.url} alt="Thumbnail preview" className="h-full w-full object-cover" />
+                                        </button>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
 
-                    {/* Right Column: Text & Details (45% width on desktop) */}
-                    <div className="flex w-full flex-col p-6 md:w-[45%] md:overflow-y-auto md:p-8 lg:p-10">
-                        <DialogHeader className="mb-6 text-left">
-                            <DialogTitle className="text-2xl leading-tight font-black tracking-tight sm:text-3xl">{post.title}</DialogTitle>
-                            <div className="text-muted-foreground mt-4 flex items-center gap-1.5 text-xs font-medium tracking-wider uppercase">
-                                <Clock className="h-4 w-4" />
-                                Posted on {new Date(post.created_at).toLocaleString()}
-                            </div>
-                        </DialogHeader>
+                    {/* BOTTOM STACK: Contextual Core Data */}
+                    <div className="flex flex-col p-4 pb-10">
+                        <div className="mx-auto w-full">
+                            <DialogHeader className="mb-6 text-left">
+                                <DialogTitle className="text-foreground text-lg leading-tight font-semibold tracking-tight sm:text-xl md:text-2xl">
+                                    {getLocalizedText(post, 'title', currentLocale)}
+                                </DialogTitle>
+                            </DialogHeader>
 
-                        {/* Description */}
-                        <DialogDescription className="text-foreground/90 mt-2 text-[15px] leading-relaxed whitespace-pre-line">
-                            {post.short_description}
-                        </DialogDescription>
+                            {post.short_description && (
+                                <DialogDescription className="text-muted-foreground/90 text-base leading-relaxed whitespace-pre-line sm:text-lg">
+                                    {getLocalizedText(post, 'short_description', currentLocale)}
+                                </DialogDescription>
+                            )}
+                        </div>
                     </div>
                 </div>
             </DialogContent>
@@ -146,95 +405,44 @@ const GarageBlogCard: React.FC<GarageBlogCardProps> = ({ post }) => {
     );
 };
 
-// --- 3. Main Page Component (Show) ---
-const Show = () => {
+// --- 7. Main Structural Scaffold ---
+const Show: React.FC<any> = () => {
+    const { t } = useTranslation() as any;
     const { tableData, garage } = usePage<any>().props;
-    const posts = tableData?.data || [];
+    const [selectedPost, setSelectedPost] = useState<any>(null);
 
-    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-        e.currentTarget.style.display = 'none';
-    };
+    const posts = tableData?.data || [];
 
     return (
         <FrontPageLayout>
-            <div className="section-container mt-8 pb-20">
-                {/* Garage Hero Section */}
-                <div className="border-border bg-card relative mb-8 overflow-hidden rounded-xl border shadow-sm">
-                    <div className="bg-muted relative h-48 w-full lg:h-64">
-                        <img
-                            src={`/assets/images/garages/${garage.banner}`}
-                            alt={garage.name}
-                            className="h-full w-full object-cover"
-                            onError={handleImageError}
-                        />
-                    </div>
-
-                    <div className="flex items-end gap-5 p-6">
-                        <div className="border-background bg-background relative -mt-16 h-28 w-28 shrink-0 overflow-hidden rounded-xl border-4 shadow-md">
-                            <img
-                                src={`/assets/images/garages/${garage.logo}`}
-                                alt={garage.name}
-                                className="h-full w-full object-cover"
-                                onError={handleImageError}
-                            />
-                            <Store className="absolute inset-0 m-auto h-8 w-8 text-[#FF6D00]/20" />
-                        </div>
-
-                        <div className="mb-2">
-                            <h1 className="flex items-center gap-2 text-2xl font-black tracking-tight md:text-3xl">
-                                {garage.name}
-                                {garage.is_verified === 1 && <CheckCircle className="h-6 w-6 text-blue-500" />}
-                            </h1>
-                            <p className="text-muted-foreground mt-1 text-sm font-medium">{garage.address}</p>
-                        </div>
-                    </div>
-                </div>
+            <div className="section-container pb-20">
+                <GarageHeader garage={garage} />
 
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                    {/* Sidebar: Info */}
-                    <div className="space-y-6 lg:col-span-1">
-                        <div className="border-border bg-card rounded-xl border p-6 shadow-sm">
-                            <h2 className="text-foreground mb-5 font-bold tracking-wider uppercase">Contact Details</h2>
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <Phone className="h-4 w-4 text-[#FF6D00]" />
-                                    <span className="text-sm font-medium">{garage.phone}</span>
-                                </div>
-                                {garage.other_phones?.map((p: string, i: number) => (
-                                    <div key={i} className="flex items-center gap-3">
-                                        <Phone className="text-muted-foreground h-4 w-4" />
-                                        <span className="text-sm font-medium">{p}</span>
-                                    </div>
-                                ))}
-                                <div className="flex items-start gap-3">
-                                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#FF6D00]" />
-                                    <span className="text-sm leading-snug font-medium">{garage.address}</span>
-                                </div>
-                            </div>
-                            <div className="border-border mt-6 border-t pt-6">
-                                <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-line">{garage.short_description}</p>
-                            </div>
-                        </div>
-                    </div>
+                    <aside className="lg:col-span-1">
+                        <ContactSidebar garage={garage} />
+                    </aside>
 
-                    {/* Main Content: Posts */}
-                    <div className="lg:col-span-2">
-                        <h2 className="mb-6 text-xl font-black tracking-wider uppercase">Recent Updates</h2>
+                    <main className="lg:col-span-2">
+                        <h2 className="text-foreground mb-6 text-lg font-semibold">{t('Recent Posts')}</h2>
                         {posts.length > 0 ? (
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                                {posts.map((post: Post) => (
-                                    <GarageBlogCard key={post.id} post={post} />
+                                {posts.map((post: any) => (
+                                    <PostCard key={post.id} post={post} onViewDetails={setSelectedPost} />
                                 ))}
                             </div>
                         ) : (
                             <div className="border-border bg-muted/10 text-muted-foreground rounded-xl border border-dashed p-16 text-center">
                                 <Store className="mx-auto mb-3 h-10 w-10 opacity-20" />
-                                <p className="font-medium">No posts found for this garage.</p>
+                                <p className="text-sm font-medium">{t('No posts posted yet.')}</p>
                             </div>
                         )}
-                    </div>
+                    </main>
                 </div>
             </div>
+
+            {/* Rendered once globally down at the viewport root frame */}
+            <DetailModal post={selectedPost} onClose={() => setSelectedPost(null)} />
         </FrontPageLayout>
     );
 };
