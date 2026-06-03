@@ -52,7 +52,16 @@ const ProductDetail = () => {
     const profileImg = profile?.logo_url;
     const isVerified = profile?.is_verified === true || profile?.is_verified === 1;
     const address = profile?.address;
-    const phone = profile?.phone;
+
+    // Extract Location
+    const lat = profile?.latitude;
+    const lng = profile?.longitude;
+    const hasLocation = !!lat && !!lng;
+
+    // Aggregate all phones into a single flat array
+    const mainPhone = profile?.phone;
+    const otherPhones = profile?.other_phones || [];
+    const allPhones = [mainPhone, ...(Array.isArray(otherPhones) ? otherPhones : [])].filter(Boolean);
 
     // --- Breadcrumb Logic (Strict Hierarchy) ---
     const breadcrumbs = [
@@ -99,9 +108,12 @@ const ProductDetail = () => {
                         return (
                             <li key={index} className="flex items-center gap-1.5">
                                 {isLast ? (
-                                    <span className="text-foreground line-clamp-1 font-medium">{crumb.label}</span>
+                                    <span className="text-foreground line-clamp-1 max-w-[50ch] truncate font-medium">{crumb.label}</span>
                                 ) : (
-                                    <Link href={crumb.url} className="hover:text-foreground transition-colors focus-visible:outline-none">
+                                    <Link
+                                        href={crumb.url}
+                                        className="hover:text-foreground max-w-[30ch] truncate transition-colors focus-visible:outline-none"
+                                    >
                                         {crumb.label}
                                     </Link>
                                 )}
@@ -137,7 +149,7 @@ const ProductDetail = () => {
                                     )}
                                 </div>
 
-                                <div className="flex justify-between">
+                                <div className="flex flex-wrap justify-between gap-4">
                                     {(discountValue > 0 || itemShow?.is_free_delivery == 1) && (
                                         <div className="flex flex-wrap gap-2">
                                             {discountValue > 0 && (
@@ -218,7 +230,7 @@ const ProductDetail = () => {
                                             <div>
                                                 <p className="text-muted-foreground text-xs font-medium">{t('Brand')}</p>
                                                 <Link
-                                                    href={`/products?brand_code=${itemShow.brand.code}`}
+                                                    href={`/products?${itemShow.category ? `category_code=${itemShow.category.code}&` : ''}brand_code=${itemShow.brand.code}`}
                                                     className="mt-0.5 inline-block text-sm font-medium text-[#FF6D00] hover:underline"
                                                 >
                                                     {isKh ? itemShow.brand.name_kh || itemShow.brand.name : itemShow.brand.name}
@@ -233,9 +245,12 @@ const ProductDetail = () => {
                                             </div>
                                             <div>
                                                 <p className="text-muted-foreground text-xs font-medium">{t('Model')}</p>
-                                                <p className="text-foreground mt-0.5 text-sm font-medium">
+                                                <Link
+                                                    href={`/products?${itemShow.category ? `category_code=${itemShow.category.code}&` : ''}${itemShow.brand ? `brand_code=${itemShow.brand.code}&` : ''}model_code=${itemShow.model.code}`}
+                                                    className="mt-0.5 inline-block text-sm font-medium text-[#FF6D00] hover:underline"
+                                                >
                                                     {isKh ? itemShow.model.name_kh || itemShow.model.name : itemShow.model.name}
-                                                </p>
+                                                </Link>
                                             </div>
                                         </div>
                                     )}
@@ -280,60 +295,87 @@ const ProductDetail = () => {
 
                         {/* RIGHT COLUMN: Sticky Shop Card */}
                         {profileName && (
-                            <div className="w-full shrink-0 pt-8 lg:sticky lg:top-24 lg:w-[340px]">
+                            <div className="w-full shrink-0 pt-8 lg:sticky lg:top-4 lg:w-[340px]">
                                 <div className="group bg-background relative overflow-hidden rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:ring-2 hover:shadow-[#FF6D00]/15 hover:ring-[#FF6D00] dark:bg-white/[0.02]">
                                     {/* Inner Glow Hover Effect */}
                                     <div className="absolute inset-0 bg-gradient-to-tr from-[#FF6D00]/0 to-[#FF6D00]/0 transition-colors group-hover:from-[#FF6D00]/5 group-hover:to-transparent"></div>
 
                                     <div className="relative p-6">
                                         <h3 className="text-muted-foreground mb-5 text-sm font-semibold">{t('Seller Information')}</h3>
+                                        <Link href={isShop ? `/shops/${profile.id}` : `/users/${profile.id}`}>
+                                            <div className="mb-5 flex flex-col items-center text-center">
+                                                <div className="dark:ring-background mb-3 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-gray-50 shadow-sm ring-4 ring-white dark:bg-white/10">
+                                                    {profileImg ? (
+                                                        <img
+                                                            src={profileImg}
+                                                            alt={profileName}
+                                                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                        />
+                                                    ) : (
+                                                        <Store className="h-8 w-8 text-gray-400" />
+                                                    )}
+                                                </div>
 
-                                        <div className="mb-5 flex flex-col items-center text-center">
-                                            <div className="dark:ring-background mb-3 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-gray-50 shadow-sm ring-4 ring-white dark:bg-white/10">
-                                                {profileImg ? (
-                                                    <img
-                                                        src={profileImg}
-                                                        alt={profileName}
-                                                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                                    />
-                                                ) : (
-                                                    <Store className="h-8 w-8 text-gray-400" />
-                                                )}
+                                                <div className="mb-1.5 flex items-center justify-center gap-1.5">
+                                                    <h4 className="text-foreground text-lg font-bold">{profileName}</h4>
+                                                    {isVerified && <BadgeCheck className="h-5 w-5 text-blue-500" />}
+                                                </div>
+
+                                                <div className="flex justify-center">
+                                                    <span
+                                                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${isShop ? 'bg-[#FF6D00]/10 text-[#FF6D00]' : 'bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-gray-300'}`}
+                                                    >
+                                                        {isShop ? <Store className="h-3.5 w-3.5" /> : <User className="h-3.5 w-3.5" />}
+                                                        {isShop ? t('Shop') : t('User')}
+                                                    </span>
+                                                </div>
                                             </div>
+                                        </Link>
 
-                                            <div className="mb-1.5 flex items-center justify-center gap-1.5">
-                                                <h4 className="text-foreground text-lg font-bold">{profileName}</h4>
-                                                {isVerified && <BadgeCheck className="h-5 w-5 text-blue-500" />}
-                                            </div>
-
-                                            <div className="flex justify-center">
-                                                <span
-                                                    className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${isShop ? 'bg-[#FF6D00]/10 text-[#FF6D00]' : 'bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-gray-300'}`}
-                                                >
-                                                    {isShop ? <Store className="h-3.5 w-3.5" /> : <User className="h-3.5 w-3.5" />}
-                                                    {isShop ? t('Shop') : t('User')}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {(phone || address) && (
+                                        {(allPhones.length > 0 || address) && (
                                             <div className="mb-6 space-y-3">
-                                                {phone && (
-                                                    <div className="group-hover:text-foreground text-muted-foreground flex items-center gap-3 transition-colors">
-                                                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FF6D00]/5 shadow-sm dark:bg-[#FF6D00]/10">
-                                                            <Phone className="h-4 w-4 text-[#FF6D00] transition-transform group-hover:rotate-12" />
+                                                {allPhones.length > 0 && (
+                                                    <div className="border-border/50 flex flex-col gap-1.5 rounded-sm border bg-gray-50/50 p-3 dark:bg-white/[0.02]">
+                                                        <div className="mb-1 flex items-center gap-2">
+                                                            <Phone className="h-4 w-4 text-[#FF6D00]" />
+                                                            <span className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
+                                                                {t('Contact')}
+                                                            </span>
                                                         </div>
-                                                        <a href={`tel:${phone}`} className="text-sm font-medium hover:text-[#FF6D00]">
-                                                            {phone}
-                                                        </a>
+                                                        <div className="flex flex-wrap gap-x-5 gap-y-1.5">
+                                                            {allPhones.map((p, index) => (
+                                                                <a
+                                                                    key={index}
+                                                                    href={`tel:${p}`}
+                                                                    className="text-foreground text-sm font-medium transition-colors hover:text-[#FF6D00]"
+                                                                >
+                                                                    {p}
+                                                                </a>
+                                                            ))}
+                                                        </div>
                                                     </div>
                                                 )}
+
                                                 {address && (
-                                                    <div className="group-hover:text-foreground text-muted-foreground flex items-start gap-3 transition-colors">
-                                                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FF6D00]/5 shadow-sm dark:bg-[#FF6D00]/10">
-                                                            <MapPin className="h-4 w-4 text-[#FF6D00] transition-transform group-hover:scale-110" />
+                                                    <div className="border-border/50 flex flex-col gap-1.5 rounded-sm border bg-gray-50/50 p-3 dark:bg-white/[0.02]">
+                                                        <div className="mb-1 flex items-center gap-2">
+                                                            <MapPin className="h-4 w-4 text-[#FF6D00]" />
+                                                            <span className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
+                                                                {t('Address')}
+                                                            </span>
                                                         </div>
-                                                        <span className="pt-1.5 text-sm leading-tight font-medium">{address}</span>
+                                                        <span className="text-foreground text-sm leading-relaxed font-medium">{address}</span>
+                                                        {hasLocation && (
+                                                            <a
+                                                                href={`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                                className="group mt-1.5 inline-flex w-fit items-center gap-1 border-b border-[#FF6D00]/40 pb-0.5 text-[13px] font-bold tracking-wide text-[#FF6D00] transition-colors hover:border-[#FF6D00]"
+                                                            >
+                                                                {t('Open on Google Map')}
+                                                                <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                                                            </a>
+                                                        )}
                                                     </div>
                                                 )}
                                             </div>

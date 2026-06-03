@@ -56,7 +56,9 @@ export default function HomePage() {
 
                     {/* Shops */}
                     {/* <ShopSection /> */}
-                    <SeeAllProductsButton />
+                    <div className="mb-10">
+                        <SeeAllProductsButton />
+                    </div>
                 </div>
             </div>
         </FrontPageLayout>

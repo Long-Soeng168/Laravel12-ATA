@@ -414,6 +414,11 @@ class ProductController extends Controller
             return $item;
         });
 
+
+        // return [
+        //     "itemShow" => $formattedItem,
+        //     'relatedItems' => $relatedItems,
+        // ];
         // 5. Return to Inertia
         return Inertia::render("frontpage/products/Show", [
             "itemShow" => $formattedItem,

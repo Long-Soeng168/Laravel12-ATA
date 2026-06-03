@@ -49,8 +49,8 @@ export default function Header() {
     const navLinks = [
         { name: 'Home', path: '/' },
         { name: 'Products', path: '/products' },
-        // { name: 'Shops', path: '/shops' },
-        // { name: 'Garages', path: '/garages' },
+        { name: 'Shops', path: '/shops' },
+        { name: 'Garages', path: '/garages' },
     ];
 
     // Determine if we should show the mobile search icon

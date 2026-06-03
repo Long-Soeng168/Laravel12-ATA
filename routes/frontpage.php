@@ -6,7 +6,6 @@ use App\Http\Controllers\FrontPageController;
 use App\Models\Garage;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use Illuminate\Http\Request;
 
 Route::get('/', [FrontPageController::class, 'index']);
 

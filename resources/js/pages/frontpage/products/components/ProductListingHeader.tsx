@@ -11,7 +11,6 @@ import {
     LayoutGridIcon,
     MapPin,
     Search,
-    SlidersHorizontal,
     X,
 } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -23,6 +22,7 @@ import { Label } from '@/components/ui/label';
 import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
 import HeaderSearchInput from '../../layouts/components/HeaderSearchInput';
+import ProductFilterSheet from './ProductFilterSheet';
 
 // --- Standard Select Filter (For select/radio <= 5 Options) ---
 
@@ -769,10 +769,20 @@ export default function ProductListingHeader() {
                     </div>
 
                     <nav className={`flex gap-1.5 overflow-x-auto pb-1 ${hideScrollbar}`}>
-                        <button className="flex shrink-0 items-center gap-1.5 rounded-none border border-gray-300 bg-white/90 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:border-gray-500 focus-visible:outline-none dark:border-gray-700 dark:bg-white/5 dark:text-gray-300 dark:hover:border-gray-500">
-                            <SlidersHorizontal className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
-                            <span>{t('All Filters')}</span>
-                        </button>
+                        <ProductFilterSheet
+                            filters={filters}
+                            dynamicFields={dynamicFields}
+                            provinceOptions={provinceOptions}
+                            sortOptions={sortOptions}
+                            categories={categories}
+                            brands={allBrands}
+                            bodyTypes={allBodyTypes}
+                            onApply={(newFilters) => {
+                                setFilters(newFilters);
+                                router.get(window.location.pathname, newFilters, { preserveState: true, replace: true });
+                            }}
+                            onClear={clearFilters}
+                        />
 
                         <div className="mx-1 h-6 w-px shrink-0 self-center bg-gray-300 dark:bg-gray-700" />
 
