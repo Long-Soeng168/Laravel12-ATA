@@ -46,12 +46,7 @@ export default function PaginationTabs2({
     };
 
     return (
-        <div
-            className={cn(
-                'border-border/50 bg-card/50 mt-6 flex flex-col items-center justify-between gap-6 p-4 shadow-sm backdrop-blur-sm sm:p-6 xl:flex-row',
-                containerClassName,
-            )}
-        >
+        <div className={cn('bg-card/50 mt-14 flex flex-col items-center justify-between gap-6 backdrop-blur-sm xl:flex-row', containerClassName)}>
             {/* Left Side: Select & Info */}
             <div className="flex w-full flex-col items-center gap-2 sm:w-auto sm:flex-row sm:gap-4">
                 <div className="flex items-center gap-3">

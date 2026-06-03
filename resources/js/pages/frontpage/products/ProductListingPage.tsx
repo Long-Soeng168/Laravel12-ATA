@@ -16,15 +16,15 @@ export default function ProductListingPage() {
                     <ProductListingHeader />
                 </div>
 
-                <div className="section-container mt-6 mb-4">
+                <div className="section-container mt-6 mb-14">
                     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
                         {products.map((item: any) => (
                             <ProductCard key={item.id} item={item} />
                         ))}
                     </div>
                     {products.length == 0 && <NoDataDisplay />}
+                    <PaginationTabs2 />
                 </div>
-                <PaginationTabs2 />
             </>
         </FrontPageLayout>
     );

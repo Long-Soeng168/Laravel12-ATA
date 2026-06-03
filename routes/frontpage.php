@@ -1,9 +1,15 @@
 <?php
 
+use App\Http\Controllers\FrontPage\GarageController;
 use App\Http\Controllers\FrontPage\ProductController;
+use App\Http\Controllers\FrontPage\ShopController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\FrontPageController;
 use App\Models\Garage;
+use App\Models\ItemCategory;
+use App\Models\Province;
+use App\Models\Shop;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -12,9 +18,11 @@ Route::get('/', [FrontPageController::class, 'index']);
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
 
-Route::get('/shops', function () {
-    return Inertia::render('frontpage/ShopListingPage', []);
-});
+Route::get('/shops', [ShopController::class, 'index']);
+Route::get('/shops/{id}', [ShopController::class, 'show']);
+
+Route::get('/garages', [GarageController::class, 'index']);
+Route::get('/garages/{id}', [GarageController::class, 'show']);
 
 Route::get('/about', [FrontPageController::class, 'about']);
 Route::get('/contact', [FrontPageController::class, 'contact']);
@@ -33,13 +41,6 @@ Route::get('/online_trainings/{id}', [FrontPageController::class, 'online_traini
 
 Route::get('/blogs', [FrontPageController::class, 'blogs']);
 Route::get('/blogs/{id}', [FrontPageController::class, 'blog_show']);
-
-
-// Route::get('/shops', [FrontPageController::class, 'shops']);
-Route::get('/shops/{id}', [FrontPageController::class, 'shop_show']);
-
-Route::get('/garages', [FrontPageController::class, 'garages']);
-Route::get('/garages/{id}', [FrontPageController::class, 'garage_show']);
 
 Route::get('/shopping-cart', [FrontPageController::class, 'shopping_cart']);
 Route::middleware('auth')->group(function () {

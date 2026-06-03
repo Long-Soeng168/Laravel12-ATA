@@ -219,12 +219,15 @@ export default function ProductFilterSheet({
     };
 
     // Calculate exact number of active filters
-    const activeFilterCount = Object.keys(filters).filter((k) => filters[k] !== '').length;
-    const localActiveFilterCount = Object.keys(localFilters).filter((k) => localFilters[k] !== '').length;
+    const activeFilterCount = Object.keys(filters).filter((k) => k !== 'page' && filters[k] !== '').length;
 
-    // --- Dynamic Taxonomy Logic ---
+    // --- Strict Hierarchical Taxonomy Logic ---
     const activeCategory = categories.find((c) => c.code === localFilters.category_code);
-    const displayedBrands = activeCategory ? brands.filter((b) => (activeCategory.brand_ids || []).includes(b.id)) : brands;
+
+    // Strict enforcement: Only show brands if a category is selected.
+    // This perfectly mirrors "each category has its own brands".
+    const displayedBrands = activeCategory ? brands.filter((b) => (activeCategory.brand_ids || []).includes(b.id)) : [];
+
     const activeBrand = displayedBrands.find((b) => b.code === localFilters.brand_code);
     const brandModels = activeBrand?.brand_models || [];
     const showBodyTypes = activeCategory ? activeCategory.has_body_type === 1 : true;
@@ -429,7 +432,8 @@ export default function ProductFilterSheet({
                         </div>
                     )}
 
-                    {brandOptions.length > 0 && (
+                    {/* Strict display: Only show if category is selected and has brand options */}
+                    {localFilters.category_code && brandOptions.length > 0 && (
                         <div className="space-y-3">
                             <Label className="text-xs font-bold text-gray-500 dark:text-gray-400">{t('Brand')}</Label>
                             <FilterSelectDialog
@@ -459,7 +463,7 @@ export default function ProductFilterSheet({
                         </div>
                     )}
 
-                    {showBodyTypes && bodyTypeOptions.length > 0 && (
+                    {showBodyTypes && localFilters.category_code && bodyTypeOptions.length > 0 && (
                         <div className="space-y-3">
                             <Label className="text-xs font-bold text-gray-500 dark:text-gray-400">{t('Body Type')}</Label>
                             <FilterSelectDialog

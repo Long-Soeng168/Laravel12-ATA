@@ -128,40 +128,7 @@ class FrontPageController extends Controller
             'highlight_products'   => $highlight_products,
         ]);
     }
-    public function shops(Request $request)
-    {
-        $search = $request->input('search', '');
-        $perPage = $request->input('perPage', 24);
-        $sortBy = $request->input('sortBy', 'order_index');
-        $sortDirection = $request->input('sortDirection', 'asc');
-        $categoryCode = $request->input('category_code');
-
-        $query = Shop::query();
-        $query->with('created_by', 'updated_by');
-
-        if ($search) {
-            $query->where(function ($sub_query) use ($search) {
-                return $sub_query->where('name', 'LIKE', "%{$search}%")
-                    ->orWhere('phone', 'LIKE', "%{$search}%")
-                    ->orWhere('address', 'LIKE', "%{$search}%");
-            });
-        }
-        if ($categoryCode) {
-            $query->where('category_code', $categoryCode);
-        }
-
-        $query->orderBy($sortBy, $sortDirection);
-        $query->orderBy('id', 'desc');
-        $query->orderBy('name');
-        $query->where('status', 'approved');
-
-        $tableData = $query->paginate(perPage: $perPage)->onEachSide(1);
-
-        // return $tableData;
-        return Inertia::render('frontpage/shops/Index', [
-            'tableData' => $tableData,
-        ]);
-    }
+    
     public function garages(Request $request)
     {
         $search = $request->input('search', '');
@@ -283,70 +250,7 @@ class FrontPageController extends Controller
         ]);
     }
 
-    public function shop_show($id, Request $request)
-    {
-        $search = $request->input('search', '');
-        $brand_code = $request->input('brand_code', '');
-        $perPage = $request->input('perPage', 25);
-        $sortBy = $request->input('sortBy', 'id');
-        $sortDirection = $request->input('sortDirection', 'desc');
-        $category_code = $request->input('category_code', '');
-        $body_type_code = $request->input('body_type_code', '');
-
-        $query = Item::query();
-        $query->with('created_by', 'updated_by', 'images', 'category', 'shop');
-
-        if ($category_code) {
-            // get category and its children codes
-            $category = ItemCategory::with('children')->where('code', $category_code)->first();
-
-            if ($category) {
-                $categoryCodes = collect([$category->code])
-                    ->merge($category->children->pluck('code'))
-                    ->toArray();
-
-                $query->whereIn('category_code', $categoryCodes);
-            }
-        }
-
-        if ($brand_code) {
-            $query->where('brand_code', $brand_code);
-        }
-        if ($body_type_code) {
-            $query->where('body_type_code', $body_type_code);
-        }
-
-        if ($search) {
-            $query->where(function ($sub_query) use ($search) {
-                return $sub_query->where('name', 'LIKE', "%{$search}%")
-                    ->orWhere('name_kh', 'LIKE', "%{$search}%");
-            });
-        }
-
-        $query->orderBy($sortBy, $sortDirection);
-        $query->where('status', 'active');
-        $query->where('shop_id', $id);
-
-        $tableData = $query->paginate(perPage: $perPage)->onEachSide(1);
-
-        // $item_brands = ItemBrand::orderBy('order_index')->orderBy('name')
-        //     ->withCount('items')
-        //     ->where('status', 'active') // Specify 'item_categories' table for status
-        //     ->get();
-        // $item_body_types = ItemBodyType::orderBy('order_index')->orderBy('name')
-        //     ->withCount('items')
-        //     ->where('status', 'active') // Specify 'item_categories' table for status
-        //     ->get();
-        // $productListBanners = Banner::where('position_code', 'PRODUCT_SEARCH')->orderBy('order_index')->where('status', 'active')->get();
-
-        return Inertia::render('frontpage/shops/Show', [
-            'shop' => Shop::find($id),
-            'tableData' => $tableData,
-            // 'item_brands' => $item_brands,
-            // 'item_body_types' => $item_body_types,
-            // 'productListBanners' => $productListBanners,
-        ]);
-    }
+    
 
 
     public function online_trainings(Request $request)
