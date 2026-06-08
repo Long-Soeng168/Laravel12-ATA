@@ -1,4 +1,5 @@
 import useTranslation from '@/hooks/use-translation';
+import { Link } from '@inertiajs/react';
 import { ArrowRight } from 'lucide-react';
 
 // --- Shared Flat UI Primitives ---
@@ -107,13 +108,29 @@ export default function MiniHeroSection() {
                                         <p className="mt-2 max-w-sm text-sm" style={{ color: banner.forground_color, opacity: 0.85 }}>
                                             {isKh ? banner.desc_kh : banner.desc}
                                         </p>
-                                        <a
-                                            href={banner.btnLink}
-                                            className="mt-3 inline-flex items-center text-xs font-bold transition-colors hover:text-[#FF6D00]"
-                                            style={{ color: banner.forground_color }}
-                                        >
-                                            {isKh ? banner.btnText_kh : banner.btnText} <ArrowRight className="ml-1 h-3 w-3" />
-                                        </a>
+
+                                        {banner.btnLink.startsWith('http') ? (
+                                            <a
+                                                href={banner.btnLink}
+                                                className="mt-3 inline-flex items-center text-xs font-bold transition-colors hover:text-[#FF6D00]"
+                                                style={{ color: banner.forground_color }}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
+                                                {isKh ? banner.btnText_kh : banner.btnText}
+                                                <ArrowRight className="ml-1 h-3 w-3" />
+                                            </a>
+                                        ) : (
+                                            <Link
+                                                prefetch
+                                                href={banner.btnLink}
+                                                className="mt-3 inline-flex items-center text-xs font-bold transition-colors hover:text-[#FF6D00]"
+                                                style={{ color: banner.forground_color }}
+                                            >
+                                                {isKh ? banner.btnText_kh : banner.btnText}
+                                                <ArrowRight className="ml-1 h-3 w-3" />
+                                            </Link>
+                                        )}
                                     </div>
                                 </div>
                             </>
