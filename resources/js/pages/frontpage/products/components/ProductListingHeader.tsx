@@ -557,6 +557,8 @@ export default function ProductListingHeader() {
     const { form_data, selectedCategory } = props;
     const { t, currentLocale } = useTranslation();
 
+    const isViewShopDetail = url && url.startsWith('/shops') 
+
     const MAX_BRAND_ITEMS = 10;
     const MAX_MODEL_ITEMS = 10;
 
@@ -673,8 +675,8 @@ export default function ProductListingHeader() {
     };
 
     const showCategories = categories.length > 0 && !selectedCategory;
-    const showBrands = displayedBrands.length > 0 && !!selectedCategory;
-    const showBodyTypes = hasBodyType && allBodyTypes.length > 0 && displayedBrands.length > 0 && !!selectedCategory && !filters.model_code;
+    const showBrands = displayedBrands.length > 0 && !!selectedCategory && !isViewShopDetail;
+    const showBodyTypes = hasBodyType && allBodyTypes.length > 0 && displayedBrands.length > 0 && !!selectedCategory && !filters.model_code && !isViewShopDetail;
     const hasContentToShow = showCategories || showBrands || showBodyTypes;
 
     // --- ADDED: Breadcrumb Logic ---

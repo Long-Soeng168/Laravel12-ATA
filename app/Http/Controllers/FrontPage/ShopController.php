@@ -113,51 +113,6 @@ class ShopController extends Controller
 
     public function show($id, Request $request)
     {
-        $form_data = [
-            'provinces' => Province::orderBy('order_index')->orderBy('name_kh')->get(),
-            'itemCategories' => ItemCategory::where('status', 'active')
-                ->with(['fields.options', 'brands'])
-                ->orderBy('order_index')
-                ->orderBy('name')
-                ->get()
-                ->map(function ($item) {
-                    $item->image_url = $item->image ? asset('assets/images/item_categories/thumb/' . $item->image) : null;
-                    $item->brand_ids = $item->brands->pluck('id')->toArray();
-                    return $item;
-                }),
-            'itemBrands' => ItemBrand::where('status', 'active')
-                ->orderBy('order_index')
-                ->orderBy('name')
-                ->with(['brand_models' => function ($query) {
-                    $query->where('status', 'active')->orderBy('name');
-                }])
-                ->get()
-                ->map(function ($brand) {
-                    // 1. Add image_url for the Brand
-                    $brand->image_url = $brand->image
-                        ? asset('assets/images/item_brands/thumb/' . $brand->image)
-                        : null;
-
-                    // 2. Map through the nested models to add their image_url
-                    $brand->brand_models->map(function ($model) {
-                        $model->image_url = $model->image
-                            ? asset('assets/images/item_models/thumb/' . $model->image)
-                            : null;
-                        return $model;
-                    });
-
-                    return $brand;
-                }),
-
-            'itemBodyTypes' => ItemBodyType::where('status', 'active')
-                ->orderBy('order_index')
-                ->orderBy('name')
-                ->get()
-                ->map(function ($item) {
-                    $item->image_url = $item->image ? asset('assets/images/item_body_types/thumb/' . $item->image) : null;
-                    return $item;
-                }),
-        ];
 
         $query = Item::with(['category', 'brand', 'images']);
 
@@ -348,7 +303,57 @@ class ShopController extends Controller
             return $category;
         });
 
-        $shop->setAttribute('category_codes', $shop->categories->pluck('code')->toArray());
+        $shopCategoryCodes = $shop->categories->pluck('code')->toArray();
+        $shop->setAttribute('category_codes', $shopCategoryCodes);
+
+        $form_data = [
+            'provinces' => Province::orderBy('order_index')->orderBy('name_kh')->get(),
+            'itemCategories' => ItemCategory::where('status', 'active')
+                ->when(!empty($shopCategoryCodes), function ($query) use ($shopCategoryCodes) {
+                    $query->whereIn('code', $shopCategoryCodes);
+                })
+                ->with(['fields.options', 'brands'])
+                ->orderBy('order_index')
+                ->orderBy('name')
+                ->get()
+                ->map(function ($item) {
+                    $item->image_url = $item->image ? asset('assets/images/item_categories/thumb/' . $item->image) : null;
+                    $item->brand_ids = $item->brands->pluck('id')->toArray();
+                    return $item;
+                }),
+            'itemBrands' => ItemBrand::where('status', 'active')
+                ->orderBy('order_index')
+                ->orderBy('name')
+                ->with(['brand_models' => function ($query) {
+                    $query->where('status', 'active')->orderBy('name');
+                }])
+                ->get()
+                ->map(function ($brand) {
+                    // 1. Add image_url for the Brand
+                    $brand->image_url = $brand->image
+                        ? asset('assets/images/item_brands/thumb/' . $brand->image)
+                        : null;
+
+                    // 2. Map through the nested models to add their image_url
+                    $brand->brand_models->map(function ($model) {
+                        $model->image_url = $model->image
+                            ? asset('assets/images/item_models/thumb/' . $model->image)
+                            : null;
+                        return $model;
+                    });
+
+                    return $brand;
+                }),
+
+            'itemBodyTypes' => ItemBodyType::where('status', 'active')
+                ->orderBy('order_index')
+                ->orderBy('name')
+                ->get()
+                ->map(function ($item) {
+                    $item->image_url = $item->image ? asset('assets/images/item_body_types/thumb/' . $item->image) : null;
+                    return $item;
+                }),
+        ];
 
         // return [
         //     'shop' => $shop,

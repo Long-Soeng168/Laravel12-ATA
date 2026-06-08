@@ -295,7 +295,7 @@ const ProductDetail = () => {
 
                         {/* RIGHT COLUMN: Sticky Shop Card */}
                         {profileName && (
-                            <div className="w-full shrink-0 pt-8 lg:sticky lg:top-4 lg:w-[340px]">
+                            <div className="w-full shrink-0 pt-8 lg:sticky lg:top-4 lg:w-[400px]">
                                 <div className="group bg-background relative overflow-hidden rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:ring-2 hover:shadow-[#FF6D00]/15 hover:ring-[#FF6D00] dark:bg-white/[0.02]">
                                     {/* Inner Glow Hover Effect */}
                                     <div className="absolute inset-0 bg-gradient-to-tr from-[#FF6D00]/0 to-[#FF6D00]/0 transition-colors group-hover:from-[#FF6D00]/5 group-hover:to-transparent"></div>
