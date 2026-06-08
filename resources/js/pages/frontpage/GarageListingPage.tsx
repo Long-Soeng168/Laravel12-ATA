@@ -6,6 +6,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { CheckCircleIcon, ChevronRight, FileText, MapIcon, MapPin, Navigation, Phone, Store, XIcon } from 'lucide-react';
 import { useState } from 'react';
 import GarageListingHeader from './garages/components/GarageListingHeader';
+import MapFloatingButton from './garages/components/MapFloatingButton';
 
 // --- Shared Flat UI Primitives ---
 const getButtonStyles = (variant: 'default' | 'outline' | 'accent' | 'green' = 'default', className = '') => {
@@ -321,6 +322,7 @@ export default function GarageListingPage() {
                     )}
                 </DialogContent>
             </Dialog>
+            <MapFloatingButton />
         </FrontPageLayout>
     );
 }
