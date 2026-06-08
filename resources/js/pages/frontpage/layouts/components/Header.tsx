@@ -176,7 +176,7 @@ export default function Header() {
                             </div>
 
                             {/* Desktop Sell Button */}
-                            <Link href={`/login`} className="hidden md:block">
+                            <Link prefetch href={`/login`} className="hidden md:block">
                                 <Button variant="accent" className="gap-2 px-6">
                                     <ImagePlusIcon className="h-4 w-4" /> {t('Sell Your Products')}
                                 </Button>
@@ -237,7 +237,7 @@ export default function Header() {
                         <div className="border-border border-t"></div>
 
                         {/* Action Buttons */}
-                        <Link href={`/login`} className="flex flex-col pt-4">
+                        <Link prefetch href={`/login`} className="flex flex-col pt-4">
                             <Button variant="accent" className="w-full justify-center gap-2">
                                 <ImagePlusIcon className="h-4 w-4" /> {t('Sell Your Products')}
                             </Button>

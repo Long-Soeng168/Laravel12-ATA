@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 import Footer from './components/Footer'; // <-- Import the new footer
 import Header from './components/Header';
+import ScrollToTopButton2 from '@/components/ScrollToTopButton2';
 
 interface FrontPageLayoutProps {
     children: ReactNode;
@@ -16,6 +17,7 @@ const FrontPageLayout = ({ children }: FrontPageLayoutProps) => {
             <main className="flex-grow">{children}</main>
 
             {/* --- Footer Section --- */}
+            <ScrollToTopButton2 />
             <Footer />
         </div>
     );
