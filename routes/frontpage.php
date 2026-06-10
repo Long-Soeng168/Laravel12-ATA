@@ -21,6 +21,7 @@ Route::get('/share/items/{id}', [ProductController::class, 'show']);
 
 Route::get('/shops', [ShopController::class, 'index']);
 Route::get('/shops/{id}', [ShopController::class, 'show']);
+Route::get('/share/shops/{id}', [ShopController::class, 'show']);
 
 Route::get('/garages', [GarageController::class, 'index']);
 Route::get('/garages/{id}', [GarageController::class, 'show']);
