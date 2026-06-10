@@ -414,6 +414,20 @@ class ProductController extends Controller
             return $item;
         });
 
+        // 5. Generate Dynamic Meta Data
+        // Adjust 'name' or 'title' based on your actual database column for the item
+        $itemTitle = $itemShow->name ?? $itemShow->title ?? 'Item Details';
+
+        // Strip HTML if your description uses a WYSIWYG editor, and limit to SEO standard 160 chars
+        $itemDescription = isset($itemShow->description)
+            ? \Illuminate\Support\Str::limit(strip_tags($itemShow->description), 150)
+            : 'View this product on A-Tech Auto. Buy & sell cars, spare parts, and more.';
+
+        // Grab the first image if available, otherwise fallback
+        $itemImage = !empty($formattedItem['images'])
+            ? $formattedItem['images'][0]['url']
+            : asset('icon512_maskable.png');
+
 
         // return [
         //     "itemShow" => $formattedItem,
@@ -423,6 +437,14 @@ class ProductController extends Controller
         return Inertia::render("frontpage/products/Show", [
             "itemShow" => $formattedItem,
             'relatedItems' => $relatedItems,
+        ])->withViewData([
+            'meta' => [
+                'title' => $itemTitle . ' - A-Tech Auto',
+                'description' => $itemDescription,
+                'image' => $itemImage,
+                'url' => url()->current(),
+                'keywords' => '',
+            ]
         ]);
     }
 }

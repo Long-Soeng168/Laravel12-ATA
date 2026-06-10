@@ -13,7 +13,7 @@
     <meta property="og:title" content="{{ $meta['title'] ?? 'A-Tech Auto' }}" />
     <meta property="og:description" content="{{ $meta['description'] ?? 'A-Tech Auto is the all-in-one automotive platform. Buy & sell cars or spare-parts, locate garages & EV stations, find DTC errors, access repair documents, and learn through our video tutorials and in-person courses.' }}" />
     <meta property="og:image" content="{{ $meta['image'] ?? asset('icon512_maskable.png') }}" />
-    <meta property="og:url" content="{{ $meta['url'] ?? url('/') }}" />
+    <meta property="og:url" content="{{ $meta['url'] ?? url()->current() }}" />
     <meta property="og:site_name" content="A-Tech Auto" />
 
     <meta name="twitter:card" content="summary_large_image" />
