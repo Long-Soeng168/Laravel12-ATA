@@ -17,6 +17,7 @@ Route::get('/', [FrontPageController::class, 'index']);
 
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
+Route::get('/share/products/{id}', [ProductController::class, 'show']);
 
 Route::get('/shops', [ShopController::class, 'index']);
 Route::get('/shops/{id}', [ShopController::class, 'show']);
