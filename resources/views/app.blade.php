@@ -5,6 +5,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    @routes
+    @viteReactRefresh
+    @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
+    @inertiaHead
+
     {{-- Inline script to detect system dark mode preference and apply it immediately --}}
     <script>
         (function() {
@@ -49,10 +54,6 @@
         gtag('config', 'G-LDQLZW5YZV');
     </script>
 
-    @routes
-    @viteReactRefresh
-    @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
-    @inertiaHead
 </head>
 
 <body class="antialiased scroll-smooth">
