@@ -442,7 +442,6 @@ class ProductController extends Controller
                 'title' => $itemTitle . ' - A-Tech Auto',
                 'description' => $itemDescription,
                 'image' => $itemImage,
-                'url' => url()->current(),
                 'keywords' => '',
             ]
         ]);
