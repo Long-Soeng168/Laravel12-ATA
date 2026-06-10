@@ -355,6 +355,17 @@ class ShopController extends Controller
                 }),
         ];
 
+        // 5. Generate Dynamic Meta Data for the Shop
+        // Adjust 'name' or 'name_en' based on your shops table columns
+        $shopName = $shop->name ?? $shop->name_en ?? 'Shop Details';
+
+        $shopDescription = isset($shop->description)
+            ? \Illuminate\Support\Str::limit(strip_tags($shop->description), 150)
+            : "Explore {$shopName} on A-Tech Auto. Find the best auto parts, cars, and services in Cambodia.";
+
+        // Use the shop's logo, fallback to banner, fallback to default app icon
+        $shopImage = $shop->logo_url ?? $shop->banner_url ?? asset('icon512_maskable.png');
+
         // return [
         //     'shop' => $shop,
         //     'form_data' => $form_data,
@@ -366,6 +377,13 @@ class ShopController extends Controller
             'form_data' => $form_data,
             'tableData' => $items,
             'selectedCategory' => $selectedCategory,
+        ])->withViewData([
+            'meta' => [
+                'title' => $shopName . ' | A-Tech Auto',
+                'description' => $shopDescription,
+                'image' => $shopImage,
+                'keywords' => '',
+            ]
         ]);
     }
 }
