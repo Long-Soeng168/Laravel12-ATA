@@ -65,7 +65,7 @@ Route::middleware('auth')->group(function () {
     // === End Testing Spatie Role & Permission ===
 
     Route::middleware(['admin.only', 'auth'])->group(function () {
-        Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('dashboard', [DashboardController::class, 'index']);
     });
 
     // Item Route

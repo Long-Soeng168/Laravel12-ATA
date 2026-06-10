@@ -6,10 +6,6 @@ use App\Http\Controllers\FrontPage\ShopController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\FrontPageController;
 use App\Models\Garage;
-use App\Models\ItemCategory;
-use App\Models\Province;
-use App\Models\Shop;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 

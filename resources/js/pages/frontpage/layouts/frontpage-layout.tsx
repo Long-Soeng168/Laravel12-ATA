@@ -1,7 +1,8 @@
+import BottomNavbarHideAndShow from '@/components/Navigation/BottomNavbarHideAndShow';
+import ScrollToTopButton2 from '@/components/ScrollToTopButton2';
 import { type ReactNode } from 'react';
 import Footer from './components/Footer'; // <-- Import the new footer
 import Header from './components/Header';
-import ScrollToTopButton2 from '@/components/ScrollToTopButton2';
 
 interface FrontPageLayoutProps {
     children: ReactNode;
@@ -19,6 +20,7 @@ const FrontPageLayout = ({ children }: FrontPageLayoutProps) => {
             {/* --- Footer Section --- */}
             <ScrollToTopButton2 />
             <Footer />
+            <BottomNavbarHideAndShow />
         </div>
     );
 };
