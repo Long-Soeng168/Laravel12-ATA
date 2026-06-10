@@ -5,6 +5,22 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <title>{{ $meta['title'] ?? 'A-Tech Auto' }}</title>
+    <meta name="description" content="{{ $meta['description'] ?? 'A-Tech Auto is the all-in-one automotive platform. Buy & sell cars or spare-parts, locate garages & EV stations, find DTC errors, access repair documents, and learn through our video tutorials and in-person courses.' }}">
+    <meta name="keywords" content="{{ $meta['keywords'] ?? 'A-Tech Auto, ATA, automotive platform Cambodia, buy and sell cars, auto spare parts, locate garages Cambodia, EV charging stations, DTC error codes, OBD2 diagnostics, auto repair manuals, automotive video tutorials, mechanic courses' }}">
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="{{ $meta['title'] ?? 'A-Tech Auto' }}" />
+    <meta property="og:description" content="{{ $meta['description'] ?? 'A-Tech Auto is the all-in-one automotive platform. Buy & sell cars or spare-parts, locate garages & EV stations, find DTC errors, access repair documents, and learn through our video tutorials and in-person courses.' }}" />
+    <meta property="og:image" content="{{ $meta['image'] ?? asset('icon512_maskable.png') }}" />
+    <meta property="og:url" content="{{ $meta['url'] ?? url('/') }}" />
+    <meta property="og:site_name" content="A-Tech Auto" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="{{ $meta['title'] ?? 'A-Tech Auto' }}" />
+    <meta name="twitter:description" content="{{ $meta['description'] ?? 'A-Tech Auto is the all-in-one automotive platform. Buy & sell cars or spare-parts, locate garages & EV stations, find DTC errors, access repair documents, and learn through our video tutorials and in-person courses.' }}" />
+    <meta name="twitter:image" content="{{ $meta['image'] ?? asset('icon512_maskable.png') }}" />
+
     @routes
     @viteReactRefresh
     @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
@@ -24,22 +40,6 @@
             }
         })();
     </script>
-
-    {{-- Inline style to set the HTML background color based on our theme in app.css --}}
-    <style>
-        html {
-            background-color: oklch(1 0 0);
-        }
-
-        html.dark {
-            background-color: oklch(0.145 0 0);
-        }
-    </style>
-
-    <title inertia>{{ config('app.name', 'Laravel') }}</title>
-
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-LDQLZW5YZV"></script>
