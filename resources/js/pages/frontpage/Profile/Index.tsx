@@ -1,18 +1,23 @@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import useTranslation from '@/hooks/use-translation';
-import { usePage } from '@inertiajs/react';
-import { CheckCircleIcon } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import { CheckCircleIcon, ChevronRight, PackagePlus, PlusCircle, Store, Wrench } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import FeatureCards from '../components/Card/FeatureCards';
+import DashboardFeatureCard from '../components/Card/DashboardFeatureCard';
 import ProfileCard from '../components/Card/ProfileCard';
 import ProfileLayout from '../layouts/ProfileLayout';
+import SettingsPage from './SettingsPage';
 
 const Index = () => {
     const { t, currentLocale } = useTranslation();
     // We use <any> here to bypass TS prop typing issues for the flash object
     const { props } = usePage<any>();
+
     const flash = props.flash;
+    const userShop = props.userShop;
+    const userGarage = props.userGarage;
+
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     // Automatically open the dialog if there's a flash success message
@@ -67,38 +72,106 @@ const Index = () => {
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+
                 <div className="flex flex-col items-center justify-center">
                     <ProfileCard />
                 </div>
-                <div className="mx-auto mt-10 grid max-w-lg grid-cols-1">
-                    {/* <Card className="relative overflow-hidden border border-gray-200 p-0 shadow-none transition dark:border-white/10 dark:bg-white/5">
-                        <CardHeader className="p-5">
-                            <div className="flex flex-row items-start justify-between space-y-0 pb-2">
-                                <QrCodeIcon className="size-10 text-primary" />
-                                <Link href={`/scan-qr`}>
-                                    <Button className="gap-2 rounded-sm" variant="default">
-                                        Start Scan
-                                        <ArrowRightIcon className="h-4 w-4" />
-                                    </Button>
-                                </Link>
-                            </div>
-                            <div>
-                                <CardTitle className="text-lg font-semibold">Attendance</CardTitle>
-                                <CardDescription>Scan QR code to check in</CardDescription>
-                            </div>
-                            <div className="flex justify-end">
-                                <button
-                                    type="button"
-                                    className="group inline-flex translate-y-1 items-center gap-1 text-sm font-medium text-primary hover:underline"
-                                >
-                                    <InfoIcon className="h-4 w-4 transition-transform group-hover:rotate-12" />
-                                    How it works
-                                </button>
-                            </div>
-                        </CardHeader>
-                    </Card> */}
-                    <FeatureCards />
+
+                {/* --- Action Buttons Section --- */}
+                <div className="mx-auto mt-6 flex max-w-lg flex-col gap-3">
+                    <DashboardFeatureCard />
                 </div>
+                <div className="mx-auto mt-6 mb-6 flex hidden max-w-lg flex-col gap-3">
+                    {/* 1. Create Product (Industrial & Translucent) */}
+                    <Link
+                        href="/create-product"
+                        className="group flex w-full items-center justify-between border border-blue-600 p-4 transition-all hover:bg-blue-600 dark:border-blue-500 dark:bg-blue-500/10 dark:hover:bg-blue-500"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="flex h-12 w-12 items-center justify-center bg-blue-600 text-white transition-colors dark:bg-blue-500">
+                                <PackagePlus className="h-6 w-6 stroke-[1.5px]" />
+                            </div>
+                            <div className="flex flex-col items-start justify-center transition-colors">
+                                <span className="text-[15px] font-semibold text-blue-900 transition-colors group-hover:text-white dark:text-blue-50">
+                                    {currentLocale === 'kh' ? 'បង្កើតផលិតផល' : 'Create Product'}
+                                </span>
+                                <span className="mt-0.5 text-[13px] text-blue-700 transition-colors group-hover:text-blue-100 dark:text-blue-300">
+                                    {currentLocale === 'kh' ? 'ដាក់លក់ផលិតផលថ្មីរបស់អ្នក' : 'List a new item for sale'}
+                                </span>
+                            </div>
+                        </div>
+                        <ChevronRight className="h-5 w-5 text-blue-600 transition-transform group-hover:translate-x-0.5 group-hover:text-white dark:text-blue-400" />
+                    </Link>
+
+                    {/* 2. Shop Action (Create or View) */}
+                    <Link
+                        href={userShop ? `/my-shop` : `/create-shop`}
+                        className="group flex w-full items-center justify-between border border-gray-200 bg-white p-4 transition-all hover:bg-gray-50 focus-visible:bg-gray-50 dark:border-white/10 dark:bg-[#101010] dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="flex h-12 w-12 items-center justify-center bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                {userShop ? <Store className="h-6 w-6 stroke-[1.5px]" /> : <PlusCircle className="h-6 w-6 stroke-[1.5px]" />}
+                            </div>
+                            <div className="flex flex-col items-start justify-center">
+                                <span className="text-[15px] font-semibold text-gray-900 dark:text-white">
+                                    {userShop
+                                        ? currentLocale === 'kh'
+                                            ? 'ហាងរបស់ខ្ញុំ'
+                                            : 'My Shop'
+                                        : currentLocale === 'kh'
+                                          ? 'បង្កើតហាង'
+                                          : 'Create Shop'}
+                                </span>
+                                <span className="mt-0.5 text-[13px] text-gray-500 dark:text-gray-400">
+                                    {userShop
+                                        ? currentLocale === 'kh'
+                                            ? 'គ្រប់គ្រងហាងរបស់អ្នក'
+                                            : 'Manage your business profile'
+                                        : currentLocale === 'kh'
+                                          ? 'ចុះឈ្មោះហាងរបស់អ្នកនៅលើប្រព័ន្ធ'
+                                          : 'Register your business on the platform'}
+                                </span>
+                            </div>
+                        </div>
+                        <ChevronRight className="h-5 w-5 text-gray-300 transition-transform group-hover:translate-x-0.5 dark:text-gray-600" />
+                    </Link>
+
+                    {/* 3. Garage Action (Create or View) */}
+                    <Link
+                        href={userGarage ? `/my-garage` : `/create-garage`}
+                        className="group flex w-full items-center justify-between border border-gray-200 bg-white p-4 transition-all hover:bg-gray-50 focus-visible:bg-gray-50 dark:border-white/10 dark:bg-[#101010] dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="flex h-12 w-12 items-center justify-center bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400">
+                                {userGarage ? <Wrench className="h-6 w-6 stroke-[1.5px]" /> : <PlusCircle className="h-6 w-6 stroke-[1.5px]" />}
+                            </div>
+                            <div className="flex flex-col items-start justify-center">
+                                <span className="text-[15px] font-semibold text-gray-900 dark:text-white">
+                                    {userGarage
+                                        ? currentLocale === 'kh'
+                                            ? 'យានដ្ឋានរបស់ខ្ញុំ'
+                                            : 'My Garage'
+                                        : currentLocale === 'kh'
+                                          ? 'បង្កើតយានដ្ឋាន'
+                                          : 'Create Garage'}
+                                </span>
+                                <span className="mt-0.5 text-[13px] text-gray-500 dark:text-gray-400">
+                                    {userGarage
+                                        ? currentLocale === 'kh'
+                                            ? 'គ្រប់គ្រងយានដ្ឋានរបស់អ្នក'
+                                            : 'Manage your garage profile'
+                                        : currentLocale === 'kh'
+                                          ? 'ចុះឈ្មោះយានដ្ឋានរបស់អ្នកនៅលើប្រព័ន្ធ'
+                                          : 'Register your garage on the platform'}
+                                </span>
+                            </div>
+                        </div>
+                        <ChevronRight className="h-5 w-5 text-gray-300 transition-transform group-hover:translate-x-0.5 dark:text-gray-600" />
+                    </Link>
+                </div>
+                {/* --- End Action Buttons Section --- */}
+
+                <SettingsPage />
             </div>
         </ProfileLayout>
     );

@@ -4,13 +4,16 @@ namespace App\Http\Controllers\Settings;
 
 use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Settings\ProfileUpdateRequest;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+
+use App\Models\User;
+use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
@@ -28,32 +31,72 @@ class ProfileController extends Controller
     /**
      * Update the user's profile settings.
      */
-    public function update(Request $request): RedirectResponse
+    public function update(Request $request)
     {
-        // dd($request->all());
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($request->user()->id)],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'gender' => ['nullable', 'in:male,female,other'],
+            'email' => [
+                'required',
+                'string',
+                'lowercase',
+                'email',
+                'max:255',
+                Rule::unique('users')->ignore($request->user()->id)
+            ],
+            'phone' => [
+                'required',
+                'string',
+                'regex:/^0\d{7,14}$/',
+                Rule::unique('users')->ignore($request->user()->id)
+            ],
+            'other_phones' => ['nullable', 'array'],
+            'other_phones.*' => [
+                'nullable',
+                'string',
+                'regex:/^(0|\+855)(\d{8,9})$/', // Validates Khmer format for each entry
+            ],
+            'gender' => ['nullable', 'string', 'in:male,female,other'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'location' => ['nullable', 'string'],
+            'latitude' => ['nullable', 'numeric'],
+            'longitude' => ['nullable', 'numeric'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp,svg', 'max:4096'],
+        ], [
+            'phone.regex' => 'The phone number must start with 0 and contain 8 to 15 digits without spaces.',
+            'other_phones.*.regex' => 'The additional phone number format is invalid.',
         ]);
 
-        $user = $request->user();
+        try {
+            // Add updater
+            $validated['updated_by'] = $request->user()->id;
 
-        if ($request->hasFile('image')) {
-            $image_created_name = ImageHelper::uploadAndResizeImageWebp($request->file('image'), 'assets/images/users', 600);
-            if ($image_created_name) {
-                ImageHelper::deleteImage($user->image, 'assets/images/users');
-                $validated['image'] = $image_created_name;
+            $imageFile = $request->file('image');
+
+            // Unset the image from validated array so we only add it back if a file is uploaded
+            unset($validated['image']);
+
+            // Handle image upload if present
+            if ($imageFile) {
+                $imageName = ImageHelper::uploadAndResizeImageWebp($imageFile, 'assets/images/users', 600);
+
+                if ($imageName) {
+                    $validated['image'] = $imageName;
+
+                    // Delete old image if a new one is successfully uploaded
+                    if ($request->user()->image) {
+                        ImageHelper::deleteImage($request->user()->image, 'assets/images/users');
+                    }
+                }
             }
+
+            // Update the user
+            $request->user()->update($validated);
+
+            return redirect()->back()->with('success', 'Profile updated successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors('Failed to update profile: ' . $e->getMessage());
         }
-
-        $user->update($validated);
-
-        return to_route('profile.edit');
     }
-
-
     /**
      * Delete the user's account.
      */

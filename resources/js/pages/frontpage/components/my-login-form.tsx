@@ -1,63 +1,30 @@
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import useTranslation from '@/hooks/use-translation';
 import { cn } from '@/lib/utils';
-import { Link } from '@inertiajs/react';
-import { useState } from 'react';
+import { Link, useForm } from '@inertiajs/react';
+import { LoaderCircle } from 'lucide-react';
+import React from 'react';
 
 export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    const { t, currentLocale } = useTranslation(); // en, kh
 
-    const handleSubmit = async (event: React.FormEvent) => {
+    // Using Inertia's useForm instead of standard React useState
+    const { data, setData, post, processing, errors, reset } = useForm({
+        email: '',
+        password: '',
+    });
+
+    const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        setError('');
 
-        try {
-            const response = await fetch(`/Auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Invalid login credentials');
-            }
-
-            const data = await response.json();
-            console.log('Login successful:', data);
-
-            // Assuming the token is in data.token
-            const token = data.token; // Replace 'token' with the actual field name from your API response
-            const user = data.user; // Replace 'token' with the actual field name from your API response
-
-            // Save the token to localStorage
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
-            document.cookie = `token=${token}; path=/;`;
-
-            // Optionally, set the login state in the app (you can update your user context or global state here)
-            // Example:
-            // setIsAuthenticated(true);
-
-            // Redirect the user to another page, if needed
-            // For example, redirecting to the home page:
-            window.location.href = '/dashboard';
-            // Redirect user or set login state here
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                setError(err.message);
-            } else {
-                setError('An unexpected error occurred');
-            }
-        }
+        // Inertia handles the POST request, validation errors, and server-side redirects automatically
+        post(route('login'), {
+            onFinish: () => reset('password'), // Clear the password field on a failed attempt
+        });
     };
-
-    const { t, currentLocale } = useTranslation(); //en, kh
 
     return (
         <div className={cn('flex flex-col gap-6', className)} {...props}>
@@ -70,11 +37,14 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                             id="email"
                             type="email"
                             placeholder="m@example.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            value={data.email}
+                            onChange={(e) => setData('email', e.target.value)}
+                            disabled={processing}
                             required
                         />
+                        <InputError message={errors.email} />
                     </div>
+
                     <div className="grid gap-2">
                         <div className="flex items-center">
                             <Label htmlFor="password">{currentLocale === 'kh' ? 'ពាក្យសម្ងាត់' : 'Password'}</Label>
@@ -83,16 +53,20 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                             className="bg-background h-11 rounded-xs dark:border-white/10 dark:bg-white/5"
                             id="password"
                             type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            value={data.password}
+                            onChange={(e) => setData('password', e.target.value)}
+                            disabled={processing}
                             required
                         />
+                        <InputError message={errors.password} />
                     </div>
-                    {error && <p className="text-red-500">{error}</p>}
-                    <Button type="submit" className="h-11 w-full rounded-xs">
+
+                    <Button type="submit" className="h-11 w-full rounded-xs" disabled={processing}>
+                        {processing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
                         {currentLocale === 'kh' ? 'ចូលគណនី' : 'Login'}
                     </Button>
                 </div>
+
                 <div className="mt-4 text-center text-sm">
                     {currentLocale === 'kh' ? 'មិនទាន់មានគណនីមែនទេ?' : "Don't have an account?"}{' '}
                     <Link href="/register" className="underline underline-offset-4">

@@ -62,6 +62,21 @@ export default function ProfileLayoutHeader() {
                         </div>
                         {auth?.user?.id ? (
                             <>
+                                <div className="bg-border hidden h-6 w-px min-[850px]:block"></div>
+                                <Link
+                                    prefetch
+                                    href="/"
+                                    className={`relative hidden cursor-pointer px-2 py-1 font-medium transition-colors before:absolute before:bottom-0 before:left-0 before:h-[2px] before:w-full before:transition-transform before:duration-200 min-[850px]:inline-flex ${
+                                        isActive('/')
+                                            ? 'text-[#FF6D00] before:scale-x-100 before:bg-[#FF6D00]'
+                                            : 'before:bg-foreground hover:text-foreground before:scale-x-0 hover:before:scale-x-100'
+                                    }`}
+                                >
+                                    <span className="flex items-center gap-2">
+                                        <HomeIcon className="size-4" />
+                                        {t('Home')}
+                                    </span>
+                                </Link>
                                 <div className="bg-border hidden h-3.5 w-px min-[850px]:block"></div>
                                 <Link
                                     prefetch

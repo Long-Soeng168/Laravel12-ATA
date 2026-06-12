@@ -16,7 +16,17 @@ Route::get('/profile', function () {
     if (!Auth::check()) {
         return Inertia::render('frontpage/Profile/ShowLoginAndRegisterPage');
     }
-    return Inertia::render('frontpage/Profile/Index');
+
+    $user = Auth::user();
+
+    // return [
+    //     'userShop' => $user->shop,
+    //     'userGarage' => $user->garage,
+    // ];
+    return Inertia::render('frontpage/Profile/Index', [
+        'userShop' => $user->shop,
+        'userGarage' => $user->garage,
+    ]);
 })->name('dashboard');
 
 Route::middleware('guest')->group(function () {

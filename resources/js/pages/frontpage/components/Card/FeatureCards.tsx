@@ -2,7 +2,7 @@ import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import usePermission from '@/hooks/use-permission';
 import useTranslation from '@/hooks/use-translation';
 import { Link } from '@inertiajs/react';
-import { BookOpenIcon, CalendarCheckIcon, HeartIcon, LayoutIcon, SettingsIcon } from 'lucide-react';
+import { LayoutIcon, SettingsIcon } from 'lucide-react';
 
 const features = [
     {
@@ -21,30 +21,6 @@ const features = [
         description_kh: 'រៀបចំ និងគ្រប់គ្រងគណនីផ្ទាល់ខ្លួនរបស់អ្នក។',
         icon: SettingsIcon,
         link: '/user-settings',
-        permission: '',
-    },
-    {
-        title: 'Recent Reads',
-        title_kh: 'ការអានថ្មីៗ',
-        description: 'See the books and materials you recently accessed.',
-        description_kh: 'មើលសៀវភៅ និងឯកសារដែលអ្នកទើបតែបានចូលអាន។',
-        icon: BookOpenIcon,
-        permission: '',
-    },
-    {
-        title: 'Favorites',
-        title_kh: 'ចំណូលចិត្ត',
-        description: 'Easily find and manage your saved.',
-        description_kh: 'ស្វែងរក និងគ្រប់គ្រងសៀវភៅ ឬឯកសារដែលអ្នកបានរក្សាទុក។',
-        icon: HeartIcon,
-        permission: '',
-    },
-    {
-        title: 'Your Attendance',
-        title_kh: 'វត្តមានរបស់អ្នក',
-        description: 'View your check-in history and track library visits.',
-        description_kh: 'មើលប្រវត្តិវត្តមាន និងការចូលអានក្នុងបណ្ណាល័យរបស់អ្នក។',
-        icon: CalendarCheckIcon,
         permission: '',
     },
 ];
