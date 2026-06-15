@@ -18,7 +18,7 @@ const FormToggle: React.FC<FormToggleProps> = ({ id, label, value, onChange, err
         <div
             onClick={() => onChange(!isChecked)}
             className={cn(
-                'flex h-10 cursor-pointer items-center justify-between rounded-lg border px-3 transition-all duration-200 select-none',
+                'flex h-10 cursor-pointer items-center justify-between rounded border px-3 transition-all duration-200 select-none',
                 isChecked
                     ? 'bg-primary/5 border-primary/40 ring-primary/10 ring-1'
                     : 'bg-background border-input hover:border-primary/20 hover:bg-accent/30',

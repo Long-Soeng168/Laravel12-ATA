@@ -34,7 +34,7 @@ export default function SettingsPage() {
                 <div className="mx-auto max-w-lg">
                     <div className="mb-6">
                         {/* Modern Card Container */}
-                        <div className="flex flex-col overflow-hidden rounded-2xl border border-gray-200/80 bg-white transition-all dark:border-white/10 dark:bg-white/5">
+                        <div className="flex flex-col overflow-hidden rounded-md border border-gray-200/80 bg-white transition-all dark:border-white/10 dark:bg-white/5">
                             {/* 1. Edit Profile */}
                             <Link
                                 href="/user-settings/profile"

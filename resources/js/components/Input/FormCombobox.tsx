@@ -1,4 +1,5 @@
 import { ComboboxSelect } from '@/components/Section/ComboboxSelect';
+import useTranslation from '@/hooks/use-translation';
 import * as React from 'react';
 import { FormDescription } from './FormDescription';
 import { FormErrorLabel } from './FormErrorLabel';
@@ -8,7 +9,7 @@ interface FormComboboxProps {
     id?: string;
     name: string;
     label: string;
-    options: { value: string; label: string }[];
+    options: { value: string; label: string; image?: string | null }[];
     value: string;
     placeholder?: string;
     searchPlaceholder?: string;
@@ -37,6 +38,7 @@ export const FormCombobox: React.FC<FormComboboxProps> = ({
     description,
     disable = false,
 }) => {
+    const { t } = useTranslation();
     return (
         <div className={`grid content-start gap-2 ${className || ''}`}>
             <FormLabel id={id} label={label} required={required} />
@@ -46,8 +48,8 @@ export const FormCombobox: React.FC<FormComboboxProps> = ({
                 value={value}
                 className={comboboxClassName}
                 onChange={onChange}
-                placeholder={placeholder || `Select ${label}...`}
-                searchPlaceholder={searchPlaceholder || `Search ${label}...`}
+                placeholder={placeholder || `${t('Select')} ${label}...`}
+                searchPlaceholder={searchPlaceholder || `${t('Search')} ${label}...`}
             />
             {description && <FormDescription description={description} />}
             <FormErrorLabel error={error} />

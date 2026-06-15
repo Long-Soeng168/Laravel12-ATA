@@ -146,7 +146,7 @@ const ShopHeader = () => {
                 </div>
             )}
         >
-            <div className="border-border bg-card relative overflow-hidden rounded-none shadow">
+            <div className="border-border bg-card relative mx-auto max-w-[2000px] overflow-hidden rounded-none shadow">
                 {/* Banner - Conditionally Rendered */}
                 {hasBanner && (
                     <div className="bg-muted relative z-10 h-64 w-full overflow-hidden lg:h-96">
@@ -164,7 +164,7 @@ const ShopHeader = () => {
 
                 {/* Updated Row Layout */}
                 <div
-                    className={`relative z-20 flex flex-col items-center gap-5 p-6 sm:flex-row sm:items-start ${hasBanner ? '-mt-16 sm:-mt-20' : ''}`}
+                    className={`section-container relative z-20 flex flex-col items-center gap-5 p-6 sm:flex-row sm:items-start ${hasBanner ? '-mt-16 sm:-mt-20' : ''}`}
                 >
                     {/* Logo Wrapper */}
                     <div className="h-28 w-28 shrink-0">

@@ -322,6 +322,19 @@
     "Recent Posts": "ការបង្ហោះថ្មីៗ",
     "No posts posted yet.": "មិនទាន់មានការបង្ហោះថ្មីៗនៅឡើយទេ។",
 
+    "This field is required": "វាលនេះត្រូវបានទាមទារ",
+    "Please check required specifications": "សូមពិនិត្យមើលលក្ខណៈបច្ចេកទេសដែលបានទាមទារ",
+    "Please fix the following errors": "សូមជួសជុលកំហុសខាងក្រោម",
+    "Price ($)": "តម្លៃ ($)",
+    "Can use product Barcode.": "អាចប្រើបាកូដផលិតផលបាន។",
+    "On": "បើក",
+    "Off": "បិទ",
+    "Enter details...": "បញ្ចូលព័ត៌មានលម្អិត...",
+    "Description": "ការពិពណ៌នា",
+    "Select Images (Max 20)": "ជ្រើសរើសរូបភាព (អតិបរមា ២០)",
+    "Select...": "ជ្រើសរើស...",
+    "No results found.": "រកមិនឃើញលទ្ធផលទេ។",
+
     "en": "kh",
 
     "A-Tech Auto": "អេ ធិច អូតូ"

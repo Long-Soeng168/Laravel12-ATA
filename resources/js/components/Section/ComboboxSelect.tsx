@@ -7,7 +7,7 @@ import { Check, ChevronsUpDown } from 'lucide-react';
 import * as React from 'react';
 
 interface ComboboxSelectProps {
-    options: { value: string; label: string }[];
+    options: { value: string; label: string; image?: string | null }[];
     value: string;
     onChange: (val: string) => void;
     placeholder?: string;
@@ -27,7 +27,9 @@ export function ComboboxSelect({
 }: ComboboxSelectProps) {
     const [open, setOpen] = React.useState(false);
 
-    const selectedLabel = options.find((opt) => opt.value === value)?.label;
+    const selectedOption = options.find((opt) => opt.value === value);
+    const selectedLabel = selectedOption?.label;
+    const selectedImage = selectedOption?.image;
 
     const { t } = useTranslation();
 
@@ -39,21 +41,24 @@ export function ComboboxSelect({
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className={cn('flex w-full max-w-full justify-between overflow-hidden rounded dark:border-white/20', className)}
+                    className={cn('flex w-full max-w-full justify-between overflow-hidden rounded-none dark:border-white/20', className)}
                 >
-                    <span className="flex-1 overflow-hidden text-start text-ellipsis">{selectedLabel ? t(selectedLabel) : t(placeholder)}</span>
+                    <div className="flex flex-1 items-center gap-2 overflow-hidden text-start">
+                        {selectedImage && <img src={selectedImage} alt={selectedLabel || 'icon'} className="h-5 w-5 object-contain" />}
+                        <span className="truncate">{selectedLabel ? t(selectedLabel) : t(placeholder)}</span>
+                    </div>
                     <ChevronsUpDown className="opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="dark:border-foreground/50 w-full max-w-[350px] min-w-[250px] border p-0">
+            <PopoverContent className="dark:border-foreground/50 w-full max-w-[350px] min-w-[250px] rounded-none border p-0">
                 <Command>
-                    <CommandInput placeholder={t(searchPlaceholder)} className="h-9" />
+                    <CommandInput placeholder={t(searchPlaceholder)} className="h-9 rounded-none" />
                     <CommandList>
                         <CommandEmpty>{t('No results found.')}</CommandEmpty>
                         <CommandGroup>
                             {options.map((opt) => (
                                 <CommandItem
-                                    className="font-mono"
+                                    className="rounded-none font-mono"
                                     key={opt.value}
                                     value={opt.value + opt.label}
                                     onSelect={() => {
@@ -61,7 +66,10 @@ export function ComboboxSelect({
                                         setOpen(false);
                                     }}
                                 >
-                                    {opt.label}
+                                    <div className="flex items-center gap-2">
+                                        {opt.image && <img src={opt.image} alt={opt.label} className="h-5 w-5 object-contain" />}
+                                        <span>{opt.label}</span>
+                                    </div>
                                     <Check className={cn('ml-auto', value === opt.value ? 'opacity-100' : 'opacity-0')} />
                                 </CommandItem>
                             ))}

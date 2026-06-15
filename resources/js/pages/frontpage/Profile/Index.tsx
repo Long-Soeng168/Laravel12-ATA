@@ -81,14 +81,14 @@ const Index = () => {
                 <div className="mx-auto mt-6 flex max-w-lg flex-col gap-3">
                     <DashboardFeatureCard />
                 </div>
-                <div className="mx-auto mt-6 mb-6 flex hidden max-w-lg flex-col gap-3">
+                <div className="mx-auto mt-6 mb-6 flex max-w-lg flex-col gap-3">
                     {/* 1. Create Product (Industrial & Translucent) */}
                     <Link
                         href="/create-product"
-                        className="group flex w-full items-center justify-between border border-blue-600 p-4 transition-all hover:bg-blue-600 dark:border-blue-500 dark:bg-blue-500/10 dark:hover:bg-blue-500"
+                        className="group flex w-full items-center justify-between rounded-md border border-blue-600 p-4 transition-all hover:bg-blue-600 dark:border-blue-500 dark:bg-blue-500/10 dark:hover:bg-blue-500"
                     >
                         <div className="flex items-center gap-4">
-                            <div className="flex h-12 w-12 items-center justify-center bg-blue-600 text-white transition-colors dark:bg-blue-500">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-blue-600 text-white transition-colors dark:bg-blue-500">
                                 <PackagePlus className="h-6 w-6 stroke-[1.5px]" />
                             </div>
                             <div className="flex flex-col items-start justify-center transition-colors">
@@ -106,10 +106,10 @@ const Index = () => {
                     {/* 2. Shop Action (Create or View) */}
                     <Link
                         href={userShop ? `/my-shop` : `/create-shop`}
-                        className="group flex w-full items-center justify-between border border-gray-200 bg-white p-4 transition-all hover:bg-gray-50 focus-visible:bg-gray-50 dark:border-white/10 dark:bg-[#101010] dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
+                        className="group flex w-full items-center justify-between rounded-md border border-gray-200 bg-white p-4 transition-all hover:bg-gray-50 focus-visible:bg-gray-50 dark:border-white/10 dark:bg-[#101010] dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
                     >
                         <div className="flex items-center gap-4">
-                            <div className="flex h-12 w-12 items-center justify-center bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
                                 {userShop ? <Store className="h-6 w-6 stroke-[1.5px]" /> : <PlusCircle className="h-6 w-6 stroke-[1.5px]" />}
                             </div>
                             <div className="flex flex-col items-start justify-center">
@@ -139,10 +139,10 @@ const Index = () => {
                     {/* 3. Garage Action (Create or View) */}
                     <Link
                         href={userGarage ? `/my-garage` : `/create-garage`}
-                        className="group flex w-full items-center justify-between border border-gray-200 bg-white p-4 transition-all hover:bg-gray-50 focus-visible:bg-gray-50 dark:border-white/10 dark:bg-[#101010] dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
+                        className="group flex w-full items-center justify-between rounded-md border border-gray-200 bg-white p-4 transition-all hover:bg-gray-50 focus-visible:bg-gray-50 dark:border-white/10 dark:bg-[#101010] dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
                     >
                         <div className="flex items-center gap-4">
-                            <div className="flex h-12 w-12 items-center justify-center bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400">
                                 {userGarage ? <Wrench className="h-6 w-6 stroke-[1.5px]" /> : <PlusCircle className="h-6 w-6 stroke-[1.5px]" />}
                             </div>
                             <div className="flex flex-col items-start justify-center">

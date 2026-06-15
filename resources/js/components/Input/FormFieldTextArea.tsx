@@ -1,10 +1,10 @@
 import useTranslation from '@/hooks/use-translation';
+import { cn } from '@/lib/utils';
 import * as React from 'react';
 import { Textarea } from '../ui/textarea';
 import { FormDescription } from './FormDescription';
 import { FormErrorLabel } from './FormErrorLabel';
 import { FormLabel } from './FormLabel';
-import { cn } from '@/lib/utils';
 
 interface FormFieldTextAreaProps {
     id: string;
@@ -43,7 +43,7 @@ export const FormFieldTextArea: React.FC<FormFieldTextAreaProps> = ({
                 placeholder={placeholder ? t(placeholder) : t(label)}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className={`dark:border-white/20 ${error ? 'border-destructive' : ''} ${className || ''}`}
+                className={`rounded dark:border-white/20 ${error ? 'border-destructive' : ''} ${className || ''}`}
             />
             {description && <FormDescription description={description} />}
             <FormErrorLabel error={error} />
