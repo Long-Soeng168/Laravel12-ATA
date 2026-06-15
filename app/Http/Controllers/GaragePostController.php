@@ -15,7 +15,9 @@ use Inertia\Inertia;
 
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\Controllers\HasMiddleware;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class GaragePostController extends Controller implements HasMiddleware
 {
@@ -67,7 +69,7 @@ class GaragePostController extends Controller implements HasMiddleware
         return Inertia::render('admin/garage_posts/Create', [
             'links' => Link::orderBy('title')->where('status', 'active')->get(),
             'postCategories' => PostCategory::where('status', 'active')->orderBy('id', 'desc')->get(),
-            'allGarages' => Garage::where('status', 'active')->orderBy('id', 'desc')->get(),
+            'allGarages' => Garage::orderBy('order_index')->orderBy('id', 'desc')->get(),
             'types' => Type::where(['status' => 'active', 'type_of' => 'post'])->orderBy('id', 'desc')->get(),
         ]);
     }
@@ -77,54 +79,108 @@ class GaragePostController extends Controller implements HasMiddleware
      */
     public function store(Request $request)
     {
-        // dd($request->all());
-        $validated = $request->validate([
+        $user = $request->user();
+
+        // 1. Validate Data (Using Validator::make for better error redirection on web)
+        $validated = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
-            'post_date' => 'required|date',
+            'post_date' => 'nullable|date', // Made nullable in case the frontend doesn't send it
             'title_kh' => 'nullable|string|max:255',
             'short_description' => 'nullable|string|max:500',
             'short_description_kh' => 'nullable|string|max:500',
-            // 'long_description' => 'nullable|string',
-            // 'long_description_kh' => 'nullable|string',
-            // 'link' => 'nullable|string|max:255',
-            // 'source' => 'nullable|string|max:255',
-            'garage_id' => 'required|exists:garages,id',
+            'garage_id' => 'nullable|exists:garages,id',
             'type' => 'nullable|string',
             'status' => 'nullable|string|in:active,inactive',
             'images' => 'nullable|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
-        ]);
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp,svg|max:5120', // Standardized to 5MB max
+        ])->validate();
 
-        $validated['created_by'] = $request->user()->id;
-        $validated['updated_by'] = $request->user()->id;
-        $validated['post_date'] = Carbon::parse($validated['post_date'])->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
+        // 2. Resolve Garage ID (Admin vs User Auth)
+        if (!empty($validated['garage_id'])) {
+            // Admin or specific selection provided
+            $garage = Garage::find($validated['garage_id']);
+            $validated['garage_id'] = $garage->id;
+        } else {
+            // Fallback to the authenticated user's attached garage
+            $validated['garage_id'] = $user->garage_id ?? null;
+        }
 
+        // Fail early if no garage could be determined
+        if (empty($validated['garage_id'])) {
+            return redirect()->back()->with('error', 'No garage associated with this post.')->withInput();
+        }
 
-        $image_files = $request->file('images');
-        unset($validated['images']);
+        $validated['created_by'] = $user->id;
+        $validated['updated_by'] = $user->id;
 
+        // Safely parse post_date or default to today
+        if (!empty($validated['post_date'])) {
+            $validated['post_date'] = Carbon::parse($validated['post_date'])
+                ->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
+        } else {
+            $validated['post_date'] = now()->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
+        }
+
+        // Clean up empty strings to null
         foreach ($validated as $key => $value) {
-            if ($value === '') {
+            if (is_string($value) && trim($value) === '') {
                 $validated[$key] = null;
             }
         }
 
-        $created_post = GaragePost::create($validated);
+        $image_files = $request->file('images');
+        unset($validated['images']);
 
+        $uploadedImages = [];
+
+        // 3. Safely handle Images OUTSIDE the DB transaction
         if ($image_files) {
             try {
                 foreach ($image_files as $image) {
-                    $created_image_name = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/garage_posts', 600);
-                    GaragePostImage::create([
-                        'image' => $created_image_name,
-                        'post_id' => $created_post->id,
-                    ]);
+                    // Standardized to 800px to match Item images, or adjust back to 600 if preferred
+                    $uploadedImages[] = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/garage_posts', 800);
                 }
             } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload images: ' . $e->getMessage());
+                // Cleanup uploaded files if the loop fails halfway
+                foreach ($uploadedImages as $uploadedImage) {
+                    if (file_exists(public_path($uploadedImage))) {
+                        unlink(public_path($uploadedImage));
+                    }
+                }
+                return redirect()->back()->with('error', 'Image processing failed: ' . $e->getMessage())->withInput();
             }
         }
-        return redirect()->back()->with('success', 'Post Created Successfully!.');
+
+        // 4. Database Transaction to prevent orphaned records
+        try {
+            DB::beginTransaction();
+
+            $created_post = GaragePost::create($validated);
+
+            // Save Image Records
+            foreach ($uploadedImages as $filename) {
+                GaragePostImage::create([
+                    'image' => $filename,
+                    'post_id' => $created_post->id,
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Post Created Successfully!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // DB failed, cleanup the newly created physical files
+            foreach ($uploadedImages as $uploadedImage) {
+                if (file_exists(public_path($uploadedImage))) {
+                    unlink(public_path($uploadedImage));
+                }
+            }
+
+            Log::error('Garage post creation DB failure: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to create post: ' . $e->getMessage())->withInput();
+        }
     }
 
     /**
@@ -135,7 +191,7 @@ class GaragePostController extends Controller implements HasMiddleware
         return Inertia::render('admin/garage_posts/Create', [
             'links' => Link::orderBy('title')->where('status', 'active')->get(),
             'editData' => $garage_post->load('images'),
-            'allGarages' => Garage::where('status', 'active')->orderBy('id', 'desc')->get(),
+            'allGarages' => Garage::orderBy('order_index')->orderBy('id', 'desc')->get(),
             'postCategories' => PostCategory::where('status', 'active')->orderBy('id', 'desc')->get(),
             'types' => Type::where(['status' => 'active', 'type_of' => 'post'])->orderBy('id', 'desc')->get(),
             'readOnly' => true,
@@ -151,7 +207,7 @@ class GaragePostController extends Controller implements HasMiddleware
         return Inertia::render('admin/garage_posts/Create', [
             'links' => Link::orderBy('title')->where('status', 'active')->get(),
             'editData' => $garage_post->load('images'),
-            'allGarages' => Garage::where('status', 'active')->orderBy('id', 'desc')->get(),
+            'allGarages' => Garage::orderBy('order_index')->orderBy('id', 'desc')->get(),
             'postCategories' => PostCategory::where('status', 'active')->orderBy('id', 'desc')->get(),
             'types' => Type::where(['status' => 'active', 'type_of' => 'post'])->orderBy('id', 'desc')->get(),
         ]);
@@ -162,53 +218,101 @@ class GaragePostController extends Controller implements HasMiddleware
      */
     public function update(Request $request, GaragePost $garage_post)
     {
-        // dd($request->all());
-        $validated = $request->validate([
+        $user = $request->user();
+
+        // 1. Validate Data
+        $validated = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
-            'post_date' => 'nullable',
+            'post_date' => 'nullable|date',
             'title_kh' => 'nullable|string|max:255',
             'short_description' => 'nullable|string|max:500',
             'short_description_kh' => 'nullable|string|max:500',
-            // 'long_description' => 'nullable|string',
-            // 'long_description_kh' => 'nullable|string',
-            // 'link' => 'nullable|string|max:255',
-            // 'source' => 'nullable|string|max:255',
-            'garage_id' => 'required|exists:garages,id',
+            'garage_id' => 'nullable|exists:garages,id',
             'type' => 'nullable|string',
             'status' => 'nullable|string|in:active,inactive',
             'images' => 'nullable|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
-        ]);
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp,svg|max:5120', // Standardized to 5MB
+        ])->validate();
 
-        $validated['updated_by'] = $request->user()->id;
-        $validated['post_date'] = Carbon::parse($validated['post_date'])->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
-        // $validated['post_date'] = Carbon::parse($validated['post_date'])->addDay()->toDateString();
+        // 2. Resolve Garage ID
+        if (!empty($validated['garage_id'])) {
+            $garage = Garage::find($validated['garage_id']);
+            $validated['garage_id'] = $garage->id;
+        } else {
+            // If missing from request, retain the existing garage_id, or fallback to auth user
+            $validated['garage_id'] = $garage_post->garage_id ?? $user->garage_id;
+        }
 
-        $image_files = $request->file('images');
-        unset($validated['images']);
+        $validated['updated_by'] = $user->id;
 
+        // Safely parse post_date or retain the existing one
+        if (!empty($validated['post_date'])) {
+            $validated['post_date'] = Carbon::parse($validated['post_date'])
+                ->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
+        } else {
+            $validated['post_date'] = $garage_post->post_date ?? now()->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
+        }
+
+        // Clean up empty strings to null safely
         foreach ($validated as $key => $value) {
-            if ($value === '') {
+            if (is_string($value) && trim($value) === '') {
                 $validated[$key] = null;
             }
         }
 
-        $garage_post->update($validated);
+        $image_files = $request->file('images');
+        unset($validated['images']);
 
+        $uploadedImages = [];
+
+        // 3. Safely handle NEW Images OUTSIDE the DB transaction
         if ($image_files) {
             try {
                 foreach ($image_files as $image) {
-                    $created_image_name = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/garage_posts', 600);
-                    GaragePostImage::create([
-                        'image' => $created_image_name,
-                        'post_id' => $garage_post->id,
-                    ]);
+                    // Standardized to 800px to match previous logic
+                    $uploadedImages[] = ImageHelper::uploadAndResizeImageWebp($image, 'assets/images/garage_posts', 800);
                 }
             } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload images: ' . $e->getMessage());
+                // Cleanup newly uploaded files if the loop fails halfway
+                foreach ($uploadedImages as $uploadedImage) {
+                    if (file_exists(public_path($uploadedImage))) {
+                        unlink(public_path($uploadedImage));
+                    }
+                }
+                return redirect()->back()->with('error', 'Image processing failed: ' . $e->getMessage())->withInput();
             }
         }
-        return redirect()->back()->with('success', 'Post Updated Successfully!.');
+
+        // 4. Database Transaction to prevent partial updates
+        try {
+            DB::beginTransaction();
+
+            $garage_post->update($validated);
+
+            // Save New Image Records
+            foreach ($uploadedImages as $filename) {
+                GaragePostImage::create([
+                    'image' => $filename,
+                    'post_id' => $garage_post->id,
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Post Updated Successfully!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // DB failed, cleanup the newly created physical files to prevent orphans
+            foreach ($uploadedImages as $uploadedImage) {
+                if (file_exists(public_path($uploadedImage))) {
+                    unlink(public_path($uploadedImage));
+                }
+            }
+
+            Log::error('Garage post update DB failure: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to update post: ' . $e->getMessage())->withInput();
+        }
     }
 
     public function update_status(Request $request, GaragePost $garage_post)
