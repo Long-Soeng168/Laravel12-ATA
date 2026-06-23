@@ -12,7 +12,9 @@ use App\Models\ItemCategoryField;
 use App\Models\ItemDailyView;
 use App\Models\Province;
 use App\Models\Shop;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class ShopController extends Controller
@@ -113,17 +115,45 @@ class ShopController extends Controller
 
     public function show($id, Request $request)
     {
+        // 1. Detect which route we are on (Check for BOTH shop route patterns)
+        $isShopRoute = $request->is('shops/*', 'shop-profile*');
 
         $query = Item::with(['category', 'brand', 'images']);
-
         $query->where('status', 'active');
 
-        // Filter by Category Code and Dynamic Attributes
+        // 2. Set context: Are we filtering items by Shop or by User?
+        if ($isShopRoute) {
+            $query->where('shop_id', $id);
+            $shop = Shop::with(['categories', 'province'])->findOrFail($id);
+            $targetUser = null;
+        } else {
+            // This handles 'users/*' and 'user-profile*'
+            $query->where('user_id', $id);
+            $targetUser = User::findOrFail($id);
+            $shop = null;
+        }
+
+        // 3. Determine if the current authenticated user is the owner
+        $user = Auth::user();
+        $isOwner = false;
+
+        // Only check ownership if the route starts with the specific profile paths
+        if ($user && $request->is('shop-profile*', 'user-profile*')) {
+            if ($isShopRoute) {
+                // User owns the shop if their shop_id matches, or if they are the shop's owner (user_id)
+                $isOwner = ($user->shop_id == $shop->id) || ($user->id == $shop->user_id);
+            } else {
+                // User owns the profile if it's their own ID
+                $isOwner = ($user->id == $targetUser->id);
+            }
+        }
+
+
+        // --- Filter by Category Code and Dynamic Attributes ---
         if ($request->filled('category_code')) {
             $categoryCode = $request->category_code;
             $query->where('category_code', $categoryCode);
 
-            // Fetch valid fields for this category to prevent SQL injection or bad queries
             $category = ItemCategory::where('code', $categoryCode)->first();
 
             if ($category) {
@@ -131,53 +161,31 @@ class ShopController extends Controller
                     ->pluck('field_key')
                     ->toArray();
 
-                // Loop through request inputs to match valid JSON attributes
                 foreach ($request->all() as $key => $value) {
                     if (in_array($key, $validFields) && $request->filled($key)) {
-                        // Assuming 'attributes' is cast to an array/json in your Item model
                         $query->where("attributes->$key", $value);
                     }
                 }
             }
         }
 
-        // Standard Filters
-        if ($request->filled('shop_id')) {
-            $shop = Shop::find($request->shop_id);
-            if ($shop) {
-                $query->where(function ($q) use ($shop) {
-                    $q->where('user_id', $shop->owner_user_id);
-                });
-            } else {
-                $query->where('shop_id', $request->shop_id);
-            }
-        }
-        if ($request->filled('user_id')) {
-            $query->where('user_id', $request->user_id);
-        }
-
+        // --- Standard Filters ---
+        // Note: We removed the shop_id / user_id checks from here because they are strictly enforced in Step 2 based on the URL.
         if ($request->filled('brand_code')) {
             $query->where('brand_code', $request->brand_code);
         }
-
         if ($request->filled('model_code')) {
             $query->where('model_code', $request->model_code);
         }
-
         if ($request->filled('body_type_code')) {
             $query->where('body_type_code', $request->body_type_code);
         }
-
-        // Price Range Filters
         if ($request->filled('min_price')) {
             $query->where('price', '>=', $request->min_price);
         }
-
         if ($request->filled('max_price')) {
             $query->where('price', '<=', $request->max_price);
         }
-
-        // Discount Filter
         if ($request->filled('is_discount')) {
             if ($request->is_discount == '1') {
                 $query->whereNotNull('discount')->where('discount', '>', 0);
@@ -187,18 +195,12 @@ class ShopController extends Controller
                 });
             }
         }
-
-        // Free Delivery Filter
         if ($request->filled('is_free_delivery')) {
             $query->where('is_free_delivery', $request->is_free_delivery);
         }
-
-        // Location / Province Filter (Assuming province_code is on the Shop relation)
         if ($request->filled('province_code')) {
             $query->where('province_code', $request->province_code);
         }
-
-        // Date Added Filter
         if ($request->filled('created_at')) {
             $dateFilter = $request->created_at;
             if ($dateFilter === 'today') {
@@ -211,7 +213,6 @@ class ShopController extends Controller
                 $query->where('created_at', '>=', Carbon::now()->subDays(30));
             }
         }
-
         if ($request->filled('q')) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->q . '%')
@@ -219,7 +220,7 @@ class ShopController extends Controller
             });
         }
 
-        // 2. Paginate & Sort (Removed latest() to prevent conflicting with orderByDesc)
+        // --- Sort & Paginate ---
         if ($request->filled('sort')) {
             $sort = $request->sort;
             if ($sort === 'price_low_to_high') {
@@ -230,25 +231,20 @@ class ShopController extends Controller
                 $query->orderByDesc('id');
             }
         } else {
-            // Default sort
             $query->orderByDesc('id');
         }
 
-        $items = $query->where('shop_id', $id)->paginate(20);
+        $items = $query->paginate(20);
 
-        // 3. Pre-fetch mappings for attributes (Optimized)
-        // We get the IDs from the already eager-loaded categories instead of running a new query!
+        // --- Pre-fetch mappings for attributes ---
         $categoryIds = $items->pluck('category.id')->filter()->unique();
-
         $categoryMaps = ItemCategoryField::whereIn('category_id', $categoryIds)
             ->with('options')
             ->get()
             ->groupBy('category_id');
 
-        // 4. Transform Collection
+        // --- Transform Collection ---
         $items->getCollection()->transform(function ($item) use ($categoryMaps) {
-
-            // --- Image Optimization for Flutter List ---
             $firstImage = $item->images->first();
 
             $item->image_url = $firstImage
@@ -263,7 +259,6 @@ class ShopController extends Controller
                 'image_url' => asset('assets/images/items/' . $firstImage->image),
             ] : null;
 
-            // --- Attribute Display Logic ---
             $categoryId = $item->category?->id;
             $fields = $categoryMaps->get($categoryId);
             $displayAttributes = [];
@@ -284,8 +279,6 @@ class ShopController extends Controller
             }
 
             $item->display_attributes = $displayAttributes;
-
-            // Correct Laravel way to hide relationships from the final JSON payload
             $item->makeHidden(['images']);
 
             return $item;
@@ -293,23 +286,40 @@ class ShopController extends Controller
 
         $selectedCategory = ItemCategory::where('code', $request->category_code)->first() ?? null;
 
-        $shop = Shop::with(['categories', 'province'])->find($id);
+        // --- Dynamic Profile / Shop Setup ---
+        $shopCategoryCodes = [];
 
-        $shop->logo_url = $shop->logo ? asset('assets/images/shops/' . $shop->logo) : null;
-        $shop->banner_url = $shop->banner ? asset('assets/images/shops/' . $shop->banner) : null;
+        if ($isShopRoute && $shop) {
+            // Prepare Shop Data
+            $shop->logo_url = $shop->logo ? asset('assets/images/shops/' . $shop->logo) : null;
+            $shop->banner_url = $shop->banner ? asset('assets/images/shops/' . $shop->banner) : null;
 
-        $shop->categories->map(function ($category) {
-            $category->image_url = $category->image ? asset('assets/images/item_categories/thumb/' . $category->image) : null;
-            return $category;
-        });
+            $shop->categories->map(function ($category) {
+                $category->image_url = $category->image ? asset('assets/images/item_categories/thumb/' . $category->image) : null;
+                return $category;
+            });
 
-        $shopCategoryCodes = $shop->categories->pluck('code')->toArray();
-        $shop->setAttribute('category_codes', $shopCategoryCodes);
+            $shopCategoryCodes = $shop->categories->pluck('code')->toArray();
+            $shop->setAttribute('category_codes', $shopCategoryCodes);
 
+            $profileName = $shop->name ?? $shop->name_en ?? 'Shop Details';
+            $profileDesc = isset($shop->description) ? \Illuminate\Support\Str::limit(strip_tags($shop->description), 150) : "Explore {$profileName} on A-Tech Auto.";
+            $profileImg = $shop->logo_url ?? $shop->banner_url ?? asset('icon512_maskable.png');
+        } else {
+            // Prepare User Data
+            $targetUser->avatar_url = $targetUser->image ? asset('assets/images/users/' . $targetUser->image) : null;
+
+            $profileName = $targetUser->name;
+            $profileDesc = "Explore items listed by {$profileName} on A-Tech Auto.";
+            $profileImg = $targetUser->avatar_url ?? asset('icon512_maskable.png');
+        }
+
+        // --- Generate Form Data ---
         $form_data = [
             'provinces' => Province::orderBy('order_index')->orderBy('name_kh')->get(),
             'itemCategories' => ItemCategory::where('status', 'active')
                 ->when(!empty($shopCategoryCodes), function ($query) use ($shopCategoryCodes) {
+                    // Only restrict dropdown to shop categories IF we are viewing a shop.
                     $query->whereIn('code', $shopCategoryCodes);
                 })
                 ->with(['fields.options', 'brands'])
@@ -329,22 +339,13 @@ class ShopController extends Controller
                 }])
                 ->get()
                 ->map(function ($brand) {
-                    // 1. Add image_url for the Brand
-                    $brand->image_url = $brand->image
-                        ? asset('assets/images/item_brands/thumb/' . $brand->image)
-                        : null;
-
-                    // 2. Map through the nested models to add their image_url
+                    $brand->image_url = $brand->image ? asset('assets/images/item_brands/thumb/' . $brand->image) : null;
                     $brand->brand_models->map(function ($model) {
-                        $model->image_url = $model->image
-                            ? asset('assets/images/item_models/thumb/' . $model->image)
-                            : null;
+                        $model->image_url = $model->image ? asset('assets/images/item_models/thumb/' . $model->image) : null;
                         return $model;
                     });
-
                     return $brand;
                 }),
-
             'itemBodyTypes' => ItemBodyType::where('status', 'active')
                 ->orderBy('order_index')
                 ->orderBy('name')
@@ -355,33 +356,30 @@ class ShopController extends Controller
                 }),
         ];
 
-        // 5. Generate Dynamic Meta Data for the Shop
-        // Adjust 'name' or 'name_en' based on your shops table columns
-        $shopName = $shop->name ?? $shop->name_en ?? 'Shop Details';
-
-        $shopDescription = isset($shop->description)
-            ? \Illuminate\Support\Str::limit(strip_tags($shop->description), 150)
-            : "Explore {$shopName} on A-Tech Auto. Find the best auto parts, cars, and services in Cambodia.";
-
-        // Use the shop's logo, fallback to banner, fallback to default app icon
-        $shopImage = $shop->logo_url ?? $shop->banner_url ?? asset('icon512_maskable.png');
-
         // return [
-        //     'shop' => $shop,
+        //     'isShop' => $isShopRoute, // <-- Useful in React to conditionally render headers
+        //     'shop' => $shop,          // Will be null if it's a user profile
+        //     'targetUser' => $targetUser, // Will be null if it's a shop profile
+        //     'isOwner' => $isOwner,
         //     'form_data' => $form_data,
         //     'tableData' => $items,
         //     'selectedCategory' => $selectedCategory,
         // ];
+
+        // --- Return to Inertia ---
         return Inertia::render('frontpage/products/ShowShopPage', [
-            'shop' => $shop,
+            'isShop' => $isShopRoute, // <-- Useful in React to conditionally render headers
+            'shop' => $shop,          // Will be null if it's a user profile
+            'targetUser' => $targetUser, // Will be null if it's a shop profile
+            'isOwner' => $isOwner,
             'form_data' => $form_data,
             'tableData' => $items,
             'selectedCategory' => $selectedCategory,
         ])->withViewData([
             'meta' => [
-                'title' => $shopName . ' | A-Tech Auto',
-                'description' => $shopDescription,
-                'image' => $shopImage,
+                'title' => $profileName . ' | A-Tech Auto',
+                'description' => $profileDesc,
+                'image' => $profileImg,
                 'keywords' => '',
             ]
         ]);

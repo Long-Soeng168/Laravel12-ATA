@@ -1,4 +1,5 @@
 import BottomNavbarHideAndShow from '@/components/Navigation/BottomNavbarHideAndShow';
+import { Toaster } from '@/components/ui/sonner';
 import { usePage } from '@inertiajs/react';
 import { type ReactNode } from 'react';
 import ProfileLayoutHeader from './components/ProfileLayoutHeader';
@@ -22,6 +23,7 @@ const ProfileLayout = ({ children }: ProfileLayoutProps) => {
             <main className="flex-grow pb-20">{children}</main>
 
             <BottomNavbarHideAndShow />
+            <Toaster />
         </div>
     );
 };

@@ -2,8 +2,26 @@
 
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+Route::get('/profile', function () {
+    if (!Auth::check()) {
+        return Inertia::render('frontpage/Profile/ShowLoginAndRegisterPage');
+    }
+
+    $user = Auth::user();
+
+    // return [
+    //     'userShop' => $user->shop,
+    //     'userGarage' => $user->garage,
+    // ];
+    return Inertia::render('frontpage/Profile/Index', [
+        'userShop' => $user->shop,
+        'userGarage' => $user->garage,
+    ]);
+})->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::redirect('settings', '/user-settings');

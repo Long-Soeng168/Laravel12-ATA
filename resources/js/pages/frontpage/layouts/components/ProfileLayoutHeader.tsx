@@ -1,4 +1,3 @@
-import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { SwitchDarkModeSingleIcon } from '@/components/SwitchDarkModeSingleIcon';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -160,7 +159,7 @@ export default function ProfileLayoutHeader() {
 
                     {/* Right Menu */}
                     <div className="text-muted-foreground flex items-center gap-2 sm:gap-3">
-                        <LanguageSwitcher />
+                        {/* <LanguageSwitcher /> */}
                         <div className="bg-border h-3.5 w-px"></div>
                         <SwitchDarkModeSingleIcon />
                         <div className="bg-border h-3.5 w-px min-[850px]:hidden"></div>

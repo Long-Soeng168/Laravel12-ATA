@@ -1,6 +1,24 @@
 import useTranslation from '@/hooks/use-translation';
 import { Link, usePage } from '@inertiajs/react';
-import { BadgeCheck, Box, Car, ChevronRight, Clock, Eye, Info, Layers3, MapPin, Phone, Store, Tag, TruckIcon, User } from 'lucide-react';
+import {
+    ArrowLeftIcon,
+    BadgeCheck,
+    Box,
+    Car,
+    ChevronRight,
+    Clock,
+    Eye,
+    Info,
+    Layers3,
+    MapPin,
+    Pencil,
+    Phone,
+    Store,
+    Tag,
+    Trash2,
+    TruckIcon,
+    User,
+} from 'lucide-react';
 import ProductImages from './ProductImages'; // Adjust import path if needed
 
 const getTimeAgo = (dateString: string, t: any) => {
@@ -28,7 +46,8 @@ const formatCurrency = (amount: number) => {
 
 const ProductDetail = () => {
     const { t, currentLocale } = useTranslation();
-    const { itemShow } = usePage<any>().props;
+    // Safely extract itemShow and isOwner from props
+    const { itemShow, isOwner } = usePage<any>().props;
     const isKh = currentLocale === 'kh';
 
     // --- Price Logic ---
@@ -101,40 +120,93 @@ const ProductDetail = () => {
 
     return (
         <div>
-            <nav aria-label="Breadcrumb" className="section-container flex items-center py-2 text-[13px] text-gray-500 dark:text-gray-400">
-                <ol className="flex flex-wrap items-center gap-1.5">
-                    {breadcrumbs.map((crumb, index) => {
-                        const isLast = index === breadcrumbs.length - 1;
-                        return (
-                            <li key={index} className="flex items-center gap-1.5">
-                                {isLast ? (
-                                    <span className="text-foreground line-clamp-1 max-w-[50ch] truncate font-medium">{crumb.label}</span>
-                                ) : (
-                                    <Link
-                                        href={crumb.url}
-                                        className="hover:text-foreground max-w-[30ch] truncate transition-colors focus-visible:outline-none"
-                                    >
-                                        {crumb.label}
-                                    </Link>
-                                )}
-                                {!isLast && <ChevronRight className="h-3.5 w-3.5 shrink-0" />}
-                            </li>
-                        );
-                    })}
-                </ol>
-            </nav>
+            {!isOwner && (
+                <nav aria-label="Breadcrumb" className="section-container flex items-center py-2 text-[13px] text-gray-500 dark:text-gray-400">
+                    <ol className="flex flex-wrap items-center gap-1.5">
+                        {breadcrumbs.map((crumb, index) => {
+                            const isLast = index === breadcrumbs.length - 1;
+                            return (
+                                <li key={index} className="flex items-center gap-1.5">
+                                    {isLast ? (
+                                        <span className="text-foreground line-clamp-1 max-w-[50ch] truncate font-medium">{crumb.label}</span>
+                                    ) : (
+                                        <Link
+                                            href={crumb.url}
+                                            className="hover:text-foreground max-w-[30ch] truncate transition-colors focus-visible:outline-none"
+                                        >
+                                            {crumb.label}
+                                        </Link>
+                                    )}
+                                    {!isLast && <ChevronRight className="h-3.5 w-3.5 shrink-0" />}
+                                </li>
+                            );
+                        })}
+                    </ol>
+                </nav>
+            )}
+
             <div className="bg-background relative min-h-screen pb-12">
                 {/* Gradient Top Border Highlight */}
                 <div className="absolute top-0 left-1/2 h-[1.5px] w-full max-w-screen-xl -translate-x-1/2 bg-gradient-to-r from-transparent via-[#FF6D00]/60 to-transparent"></div>
 
                 {/* Top Center Radial Mesh Glow */}
                 <div className="pointer-events-none absolute top-0 left-0 h-[500px] w-full bg-[radial-gradient(ellipse_60%_60%_at_50%_-10%,rgba(255,109,0,0.08),transparent)]"></div>
-                {/* Breadcrumb Navigation */}
 
                 <div className="section-container relative z-10">
-                    <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+                    {/* Conditionally adjust max-width when `isOwner` is true since the sidebar is hidden */}
+                    <div className={`mx-auto gap-6 ${isOwner ? 'w-full max-w-4xl pt-2' : 'flex flex-col lg:flex-row lg:items-start'}`}>
                         {/* LEFT COLUMN: Main Product Details */}
                         <div className="min-w-0 flex-1 space-y-6">
+                            {/* --- OWNER ACTIONS BAR --- */}
+                            {isOwner && (
+                                <div className="sticky top-4 z-40 mt-4 flex flex-col gap-4 rounded-md border border-emerald-500/20 bg-emerald-500/10 p-4 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between dark:bg-emerald-500/20">
+                                    {/* Left Side: Back Button & Title */}
+                                    <div className="flex items-center gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => window.history.back()}
+                                            className="group flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded border border-gray-200 bg-white text-gray-500 transition-all duration-200 ease-out hover:border-gray-900 hover:bg-gray-900 hover:text-white focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 active:scale-95 dark:border-white/10 dark:bg-zinc-600 dark:text-gray-100 dark:hover:border-white dark:hover:bg-white dark:hover:text-black"
+                                            aria-label={t('Go back')}
+                                        >
+                                            <ArrowLeftIcon className="h-[20px] w-[20px] stroke-[2px] duration-200" />
+                                        </button>
+                                        <div>
+                                            <h3 className="text-sm font-bold text-emerald-800 dark:text-emerald-400">
+                                                {currentLocale === 'kh' ? 'គ្រប់គ្រងផលិតផល' : 'Manage Product'}
+                                            </h3>
+                                        </div>
+                                    </div>
+
+                                    {/* Right Side: Action Buttons */}
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        {/* Delete Button */}
+                                        <Link
+                                            href={`/items/${itemShow?.id}`}
+                                            method="delete"
+                                            as="button"
+                                            onClick={(e) => {
+                                                if (!confirm(t('Are you sure you want to delete this product?'))) {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                            className="flex items-center justify-center gap-1.5 rounded bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-700 max-sm:flex-1 dark:bg-red-600 dark:hover:bg-red-700"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                            {t('Delete')}
+                                        </Link>
+
+                                        {/* Edit Button */}
+                                        <Link
+                                            href={`/edit-product/${itemShow?.id}`}
+                                            className="flex items-center justify-center gap-1.5 rounded bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700 max-sm:flex-1 dark:bg-emerald-500 dark:hover:bg-emerald-600"
+                                        >
+                                            <Pencil className="h-4 w-4" />
+                                            {t('Edit')}
+                                        </Link>
+                                    </div>
+                                </div>
+                            )}
+
                             <div>
                                 <h1 className="text-foreground my-4 mt-6 text-2xl font-bold md:text-3xl">
                                     {isKh ? itemShow?.name_kh || itemShow?.name : itemShow?.name}
@@ -293,8 +365,8 @@ const ProductDetail = () => {
                             </div>
                         </div>
 
-                        {/* RIGHT COLUMN: Sticky Shop Card */}
-                        {profileName && (
+                        {/* RIGHT COLUMN: Sticky Shop Card (Hidden if isOwner is true) */}
+                        {!isOwner && profileName && (
                             <div className="w-full shrink-0 pt-8 lg:sticky lg:top-4 lg:w-[400px]">
                                 <div className="group bg-background relative overflow-hidden rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:ring-2 hover:shadow-[#FF6D00]/15 hover:ring-[#FF6D00] dark:bg-white/[0.02]">
                                     {/* Inner Glow Hover Effect */}

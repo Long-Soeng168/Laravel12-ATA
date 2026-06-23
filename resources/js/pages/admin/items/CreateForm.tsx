@@ -489,9 +489,11 @@ export default function CreateForm() {
                                     className="group relative aspect-square overflow-hidden border border-slate-200 dark:border-slate-800"
                                 >
                                     <img src={`/assets/images/items/thumb/${img.image}`} className="h-full w-full object-cover" />
-                                    <div className="absolute top-1 right-1 bg-white/30">
-                                        <DeleteButton deletePath="/admin/items/images/" id={img.id} />
-                                    </div>
+                                    {editData.images?.length > 1 && (
+                                        <div className="absolute top-1 right-1 bg-white/30">
+                                            <DeleteButton deletePath="/admin/items/images/" id={img.id} />
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>

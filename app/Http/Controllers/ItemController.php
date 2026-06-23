@@ -21,6 +21,7 @@ use Inertia\Inertia;
 
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -32,9 +33,9 @@ class ItemController extends Controller implements HasMiddleware
     {
         return [
             new Middleware('permission:item view', only: ['index', 'show']),
-            new Middleware('permission:item create', only: ['create', 'store']),
-            new Middleware('permission:item update', only: ['edit', 'update', 'update_status']),
-            new Middleware('permission:item delete', only: ['destroy', 'destroy_image']),
+            new Middleware('permission:item create', only: ['create']),
+            new Middleware('permission:item update', only: ['edit']),
+            // new Middleware('permission:item delete', only: ['destroy', 'destroy_image']),
         ];
     }
 
@@ -123,6 +124,58 @@ class ItemController extends Controller implements HasMiddleware
                     return $bodyType;
                 }),
             'shops' => Shop::orderBy('name')->get(),
+        ]);
+    }
+    public function user_create_product(Request $request)
+    {
+        return Inertia::render('admin/items/UserCreateItem', [
+            'provinces' => Province::orderBy('order_index')->orderBy('name_kh')->get(),
+            'itemCategories' => ItemCategory::where('status', 'active')
+                ->with(['fields.options', 'brands'])
+                ->orderBy('order_index')
+                ->orderBy('name')
+                ->get()
+                ->map(function ($category) {
+                    $category->image_url = $category->image
+                        ? asset('assets/images/item_categories/thumb/' . $category->image)
+                        : null;
+
+                    // Retaining your existing logic for brand_ids
+                    $category->brand_ids = $category->brands->pluck('id')->toArray();
+
+                    return $category;
+                }),
+            'itemBrands' => ItemBrand::where('status', 'active')
+                ->orderBy('order_index')
+                ->orderBy('name')
+                ->get()
+                ->map(function ($brand) {
+                    $brand->image_url = $brand->image
+                        ? asset('assets/images/item_brands/thumb/' . $brand->image)
+                        : null;
+                    return $brand;
+                }),
+
+            'itemModels' => ItemModel::where('status', 'active')
+                ->orderBy('name')
+                ->get()
+                ->map(function ($model) {
+                    $model->image_url = $model->image
+                        ? asset('assets/images/item_models/thumb/' . $model->image)
+                        : null;
+                    return $model;
+                }),
+
+            'itemBodyTypes' => ItemBodyType::where('status', 'active')
+                ->orderBy('order_index')
+                ->orderBy('name')
+                ->get()
+                ->map(function ($bodyType) {
+                    $bodyType->image_url = $bodyType->image
+                        ? asset('assets/images/item_body_types/thumb/' . $bodyType->image)
+                        : null;
+                    return $bodyType;
+                }),
         ]);
     }
 
@@ -373,12 +426,76 @@ class ItemController extends Controller implements HasMiddleware
         ]);
     }
 
+    public function user_edit_product(Item $item)
+    {
+        // return ($item);
+        $user = Auth::user();
+        if (! ($user->hasAnyPermission('item update') || $user->id === $item->user_id)) {
+            abort(403, 'User does not have permission to edit.');
+        }
+
+        return Inertia::render('admin/items/UserCreateItem', [
+            'editData' => $item->load('images'),
+            'provinces' => Province::orderBy('order_index')->orderBy('name_kh')->get(),
+            'itemCategories' => ItemCategory::where('status', 'active')
+                ->with(['fields.options', 'brands'])
+                ->orderBy('order_index')
+                ->orderBy('name')
+                ->get()
+                ->map(function ($category) {
+                    $category->image_url = $category->image
+                        ? asset('assets/images/item_categories/thumb/' . $category->image)
+                        : null;
+
+                    // Retaining your existing logic for brand_ids
+                    $category->brand_ids = $category->brands->pluck('id')->toArray();
+
+                    return $category;
+                }),
+            'itemBrands' => ItemBrand::where('status', 'active')
+                ->orderBy('order_index')
+                ->orderBy('name')
+                ->get()
+                ->map(function ($brand) {
+                    $brand->image_url = $brand->image
+                        ? asset('assets/images/item_brands/thumb/' . $brand->image)
+                        : null;
+                    return $brand;
+                }),
+
+            'itemModels' => ItemModel::where('status', 'active')
+                ->orderBy('name')
+                ->get()
+                ->map(function ($model) {
+                    $model->image_url = $model->image
+                        ? asset('assets/images/item_models/thumb/' . $model->image)
+                        : null;
+                    return $model;
+                }),
+
+            'itemBodyTypes' => ItemBodyType::where('status', 'active')
+                ->orderBy('order_index')
+                ->orderBy('name')
+                ->get()
+                ->map(function ($bodyType) {
+                    $bodyType->image_url = $bodyType->image
+                        ? asset('assets/images/item_body_types/thumb/' . $bodyType->image)
+                        : null;
+                    return $bodyType;
+                }),
+        ]);
+    }
+
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, Item $item)
     {
         $user = $request->user();
+
+        if (! ($user->hasAnyPermission('item update') || $user->id === $item->user_id)) {
+            abort(403, 'User does not have permission to update.');
+        }
 
         // 1. Pre-process multipart/form-data inputs
         $input = $request->all();
@@ -523,10 +640,9 @@ class ItemController extends Controller implements HasMiddleware
      */
     public function destroy(Item $item)
     {
-        if (count($item->images) > 0) {
-            foreach ($item->images as $image) {
-                ImageHelper::deleteImage($image->image, 'assets/images/items');
-            }
+        $user = Auth::user();
+        if (! ($user->hasAnyPermission('item delete') || $user->id === $item->user_id)) {
+            abort(403, 'User does not have permission to delete.');
         }
         $item->delete();
         return redirect()->back()->with('success', 'Item deleted successfully.');
@@ -534,17 +650,11 @@ class ItemController extends Controller implements HasMiddleware
 
     public function destroy_image(ItemImage $image)
     {
-        // Debugging (Check if model is found)
-        if (!$image) {
-            return redirect()->back()->with('error', 'Image not found.');
+        $user = Auth::user();
+        if (! ($user->hasAnyPermission('item delete') || $user->id === $image->item->user_id)) {
+            abort(403, 'User does not have permission to delete.');
         }
-
-        // Call helper function to delete image
-        ImageHelper::deleteImage($image->image, 'assets/images/items');
-
-        // Delete from DB
         $image->delete();
-
         return redirect()->back()->with('success', 'Image deleted successfully.');
     }
 

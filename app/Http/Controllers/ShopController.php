@@ -14,6 +14,7 @@ use Inertia\Inertia;
 
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ShopController extends Controller implements HasMiddleware
@@ -89,7 +90,7 @@ class ShopController extends Controller implements HasMiddleware
             'provinces' => Province::orderBy('order_index')
                 ->orderBy('name')
                 ->get(),
-            'categories' => ItemCategory::orderByDesc('order_index')->orderBy('name')->get(),
+            'categories' => ItemCategory::orderBy('order_index')->orderBy('name')->get(),
         ]);
     }
     public function edit(Shop $shop)
@@ -104,7 +105,20 @@ class ShopController extends Controller implements HasMiddleware
             'provinces' => Province::orderBy('order_index')
                 ->orderBy('name')
                 ->get(),
-            'categories' => ItemCategory::orderByDesc('order_index')->orderBy('name')->get(),
+            'categories' => ItemCategory::orderBy('order_index')->orderBy('name')->get(),
+        ]);
+    }
+    public function user_edit_shop()
+    {
+        $shop = Shop::findOrFail(Auth::user()->shop_id);
+        // return ($shop->load('owner', 'categories'));
+        return Inertia::render('admin/shops/UserCreateShop', [
+            'is_user_create_or_edit_shop' => true,
+            'editData' => $shop->load('owner', 'categories'),
+            'provinces' => Province::orderBy('order_index')
+                ->orderBy('name')
+                ->get(),
+            'categories' => ItemCategory::orderBy('order_index')->orderBy('name')->get(),
         ]);
     }
 
@@ -119,7 +133,17 @@ class ShopController extends Controller implements HasMiddleware
             'provinces' => Province::orderBy('order_index')
                 ->orderBy('name')
                 ->get(),
-            'categories' => ItemCategory::orderByDesc('order_index')->orderBy('name')->get(),
+            'categories' => ItemCategory::orderBy('order_index')->orderBy('name')->get(),
+        ]);
+    }
+    public function user_create_shop()
+    {
+        return Inertia::render('admin/shops/UserCreateShop', [
+            'is_user_create_or_edit_shop' => true,
+            'provinces' => Province::orderBy('order_index')
+                ->orderBy('name')
+                ->get(),
+            'categories' => ItemCategory::orderBy('order_index')->orderBy('name')->get(),
         ]);
     }
 
@@ -130,7 +154,7 @@ class ShopController extends Controller implements HasMiddleware
     {
         // dd($request->all());
         $validated = $request->validate([
-            'owner_user_id' => 'required|exists:users,id',
+            'owner_user_id' => 'nullable|exists:users,id',
             'name' => 'required|string|max:255',
             'phone' => 'nullable|numeric|digits_between:8,15',
             'other_phones' => 'nullable|array',
@@ -155,13 +179,15 @@ class ShopController extends Controller implements HasMiddleware
             'category_codes' => ['nullable', 'array', 'min:1'],
             'category_codes.*' => ['nullable', 'string', 'exists:item_categories,code'],
         ]);
+        $is_user_create_or_edit_shop = $request->boolean('is_user_create_or_edit_shop');
 
+        // $validated['expired_at'] = null;
         $validated['expired_at'] = isset($validated['expired_at'])
             ? Carbon::parse($validated['expired_at'])->setTimezone('Asia/Bangkok')->startOfDay()->toDateString()
-            : now()->addYears(2)->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
+            : null;
 
 
-        $owner = User::find($validated['owner_user_id']);
+        $owner = $is_user_create_or_edit_shop ? Auth::user() : ($validated['owner_user_id'] ? User::find($validated['owner_user_id']) : null);
         if (!$owner) {
             return redirect()->back()->with('error', 'Owner user not found.');
         }
@@ -173,6 +199,7 @@ class ShopController extends Controller implements HasMiddleware
 
         $validated['created_by'] = $request->user()->id;
         $validated['updated_by'] = $request->user()->id;
+
 
         $image_file = $request->file('logo');
         $banner_file = $request->file('banner');
@@ -210,13 +237,14 @@ class ShopController extends Controller implements HasMiddleware
         $shop->categories()->sync($categoryCodes);
 
         if ($shop) {
-            $user = User::where('id', $validated['owner_user_id'])->where('shop_id', null)->first();
-            if ($user)
-                $user->update([
-                    'shop_id' => $shop->id,
-                ]);
+            $owner->update([
+                'shop_id' => $shop->id,
+            ]);
         }
 
+        if ($is_user_create_or_edit_shop) {
+            return redirect('/profile')->with('success', 'Shop created successfully!');
+        }
         return redirect()->back()->with('success', 'Shop created successfully!');
     }
 
@@ -226,7 +254,7 @@ class ShopController extends Controller implements HasMiddleware
     public function update(Request $request, Shop $shop)
     {
         $validated = $request->validate([
-            'owner_user_id' => 'required|exists:users,id',
+            'owner_user_id' => 'nullable|exists:users,id',
             'name' => 'required|string|max:255',
             'phone' => 'nullable|numeric|digits_between:8,15',
             'other_phones' => 'nullable|array',
@@ -253,9 +281,13 @@ class ShopController extends Controller implements HasMiddleware
         ]);
 
         // 1. Format Dates and Meta
-        $validated['expired_at'] = isset($validated['expired_at'])
-            ? Carbon::parse($validated['expired_at'])->setTimezone('Asia/Bangkok')->startOfDay()->toDateString()
-            : now()->addYears(2)->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
+        if (!empty($validated['expired_at'])) {
+            $validated['expired_at'] = Carbon::parse($validated['expired_at'])
+                ->setTimezone('Asia/Bangkok')
+                ->format('Y-m-d');
+        } else {
+            $validated['expired_at'] = null;
+        }
 
         $validated['updated_by'] = $request->user()->id;
 

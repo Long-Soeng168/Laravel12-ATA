@@ -13,10 +13,14 @@ Route::get('/', [FrontPageController::class, 'index']);
 
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
+Route::get('/your-products/{id}', [ProductController::class, 'show']);
 Route::get('/share/items/{id}', [ProductController::class, 'show']);
 
 Route::get('/shops', [ShopController::class, 'index']);
 Route::get('/shops/{id}', [ShopController::class, 'show']);
+Route::get('/shop-profile/{id}', [ShopController::class, 'show']);
+Route::get('/users/{id}', [ShopController::class, 'show']);
+Route::get('/user-profile/{id}', [ShopController::class, 'show']);
 Route::get('/share/shops/{id}', [ShopController::class, 'show']);
 
 Route::get('/garages', [GarageController::class, 'index']);

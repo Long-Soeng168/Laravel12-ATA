@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import useTranslation from '@/hooks/use-translation';
 import { Link, usePage } from '@inertiajs/react';
-import { CheckCircleIcon, ChevronRight, PackagePlus, PlusCircle, Store, Wrench } from 'lucide-react';
+import { CheckCircleIcon, ChevronRight, LayoutGrid, PackagePlus, PlusCircle, Store, Wrench } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import DashboardFeatureCard from '../components/Card/DashboardFeatureCard';
 import ProfileCard from '../components/Card/ProfileCard';
@@ -15,6 +15,7 @@ const Index = () => {
     const { props } = usePage<any>();
 
     const flash = props.flash;
+    const auth = props.auth; // Added to access auth.user.id
     const userShop = props.userShop;
     const userGarage = props.userGarage;
 
@@ -103,71 +104,101 @@ const Index = () => {
                         <ChevronRight className="h-5 w-5 text-blue-600 transition-transform group-hover:translate-x-0.5 group-hover:text-white dark:text-blue-400" />
                     </Link>
 
-                    {/* 2. Shop Action (Create or View) */}
+                    {/* 2. All Your Products Action */}
                     <Link
-                        href={userShop ? `/my-shop` : `/create-shop`}
+                        href={userShop ? `/shop-profile/${userShop?.id}` : `/user-profile/${auth?.user?.id}`}
                         className="group flex w-full items-center justify-between rounded-md border border-gray-200 bg-white p-4 transition-all hover:bg-gray-50 focus-visible:bg-gray-50 dark:border-white/10 dark:bg-[#101010] dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
                     >
                         <div className="flex items-center gap-4">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
-                                {userShop ? <Store className="h-6 w-6 stroke-[1.5px]" /> : <PlusCircle className="h-6 w-6 stroke-[1.5px]" />}
+                            <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400">
+                                {/* Make sure { LayoutGrid } is imported from 'lucide-react' */}
+                                <LayoutGrid className="h-6 w-6 stroke-[1.5px]" />
                             </div>
                             <div className="flex flex-col items-start justify-center">
                                 <span className="text-[15px] font-semibold text-gray-900 dark:text-white">
-                                    {userShop
-                                        ? currentLocale === 'kh'
-                                            ? 'ហាងរបស់ខ្ញុំ'
-                                            : 'My Shop'
-                                        : currentLocale === 'kh'
-                                          ? 'បង្កើតហាង'
-                                          : 'Create Shop'}
+                                    {currentLocale === 'kh' ? 'ផលិតផលទាំងអស់របស់អ្នក' : 'All Your Products'}
                                 </span>
                                 <span className="mt-0.5 text-[13px] text-gray-500 dark:text-gray-400">
                                     {userShop
                                         ? currentLocale === 'kh'
-                                            ? 'គ្រប់គ្រងហាងរបស់អ្នក'
-                                            : 'Manage your business profile'
+                                            ? 'មើលផលិតផលទាំងអស់នៅក្នុងហាងរបស់អ្នក'
+                                            : 'View all products listed in your shop'
                                         : currentLocale === 'kh'
-                                          ? 'ចុះឈ្មោះហាងរបស់អ្នកនៅលើប្រព័ន្ធ'
-                                          : 'Register your business on the platform'}
+                                          ? 'មើលផលិតផលទាំងអស់ដែលអ្នកបានដាក់លក់'
+                                          : 'View all products you have listed for sale'}
                                 </span>
                             </div>
                         </div>
                         <ChevronRight className="h-5 w-5 text-gray-300 transition-transform group-hover:translate-x-0.5 dark:text-gray-600" />
                     </Link>
 
-                    {/* 3. Garage Action (Create or View) */}
-                    <Link
-                        href={userGarage ? `/my-garage` : `/create-garage`}
-                        className="group flex w-full items-center justify-between rounded-md border border-gray-200 bg-white p-4 transition-all hover:bg-gray-50 focus-visible:bg-gray-50 dark:border-white/10 dark:bg-[#101010] dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
-                    >
-                        <div className="flex items-center gap-4">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400">
-                                {userGarage ? <Wrench className="h-6 w-6 stroke-[1.5px]" /> : <PlusCircle className="h-6 w-6 stroke-[1.5px]" />}
+                    <div className="overflow-hidden rounded-md border">
+                        {/* 3. Shop Action (Create or View) */}
+                        <Link
+                            href={userShop ? `/shop-profile/${userShop?.id}` : `/create-shop`}
+                            className="group flex w-full items-center justify-between bg-white p-4 transition-all hover:bg-gray-50 focus-visible:bg-gray-50 dark:border-white/10 dark:bg-[#101010] dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                    {userShop ? <Store className="h-6 w-6 stroke-[1.5px]" /> : <PlusCircle className="h-6 w-6 stroke-[1.5px]" />}
+                                </div>
+                                <div className="flex flex-col items-start justify-center">
+                                    <span className="text-[15px] font-semibold text-gray-900 dark:text-white">
+                                        {userShop
+                                            ? currentLocale === 'kh'
+                                                ? 'ហាងរបស់ខ្ញុំ'
+                                                : 'My Shop'
+                                            : currentLocale === 'kh'
+                                              ? 'បង្កើតហាង'
+                                              : 'Create Shop'}
+                                    </span>
+                                    <span className="mt-0.5 text-[13px] text-gray-500 dark:text-gray-400">
+                                        {userShop
+                                            ? currentLocale === 'kh'
+                                                ? 'គ្រប់គ្រងហាងរបស់អ្នក'
+                                                : 'Manage your business profile'
+                                            : currentLocale === 'kh'
+                                              ? 'ចុះឈ្មោះហាងរបស់អ្នកនៅលើប្រព័ន្ធ'
+                                              : 'Register your business on the platform'}
+                                    </span>
+                                </div>
                             </div>
-                            <div className="flex flex-col items-start justify-center">
-                                <span className="text-[15px] font-semibold text-gray-900 dark:text-white">
-                                    {userGarage
-                                        ? currentLocale === 'kh'
-                                            ? 'យានដ្ឋានរបស់ខ្ញុំ'
-                                            : 'My Garage'
-                                        : currentLocale === 'kh'
-                                          ? 'បង្កើតយានដ្ឋាន'
-                                          : 'Create Garage'}
-                                </span>
-                                <span className="mt-0.5 text-[13px] text-gray-500 dark:text-gray-400">
-                                    {userGarage
-                                        ? currentLocale === 'kh'
-                                            ? 'គ្រប់គ្រងយានដ្ឋានរបស់អ្នក'
-                                            : 'Manage your garage profile'
-                                        : currentLocale === 'kh'
-                                          ? 'ចុះឈ្មោះយានដ្ឋានរបស់អ្នកនៅលើប្រព័ន្ធ'
-                                          : 'Register your garage on the platform'}
-                                </span>
+                            <ChevronRight className="h-5 w-5 text-gray-300 transition-transform group-hover:translate-x-0.5 dark:text-gray-600" />
+                        </Link>
+
+                        {/* 4. Garage Action (Create or View) */}
+                        <Link
+                            href={userGarage ? `/my-garage` : `/create-garage`}
+                            className="group flex w-full items-center justify-between bg-white p-4 transition-all hover:bg-gray-50 focus-visible:bg-gray-50 dark:border-white/10 dark:bg-[#101010] dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400">
+                                    {userGarage ? <Wrench className="h-6 w-6 stroke-[1.5px]" /> : <PlusCircle className="h-6 w-6 stroke-[1.5px]" />}
+                                </div>
+                                <div className="flex flex-col items-start justify-center">
+                                    <span className="text-[15px] font-semibold text-gray-900 dark:text-white">
+                                        {userGarage
+                                            ? currentLocale === 'kh'
+                                                ? 'យានដ្ឋានរបស់ខ្ញុំ'
+                                                : 'My Garage'
+                                            : currentLocale === 'kh'
+                                              ? 'បង្កើតយានដ្ឋាន'
+                                              : 'Create Garage'}
+                                    </span>
+                                    <span className="mt-0.5 text-[13px] text-gray-500 dark:text-gray-400">
+                                        {userGarage
+                                            ? currentLocale === 'kh'
+                                                ? 'គ្រប់គ្រងយានដ្ឋានរបស់អ្នក'
+                                                : 'Manage your garage profile'
+                                            : currentLocale === 'kh'
+                                              ? 'ចុះឈ្មោះយានដ្ឋានរបស់អ្នកនៅលើប្រព័ន្ធ'
+                                              : 'Register your garage on the platform'}
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                        <ChevronRight className="h-5 w-5 text-gray-300 transition-transform group-hover:translate-x-0.5 dark:text-gray-600" />
-                    </Link>
+                            <ChevronRight className="h-5 w-5 text-gray-300 transition-transform group-hover:translate-x-0.5 dark:text-gray-600" />
+                        </Link>
+                    </div>
                 </div>
                 {/* --- End Action Buttons Section --- */}
 

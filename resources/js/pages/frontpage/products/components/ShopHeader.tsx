@@ -1,9 +1,11 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import useTranslation from '@/hooks/use-translation';
-import { usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react'; // Added Link here
 import {
     CheckCircle2Icon,
     ChevronRightIcon,
+    Edit,
+    EyeIcon, // Added Edit icon
     ImageOff,
     InfoIcon,
     MapPin,
@@ -12,6 +14,9 @@ import {
     Phone,
     RotateCwSquareIcon,
     Store,
+    StoreIcon,
+    User,
+    UserIcon,
     ZoomInIcon,
     ZoomOutIcon,
 } from 'lucide-react';
@@ -74,17 +79,25 @@ const SafeImage = React.forwardRef<HTMLImageElement | HTMLDivElement, any>(
 );
 SafeImage.displayName = 'SafeImage';
 
-// --- 3. Main Component: Shop Header ---
+// --- 3. Main Component: Profile/Shop Header ---
 const ShopHeader = () => {
-    const { shop } = usePage<any>().props;
+    // 1. Extract the props from the backend
+    // isOwner is now provided directly by the server, so we just destructure it here
+    const { isShop, shop, targetUser, isOwner } = usePage<any>().props;
     const { t, currentLocale } = useTranslation() as any;
 
-    // Failsafe if shop data isn't loaded yet
-    if (!shop) return null;
+    // 2. Failsafe: if neither exists, don't render
+    const profile = isShop ? shop : targetUser;
+    if (!profile) return null;
 
-    const hasBanner = !!shop.banner;
-    const bannerPath = `/assets/images/shops/${shop.banner}`;
-    const logoPath = `/assets/images/shops/${shop.logo}`;
+    // 3. Dynamic Profile Mappings
+    const hasBanner = isShop && !!profile.banner;
+    const bannerPath = hasBanner ? `/assets/images/shops/${profile.banner}` : null;
+    const logoPath = isShop ? (profile.logo ? `/assets/images/shops/${profile.logo}` : null) : profile.avatar_url;
+
+    const profileName = isShop ? getLocalizedText(profile, 'name', currentLocale) : profile.name;
+    const profileAddress = isShop ? getLocalizedText(profile, 'address', currentLocale) : profile.address;
+    const isVerified = isShop ? profile.is_verified === 1 : false;
 
     const [isFullScreen, setIsFullScreen] = useState(false);
 
@@ -113,9 +126,9 @@ const ShopHeader = () => {
 
     const handleOpenMap = (lat?: any, lng?: any) => {
         if (lat && lng) {
-            window.open(`https://maps.google.com/?q=${lat},${lng}`, '_blank');
+            window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
         } else {
-            alert(t('Location coordinates not available for this shop.'));
+            alert(t('Location coordinates not available.'));
         }
     };
 
@@ -146,66 +159,123 @@ const ShopHeader = () => {
                 </div>
             )}
         >
+            {isOwner && (
+                <div className="bg-background sticky top-0 z-50">
+                    <div className="z-30 flex flex-col items-center justify-between gap-3 border-b border-emerald-500/20 bg-emerald-500/10 px-4 py-2.5 sm:flex-row sm:px-6 dark:bg-emerald-500/20">
+                        <div className="flex items-center gap-2 text-center text-sm font-semibold text-emerald-600 sm:text-left dark:text-emerald-400">
+                            {isShop ? <StoreIcon className="h-4 w-4 shrink-0" /> : <UserIcon className="h-4 w-4 shrink-0" />}
+                            <span>
+                                {isShop
+                                    ? currentLocale === 'kh'
+                                        ? 'សូមស្វាគមន៍! អ្នកកំពុងមើលហាងផ្ទាល់របស់អ្នក។'
+                                        : 'Welcome! You are currently viewing your own shop.'
+                                    : currentLocale === 'kh'
+                                      ? 'សូមស្វាគមន៍! អ្នកកំពុងមើលគណនីផ្ទាល់របស់អ្នក។'
+                                      : 'Welcome! You are currently viewing your own profile.'}
+                            </span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            <Link
+                                href={isShop ? `/shops/${profile?.id}` : `/users/${profile?.id}`}
+                                className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded bg-zinc-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-zinc-700 dark:bg-zinc-500 dark:hover:bg-zinc-600"
+                            >
+                                <EyeIcon className="h-3.5 w-3.5" />
+                                {currentLocale === 'kh' ? 'មើលជាសាធារណៈ' : 'Public View'}
+                            </Link>
+                            <Link
+                                href={isShop ? '/edit-shop' : '/user-settings/profile'}
+                                className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600"
+                            >
+                                <Edit className="h-3.5 w-3.5" />
+                                {isShop
+                                    ? currentLocale === 'kh'
+                                        ? 'កែប្រែហាង'
+                                        : 'Edit Shop'
+                                    : currentLocale === 'kh'
+                                      ? 'កែប្រែគណនី'
+                                      : 'Edit Profile'}
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="border-border bg-card relative mx-auto max-w-[2000px] overflow-hidden rounded-none shadow">
-                {/* Banner - Conditionally Rendered */}
-                {hasBanner && (
+                {/* Banner - Conditionally Rendered (Only for Shops) */}
+                {hasBanner && bannerPath && (
                     <div className="bg-muted relative z-10 h-64 w-full overflow-hidden lg:h-96">
                         <PhotoView src={bannerPath}>
-                            <SafeImage
-                                src={bannerPath}
-                                alt={`${getLocalizedText(shop, 'name', currentLocale)} Banner`}
-                                className="h-full w-full cursor-pointer object-cover"
-                            />
+                            <SafeImage src={bannerPath} alt={`${profileName} Banner`} className="h-full w-full cursor-pointer object-cover" />
                         </PhotoView>
-                        {/* Bottom-to-Top Gradient Overlay to blend banner with card background */}
                         <div className="from-card pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t to-transparent" />
                     </div>
                 )}
 
-                {/* Updated Row Layout */}
                 <div
                     className={`section-container relative z-20 flex flex-col items-center gap-5 p-6 sm:flex-row sm:items-start ${hasBanner ? '-mt-16 sm:-mt-20' : ''}`}
                 >
-                    {/* Logo Wrapper */}
-                    <div className="h-28 w-28 shrink-0">
-                        <div className="border-background bg-background relative h-full w-full overflow-hidden rounded-none border-4 shadow-md">
-                            {/* Decorative background icon placed behind the image */}
-                            <Store className="pointer-events-none absolute inset-0 z-0 m-auto h-8 w-8 text-blue-600/20" />
+                    {/* Logo/Avatar Wrapper */}
+                    <div className={`h-28 w-28 shrink-0 ${!isShop ? 'overflow-hidden rounded-full' : ''}`}>
+                        <div
+                            className={`border-background bg-background relative h-full w-full overflow-hidden border-4 shadow-md ${!isShop ? 'rounded-full' : 'rounded-none'}`}
+                        >
+                            {isShop ? (
+                                <Store className="pointer-events-none absolute inset-0 z-0 m-auto h-8 w-8 text-blue-600/20" />
+                            ) : (
+                                <User className="pointer-events-none absolute inset-0 z-0 m-auto h-8 w-8 text-blue-600/20" />
+                            )}
 
-                            {/* Image wrapper with relative z-10 to stay above the icon */}
                             <div className="relative z-10 h-full w-full">
-                                <PhotoView src={logoPath}>
-                                    <SafeImage
-                                        src={logoPath}
-                                        alt={`${getLocalizedText(shop, 'name', currentLocale)} Logo`}
-                                        className="h-full w-full cursor-pointer object-cover"
-                                    />
-                                </PhotoView>
+                                {logoPath ? (
+                                    <PhotoView src={logoPath}>
+                                        <SafeImage src={logoPath} alt={`${profileName} Logo`} className="h-full w-full cursor-pointer object-cover" />
+                                    </PhotoView>
+                                ) : (
+                                    <div className="flex h-full w-full items-center justify-center bg-gray-100 dark:bg-gray-800">
+                                        {isShop ? <Store className="h-8 w-8 text-gray-400" /> : <User className="h-8 w-8 text-gray-400" />}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
 
-                    {/* Shop Info & Triggers */}
+                    {/* Profile Info & Triggers */}
                     <div className="w-full flex-1 text-center sm:text-left">
                         <h1 className="flex flex-wrap items-center justify-center gap-2 text-2xl font-black tracking-tight sm:justify-start md:text-3xl">
-                            {getLocalizedText(shop, 'name', currentLocale)}
-                            {shop.is_verified === 1 && (
-                                <CheckCircle2Icon className="h-6 w-6 rounded-full bg-blue-500 text-white" aria-label="Verified Shop" />
-                            )}
+                            {profileName}
+                            {isVerified && <CheckCircle2Icon className="h-6 w-6 rounded-full bg-blue-500 text-white" aria-label="Verified Shop" />}
                         </h1>
 
-                        {/* Phone Number & Address Stack */}
-                        <div className="text-foreground mt-1.5 flex items-center justify-center gap-1.5 text-sm font-semibold sm:justify-start">
-                            <Phone className="h-4 w-4 text-blue-500" />
-                            <span>{shop.phone}</span>
+                        {/* Phone & Other Phones Display Under Name (Clickable Links) */}
+                        <div className="text-foreground mt-1.5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm font-semibold sm:justify-start">
+                            {profile.phone && (
+                                <a
+                                    href={`tel:${profile.phone}`}
+                                    className="flex items-center gap-1.5 transition-colors hover:text-blue-600 dark:hover:text-blue-400"
+                                >
+                                    <Phone className="h-4 w-4 text-blue-500" />
+                                    <span>{profile.phone}</span>
+                                </a>
+                            )}
+                            {profile.other_phones?.map((phone: any, idx: any) => (
+                                <a
+                                    key={idx}
+                                    href={`tel:${phone}`}
+                                    className="flex items-center gap-1.5 transition-colors hover:text-blue-600 dark:hover:text-blue-400"
+                                >
+                                    <Phone className="h-4 w-4 text-blue-500" />
+                                    <span>{phone}</span>
+                                </a>
+                            ))}
                         </div>
-                        <p className="text-muted-foreground mt-1 text-sm font-medium">{getLocalizedText(shop, 'address', currentLocale)}</p>
+
+                        {profileAddress && <p className="text-muted-foreground mt-1 text-sm font-medium">{profileAddress}</p>}
 
                         {/* Action Buttons Row */}
                         <div className="mt-3 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                             {/* Map Button */}
                             <button
-                                onClick={() => handleOpenMap(shop.latitude, shop.longitude)}
+                                onClick={() => handleOpenMap(profile.latitude, profile.longitude)}
                                 className="inline-flex items-center justify-center gap-1.5 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-semibold text-[#FF6D00] transition-colors hover:bg-orange-200 dark:bg-orange-500/10 dark:text-orange-500 dark:hover:bg-orange-500/20"
                             >
                                 <MapPin className="h-3.5 w-3.5" />
@@ -217,7 +287,7 @@ const ShopHeader = () => {
                                 <DialogTrigger asChild>
                                     <button className="inline-flex items-center justify-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-200 dark:bg-blue-500/10 dark:text-blue-500 dark:hover:bg-blue-500/20">
                                         <InfoIcon className="h-3.5 w-3.5" />
-                                        {t('Shop Details')}
+                                        {isShop ? t('Shop Details') : t('User Details')}
                                     </button>
                                 </DialogTrigger>
 
@@ -225,16 +295,16 @@ const ShopHeader = () => {
                                 <DialogContent className="sm:max-w-lg">
                                     <DialogHeader>
                                         <DialogTitle className="flex items-center gap-2 text-xl font-bold">
-                                            <Store className="h-5 w-5 text-blue-500" />
-                                            {getLocalizedText(shop, 'name', currentLocale)}
+                                            {isShop ? <Store className="h-5 w-5 text-blue-500" /> : <User className="h-5 w-5 text-blue-500" />}
+                                            {profileName}
                                         </DialogTitle>
                                     </DialogHeader>
 
                                     <div className="space-y-4 pt-4">
-                                        {shop.short_description && (
+                                        {profile.short_description && (
                                             <div className="bg-muted/50 rounded-lg p-4">
                                                 <p className="text-foreground text-sm leading-relaxed whitespace-pre-line">
-                                                    {getLocalizedText(shop, 'short_description', currentLocale)}
+                                                    {getLocalizedText(profile, 'short_description', currentLocale)}
                                                 </p>
                                             </div>
                                         )}
@@ -242,18 +312,22 @@ const ShopHeader = () => {
                                         <div className="grid gap-4">
                                             {/* Phones Block */}
                                             <div className="flex flex-col gap-2 rounded-lg border p-2 shadow-sm">
-                                                <button
-                                                    onClick={() => handleCallPhone(shop.phone)}
-                                                    className="group flex w-full cursor-pointer items-center justify-between rounded-md bg-gray-50 px-4 py-3 text-left transition-colors hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10"
-                                                >
-                                                    <div className="flex items-center gap-2">
-                                                        <Phone className="h-4 w-4 text-blue-500" />
-                                                        <span className="text-base font-medium text-gray-900 dark:text-white">{shop.phone}</span>
-                                                    </div>
-                                                    <ChevronRightIcon className="h-4 w-4 text-gray-400 transition-transform group-hover:translate-x-1" />
-                                                </button>
+                                                {profile.phone && (
+                                                    <button
+                                                        onClick={() => handleCallPhone(profile.phone)}
+                                                        className="group flex w-full cursor-pointer items-center justify-between rounded-md bg-gray-50 px-4 py-3 text-left transition-colors hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10"
+                                                    >
+                                                        <div className="flex items-center gap-2">
+                                                            <Phone className="h-4 w-4 text-blue-500" />
+                                                            <span className="text-base font-medium text-gray-900 dark:text-white">
+                                                                {profile.phone}
+                                                            </span>
+                                                        </div>
+                                                        <ChevronRightIcon className="h-4 w-4 text-gray-400 transition-transform group-hover:translate-x-1" />
+                                                    </button>
+                                                )}
 
-                                                {shop.other_phones?.map((phone: any, idx: any) => (
+                                                {profile.other_phones?.map((phone: any, idx: any) => (
                                                     <button
                                                         key={idx}
                                                         onClick={() => handleCallPhone(phone)}
@@ -269,23 +343,25 @@ const ShopHeader = () => {
                                             </div>
 
                                             {/* Address Block with Map Button */}
-                                            <div className="flex items-start gap-3 rounded-lg border p-3 shadow-sm">
-                                                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
-                                                <div className="flex w-full flex-col items-start">
-                                                    <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                                                        {t('Address')}
-                                                    </p>
-                                                    <p className="mt-1 text-sm font-medium">{getLocalizedText(shop, 'address', currentLocale)}</p>
+                                            {profileAddress && (
+                                                <div className="flex items-start gap-3 rounded-lg border p-3 shadow-sm">
+                                                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
+                                                    <div className="flex w-full flex-col items-start">
+                                                        <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                                                            {t('Address')}
+                                                        </p>
+                                                        <p className="mt-1 text-sm font-medium">{profileAddress}</p>
 
-                                                    <button
-                                                        onClick={() => handleOpenMap(shop.latitude, shop.longitude)}
-                                                        className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-semibold text-[#FF6D00] transition-colors hover:bg-orange-200 dark:bg-orange-500/10 dark:text-orange-500 dark:hover:bg-orange-500/20"
-                                                    >
-                                                        <MapPin className="h-3.5 w-3.5" />
-                                                        {t('Open In Google Map')}
-                                                    </button>
+                                                        <button
+                                                            onClick={() => handleOpenMap(profile.latitude, profile.longitude)}
+                                                            className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-semibold text-[#FF6D00] transition-colors hover:bg-orange-200 dark:bg-orange-500/10 dark:text-orange-500 dark:hover:bg-orange-500/20"
+                                                        >
+                                                            <MapPin className="h-3.5 w-3.5" />
+                                                            {t('Open In Google Map')}
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            )}
                                         </div>
                                     </div>
                                 </DialogContent>

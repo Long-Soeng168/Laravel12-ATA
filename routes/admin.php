@@ -16,7 +16,6 @@ use App\Http\Controllers\ItemBodyTypeController;
 use App\Http\Controllers\ItemBrandController;
 use App\Http\Controllers\ItemCategoryController;
 use App\Http\Controllers\ItemCategoryFieldController;
-use App\Http\Controllers\ItemCategoryFieldOpOptionController;
 use App\Http\Controllers\ItemCategoryFieldOptionController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ItemModelController;
@@ -75,6 +74,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('admin/items/images/{image}', [ItemController::class, 'destroy_image']);
     Route::get('admin/item_view_counts', [ItemController::class, 'item_view_counts']);
     Route::get('admin/item_view_counts/export', [ItemController::class, 'item_view_counts_export']);
+
+    Route::get('create-product', [ItemController::class, 'user_create_product']);
+    Route::get('edit-product/{item}', [ItemController::class, 'user_edit_product']);
 
     Route::resource('admin/item_colors', ItemColorController::class);
     Route::post('admin/item_colors/{item_colors}/update', [ItemColorController::class, 'update']);
@@ -180,6 +182,9 @@ Route::middleware('auth')->group(function () {
     Route::post('admin/shops/{shop}/update', [ShopController::class, 'update']);
     Route::get('admin/all_shops', [ShopController::class, 'all_shops']);
     Route::post('admin/shops/{shop}/update_status', [ShopController::class, 'update_status']);
+
+    Route::get('/create-shop', [ShopController::class, 'user_create_shop']);
+    Route::get('/edit-shop', [ShopController::class, 'user_edit_shop']);
     // Garage Route
     Route::resource('admin/garages', GarageController::class);
     Route::post('admin/garages/{garage}/update', [GarageController::class, 'update']);

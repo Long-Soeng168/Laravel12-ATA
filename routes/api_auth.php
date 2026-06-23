@@ -9,8 +9,6 @@ Route::get('/test-api-auth', function (Request $request) {
     return 'Working';
 });
 
-
-
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 

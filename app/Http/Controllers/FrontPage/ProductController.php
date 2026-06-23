@@ -13,6 +13,7 @@ use App\Models\ItemDailyView;
 use App\Models\Province;
 use App\Models\Shop;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class ProductController extends Controller
@@ -255,7 +256,7 @@ class ProductController extends Controller
         ]);
     }
 
-    public function show($id)
+    public function show($id, Request $request)
     {
         // 1. Fetch Main Item
         $itemShow = Item::with([
@@ -267,6 +268,16 @@ class ProductController extends Controller
             'owner',
             'category.fields.options'
         ])->findOrFail($id);
+
+        // --- Determine Ownership ---
+        $isOwner = false;
+        // Only check ownership if the route starts with 'your-products'
+        if ($request->is('your-products*')) {
+            $user = Auth::user();
+            if ($user) {
+                $isOwner = ($user->id == $itemShow->user_id) || ($itemShow->shop_id && $user->shop_id == $itemShow->shop_id);
+            }
+        }
 
         // 2. View Tracking
         $date = now()->toDateString();
@@ -350,69 +361,73 @@ class ProductController extends Controller
                 : null;
         }
 
-        // 4. Fetch Related Items
-        $query = Item::with(['category', 'images'])
-            ->where('id', '!=', $itemShow->id)
-            ->where('status', 'active')
-            ->where(function ($q) use ($itemShow) {
-                if ($itemShow->category_code) {
-                    $q->orWhere('category_code', $itemShow->category_code);
+        // 4. Fetch Related Items (Skipped if isOwner is true)
+        $relatedItems = collect(); // Default to an empty collection
+
+        if (!$isOwner) {
+            $query = Item::with(['category', 'images'])
+                ->where('id', '!=', $itemShow->id)
+                ->where('status', 'active')
+                ->where(function ($q) use ($itemShow) {
+                    if ($itemShow->category_code) {
+                        $q->orWhere('category_code', $itemShow->category_code);
+                    }
+                    if ($itemShow->brand_code) {
+                        $q->orWhere('brand_code', $itemShow->brand_code);
+                    }
+                    if ($itemShow->model_code) {
+                        $q->orWhere('model_code', $itemShow->model_code);
+                    }
+                });
+
+            $relatedItems = $query->orderByDesc('id')->take(10)->get();
+
+            $categoryIds = $relatedItems->pluck('category.id')->filter()->unique();
+            $categoryMaps = ItemCategoryField::whereIn('category_id', $categoryIds)
+                ->with('options')
+                ->get()
+                ->groupBy('category_id');
+
+            $relatedItems->transform(function (Item $item) use ($categoryMaps) {
+                $firstImage = $item->images->first();
+
+                $item->image_url = $firstImage
+                    ? asset('assets/images/items/' . $firstImage->image)
+                    : asset('assets/images/placeholder.webp');
+
+                $item->total_images = $item->images->count();
+
+                $item->thumbnail_image = $firstImage ? [
+                    'id' => $firstImage->id,
+                    'image' => $firstImage->image,
+                    'image_url' => asset('assets/images/items/' . $firstImage->image),
+                ] : null;
+
+                $categoryId = $item->category?->id;
+                $fields = $categoryMaps->get($categoryId);
+                $displayAttributes = [];
+
+                if ($fields && is_array($item->attributes)) {
+                    foreach ($item->attributes as $key => $storedValue) {
+                        $field = $fields->where('field_key', $key)->first();
+                        $option = $field ? $field->options->where('option_value', $storedValue)->first() : null;
+
+                        $displayAttributes[$key] = [
+                            'label' => $field->label ?? $key,
+                            'label_kh' => $field->label_kh ?? $key,
+                            'value' => $storedValue,
+                            'value_label_en' => $option->label_en ?? $storedValue,
+                            'value_label_kh' => $option->label_kh ?? $storedValue,
+                        ];
+                    }
                 }
-                if ($itemShow->brand_code) {
-                    $q->orWhere('brand_code', $itemShow->brand_code);
-                }
-                if ($itemShow->model_code) {
-                    $q->orWhere('model_code', $itemShow->model_code);
-                }
+
+                $item->display_attributes = $displayAttributes;
+                $item->makeHidden(['images', 'category']);
+
+                return $item;
             });
-
-        $relatedItems = $query->orderByDesc('id')->take(10)->get();
-
-        $categoryIds = $relatedItems->pluck('category.id')->filter()->unique();
-        $categoryMaps = ItemCategoryField::whereIn('category_id', $categoryIds)
-            ->with('options')
-            ->get()
-            ->groupBy('category_id');
-
-        $relatedItems->transform(function (Item $item) use ($categoryMaps) {
-            $firstImage = $item->images->first();
-
-            $item->image_url = $firstImage
-                ? asset('assets/images/items/' . $firstImage->image)
-                : asset('assets/images/placeholder.webp');
-
-            $item->total_images = $item->images->count();
-
-            $item->thumbnail_image = $firstImage ? [
-                'id' => $firstImage->id,
-                'image' => $firstImage->image,
-                'image_url' => asset('assets/images/items/' . $firstImage->image),
-            ] : null;
-
-            $categoryId = $item->category?->id;
-            $fields = $categoryMaps->get($categoryId);
-            $displayAttributes = [];
-
-            if ($fields && is_array($item->attributes)) {
-                foreach ($item->attributes as $key => $storedValue) {
-                    $field = $fields->where('field_key', $key)->first();
-                    $option = $field ? $field->options->where('option_value', $storedValue)->first() : null;
-
-                    $displayAttributes[$key] = [
-                        'label' => $field->label ?? $key,
-                        'label_kh' => $field->label_kh ?? $key,
-                        'value' => $storedValue,
-                        'value_label_en' => $option->label_en ?? $storedValue,
-                        'value_label_kh' => $option->label_kh ?? $storedValue,
-                    ];
-                }
-            }
-
-            $item->display_attributes = $displayAttributes;
-            $item->makeHidden(['images', 'category']);
-
-            return $item;
-        });
+        }
 
         // 5. Generate Dynamic Meta Data
         // Adjust 'name' or 'title' based on your actual database column for the item
@@ -428,14 +443,10 @@ class ProductController extends Controller
             ? $formattedItem['images'][0]['url']
             : asset('icon512_maskable.png');
 
-
-        // return [
-        //     "itemShow" => $formattedItem,
-        //     'relatedItems' => $relatedItems,
-        // ];
-        // 5. Return to Inertia
+        // 6. Return to Inertia
         return Inertia::render("frontpage/products/Show", [
             "itemShow" => $formattedItem,
+            "isOwner" => $isOwner,
             'relatedItems' => $relatedItems,
         ])->withViewData([
             'meta' => [

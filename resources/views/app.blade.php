@@ -7,7 +7,7 @@
 
     <title>{{ $meta['title'] ?? 'A-Tech Auto' }}</title>
     <meta name="description" content="{{ $meta['description'] ?? 'A-Tech Auto is the all-in-one automotive platform. Buy & sell cars or spare-parts, locate garages & EV stations, find DTC errors, access repair documents, and learn through our video tutorials and in-person courses.' }}">
-    <meta name="keywords" content="{{ $meta['keywords'] ?? 'A-Tech Auto, ATA, automotive platform Cambodia, buy and sell cars, auto spare parts, locate garages Cambodia, EV charging stations, DTC error codes, OBD2 diagnostics, auto repair manuals, automotive video tutorials, mechanic courses' }}">
+    <meta name="keywords" content="{{ $meta['keywords'] ?? 'A-Tech Auto, ATech Auto, atech auto, ATA, ata, automotive platform Cambodia, buy and sell cars, auto spare parts, locate garages Cambodia, EV charging stations, DTC error codes, OBD2 diagnostics, auto repair manuals, automotive video tutorials, mechanic courses' }}">
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content="{{ $meta['title'] ?? 'A-Tech Auto' }}" />

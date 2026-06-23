@@ -1,5 +1,5 @@
 import useTranslation from '@/hooks/use-translation';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Image as ImageIcon, Truck } from 'lucide-react';
 import { useState } from 'react';
 
@@ -9,6 +9,7 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ item }: ProductCardProps) => {
+    const { isOwner } = usePage<any>().props;
     const { t, currentLocale } = useTranslation();
     const isKm = currentLocale === 'kh';
 
@@ -43,7 +44,7 @@ const ProductCard = ({ item }: ProductCardProps) => {
 
     return (
         <Link
-            href={`/products/${item.id}`}
+            href={isOwner ? `/your-products/${item.id}` : `/products/${item.id}`}
             className="flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-transparent bg-white shadow-sm ring-[#FF6D00] transition-all duration-300 hover:scale-[1.02] hover:shadow-md hover:ring focus:scale-95 dark:border-white/15 dark:bg-gray-900"
         >
             {/* Image Container: flex-1 ensures it expands */}
