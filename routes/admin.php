@@ -202,6 +202,9 @@ Route::middleware('auth')->group(function () {
     Route::get('admin/garage_post_view_counts', [PostViewController::class, 'index']);
     Route::get('admin/garage_post_view_counts/export', [PostViewController::class, 'export']);
 
+    Route::get('/garage-posts/create', [GaragePostController::class, 'user_create_garage_post']);
+    Route::get('/garage-posts/{id}/edit', [GaragePostController::class, 'user_edit_garage_post']);
+
     // Project Route
     Route::resource('admin/projects', ProjectController::class);
     Route::post('admin/projects/{project}/update', [ProjectController::class, 'update']);

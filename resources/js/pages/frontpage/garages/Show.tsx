@@ -1,7 +1,22 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import useTranslation from '@/hooks/use-translation';
 import { usePage } from '@inertiajs/react';
-import { Camera, ChevronRightIcon, Clock, ImageOff, MapIcon, MapPin, NavigationIcon, Phone, Store, XIcon } from 'lucide-react';
+import {
+    Camera,
+    CheckCircleIcon,
+    ChevronRightIcon,
+    Clock,
+    EditIcon,
+    ImageOff,
+    MapIcon,
+    MapPin,
+    NavigationIcon,
+    Phone,
+    Store,
+    Trash2Icon,
+    XIcon,
+} from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import 'react-photo-view/dist/react-photo-view.css';
 import FrontPageLayout from '../layouts/frontpage-layout';
@@ -200,6 +215,7 @@ const PostCard: React.FC<any> = ({ post, onViewDetails }) => {
 const DetailModal: React.FC<any> = ({ post, onClose }) => {
     const { t, currentLocale } = useTranslation() as any;
     const [activeImage, setActiveImage] = useState<any>('');
+    const { isOwner } = usePage<any>().props;
 
     useEffect(() => {
         if (post) {
@@ -215,16 +231,37 @@ const DetailModal: React.FC<any> = ({ post, onClose }) => {
             <DialogContent className="max-w-3xl border-none p-0 shadow-2xl sm:max-w-4xl sm:rounded-[2rem] [&>button]:hidden">
                 <div className="bg-background flex max-h-[90vh] w-full flex-col overflow-y-auto [scrollbar-width:thin]">
                     {/* Floating Glass Close Button - Light Themed */}
-                    <button
-                        onClick={onClose}
-                        className="bg-background/60 text-foreground hover:bg-background absolute top-4 right-4 z-50 flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 hover:scale-105 sm:top-5 sm:right-5"
-                        aria-label={t('Close modal')}
-                    >
-                        <XIcon className="h-5 w-5" />
-                    </button>
+                    {/* Owner Actions (Edit / Delete) */}
+                    <div className="absolute top-4 right-4 z-50 flex items-center gap-2 sm:top-5 sm:right-5">
+                        {isOwner && (
+                            <>
+                                <button
+                                    onClick={() => console.log('Delete post', post.id)}
+                                    className="bg-background/60 hover:bg-background flex h-10 w-10 items-center justify-center rounded-full text-red-600 backdrop-blur-md transition-all duration-300 hover:scale-105"
+                                    aria-label={t('Delete')}
+                                >
+                                    <Trash2Icon className="h-5 w-5" />
+                                </button>
+                                <button
+                                    onClick={() => console.log('Edit post', post.id)}
+                                    className="bg-background/60 text-foreground hover:bg-background flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 hover:scale-105"
+                                    aria-label={t('Edit')}
+                                >
+                                    <EditIcon className="h-5 w-5" />
+                                </button>
+                            </>
+                        )}
+                        <button
+                            onClick={onClose}
+                            className="bg-background/60 text-foreground hover:bg-background flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 hover:scale-105"
+                            aria-label={t('Close modal')}
+                        >
+                            <XIcon className="h-5 w-5" />
+                        </button>
+                    </div>
 
                     {/* TOP STACK: High-End Light Image Viewer */}
-                    <div className="bg-background flex w-full flex-col">
+                    <div className="bg-background flex w-full flex-col border-b">
                         {/* Main Image Area */}
                         <div className="relative flex h-[300px] w-full items-center justify-center sm:h-[400px] md:h-[500px]">
                             <SafeImage
@@ -267,6 +304,7 @@ const DetailModal: React.FC<any> = ({ post, onClose }) => {
                                 </DialogTitle>
                             </DialogHeader>
 
+                            {/* Description (Fixed: Removed isOwner requirement so the public can see it) */}
                             {post.short_description && (
                                 <DialogDescription className="text-muted-foreground/90 text-base leading-relaxed whitespace-pre-line sm:text-lg">
                                     {getLocalizedText(post, 'short_description', currentLocale)}
@@ -282,22 +320,77 @@ const DetailModal: React.FC<any> = ({ post, onClose }) => {
 
 // --- 7. Main Structural Scaffold ---
 const Show: React.FC<any> = () => {
-    const { t } = useTranslation() as any;
-    const { tableData, garage } = usePage<any>().props;
+    const { t, currentLocale } = useTranslation() as any;
+
+    // Extract full props to access flash and wipe it cleanly later
+    const { props } = usePage<any>();
+    const { tableData, garage } = props;
+    const flash = props.flash;
+
     const [selectedPost, setSelectedPost] = useState<any>(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     const posts = tableData?.data || [];
 
+    // Automatically open the dialog if there's a flash success message
+    useEffect(() => {
+        if (flash?.success) {
+            setIsDialogOpen(true);
+        }
+    }, [flash?.success]);
+
+    // Handle closing the dialog and clearing the flash state
+    const handleDialogChange = (open: boolean) => {
+        setIsDialogOpen(open);
+        if (!open) {
+            // 1. Clear the flash message from the current page props directly
+            if (props.flash) {
+                props.flash.success = null;
+            }
+
+            // 2. Clear it from the browser's history cache so it doesn't restore on "Back"
+            const state = window.history.state;
+            if (state?.page?.props?.flash) {
+                state.page.props.flash.success = null;
+                window.history.replaceState(state, '', window.location.href);
+            }
+        }
+    };
+
     return (
         <FrontPageLayout>
+            {/* shadcn Dialog for Success Message */}
+            <Dialog open={isDialogOpen} onOpenChange={handleDialogChange}>
+                <DialogContent className="rounded-none border border-t-4 border-gray-200 border-t-green-600 bg-white/95 p-0 shadow-none sm:max-w-sm dark:border-gray-800 dark:border-t-green-500 dark:bg-gray-900/95">
+                    <DialogHeader className="space-y-2 p-4 pt-5 text-start">
+                        <DialogTitle className="flex items-center gap-2 text-xl font-semibold text-green-600 dark:text-green-500">
+                            <CheckCircleIcon className="h-6 w-6" />
+                            <span>{currentLocale == 'kh' ? 'ជោគជ័យ!' : 'Success!'}</span>
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-gray-700 dark:text-gray-300">{t(flash?.success)}</DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="flex justify-start p-4 pt-0">
+                        <Button
+                            type="button"
+                            variant="default"
+                            onClick={() => handleDialogChange(false)}
+                            className="rounded-none bg-green-600 px-6 text-white shadow-none hover:bg-green-700 dark:hover:bg-green-600"
+                        >
+                            {currentLocale == 'kh' ? 'យល់ព្រម' : 'OK'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
             <GarageHeader />
+
             <div className="section-container mb-14 scroll-mt-[100px] pt-6" id="contents">
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                     <aside className="lg:col-span-1">
                         <ContactSidebar garage={garage} />
                     </aside>
 
-                    <main className="lg:col-span-2">
+                    <main className="lg:col-span-2" id="posts">
                         <h2 className="text-foreground mb-6 text-lg font-semibold">{t('Recent Posts')}</h2>
                         {posts.length > 0 ? (
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">

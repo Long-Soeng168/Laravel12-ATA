@@ -1,3 +1,4 @@
+import SubmitButton from '@/components/Button/SubmitButton';
 import DeleteButton from '@/components/delete-button';
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,7 @@ import useTranslation from '@/hooks/use-translation';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm as inertiaUseForm, usePage } from '@inertiajs/react';
-import { Check, ChevronsUpDown, CloudUpload, Loader } from 'lucide-react';
+import { Check, ChevronsUpDown, CloudUpload } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -114,79 +115,81 @@ export default function CreateForm() {
         <>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-5">
-                    <FormField
-                        control={form.control}
-                        name="garage_id"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-col" key={field.value}>
-                                <FormLabel>{t('Garage')}</FormLabel>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <FormControl>
-                                            <Button
-                                                variant="outline"
-                                                role="combobox"
-                                                className={cn('w-full justify-between', !field.value && 'text-muted-foreground')}
-                                            >
-                                                {field.value
-                                                    ? (() => {
-                                                          const garage = allGarages?.find((garage: any) => garage.id == field.value);
-                                                          return garage ? `${garage.name}` : '';
-                                                      })()
-                                                    : t('Select')}
+                    {allGarages?.length > 0 && (
+                        <FormField
+                            control={form.control}
+                            name="garage_id"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col" key={field.value}>
+                                    <FormLabel>{t('Garage')}</FormLabel>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <FormControl>
+                                                <Button
+                                                    variant="outline"
+                                                    role="combobox"
+                                                    className={cn('w-full justify-between', !field.value && 'text-muted-foreground')}
+                                                >
+                                                    {field.value
+                                                        ? (() => {
+                                                              const garage = allGarages?.find((garage: any) => garage.id == field.value);
+                                                              return garage ? `${garage.name}` : '';
+                                                          })()
+                                                        : t('Select')}
 
-                                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                            </Button>
-                                        </FormControl>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="p-0">
-                                        <Command>
-                                            <CommandInput placeholder={t('Search')} />
-                                            <CommandList>
-                                                <CommandEmpty>{t('No data')}</CommandEmpty>
-                                                <CommandGroup>
-                                                    <CommandItem
-                                                        value=""
-                                                        onSelect={() => {
-                                                            form.setValue('garage_id', '');
-                                                        }}
-                                                    >
-                                                        <Check className={cn('mr-2 h-4 w-4', '' == field.value ? 'opacity-100' : 'opacity-0')} />
-                                                        {t('Select garage')}
-                                                    </CommandItem>
-                                                    {allGarages?.map((garageObject: any) => (
+                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                </Button>
+                                            </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="p-0">
+                                            <Command>
+                                                <CommandInput placeholder={t('Search')} />
+                                                <CommandList>
+                                                    <CommandEmpty>{t('No data')}</CommandEmpty>
+                                                    <CommandGroup>
                                                         <CommandItem
-                                                            value={garageObject.name}
-                                                            key={garageObject.id}
+                                                            value=""
                                                             onSelect={() => {
-                                                                form.setValue('garage_id', garageObject.id?.toString());
+                                                                form.setValue('garage_id', '');
                                                             }}
                                                         >
-                                                            <Check
-                                                                className={cn(
-                                                                    'mr-2 h-4 w-4',
-                                                                    garageObject.id === field.value ? 'opacity-100' : 'opacity-0',
-                                                                )}
-                                                            />
-                                                            {garageObject.logo && (
-                                                                <img
-                                                                    className="size-6 object-contain"
-                                                                    src={`/assets/images/garages/thumb/${garageObject.logo}`}
-                                                                />
-                                                            )}
-                                                            {garageObject.name}
+                                                            <Check className={cn('mr-2 h-4 w-4', '' == field.value ? 'opacity-100' : 'opacity-0')} />
+                                                            {t('Select garage')}
                                                         </CommandItem>
-                                                    ))}
-                                                </CommandGroup>
-                                            </CommandList>
-                                        </Command>
-                                    </PopoverContent>
-                                </Popover>
-                                <FormDescription>{t('Select the garage where this post belongs.')}</FormDescription>
-                                <FormMessage>{errors.garage_id && <div>{errors.garage_id as string}</div>}</FormMessage>
-                            </FormItem>
-                        )}
-                    />
+                                                        {allGarages?.map((garageObject: any) => (
+                                                            <CommandItem
+                                                                value={garageObject.name}
+                                                                key={garageObject.id}
+                                                                onSelect={() => {
+                                                                    form.setValue('garage_id', garageObject.id?.toString());
+                                                                }}
+                                                            >
+                                                                <Check
+                                                                    className={cn(
+                                                                        'mr-2 h-4 w-4',
+                                                                        garageObject.id === field.value ? 'opacity-100' : 'opacity-0',
+                                                                    )}
+                                                                />
+                                                                {garageObject.logo && (
+                                                                    <img
+                                                                        className="size-6 object-contain"
+                                                                        src={`/assets/images/garages/thumb/${garageObject.logo}`}
+                                                                    />
+                                                                )}
+                                                                {garageObject.name}
+                                                            </CommandItem>
+                                                        ))}
+                                                    </CommandGroup>
+                                                </CommandList>
+                                            </Command>
+                                        </PopoverContent>
+                                    </Popover>
+                                    <FormDescription>{t('Select the garage where this post belongs.')}</FormDescription>
+                                    <FormMessage>{errors.garage_id && <div>{errors.garage_id as string}</div>}</FormMessage>
+                                </FormItem>
+                            )}
+                        />
+                    )}
 
                     <FormField
                         control={form.control}
@@ -278,16 +281,7 @@ export default function CreateForm() {
 
                     {progress && <ProgressWithValue value={progress.percentage} position="start" />}
 
-                    {!readOnly && (
-                        <Button disabled={processing} type="submit">
-                            {processing && (
-                                <span className="size-6 animate-spin">
-                                    <Loader />
-                                </span>
-                            )}
-                            {processing ? t('Submitting') : t('Submit')}
-                        </Button>
-                    )}
+                    {!readOnly && <SubmitButton processing={processing} />}
                 </form>
             </Form>
         </>

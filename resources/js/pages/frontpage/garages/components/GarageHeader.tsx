@@ -5,13 +5,13 @@ import {
     CheckCircle2Icon,
     ChevronRightIcon,
     Edit,
-    EyeIcon,
     ImageOff,
     InfoIcon,
     MapPin,
     Maximize2Icon,
     Minimize2Icon,
     Phone,
+    PlusCircleIcon,
     RotateCwSquareIcon,
     Warehouse, // Garage-specific icon
     Wrench, // Garage-specific icon
@@ -169,11 +169,11 @@ const GarageHeader = () => {
                         </div>
                         <div className="flex flex-wrap gap-2">
                             <Link
-                                href={`/garages/${garage?.id}`}
+                                href="/garage-posts/create" // <-- Update this to your actual create post route
                                 className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded bg-zinc-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-zinc-700 dark:bg-zinc-500 dark:hover:bg-zinc-600"
                             >
-                                <EyeIcon className="h-3.5 w-3.5" />
-                                {currentLocale === 'kh' ? 'មើលជាសាធារណៈ' : 'Public View'}
+                                <PlusCircleIcon className="h-3.5 w-3.5" />
+                                {currentLocale === 'kh' ? 'បង្កើតការបង្ហោះ' : 'Create Post'}
                             </Link>
                             <Link
                                 href="/edit-garage"

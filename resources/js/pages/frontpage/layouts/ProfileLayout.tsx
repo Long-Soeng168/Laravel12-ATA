@@ -15,7 +15,7 @@ const ProfileLayout = ({ children }: ProfileLayoutProps) => {
     // const hideBottomNav = url.startsWith('/student-register') || url.startsWith('/login');
 
     return (
-        <div className="flex min-h-screen flex-col bg-gray-50 font-sans text-gray-900 dark:bg-white/5 dark:text-gray-100">
+        <div className="bg-background flex min-h-screen flex-col font-sans text-gray-900 dark:bg-white/5 dark:text-gray-100">
             {/* --- Header Section --- */}
             <ProfileLayoutHeader />
 
