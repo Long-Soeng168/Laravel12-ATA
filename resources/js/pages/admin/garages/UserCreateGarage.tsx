@@ -4,7 +4,7 @@ import { usePage } from '@inertiajs/react';
 import { ArrowLeftIcon } from 'lucide-react';
 import CreateForm from './CreateForm';
 
-export default function UserCreateShop() {
+export default function UserCreateGarage() {
     const { t, currentLocale } = useTranslation();
     const { editData } = usePage<any>().props;
 
@@ -24,7 +24,7 @@ export default function UserCreateShop() {
                             <ArrowLeftIcon className="h-[20px] w-[20px] stroke-[2px] duration-200" />
                         </button>
                         <h1 className="text-[28px] font-semibold tracking-tight text-gray-900 dark:text-white">
-                            {editData ? (isKh ? 'កែប្រែហាង' : 'Edit Shop') : isKh ? 'បង្កើតហាង' : 'Create Shop'}
+                            {editData ? (isKh ? 'កែប្រែយានដ្ឋាន' : 'Edit Garage') : isKh ? 'បង្កើតយានដ្ឋាន' : 'Create Garage'}
                         </h1>
                     </header>
                     <CreateForm />

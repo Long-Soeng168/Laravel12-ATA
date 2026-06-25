@@ -1,28 +1,11 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import useTranslation from '@/hooks/use-translation';
 import { usePage } from '@inertiajs/react';
-import {
-    Camera,
-    CheckCircle2Icon,
-    ChevronRightIcon,
-    Clock,
-    ImageOff,
-    MapIcon,
-    MapPin,
-    Maximize2Icon,
-    Minimize2Icon,
-    NavigationIcon,
-    Phone,
-    RotateCwSquareIcon,
-    Store,
-    XIcon,
-    ZoomInIcon,
-    ZoomOutIcon,
-} from 'lucide-react';
+import { Camera, ChevronRightIcon, Clock, ImageOff, MapIcon, MapPin, NavigationIcon, Phone, Store, XIcon } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
-import { PhotoProvider, PhotoView } from 'react-photo-view';
 import 'react-photo-view/dist/react-photo-view.css';
 import FrontPageLayout from '../layouts/frontpage-layout';
+import GarageHeader from './components/GarageHeader';
 
 // --- 1. Localization Helper ---
 const getLocalizedText = (item: any, key: any, currentLocale: any): any => {
@@ -78,114 +61,6 @@ const SafeImage = React.forwardRef<HTMLImageElement | HTMLDivElement, any>(
     },
 );
 SafeImage.displayName = 'SafeImage';
-
-// --- 3. Sub-Component: Garage Header Layout ---
-const GarageHeader: React.FC<any> = ({ garage }) => {
-    const { t, currentLocale } = useTranslation() as any;
-    const bannerPath = `/assets/images/garages/${garage.banner}`;
-    const logoPath = `/assets/images/garages/${garage.logo}`;
-
-    const [isFullScreen, setIsFullScreen] = useState(false);
-
-    const toggleFullScreen = () => {
-        const doc = document;
-        const el = doc.documentElement;
-        if (!doc.fullscreenElement) {
-            el.requestFullscreen()
-                .then(() => setIsFullScreen(true))
-                .catch(() => {});
-        } else {
-            doc.exitFullscreen()
-                .then(() => setIsFullScreen(false))
-                .catch(() => {});
-        }
-    };
-
-    const handleVisibleChange = (visible: boolean) => {
-        if (!visible && document.fullscreenElement) {
-            document
-                .exitFullscreen()
-                .then(() => setIsFullScreen(false))
-                .catch(() => {});
-        }
-    };
-
-    const handleOpenMap = (lat?: any, lng?: any) => {
-        if (lat && lng) {
-            window.open(`https://maps.google.com/?q=${lat},${lng}`, '_blank');
-        } else {
-            alert(t('Location coordinates not available for this garage.'));
-        }
-    };
-
-    return (
-        <PhotoProvider
-            onVisibleChange={handleVisibleChange}
-            maskOpacity={0.9}
-            toolbarRender={({ scale, onScale, rotate, onRotate }) => (
-                <div className="mx-2 flex h-[44px] items-center gap-2 rounded-md bg-black/50 px-2">
-                    <button onClick={() => onScale(scale + 0.25)} className="rounded bg-white/15 p-2 transition-colors hover:bg-white/20">
-                        <ZoomInIcon size={16} className="text-white" />
-                    </button>
-                    <button onClick={() => onScale(scale - 0.25)} className="rounded bg-white/15 p-2 transition-colors hover:bg-white/20">
-                        <ZoomOutIcon size={16} className="text-white" />
-                    </button>
-                    <button onClick={() => onRotate(rotate + 90)} className="rounded bg-white/15 p-2 transition-colors hover:bg-white/20">
-                        <RotateCwSquareIcon size={16} className="text-white" />
-                    </button>
-                    <button onClick={toggleFullScreen} className="rounded bg-white/15 p-2 transition-colors hover:bg-white/20">
-                        {isFullScreen ? <Minimize2Icon size={16} className="text-white" /> : <Maximize2Icon size={16} className="text-white" />}
-                    </button>
-                </div>
-            )}
-        >
-            <div className="border-border bg-card relative mb-8 overflow-hidden rounded-none shadow">
-                <div className="bg-muted relative h-64 w-full overflow-hidden lg:h-96">
-                    <PhotoView src={bannerPath}>
-                        <SafeImage
-                            src={bannerPath}
-                            alt={`${getLocalizedText(garage, 'name', currentLocale)} Banner`}
-                            className="h-full w-full cursor-pointer object-cover"
-                        />
-                    </PhotoView>
-                </div>
-
-                <div className="flex flex-col items-center gap-5 p-6 sm:flex-row sm:items-end">
-                    <div className="border-background bg-background relative -mt-16 h-28 w-28 shrink-0 overflow-hidden rounded-none border-4 shadow-md sm:-mt-20">
-                        <PhotoView src={logoPath}>
-                            <SafeImage
-                                src={logoPath}
-                                alt={`${getLocalizedText(garage, 'name', currentLocale)} Logo`}
-                                className="h-full w-full cursor-pointer object-cover"
-                            />
-                        </PhotoView>
-                        {/* pointer-events-none ensures the Store icon doesn't block the user's click */}
-                        <Store className="pointer-events-none absolute inset-0 m-auto h-8 w-8 text-orange-600/10 mix-blend-multiply" />
-                    </div>
-
-                    <div className="mb-2 text-center sm:text-left">
-                        <h1 className="flex flex-wrap items-center justify-center gap-2 text-2xl font-black tracking-tight sm:justify-start md:text-3xl">
-                            {getLocalizedText(garage, 'name', currentLocale)}
-                            {garage.is_verified === 1 && (
-                                <CheckCircle2Icon className="h-6 w-6 rounded-full bg-blue-500 text-white" aria-label="Verified Garage" />
-                            )}
-                        </h1>
-                        <p className="text-muted-foreground mt-1 text-sm font-medium">{getLocalizedText(garage, 'address', currentLocale)}</p>
-
-                        {/* MAP LINK BUTTON ADDED HERE */}
-                        <button
-                            onClick={() => handleOpenMap(garage.latitude, garage.longitude)}
-                            className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-semibold text-[#FF6D00] transition-colors hover:bg-orange-200 dark:bg-orange-500/10 dark:text-orange-500 dark:hover:bg-orange-500/20"
-                        >
-                            <MapPin className="h-3.5 w-3.5" />
-                            {t('Open In Google Map')}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </PhotoProvider>
-    );
-};
 
 // --- 4. Sub-Component: Contact Sidebar ---
 const ContactSidebar: React.FC<any> = ({ garage }) => {
@@ -415,9 +290,8 @@ const Show: React.FC<any> = () => {
 
     return (
         <FrontPageLayout>
-            <div className="section-container pb-20">
-                <GarageHeader garage={garage} />
-
+            <GarageHeader />
+            <div className="section-container mb-14 scroll-mt-[100px] pt-6" id="contents">
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                     <aside className="lg:col-span-1">
                         <ContactSidebar garage={garage} />

@@ -23,8 +23,8 @@ class ShopController extends Controller implements HasMiddleware
     {
         return [
             new Middleware('permission:shop view', only: ['index', 'show', 'all_shops']),
-            new Middleware('permission:shop create', only: ['create', 'store']),
-            new Middleware('permission:shop update', only: ['edit', 'update', 'update_status']),
+            new Middleware('permission:shop create', only: ['create']),
+            new Middleware('permission:shop update', only: ['edit', 'update_status']),
             new Middleware('permission:shop delete', only: ['destroy', 'destroy_image']),
         ];
     }
@@ -152,7 +152,6 @@ class ShopController extends Controller implements HasMiddleware
      */
     public function store(Request $request)
     {
-        // dd($request->all());
         $validated = $request->validate([
             'owner_user_id' => 'nullable|exists:users,id',
             'name' => 'required|string|max:255',
@@ -161,15 +160,15 @@ class ShopController extends Controller implements HasMiddleware
             'other_phones.*' => [
                 'nullable',
                 'string',
-                'regex:/^(0|\+855)(\d{8,9})$/', // Validates Khmer format for each entry
+                'regex:/^(0|\+855)(\d{8,9})$/',
             ],
             'short_description' => 'nullable|string|max:1000',
             'short_description_kh' => 'nullable|string|max:1000',
             'order_index' => 'nullable|numeric',
             'expired_at' => 'nullable|date',
             'status' => 'nullable|string|in:pending,approved,suspended,rejected',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
-            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'banner' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'is_verified' => 'nullable|boolean',
             'address' => 'nullable|string|max:255',
             'location' => 'nullable|string',
@@ -179,15 +178,14 @@ class ShopController extends Controller implements HasMiddleware
             'category_codes' => ['nullable', 'array', 'min:1'],
             'category_codes.*' => ['nullable', 'string', 'exists:item_categories,code'],
         ]);
-        $is_user_create_or_edit_shop = $request->boolean('is_user_create_or_edit_shop');
 
-        // $validated['expired_at'] = null;
-        $validated['expired_at'] = isset($validated['expired_at'])
-            ? Carbon::parse($validated['expired_at'])->setTimezone('Asia/Bangkok')->startOfDay()->toDateString()
-            : null;
+        $currentUser = $request->user();
 
+        // 1. Safely determine the Owner (No frontend boolean needed)
+        // If an owner ID was provided in the validated request, use it. Otherwise, assume the logged-in user.
+        $ownerUserId = $validated['owner_user_id'] ?? $currentUser->id;
+        $owner = User::find($ownerUserId);
 
-        $owner = $is_user_create_or_edit_shop ? Auth::user() : ($validated['owner_user_id'] ? User::find($validated['owner_user_id']) : null);
         if (!$owner) {
             return redirect()->back()->with('error', 'Owner user not found.');
         }
@@ -196,55 +194,57 @@ class ShopController extends Controller implements HasMiddleware
             return redirect()->back()->with('error', 'User already has a shop.');
         }
 
+        // Optional Security Check: Prevent normal users from creating shops for other people
+        if ($owner->id !== $currentUser->id && !$currentUser->hasAnyPermission('shop create')) {
+            abort(403, 'You do not have permission to assign a shop to another user.');
+        }
 
-        $validated['created_by'] = $request->user()->id;
-        $validated['updated_by'] = $request->user()->id;
+        // 2. Format Dates and Meta
+        $validated['expired_at'] = !empty($validated['expired_at'])
+            ? Carbon::parse($validated['expired_at'])->setTimezone('Asia/Bangkok')->startOfDay()->format('Y-m-d')
+            : null;
 
+        $validated['created_by'] = $currentUser->id;
+        $validated['updated_by'] = $currentUser->id;
+        $validated['owner_user_id'] = $owner->id; // Ensure this is explicitly set in the data payload
 
+        // 3. Process File Uploads FIRST
         $image_file = $request->file('logo');
         $banner_file = $request->file('banner');
-        unset($validated['logo']);
-        unset($validated['banner']);
+        unset($validated['logo'], $validated['banner']);
 
-        foreach ($validated as $key => $value) {
-            if ($value === '') {
-                $validated[$key] = null;
+        try {
+            if ($image_file) {
+                $validated['logo'] = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/shops', 600);
             }
+            if ($banner_file) {
+                $validated['banner'] = ImageHelper::uploadAndResizeImageWebp($banner_file, 'assets/images/shops', 1200);
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
         }
 
-
-        if ($image_file) {
-            try {
-                $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/shops', 600);
-                $validated['logo'] = $created_image_name;
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
-            }
-        }
-        if ($banner_file) {
-            try {
-                $created_image_name = ImageHelper::uploadAndResizeImageWebp($banner_file, 'assets/images/shops', 1200);
-                $validated['banner'] = $created_image_name;
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
-            }
-        }
-        $categoryCodes = $request->input('category_codes', []);
+        // 4. Safely extract category codes from the VALIDATED array
+        $categoryCodes = $validated['category_codes'] ?? [];
         unset($validated['category_codes']);
 
-        $shop = Shop::create($validated);
+        // 5. Execute DB writes inside ONE Transaction
+        DB::transaction(function () use ($validated, $owner, $categoryCodes) {
+            $shop = Shop::create($validated);
 
-        $shop->categories()->sync($categoryCodes);
+            $shop->categories()->sync($categoryCodes);
 
-        if ($shop) {
             $owner->update([
                 'shop_id' => $shop->id,
             ]);
-        }
+        });
 
-        if ($is_user_create_or_edit_shop) {
+        // 6. Dynamic Redirect
+        // If the user created the shop for themselves, send them to the profile. Otherwise, send them back.
+        if ($owner->id === $currentUser->id) {
             return redirect('/profile')->with('success', 'Shop created successfully!');
         }
+
         return redirect()->back()->with('success', 'Shop created successfully!');
     }
 
@@ -268,8 +268,8 @@ class ShopController extends Controller implements HasMiddleware
             'order_index' => 'nullable|numeric',
             'expired_at' => 'nullable|date',
             'status' => 'nullable|string|in:pending,approved,suspended,rejected',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
-            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'banner' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'is_verified' => 'nullable|boolean',
             'address' => 'nullable|string|max:255',
             'location' => 'nullable|string',
@@ -280,7 +280,16 @@ class ShopController extends Controller implements HasMiddleware
             'category_codes.*' => ['nullable', 'string', 'exists:item_categories,code'],
         ]);
 
-        // 1. Format Dates and Meta
+        // 1. Clean, secure Authorization
+        $user = $request->user();
+        $isOwner = $user->shop_id === $shop->id;
+        $hasPermission = $user->hasAnyPermission('shop update');
+
+        if (!$isOwner && !$hasPermission) {
+            abort(403, 'Cannot Update Shop.');
+        }
+
+        // 2. Format Dates and Meta
         if (!empty($validated['expired_at'])) {
             $validated['expired_at'] = Carbon::parse($validated['expired_at'])
                 ->setTimezone('Asia/Bangkok')
@@ -289,9 +298,9 @@ class ShopController extends Controller implements HasMiddleware
             $validated['expired_at'] = null;
         }
 
-        $validated['updated_by'] = $request->user()->id;
+        $validated['updated_by'] = $user->id;
 
-        // 2. Process File Uploads FIRST
+        // 3. Process File Uploads FIRST
         $image_file = $request->file('logo');
         $banner_file = $request->file('banner');
         unset($validated['logo'], $validated['banner']);
@@ -316,44 +325,29 @@ class ShopController extends Controller implements HasMiddleware
             return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
         }
 
-        // 3. Execute ALL Database writes inside ONE Transaction
-        DB::transaction(function () use ($validated, $shop, $request) {
-            $oldOwnerId = $shop->owner_user_id;
-            $newOwnerId = $validated['owner_user_id'];
+        // 4. Extract categories safely from VALIDATED data, not raw request
+        $categoryCodes = $validated['category_codes'] ?? [];
+        unset($validated['category_codes']);
 
-            $wasApproved = $shop->status === 'approved';
-            $isBecomingApproved = isset($validated['status']) && $validated['status'] === 'approved';
+        // 5. Execute ALL Database writes inside ONE Transaction
+        DB::transaction(function () use ($validated, $shop, $categoryCodes) {
 
-            // A. Handle Ownership Change
-            if ($oldOwnerId != $newOwnerId) {
-                // Unlink the old owner
-                User::where('id', $oldOwnerId)->update(['shop_id' => null]);
-
-                // Link the new owner
-                User::where('id', $newOwnerId)->update(['shop_id' => $shop->id]);
-
-                // Transfer ALL existing products in this shop to the new owner's user_id
-                Item::where('shop_id', $shop->id)->update([
-                    'user_id' => $newOwnerId
-                ]);
-            } else {
-                Item::where('user_id', $shop->owner_user_id)
-                    ->whereNull('shop_id') // Safety check: Only grab items that don't have a shop yet
-                    ->update([
-                        'shop_id' => $shop->id
-                    ]);
-                Item::where('shop_id', $shop->id)
-                    ->whereNull('user_id') // Safety check: Only grab items that don't have a shop yet
-                    ->update([
-                        'user_id' => $shop->owner_user_id
-                    ]);
+            // Safely check if owner_user_id was actually passed in the request
+            if (array_key_exists('owner_user_id', $validated) && !is_null($validated['owner_user_id'])) {
+                User::where('id', $validated['owner_user_id'])
+                    ->whereNull('shop_id')
+                    ->update(['shop_id' => $shop->id]);
             }
 
-            $categoryCodes = $request->input('category_codes', []);
-            unset($validated['category_codes']);
+            Item::where('user_id', $shop->owner_user_id)
+                ->whereNull('shop_id')
+                ->update(['shop_id' => $shop->id]);
+
+            Item::where('shop_id', $shop->id)
+                ->whereNull('user_id')
+                ->update(['user_id' => $shop->owner_user_id]);
 
             $shop->update($validated);
-
             $shop->categories()->sync($categoryCodes);
         });
 

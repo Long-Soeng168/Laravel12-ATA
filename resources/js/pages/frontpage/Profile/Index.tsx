@@ -106,7 +106,7 @@ const Index = () => {
 
                     {/* 2. All Your Products Action */}
                     <Link
-                        href={userShop ? `/shop-profile/${userShop?.id}` : `/user-profile/${auth?.user?.id}`}
+                        href={userShop ? `/shop-profile/${userShop?.id}#products` : `/user-profile/${auth?.user?.id}#products`}
                         className="group flex w-full items-center justify-between rounded-md border border-gray-200 bg-white p-4 transition-all hover:bg-gray-50 focus-visible:bg-gray-50 dark:border-white/10 dark:bg-[#101010] dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
                     >
                         <div className="flex items-center gap-4">
@@ -168,7 +168,7 @@ const Index = () => {
 
                         {/* 4. Garage Action (Create or View) */}
                         <Link
-                            href={userGarage ? `/my-garage` : `/create-garage`}
+                            href={userGarage ? `/garage-profile/${userGarage?.id}` : `/create-garage`}
                             className="group flex w-full items-center justify-between bg-white p-4 transition-all hover:bg-gray-50 focus-visible:bg-gray-50 dark:border-white/10 dark:bg-[#101010] dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
                         >
                             <div className="flex items-center gap-4">

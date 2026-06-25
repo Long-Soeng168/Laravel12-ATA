@@ -190,6 +190,10 @@ Route::middleware('auth')->group(function () {
     Route::post('admin/garages/{garage}/update', [GarageController::class, 'update']);
     Route::get('admin/all_garages', [GarageController::class, 'all_garages']);
     Route::post('admin/garages/{garage}/update_status', [GarageController::class, 'update_status']);
+
+    Route::get('/create-garage', [GarageController::class, 'user_create_garage']);
+    Route::get('/edit-garage', [GarageController::class, 'user_edit_garage']);
+
     // Garage Post Route
     Route::resource('admin/garage_posts', GaragePostController::class);
     Route::post('admin/garage_posts/{garage_post}/update', [GaragePostController::class, 'update']);

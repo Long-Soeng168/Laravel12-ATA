@@ -1,3 +1,5 @@
+import AlertFlashMessage from '@/components/Alert/AlertFlashMessage';
+import AllErrorsAlert from '@/components/Alert/AllErrorsAlert';
 import SubmitButton from '@/components/Button/SubmitButton';
 import CheckboxCardOption from '@/components/Card/CheckboxCardOption';
 import FormFileUpload from '@/components/Form/FormFileUpload';
@@ -30,6 +32,11 @@ import { toast } from 'sonner';
 export default function CreateForm() {
     const { t, currentLocale } = useTranslation();
     const { editData, readOnly, all_users, provinces, categories, is_user_create_or_edit_shop } = usePage<any>().props;
+
+    const [flashMessage, setFlashMessage] = useState<{ message: string; type: string }>({
+        message: '',
+        type: 'message',
+    });
 
     const [files, setFiles] = useState<File[] | null>(null);
     const [filesBanner, setFilesBanner] = useState<File[] | null>(null);
@@ -111,8 +118,16 @@ export default function CreateForm() {
                     setFiles(null);
                     setFilesBanner(null);
                 }
+                // Handle success notifications uniformly
                 if (page.props.flash?.success) {
+                    setFlashMessage({ message: page.props.flash.success, type: 'success' });
                     toast.success(t('Success'), { description: page.props.flash.success });
+                }
+
+                // Handle error notifications uniformly
+                if (page.props.flash?.error) {
+                    setFlashMessage({ message: page.props.flash.error, type: 'error' });
+                    toast.error(t('Error'), { description: page.props.flash.error });
                 }
             },
         });
@@ -121,6 +136,14 @@ export default function CreateForm() {
     return (
         <>
             <form onSubmit={onSubmit} className="space-y-8 p-4">
+                <AlertFlashMessage
+                    key={flashMessage.message}
+                    type={flashMessage.type}
+                    flashMessage={flashMessage.message}
+                    setFlashMessage={setFlashMessage}
+                />
+
+                {errors && <AllErrorsAlert title="Please fix the following errors" errors={errors} />}
                 {/* Expired Date */}
                 {all_users?.length > 0 && (
                     <div className="flex flex-col space-y-2">

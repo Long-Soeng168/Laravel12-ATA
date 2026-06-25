@@ -13,6 +13,8 @@ use Inertia\Inertia;
 
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class GarageController extends Controller implements HasMiddleware
 {
@@ -20,8 +22,8 @@ class GarageController extends Controller implements HasMiddleware
     {
         return [
             new Middleware('permission:garage view', only: ['index', 'show', 'all_garages']),
-            new Middleware('permission:garage create', only: ['create', 'store']),
-            new Middleware('permission:garage update', only: ['edit', 'update', 'update_status']),
+            new Middleware('permission:garage create', only: ['create']),
+            new Middleware('permission:garage update', only: ['edit', 'update_status']),
             new Middleware('permission:garage delete', only: ['destroy', 'destroy_image']),
         ];
     }
@@ -104,10 +106,25 @@ class GarageController extends Controller implements HasMiddleware
         $brands = ItemBrand::orderBy('name')
             ->where('status', 'active')
             ->get();
-        // return ($owners);
         return Inertia::render('admin/garages/Create', [
             'editData' => $garage->load('owner'),
             'owners' => $owners,
+            'brands' => $brands,
+            'provinces' => Province::orderBy('order_index')
+                ->orderBy('name')
+                ->get(),
+        ]);
+    }
+    public function user_edit_garage()
+    {
+        $garage = Garage::findOrFail(Auth::user()->garage_id);
+        $brands = ItemBrand::orderBy('name')
+            ->where('status', 'active')
+            ->get();
+        // return ($owners);
+        return Inertia::render('admin/garages/UserCreateGarage', [
+            'is_user_create_or_edit_garage' => true,
+            'editData' => $garage->load('owner'),
             'brands' => $brands,
             'provinces' => Province::orderBy('order_index')
                 ->orderBy('name')
@@ -132,31 +149,44 @@ class GarageController extends Controller implements HasMiddleware
                 ->get(),
         ]);
     }
+    public function user_create_garage()
+    {
+        $brands = ItemBrand::orderBy('name')
+            ->where('status', 'active')
+            ->get();
+        // return ($owners);
+        return Inertia::render('admin/garages/UserCreateGarage', [
+            'is_user_create_or_edit_garage' => true,
+            'brands' => $brands,
+            'provinces' => Province::orderBy('order_index')
+                ->orderBy('name')
+                ->get(),
+        ]);
+    }
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        // dd($request->all());
         $validated = $request->validate([
-            'owner_user_id' => 'required|exists:users,id',
+            'owner_user_id' => 'nullable|exists:users,id',
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string',
             'other_phones' => 'nullable|array',
             'other_phones.*' => [
                 'nullable',
                 'string',
-                'regex:/^(0|\+855)(\d{8,9})$/', // Validates Khmer format for each entry
+                'regex:/^(0|\+855)(\d{8,9})$/',
             ],
             'short_description' => 'nullable|string|max:500',
             'short_description_kh' => 'nullable|string|max:500',
             'brand_code' => 'nullable|string|max:255',
-            'province_code' => 'nullable|string|max:255',
+            'province_code' => 'required|string|max:255',
             'order_index' => 'nullable|numeric',
             'status' => 'nullable|string|in:pending,approved,suspended,rejected',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
-            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'banner' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'is_verified' => 'nullable|boolean',
             'expired_at' => 'nullable|date',
             'address' => 'nullable|string|max:255',
@@ -165,11 +195,13 @@ class GarageController extends Controller implements HasMiddleware
             'longitude' => 'nullable|numeric',
         ]);
 
-        $validated['expired_at'] = isset($validated['expired_at'])
-            ? Carbon::parse($validated['expired_at'])->setTimezone('Asia/Bangkok')->startOfDay()->toDateString()
-            : now()->addYears(2)->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
+        $currentUser = $request->user();
 
-        $owner = User::find($validated['owner_user_id']);
+        // 1. Safely determine the Owner (No frontend boolean needed)
+        // If an owner ID was provided in the validated request, use it. Otherwise, assume the logged-in user.
+        $ownerUserId = $validated['owner_user_id'] ?? $currentUser->id;
+        $owner = User::find($ownerUserId);
+
         if (!$owner) {
             return redirect()->back()->with('error', 'Owner user not found.');
         }
@@ -178,46 +210,50 @@ class GarageController extends Controller implements HasMiddleware
             return redirect()->back()->with('error', 'User already has a garage.');
         }
 
-        $validated['created_by'] = $request->user()->id;
-        $validated['updated_by'] = $request->user()->id;
+        // Optional Security Check: Prevent normal users from creating garages for other people
+        if ($owner->id !== $currentUser->id && !$currentUser->hasAnyPermission('garage create')) {
+            abort(403, 'You do not have permission to assign a garage to another user.');
+        }
 
+        // 2. Format Dates and Meta
+        $validated['expired_at'] = !empty($validated['expired_at'])
+            ? Carbon::parse($validated['expired_at'])->setTimezone('Asia/Bangkok')->startOfDay()->format('Y-m-d')
+            : null;
+
+        $validated['created_by'] = $currentUser->id;
+        $validated['updated_by'] = $currentUser->id;
+        $validated['owner_user_id'] = $owner->id; // Explicitly set it so the DB insertion is accurate
+
+        // 3. Process File Uploads FIRST
         $image_file = $request->file('logo');
         $banner_file = $request->file('banner');
-        unset($validated['logo']);
-        unset($validated['banner']);
+        unset($validated['logo'], $validated['banner']);
 
-        foreach ($validated as $key => $value) {
-            if ($value === '') {
-                $validated[$key] = null;
+        try {
+            if ($image_file) {
+                $validated['logo'] = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/garages', 600);
             }
+            if ($banner_file) {
+                $validated['banner'] = ImageHelper::uploadAndResizeImageWebp($banner_file, 'assets/images/garages', 900);
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
         }
 
+        // 4. Execute DB writes inside ONE Transaction
+        DB::transaction(function () use ($validated, $owner) {
+            $garage = Garage::create($validated);
 
-        if ($image_file) {
-            try {
-                $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/garages', 600);
-                $validated['logo'] = $created_image_name;
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
-            }
-        }
-        if ($banner_file) {
-            try {
-                $created_image_name = ImageHelper::uploadAndResizeImageWebp($banner_file, 'assets/images/garages', 900);
-                $validated['banner'] = $created_image_name;
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
-            }
-        }
+            // Update the owner directly using the model instance we already fetched
+            $owner->update([
+                'garage_id' => $garage->id,
+            ]);
+        });
 
-        $garage = Garage::create($validated);
-
-        if ($garage) {
-            $user = User::where('id', $validated['owner_user_id'])->where('garage_id', null)->first();
-            if ($user)
-                $user->update([
-                    'garage_id' => $garage->id,
-                ]);
+        // 5. Dynamic Redirect
+        // If the user created the garage for themselves, send them to the profile. Otherwise, send them back.
+        if ($owner->id === $currentUser->id) {
+            return redirect('/profile')->with('success', 'Garage created successfully!');
         }
 
         return redirect()->back()->with('success', 'Garage created successfully!');
@@ -229,7 +265,7 @@ class GarageController extends Controller implements HasMiddleware
     public function update(Request $request, Garage $garage)
     {
         $validated = $request->validate([
-            'owner_user_id' => 'required|exists:users,id',
+            'owner_user_id' => 'nullable|exists:users,id',
             'name' => 'required|string|max:255',
             'address' => 'nullable|string|max:255',
             'phone' => 'nullable|string',
@@ -237,17 +273,17 @@ class GarageController extends Controller implements HasMiddleware
             'other_phones.*' => [
                 'nullable',
                 'string',
-                'regex:/^(0|\+855)(\d{8,9})$/', // Validates Khmer format for each entry
+                'regex:/^(0|\+855)(\d{8,9})$/',
             ],
             'short_description' => 'nullable|string|max:500',
             'short_description_kh' => 'nullable|string|max:500',
             'parent_code' => 'nullable|string|max:255',
             'brand_code' => 'nullable|string|max:255',
-            'province_code' => 'nullable|string|max:255',
+            'province_code' => 'required|string|max:255',
             'order_index' => 'nullable|numeric',
             'status' => 'nullable|string|in:pending,approved,suspended,rejected',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
-            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg,webp|max:2048',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // removed duplicate 'webp'
+            'banner' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'is_verified' => 'nullable|boolean',
             'expired_at' => 'nullable|date',
             'location' => 'nullable|string',
@@ -255,64 +291,63 @@ class GarageController extends Controller implements HasMiddleware
             'longitude' => 'nullable|numeric',
         ]);
 
-        $validated['expired_at'] = isset($validated['expired_at'])
-            ? Carbon::parse($validated['expired_at'])->setTimezone('Asia/Bangkok')->startOfDay()->toDateString()
-            : now()->addYears(2)->setTimezone('Asia/Bangkok')->startOfDay()->toDateString();
+        // 1. Clean, secure Authorization
+        $user = $request->user();
+        $isOwner = $user->garage_id === $garage->id;
+        $hasPermission = $user->hasAnyPermission('garage update');
 
-        $validated['updated_by'] = $request->user()->id;
-
-        if ($validated['owner_user_id'] != $garage->owner_user_id) {
-            User::where('id', $garage->owner_user_id)->update([
-                'garage_id' => null,
-            ]);
+        if (!$isOwner && !$hasPermission) {
+            abort(403, 'Cannot Update Garage.');
         }
 
+        // 2. Format Dates and Meta
+        if (!empty($validated['expired_at'])) {
+            $validated['expired_at'] = Carbon::parse($validated['expired_at'])
+                ->setTimezone('Asia/Bangkok')
+                ->format('Y-m-d');
+        } else {
+            $validated['expired_at'] = null;
+        }
+
+        $validated['updated_by'] = $user->id;
+
+        // 3. Process File Uploads FIRST
         $image_file = $request->file('logo');
         $banner_file = $request->file('banner');
-        unset($validated['logo']);
-        unset($validated['banner']);
+        unset($validated['logo'], $validated['banner']);
 
-        foreach ($validated as $key => $value) {
-            if ($value === '') {
-                $validated[$key] = null;
-            }
-        }
-
-        if ($image_file) {
-            try {
+        try {
+            if ($image_file) {
                 $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/garages', 600);
                 $validated['logo'] = $created_image_name;
 
                 if ($garage->logo && $created_image_name) {
                     ImageHelper::deleteImage($garage->logo, 'assets/images/garages');
                 }
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
             }
-        }
-        if ($banner_file) {
-            try {
-                $created_image_name = ImageHelper::uploadAndResizeImageWebp($banner_file, 'assets/images/garages', 900);
-                $validated['banner'] = $created_image_name;
 
-                if ($garage->banner && $created_image_name) {
+            if ($banner_file) {
+                $created_banner_name = ImageHelper::uploadAndResizeImageWebp($banner_file, 'assets/images/garages', 900);
+                $validated['banner'] = $created_banner_name;
+
+                if ($garage->banner && $created_banner_name) {
                     ImageHelper::deleteImage($garage->banner, 'assets/images/garages');
                 }
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
             }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
         }
 
-        $updated_success = $garage->update($validated);
-
-        if ($updated_success) {
-            $user = User::where('id', $validated['owner_user_id'])->where('garage_id', null)->first();
-            if ($user)
-                $user->update([
-                    'garage_id' => $garage->id,
-                ]);
-        }
-
+        // 4. Execute DB writes inside ONE Transaction
+        DB::transaction(function () use ($validated, $garage) {
+            $garage->update($validated);
+            // Safely check if owner_user_id was actually passed in the request payload
+            if (array_key_exists('owner_user_id', $validated) && !is_null($validated['owner_user_id'])) {
+                User::where('id', $validated['owner_user_id'])
+                    ->whereNull('garage_id')
+                    ->update(['garage_id' => $garage->id]);
+            }
+        });
 
         return redirect()->back()->with('success', 'Garage updated successfully!');
     }

@@ -18,7 +18,7 @@ export default function ShowShopPage() {
                     <ProductListingHeader />
                 </div>
 
-                <div className="section-container mt-6 mb-14">
+                <div className="section-container mt-6 mb-14 scroll-mt-[100px]" id='products'>
                     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
                         {products.map((item: any) => (
                             <ProductCard key={item.id} item={item} />

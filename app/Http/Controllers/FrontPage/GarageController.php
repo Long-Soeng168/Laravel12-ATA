@@ -15,6 +15,7 @@ use App\Models\ItemDailyView;
 use App\Models\Province;
 use App\Models\Shop;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class GarageController extends Controller
@@ -90,6 +91,23 @@ class GarageController extends Controller
 
     public function show($id, Request $request)
     {
+        // 1. Fetch the Garage FIRST so we can use its data for SEO metadata
+        $garage = Garage::with('province')->findOrFail($id);
+
+        // Prepare Garage URLs for frontend and SEO
+        $garage->logo_url = $garage->logo ? asset('assets/images/garages/' . $garage->logo) : null;
+        $garage->banner_url = $garage->banner ? asset('assets/images/garages/' . $garage->banner) : null;
+
+        // 2. Determine if the current authenticated user is the owner
+        $user = $request->user();
+        $isOwner = false;
+
+        // Only check ownership if the route starts with the specific profile path
+        if ($user && $request->is('garage-profile*')) {
+            $isOwner = ($user->garage_id === $garage->id) || ($user->id === $garage->owner_user_id);
+        }
+
+        // 3. Handle the Garage Posts Query
         $search = $request->input('search', '');
         $perPage = $request->input('perPage', 25);
         $sortBy = $request->input('sortBy', 'id');
@@ -107,11 +125,11 @@ class GarageController extends Controller
 
         $query->orderBy($sortBy, $sortDirection);
         $query->where('status', 'active');
-        $query->where('garage_id', $id);
+        $query->where('garage_id', $garage->id);
 
         $tableData = $query->paginate(perPage: $perPage)->onEachSide(1);
 
-        // Transform collection
+        // 4. Transform collection
         $tableData->getCollection()->transform(function ($item) {
             $firstImage = $item->images->first();
 
@@ -128,20 +146,28 @@ class GarageController extends Controller
                 return $img;
             });
 
-            // WE REMOVED: $item->makeHidden(['images']); 
-            // So now the 'images' array will be included in the JSON response!
-
             return $item;
         });
 
-        // return [
-        //     'garage' => Garage::findOrFail($id)->load('province'),
-        //     'tableData' => $tableData,
-        // ];
+        // 5. Prepare Meta Data
+        $profileName = $garage->name ?? 'Garage Details';
+        $profileDesc = isset($garage->short_description)
+            ? Str::limit(strip_tags($garage->short_description), 150)
+            : "Explore {$profileName} on A-Tech Auto.";
+        $profileImg = $garage->logo_url ?? $garage->banner_url ?? asset('icon512_maskable.png');
 
+        // 6. Return Inertia Response with Meta AND isOwner
         return Inertia::render('frontpage/garages/Show', [
-            'garage' => Garage::findOrFail($id)->load('province'),
+            'garage' => $garage,
             'tableData' => $tableData,
+            'isOwner' => $isOwner,
+        ])->withViewData([
+            'meta' => [
+                'title' => $profileName . ' | A-Tech Auto',
+                'description' => $profileDesc,
+                'image' => $profileImg,
+                'keywords' => '',
+            ]
         ]);
     }
 }

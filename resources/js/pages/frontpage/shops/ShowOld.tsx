@@ -71,7 +71,7 @@ const Show = () => {
                             {/* start list products */}
                             <div>{tableData?.data?.length == 0 && <MyNoData />}</div>
                             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                                {tableData?.data?.map((product) => <MyProductCard key={product.id} product={product} />)}
+                                {tableData?.data?.map((product: any) => <MyProductCard key={product.id} product={product} />)}
                             </div>
                             {/* end list products */}
                             {/* start pagination */}

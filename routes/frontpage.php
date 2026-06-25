@@ -25,6 +25,8 @@ Route::get('/share/shops/{id}', [ShopController::class, 'show']);
 
 Route::get('/garages', [GarageController::class, 'index']);
 Route::get('/garages/{id}', [GarageController::class, 'show']);
+Route::get('/garage-profile/{id}', [GarageController::class, 'show']);
+
 
 Route::get('/about', [FrontPageController::class, 'about']);
 Route::get('/contact', [FrontPageController::class, 'contact']);
