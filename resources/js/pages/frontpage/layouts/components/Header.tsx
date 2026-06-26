@@ -35,6 +35,7 @@ const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { variant
 export default function Header() {
     const { t } = useTranslation();
     const { url } = usePage();
+    const { auth } = usePage<any>().props;
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     // Strip search parameters (e.g., '?category_code=...') to get the pure path
@@ -111,11 +112,11 @@ export default function Header() {
                         <div className="bg-border h-3.5 w-px"></div>
                         <Link
                             prefetch
-                            href="/login"
+                            href={auth?.user?.id ? '/profile' : '/login'}
                             className="bg-primary text-primary-foreground hover:bg-primary/90 flex cursor-pointer items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors sm:px-3.5 sm:py-2 sm:text-sm"
                         >
                             <User className="h-3.5 w-3.5 max-[455px]:hidden" />
-                            <span className="text-center">{t('Login')}</span>
+                            <span className="text-center">{auth?.user?.id ? t('Profile') : t('Login')}</span>
                         </Link>
                     </div>
                 </div>
@@ -176,7 +177,7 @@ export default function Header() {
                             </div>
 
                             {/* Desktop Sell Button */}
-                            <Link prefetch href={`/login`} className="hidden md:block">
+                            <Link prefetch href={`/create-product`} className="hidden md:block">
                                 <Button variant="accent" className="gap-2 px-6">
                                     <ImagePlusIcon className="h-4 w-4" /> {t('Sell Your Products')}
                                 </Button>
@@ -237,7 +238,7 @@ export default function Header() {
                         <div className="border-border border-t"></div>
 
                         {/* Action Buttons */}
-                        <Link prefetch href={`/login`} className="flex flex-col pt-4">
+                        <Link prefetch href={`/create-product`} className="flex flex-col pt-4">
                             <Button variant="accent" className="w-full justify-center gap-2">
                                 <ImagePlusIcon className="h-4 w-4" /> {t('Sell Your Products')}
                             </Button>

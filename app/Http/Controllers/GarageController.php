@@ -198,7 +198,6 @@ class GarageController extends Controller implements HasMiddleware
         $currentUser = $request->user();
 
         // 1. Safely determine the Owner (No frontend boolean needed)
-        // If an owner ID was provided in the validated request, use it. Otherwise, assume the logged-in user.
         $ownerUserId = $validated['owner_user_id'] ?? $currentUser->id;
         $owner = User::find($ownerUserId);
 
@@ -210,8 +209,7 @@ class GarageController extends Controller implements HasMiddleware
             return redirect()->back()->with('error', 'User already has a garage.');
         }
 
-        // Optional Security Check: Prevent normal users from creating garages for other people
-        if ($owner->id !== $currentUser->id && !$currentUser->hasAnyPermission('garage create')) {
+        if (!$request->boolean('is_user_create_or_edit_garage') && !$currentUser->hasAnyPermission('garage create')) {
             abort(403, 'You do not have permission to assign a garage to another user.');
         }
 
@@ -296,7 +294,10 @@ class GarageController extends Controller implements HasMiddleware
         $isOwner = $user->garage_id === $garage->id;
         $hasPermission = $user->hasAnyPermission('garage update');
 
-        if (!$isOwner && !$hasPermission) {
+        if ($request->boolean('is_user_create_or_edit_garage') && !$isOwner) {
+            abort(403, 'Cannot Update Garage.');
+        }
+        if (!$request->boolean('is_user_create_or_edit_garage') && !$hasPermission) {
             abort(403, 'Cannot Update Garage.');
         }
 

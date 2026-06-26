@@ -641,11 +641,20 @@ class ItemController extends Controller implements HasMiddleware
     public function destroy(Item $item)
     {
         $user = Auth::user();
-        if (! ($user->hasAnyPermission('item delete') || $user->id === $item->user_id)) {
+        if (!($user->hasAnyPermission('item delete') || $user->id === $item->user_id)) {
             abort(403, 'User does not have permission to delete.');
         }
         $item->delete();
         return redirect()->back()->with('success', 'Item deleted successfully.');
+    }
+    public function user_destroy(Item $item)
+    {
+        $user = Auth::user();
+        if (!($user->hasAnyPermission('item delete') || $user->id === $item->user_id)) {
+            abort(403, 'User does not have permission to delete.');
+        }
+        $item->delete();
+        return redirect("/shop-profile/{$user->shop_id}")->with('success', 'Item deleted successfully.');
     }
 
     public function destroy_image(ItemImage $image)

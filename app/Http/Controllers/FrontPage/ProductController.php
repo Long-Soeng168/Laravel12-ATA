@@ -279,14 +279,17 @@ class ProductController extends Controller
             }
         }
 
-        // 2. View Tracking
-        $date = now()->toDateString();
-        $view = ItemDailyView::firstOrCreate(
-            ['item_id' => $id, 'view_date' => $date],
-            ['view_counts' => 0],
-        );
-        $view->increment('view_counts');
-        $itemShow->increment('total_view_counts');
+        if (!$request->is('your-products*')) {
+            // 2. View Tracking
+            $date = now()->toDateString();
+            $view = ItemDailyView::firstOrCreate(
+                ['item_id' => $id, 'view_date' => $date],
+                ['view_counts' => 0],
+            );
+            $view->increment('view_counts');
+            $itemShow->increment('total_view_counts');
+        }
+
 
         // 3. Format Main Item Data
         $formattedItem = $itemShow->toArray();

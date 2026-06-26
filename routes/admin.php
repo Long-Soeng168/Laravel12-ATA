@@ -69,6 +69,7 @@ Route::middleware('auth')->group(function () {
 
     // Item Route
     Route::resource('admin/items', ItemController::class);
+    Route::get('/items/{item}/delete', [ItemController::class, 'user_destroy']);
     Route::post('admin/items/{item}/update', [ItemController::class, 'update']);
     Route::post('admin/items/{item}/update_status', [ItemController::class, 'update_status']);
     Route::delete('admin/items/images/{image}', [ItemController::class, 'destroy_image']);
@@ -204,6 +205,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/garage-posts/create', [GaragePostController::class, 'user_create_garage_post']);
     Route::get('/garage-posts/{id}/edit', [GaragePostController::class, 'user_edit_garage_post']);
+    Route::get('/garage-posts/{id}/delete', [GaragePostController::class, 'user_delete_garage_post']);
 
     // Project Route
     Route::resource('admin/projects', ProjectController::class);

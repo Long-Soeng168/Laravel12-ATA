@@ -21,9 +21,7 @@ export default function ProfileLayoutHeader() {
         return currentPath === path || currentPath.startsWith(`${path}/`);
     };
 
-    const { website_info, auth } = usePage<any>().props;
-
-    const logo = website_info?.logo ? `/assets/images/website_infos/thumb/${website_info.logo}` : '/assets/images/default-logo.png';
+    const { auth } = usePage<any>().props;
 
     const cleanup = useMobileNavigation();
 

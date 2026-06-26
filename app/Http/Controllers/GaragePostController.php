@@ -15,6 +15,7 @@ use Inertia\Inertia;
 
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -116,7 +117,7 @@ class GaragePostController extends Controller implements HasMiddleware
         }
 
         // Authorization: Prevent normal users from creating posts for other people's garages
-        if ($user->garage_id !== $garage->id && !$user->hasAnyPermission('garage create')) {
+        if ($user->garage_id !== $garage->id || !$user->hasAnyPermission('garage create')) {
             abort(403, 'You do not have permission to create a post for this garage.');
         }
 
@@ -220,6 +221,14 @@ class GaragePostController extends Controller implements HasMiddleware
     public function user_edit_garage_post(String $id)
     {
         $post = GaragePost::findOrFail($id);
+
+        $user = Auth::user();
+
+        // Authorization: Prevent normal users from update posts
+        if ($user->garage_id !== $post->garage_id) {
+            abort(403, 'You do not have permission to update a post.');
+        }
+
         return Inertia::render('admin/garage_posts/UserCreatePost', [
             'editData' => $post->load('images'),
             'types' => Type::where(['status' => 'active', 'type_of' => 'post'])->orderBy('id', 'desc')->get(),
@@ -258,7 +267,7 @@ class GaragePostController extends Controller implements HasMiddleware
 
         // Authorization Check: Prevent normal users from editing posts they don't own
         // or moving posts to a garage they don't own.
-        if ($user->garage_id !== $garage->id && !$user->hasAnyPermission('garage update')) {
+        if ($user->garage_id !== $garage->id || !$user->hasAnyPermission('garage update')) {
             abort(403, 'You do not have permission to update this post.');
         }
 
@@ -352,7 +361,24 @@ class GaragePostController extends Controller implements HasMiddleware
             }
         }
         $garage_post->delete();
-        return redirect()->back()->with('success', 'post deleted successfully.');
+        return redirect()->back()->with('success', 'Post deleted successfully.');
+    }
+
+    public function user_delete_garage_post(String $id)
+    {
+        $garage_post = GaragePost::findOrFail($id);
+        $user = Auth::user();
+        if ($user->garage_id !== $garage_post->garage_id) {
+            abort(403, 'You do not have permission to update this post.');
+        }
+
+        if (count($garage_post->images) > 0) {
+            foreach ($garage_post->images as $image) {
+                ImageHelper::deleteImage($image->image, 'assets/images/garage_posts');
+            }
+        }
+        $garage_post->delete();
+        return redirect()->back()->with('success', 'Post deleted successfully.');
     }
 
     public function destroy_image(GaragePostImage $image)

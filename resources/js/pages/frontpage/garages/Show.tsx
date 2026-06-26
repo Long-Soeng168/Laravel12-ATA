@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import useTranslation from '@/hooks/use-translation';
-import { usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import {
     Camera,
     CheckCircleIcon,
@@ -228,27 +228,32 @@ const DetailModal: React.FC<any> = ({ post, onClose }) => {
 
     return (
         <Dialog open={!!post} onOpenChange={(open: any) => !open && onClose()}>
-            <DialogContent className="max-w-3xl border-none p-0 shadow-2xl sm:max-w-4xl sm:rounded-[2rem] [&>button]:hidden">
+            <DialogContent className="max-w-3xl border-none p-0 sm:max-w-4xl [&>button]:hidden">
                 <div className="bg-background flex max-h-[90vh] w-full flex-col overflow-y-auto [scrollbar-width:thin]">
                     {/* Floating Glass Close Button - Light Themed */}
                     {/* Owner Actions (Edit / Delete) */}
                     <div className="absolute top-4 right-4 z-50 flex items-center gap-2 sm:top-5 sm:right-5">
                         {isOwner && (
                             <>
-                                <button
-                                    onClick={() => console.log('Delete post', post.id)}
+                                <Link
+                                    href={`/garage-posts/${post.id}/delete`}
+                                    as="button"
+                                    onBefore={() => window.confirm('Are you sure you want to delete this Post?')}
                                     className="bg-background/60 hover:bg-background flex h-10 w-10 items-center justify-center rounded-full text-red-600 backdrop-blur-md transition-all duration-300 hover:scale-105"
                                     aria-label={t('Delete')}
                                 >
                                     <Trash2Icon className="h-5 w-5" />
-                                </button>
-                                <button
-                                    onClick={() => console.log('Edit post', post.id)}
-                                    className="bg-background/60 text-foreground hover:bg-background flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 hover:scale-105"
-                                    aria-label={t('Edit')}
-                                >
-                                    <EditIcon className="h-5 w-5" />
-                                </button>
+                                </Link>
+
+                                <Link href={`/garage-posts/${post.id}/edit`}>
+                                    <button
+                                        onClick={() => console.log('Edit post', post.id)}
+                                        className="bg-background/60 text-foreground hover:bg-background flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-md transition-all duration-300 hover:scale-105"
+                                        aria-label={t('Edit')}
+                                    >
+                                        <EditIcon className="h-5 w-5" />
+                                    </button>
+                                </Link>
                             </>
                         )}
                         <button
@@ -267,7 +272,7 @@ const DetailModal: React.FC<any> = ({ post, onClose }) => {
                             <SafeImage
                                 src={activeImage}
                                 alt={getLocalizedText(post, 'title', currentLocale)}
-                                className="h-full w-full object-cover drop-shadow-2xl"
+                                className="h-full w-full object-cover"
                             />
                         </div>
 

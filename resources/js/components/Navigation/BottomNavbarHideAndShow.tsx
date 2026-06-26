@@ -105,7 +105,7 @@ export default function BottomNavbarHideAndShow() {
                     <div className="transition-transform duration-300">
                         <UserIcon size={22} />
                     </div>
-                    <span className="mt-[2px] text-center text-[12px]">{currentLocale == 'kh' ? 'គណនី' : 'Account'}</span>
+                    <span className="mt-[2px] text-center text-[12px]">{t('Profile')}</span>
 
                     {/* Floating Neon Pill Indicator */}
                     <span

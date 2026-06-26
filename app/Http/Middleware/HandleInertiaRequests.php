@@ -6,11 +6,8 @@ use App\Models\ApplicationInfo;
 use App\Models\Garage;
 use App\Models\ItemCategory;
 use App\Models\Link;
-use App\Models\Post;
 use App\Models\Shop;
-use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
 

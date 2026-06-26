@@ -170,14 +170,14 @@ const GarageHeader = () => {
                         <div className="flex flex-wrap gap-2">
                             <Link
                                 href="/garage-posts/create" // <-- Update this to your actual create post route
-                                className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded bg-zinc-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-zinc-700 dark:bg-zinc-500 dark:hover:bg-zinc-600"
+                                className="bg-true-primary hover:bg-true-primary dark:bg-true-primary dark:hover:bg-true-primary inline-flex shrink-0 items-center justify-center gap-1.5 rounded px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors"
                             >
                                 <PlusCircleIcon className="h-3.5 w-3.5" />
                                 {currentLocale === 'kh' ? 'បង្កើតការបង្ហោះ' : 'Create Post'}
                             </Link>
                             <Link
                                 href="/edit-garage"
-                                className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600"
+                                className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600"
                             >
                                 <Edit className="h-3.5 w-3.5" />
                                 {currentLocale === 'kh' ? 'កែប្រែយានដ្ឋាន' : 'Edit Garage'}

@@ -181,8 +181,7 @@ const ProductDetail = () => {
                                     <div className="flex flex-wrap items-center gap-2">
                                         {/* Delete Button */}
                                         <Link
-                                            href={`/items/${itemShow?.id}`}
-                                            method="delete"
+                                            href={`/items/${itemShow?.id}/delete`}
                                             as="button"
                                             onClick={(e) => {
                                                 if (!confirm(t('Are you sure you want to delete this product?'))) {
@@ -195,7 +194,13 @@ const ProductDetail = () => {
                                             {t('Delete')}
                                         </Link>
 
-                                        {/* Edit Button */}
+                                        <Link
+                                            href={`/products/${itemShow?.id}`}
+                                            className="flex items-center justify-center gap-1.5 rounded bg-zinc-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-zinc-700 max-sm:flex-1 dark:bg-zinc-500 dark:hover:bg-zinc-600"
+                                        >
+                                            <Pencil className="h-4 w-4" />
+                                            {t('Public View')}
+                                        </Link>
                                         <Link
                                             href={`/edit-product/${itemShow?.id}`}
                                             className="flex items-center justify-center gap-1.5 rounded bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700 max-sm:flex-1 dark:bg-emerald-500 dark:hover:bg-emerald-600"

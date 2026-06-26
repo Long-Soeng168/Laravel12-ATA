@@ -195,8 +195,8 @@ class ShopController extends Controller implements HasMiddleware
         }
 
         // Optional Security Check: Prevent normal users from creating shops for other people
-        if ($owner->id !== $currentUser->id && !$currentUser->hasAnyPermission('shop create')) {
-            abort(403, 'You do not have permission to assign a shop to another user.');
+        if (!$request->boolean('is_user_create_or_edit_shop') && !$currentUser->hasAnyPermission('garage create')) {
+            abort(403, 'You do not have permission to assign a garage to another user.');
         }
 
         // 2. Format Dates and Meta
@@ -285,10 +285,13 @@ class ShopController extends Controller implements HasMiddleware
         $isOwner = $user->shop_id === $shop->id;
         $hasPermission = $user->hasAnyPermission('shop update');
 
-        if (!$isOwner && !$hasPermission) {
+        if ($request->boolean('is_user_create_or_edit_shop') && !$isOwner) {
             abort(403, 'Cannot Update Shop.');
         }
-
+        if (!$request->boolean('is_user_create_or_edit_shop') && !$hasPermission) {
+            abort(403, 'Cannot Update Shop.');
+        }
+        
         // 2. Format Dates and Meta
         if (!empty($validated['expired_at'])) {
             $validated['expired_at'] = Carbon::parse($validated['expired_at'])
