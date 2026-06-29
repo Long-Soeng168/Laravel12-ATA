@@ -61,7 +61,7 @@ export default function Create() {
         },
     };
     const { post, progress, processing, transform, errors } = inertiaUseForm();
-    const { playlists, types, editData, links, readOnly } = usePage().props;
+    const { playlists, types, editData, links, readOnly } = usePage<any>().props;
 
     const [files, setFiles] = useState<File[] | null>(null);
     const [videoFiles, setVideoFiles] = useState<File[] | null>(null);
@@ -488,7 +488,7 @@ export default function Create() {
                                                         controls
                                                         controlsList="nodownload"
                                                     >
-                                                        <source src={`/assets/files/videos/${editData?.video_file}`} />
+                                                        <source src={`${editData?.video_url}`} />
                                                     </video>
                                                     {/* <div className="bg-opacity-50 absolute right-0 bottom-0 left-0 bg-black p-1 text-xs text-white">
                                                         {editData?.video_file}

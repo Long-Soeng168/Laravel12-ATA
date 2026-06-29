@@ -9,9 +9,8 @@ import VideoDialog from '@/components/video-dialog';
 import usePermission from '@/hooks/use-permission';
 import useTranslation from '@/hooks/use-translation';
 import { Link, router, usePage } from '@inertiajs/react';
-import { ArrowUpDown, EditIcon, EyeIcon } from 'lucide-react';
+import { ArrowUpDown, EditIcon } from 'lucide-react';
 import { useState } from 'react';
-import ViewButton from './view-button';
 
 const MyTableData = () => {
     const hasPermission = usePermission();
@@ -162,7 +161,7 @@ const MyTableData = () => {
 
                                     <TableCell>
                                         <span className="flex items-center justify-center">
-                                            <VideoDialog videoSrc={`/assets/files/videos/${item?.video_file}`} />
+                                            <VideoDialog videoSrc={`${item?.video_url}`} />
                                         </span>
                                     </TableCell>
                                     <TableCell>{item.title || '---'}</TableCell>

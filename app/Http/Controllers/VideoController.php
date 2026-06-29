@@ -50,6 +50,22 @@ class VideoController extends Controller implements HasMiddleware
 
         $tableData = $query->paginate(perPage: 10)->onEachSide(1);
 
+        // Map over the paginated items to append the R2 temporary URL
+        $tableData->through(function ($video) {
+            if ($video->video_file) {
+                // Because we stored the full path (e.g. 'Videos/filename.mp4') in the DB
+                // during the upload/migration, we can pass $video->video_file directly.
+                $video->video_url = \Illuminate\Support\Facades\Storage::disk('s3')->temporaryUrl(
+                    $video->video_file,
+                    now()->addMinutes(60)
+                );
+            } else {
+                $video->video_url = null;
+            }
+
+            return $video;
+        });
+
         return Inertia::render('admin/videos/Index', [
             'tableData' => $tableData,
         ]);
@@ -148,6 +164,16 @@ class VideoController extends Controller implements HasMiddleware
      */
     public function edit(Video $video)
     {
+        // Append the R2 temporary URL so the frontend can preview the current video
+        if ($video->video_file) {
+            $video->video_url = \Illuminate\Support\Facades\Storage::disk('s3')->temporaryUrl(
+                $video->video_file,
+                now()->addMinutes(60)
+            );
+        } else {
+            $video->video_url = null;
+        }
+
         return Inertia::render('admin/videos/Create', [
             'editData' => $video,
             'playlists' => VideoPlayList::where('status', 'active')->orderBy('id', 'desc')->get(),

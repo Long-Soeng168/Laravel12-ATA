@@ -138,10 +138,10 @@ class VideoController extends Controller
             'Videos/Testing/video1.mp4',
             now()->addMinutes(60) // expire time
         );
-        // $videoUrl = $disk->temporaryUrl(
-        //     'Videos/Testing' . $video->video_file,
-        //     now()->addMinutes(60) // expire time
-        // );
+        $videoUrl = $disk->temporaryUrl(
+            'Videos/Testing' . $video->video_file,
+            now()->addMinutes(60) // expire time
+        );
 
         $formattedVideo = [
             'id' => $video->id,
@@ -150,8 +150,8 @@ class VideoController extends Controller
             'image_url' => 'https://atech-auto.com/assets/images/videos/thumb/' . $video->image,
             'description' => $video->short_description, // or $video->short_description_kh
             'video_name' => $video->video_file,
-            'video_url' => 'https://atech-auto.com/assets/files/videos/' . $video->video_file,
-            // 'video_url' => $videoUrl,
+            // 'video_url' => 'https://atech-auto.com/assets/files/videos/' . $video->video_file,
+            'video_url' => $videoUrl,
             'playlist_id' => $playlistId,
             'status' => $video->status,
             'views_count' => $video->total_view_counts,
