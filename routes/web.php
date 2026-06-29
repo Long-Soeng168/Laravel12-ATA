@@ -59,10 +59,3 @@ require __DIR__ . '/order.php';
 // ========= Telegram Testing Route =========
 require __DIR__ . '/telegram.php';
 
-use App\Http\Controllers\R2FileController;
-
-Route::get('/r2', [R2FileController::class, 'index']);
-Route::post('/r2/upload', [R2FileController::class, 'upload']);
-Route::delete('/r2/delete', [R2FileController::class, 'delete']);
-Route::post('/r2/folder', [R2FileController::class, 'createFolder']);
-Route::get('/r2/view', [R2FileController::class, 'view'])->name('r2.view');

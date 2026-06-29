@@ -149,6 +149,7 @@ export default function CreateForm() {
                 <div className="form-field-container">
                     {shops != null && (
                         <FormCombobox
+                            className="md:col-span-2"
                             name="shop_id"
                             label={t('Shop')}
                             options={shops?.map((shop: any) => ({

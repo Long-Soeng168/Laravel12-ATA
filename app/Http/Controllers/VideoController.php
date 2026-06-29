@@ -99,12 +99,6 @@ class VideoController extends Controller implements HasMiddleware
         unset($validated['image']);
         unset($validated['video_file']);
 
-        foreach ($validated as $key => $value) {
-            if ($value === '') {
-                $validated[$key] = null;
-            }
-        }
-
         if ($image_file) {
             try {
                 $created_image_name = ImageHelper::uploadAndResizeImage($image_file, 'assets/images/videos', 600);
@@ -116,12 +110,22 @@ class VideoController extends Controller implements HasMiddleware
 
         if ($video_file) {
             try {
-                $created_video_file  = FileHelper::uploadFile($video_file, 'assets/files/videos', true);
-                $validated['video_file'] = $created_video_file;
+                // Upload directly to Cloudflare R2 (s3 disk) into the 'Videos' directory
+                $path = \Illuminate\Support\Facades\Storage::disk('s3')->putFile('Videos', $video_file);
+                $validated['video_file'] = $path;
             } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload video: ' . $e->getMessage());
+                return redirect()->back()->with('error', 'Failed to upload video to R2: ' . $e->getMessage());
             }
         }
+
+        // if ($video_file) {
+        //     try {
+        //         $created_video_file  = FileHelper::uploadFile($video_file, 'assets/files/videos', true);
+        //         $validated['video_file'] = $created_video_file;
+        //     } catch (\Exception $e) {
+        //         return redirect()->back()->with('error', 'Failed to upload video: ' . $e->getMessage());
+        //     }
+        // }
 
         Video::create($validated);
 
@@ -191,21 +195,35 @@ class VideoController extends Controller implements HasMiddleware
                 return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
             }
         }
+        // if ($video_file = $request->file('video_file')) {
+        //     try {
+        //         $created_video_file  = FileHelper::uploadFile($video_file, 'assets/files/videos', true);
+        //         $validated['video_file'] = $created_video_file;
+
+        //         // if ($video->video_file && $created_video_file) {
+        //         //     FileHelper::deleteFile($video->video_file, 'assets/files/videos');
+        //         // }
+        //     } catch (\Exception $e) {
+        //         return redirect()->back()->with('error', 'Failed to upload video: ' . $e->getMessage());
+        //     }
+        // }
         if ($video_file = $request->file('video_file')) {
             try {
-                $created_video_file  = FileHelper::uploadFile($video_file, 'assets/files/videos', true);
-                $validated['video_file'] = $created_video_file;
+                // Upload new video directly to Cloudflare R2 (s3 disk)
+                $path = \Illuminate\Support\Facades\Storage::disk('s3')->putFile('Videos', $video_file);
+                $validated['video_file'] = $path;
 
-                // if ($video->video_file && $created_video_file) {
-                //     FileHelper::deleteFile($video->video_file, 'assets/files/videos');
-                // }
+                // Delete the old video from R2 if it exists
+                if ($video->video_file && $path) {
+                    \Illuminate\Support\Facades\Storage::disk('s3')->delete($video->video_file);
+                }
             } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload video: ' . $e->getMessage());
+                return redirect()->back()->with('error', 'Failed to upload video to R2: ' . $e->getMessage());
             }
         }
         $video->update($validated);
 
-        return redirect()->route('videos.index')->with('success', 'Video updated successfully!');
+        return redirect()->back()->with('success', 'Video updated successfully!');
     }
     public function update_status(Request $request, Video $video)
     {
