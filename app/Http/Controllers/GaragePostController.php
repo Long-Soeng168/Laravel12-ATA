@@ -363,14 +363,12 @@ class GaragePostController extends Controller implements HasMiddleware
             abort(403, 'You do not have permission to delete this post.');
         }
 
-        // Delete associated physical images
-        if (count($garage_post->images) > 0) {
-            foreach ($garage_post->images as $image) {
-                ImageHelper::deleteImage($image->image, 'assets/images/garage_posts');
-            }
+        // Soft delete associated images
+        if ($garage_post->images()->exists()) {
+            $garage_post->images()->delete();
         }
 
-        // Delete the database record (this will also delete the image records if you have cascading deletes set up)
+        // Delete the database record (this will now be a soft delete)
         $garage_post->delete();
 
         return redirect()->back()->with('success', 'Post deleted successfully.');
@@ -384,10 +382,9 @@ class GaragePostController extends Controller implements HasMiddleware
             abort(403, 'You do not have permission to update this post.');
         }
 
-        if (count($garage_post->images) > 0) {
-            foreach ($garage_post->images as $image) {
-                ImageHelper::deleteImage($image->image, 'assets/images/garage_posts');
-            }
+        // Soft delete associated images
+        if ($garage_post->images()->exists()) {
+            $garage_post->images()->delete();
         }
         $garage_post->delete();
         return redirect()->back()->with('success', 'Post deleted successfully.');
@@ -410,10 +407,10 @@ class GaragePostController extends Controller implements HasMiddleware
             abort(403, 'You do not have permission to delete this image.');
         }
 
-        // Delete the physical file via helper
-        ImageHelper::deleteImage($image->image, 'assets/images/garage_posts');
+        // The physical file is intentionally kept since we are using soft deletes
+        // ImageHelper::deleteImage($image->image, 'assets/images/garage_posts');
 
-        // Delete the database record
+        // Delete the database record (soft delete)
         $image->delete();
 
         return redirect()->back()->with('success', 'Image deleted successfully.');

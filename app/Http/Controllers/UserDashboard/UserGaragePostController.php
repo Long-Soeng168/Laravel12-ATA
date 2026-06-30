@@ -242,10 +242,9 @@ class UserGaragePostController extends Controller implements HasMiddleware
      */
     public function destroy(GaragePost $user_garage_post)
     {
-        if (count($user_garage_post->images) > 0) {
-            foreach ($user_garage_post->images as $image) {
-                ImageHelper::deleteImage($image->image, 'assets/images/garage_posts');
-            }
+        // Soft delete associated images
+        if ($user_garage_post->images()->exists()) {
+            $user_garage_post->images()->delete();
         }
         $user_garage_post->delete();
         return redirect()->back()->with('success', 'post deleted successfully.');
@@ -258,10 +257,10 @@ class UserGaragePostController extends Controller implements HasMiddleware
             return redirect()->back()->with('error', 'Image not found.');
         }
 
-        // Call helper function to delete image
-        ImageHelper::deleteImage($image->image, 'assets/images/garage_posts');
+        // The physical file is intentionally kept since we are using soft deletes
+        // ImageHelper::deleteImage($image->image, 'assets/images/garage_posts');
 
-        // Delete from DB
+        // Delete from DB (soft delete)
         $image->delete();
 
         return redirect()->back()->with('success', 'Image deleted successfully.');

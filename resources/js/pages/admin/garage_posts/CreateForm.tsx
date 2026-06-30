@@ -36,7 +36,7 @@ export default function CreateForm() {
         const url = editData?.id ? `/admin/garage_posts/${editData.id}/update` : '/admin/garage_posts';
 
         post(url, {
-            preserveScroll: true,
+            preserveScroll: false,
             onSuccess: (page: any) => {
                 if (!editData) reset();
                 setFiles(null);
