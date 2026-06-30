@@ -56,6 +56,14 @@ class PagePositionController extends Controller implements HasMiddleware
     }
 
     /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        return Inertia::render('admin/page_positions/Create');
+    }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -106,6 +114,27 @@ class PagePositionController extends Controller implements HasMiddleware
         PagePosition::create($validated);
 
         return redirect()->back()->with('success', 'Page position created successfully!');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(PagePosition $pagePosition)
+    {
+        return Inertia::render('admin/page_positions/Create', [
+            'editData' => $pagePosition,
+            'readOnly' => true,
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(PagePosition $pagePosition)
+    {
+        return Inertia::render('admin/page_positions/Create', [
+            'editData' => $pagePosition,
+        ]);
     }
 
     /**

@@ -7,7 +7,7 @@ import { FormErrorLabel } from './FormErrorLabel';
 import { FormLabel } from './FormLabel';
 
 interface FormFieldProps {
-    id: string;
+    id?: string;
     name?: string;
     label: string;
     description?: string;
