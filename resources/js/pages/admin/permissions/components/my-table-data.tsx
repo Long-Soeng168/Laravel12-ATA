@@ -54,7 +54,7 @@ const MyTableData = () => {
                                 </TableCell>
                                 <TableCell>
                                     <span className="flex h-full items-center justify-start">
-                                        {hasPermission('permission delete') && <DeleteButton deletePath="/admin/permissions/" id={item.id} />}
+                                        {/* {hasPermission('permission delete') && <DeleteButton deletePath="/admin/permissions/" id={item.id} />} */}
                                         {hasPermission('permission update') && <EditButton item={item} />}
                                     </span>
                                 </TableCell>

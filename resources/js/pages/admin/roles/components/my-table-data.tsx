@@ -61,7 +61,7 @@ const MyTableData = () => {
                                                 </MyTooltipButton>
                                             </Link>
                                         )}
-                                        {hasPermission('role delete') && <DeleteButton deletePath="/admin/roles/" id={item.id} />}
+                                        {/* {hasPermission('role delete') && <DeleteButton deletePath="/admin/roles/" id={item.id} />} */}
 
                                         {hasPermission('role update') && (
                                             <Link href={`/admin/roles/${item.id}/edit`}>
