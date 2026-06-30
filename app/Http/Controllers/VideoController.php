@@ -117,7 +117,7 @@ class VideoController extends Controller implements HasMiddleware
 
         if ($image_file) {
             try {
-                $created_image_name = ImageHelper::uploadAndResizeImage($image_file, 'assets/images/videos', 600);
+                $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/videos', 600);
                 $validated['image'] = $created_image_name;
             } catch (\Exception $e) {
                 return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
@@ -143,7 +143,9 @@ class VideoController extends Controller implements HasMiddleware
         //     }
         // }
 
-        Video::create($validated);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($validated) {
+            Video::create($validated);
+        });
 
         return redirect()->back()->with('success', 'Video created successfully!');
     }
@@ -153,8 +155,20 @@ class VideoController extends Controller implements HasMiddleware
      */
     public function show(Video $video)
     {
-        return Inertia::render('admin/videos/Show', [
-            'video' => $video
+        // Append the R2 temporary URL so the frontend can preview the current video
+        if ($video->video_file) {
+            $video->video_url = \Illuminate\Support\Facades\Storage::disk('s3')->temporaryUrl(
+                $video->video_file,
+                now()->addMinutes(60)
+            );
+        } else {
+            $video->video_url = null;
+        }
+
+        return Inertia::render('admin/videos/Create', [
+            'editData' => $video,
+            'playlists' => VideoPlayList::where('status', 'active')->orderBy('id', 'desc')->get(),
+            'readOnly' => true,
         ]);
     }
 
@@ -211,7 +225,7 @@ class VideoController extends Controller implements HasMiddleware
 
         if ($image_file) {
             try {
-                $created_image_name = ImageHelper::uploadAndResizeImage($image_file, 'assets/images/videos', 600);
+                $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/videos', 600);
                 $validated['image'] = $created_image_name;
 
                 if ($video->image && $created_image_name) {
@@ -247,7 +261,9 @@ class VideoController extends Controller implements HasMiddleware
                 return redirect()->back()->with('error', 'Failed to upload video to R2: ' . $e->getMessage());
             }
         }
-        $video->update($validated);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $video) {
+            $video->update($validated);
+        });
 
         return redirect()->back()->with('success', 'Video updated successfully!');
     }
