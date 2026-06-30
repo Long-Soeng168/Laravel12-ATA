@@ -1,9 +1,9 @@
 import useTranslation from '@/hooks/use-translation';
 
-const NoDataDisplay = ({ title = 'No Data Found', message = '' }) => {
+const NoDataDisplay = ({ title = 'No Data', message = '' }) => {
     const { t } = useTranslation();
     return (
-        <div className="flex w-full flex-col items-center justify-center px-8">
+        <div className="flex w-full flex-col items-center justify-center pt-4 px-8">
             <div className="flex max-w-md flex-col items-center text-center transition-opacity duration-300 ease-in-out">
                 {/* Image with subtle styling */}
                 <img

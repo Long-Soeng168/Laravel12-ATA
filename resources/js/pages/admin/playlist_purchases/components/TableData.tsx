@@ -49,9 +49,7 @@ const TableData = () => {
                                         <div className="flex items-center gap-2">
                                             <EditItemButton url={`/admin/playlist_purchases/${item.id}/edit`} permission="video update" />
                                             <ViewItemButton url={`/admin/playlist_purchases/${item.id}`} permission="video view" />
-                                            <div className="hidden">
-                                                <DeleteItemButton deletePath="/admin/playlist_purchases/" id={item.id} permission="video delete" />
-                                            </div>
+                                            <DeleteItemButton deletePath="/admin/playlist_purchases/" id={item.id} permission="video delete" />
                                         </div>
                                     </TableCellActions>
                                     <TableCellText value={item.playlist?.name} />
