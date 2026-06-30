@@ -45,7 +45,7 @@ const TableData = () => {
                                 <TableCellActions>
                                     <div className="flex items-center gap-2">
                                         <EditItemButton url={`/admin/banner_positions/${item.id}/edit`} permission="banner update" />
-                                        {/* <ViewItemButton url={`/admin/banner_positions/${item.id}`} /> */}
+                                        <ViewItemButton url={`/admin/banner_positions/${item.id}`} permission="banner view" />
                                         <DeleteItemButton deletePath="/admin/banner_positions/" id={item.id} permission="banner delete" />
                                     </div>
                                 </TableCellActions>

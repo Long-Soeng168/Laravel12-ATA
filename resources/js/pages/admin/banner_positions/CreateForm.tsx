@@ -5,7 +5,6 @@ import { FormCombobox } from '@/components/Input/FormCombobox';
 import { FormField } from '@/components/Input/FormField';
 import { FormFieldTextArea } from '@/components/Input/FormFieldTextArea';
 import { FileInput, FileUploader, FileUploaderContent, FileUploaderItem } from '@/components/ui/file-upload';
-import { FormDescription } from '@/components/ui/form';
 import { ProgressWithValue } from '@/components/ui/progress-with-value';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import useTranslation from '@/hooks/use-translation';
@@ -39,7 +38,7 @@ export default function CreateForm({ editData, readOnly }: { editData?: any; rea
         },
     };
 
-    const { post, data, setData, progress, processing, transform, errors, reset } = inertiaUseForm({
+    const { post, data, setData, progress, processing, transform, errors, clearErrors, reset } = inertiaUseForm({
         name: editData?.name || '',
         name_kh: editData?.name_kh || '',
         code: editData?.code || '',
@@ -52,6 +51,7 @@ export default function CreateForm({ editData, readOnly }: { editData?: any; rea
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
+        clearErrors();
 
         transform((data) => ({
             ...data,
@@ -103,11 +103,11 @@ export default function CreateForm({ editData, readOnly }: { editData?: any; rea
             )}
             {Object.keys(errors).length > 0 && <AllErrorsAlert title={t('Please fix the following errors')} errors={errors} />}
 
-            <div className="flex w-full items-center justify-between border-b pb-4">
+            <div className="mb-4">
                 <Tabs defaultValue={currentLocale} onValueChange={setCurrentLocale} className="w-full">
-                    <TabsList>
-                        <TabsTrigger value="Default">{t('Default')}</TabsTrigger>
-                        <TabsTrigger value="Khmer">{t('Khmer')}</TabsTrigger>
+                    <TabsList className="bg-border/50 border p-1 dark:border-white/20">
+                        <TabsTrigger value="Default" className="h-full dark:data-[state=active]:bg-white/20">{t('Default')}</TabsTrigger>
+                        <TabsTrigger value="Khmer" className="h-full dark:data-[state=active]:bg-white/20">{t('Khmer')}</TabsTrigger>
                     </TabsList>
                 </Tabs>
             </div>
@@ -159,7 +159,7 @@ export default function CreateForm({ editData, readOnly }: { editData?: any; rea
                 </div>
             )}
 
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className={currentLocale === 'Khmer' ? 'hidden' : 'grid gap-6 md:grid-cols-2'}>
                 <FormField
                     name="code"
                     label={t('Unique Code')}
@@ -217,7 +217,7 @@ export default function CreateForm({ editData, readOnly }: { editData?: any; rea
 
                         {editData?.image && (
                             <div className="mt-4 p-1">
-                                <FormDescription className="mb-2">{t('Uploaded Image')}</FormDescription>
+                                <p className="text-[0.8rem] text-muted-foreground mb-2">{t('Uploaded Image')}</p>
                                 <div className="grid w-full grid-cols-3 gap-2 rounded-md lg:grid-cols-5">
                                     <span className="group bg-background relative aspect-square h-auto w-full overflow-hidden rounded-md border p-0">
                                         <img
@@ -265,7 +265,7 @@ export default function CreateForm({ editData, readOnly }: { editData?: any; rea
 
                         {editData?.banner && (
                             <div className="mt-4 p-1">
-                                <FormDescription className="mb-2">{t('Uploaded Banner')}</FormDescription>
+                                <p className="text-[0.8rem] text-muted-foreground mb-2">{t('Uploaded Banner')}</p>
                                 <div className="grid w-full grid-cols-2 gap-2 rounded-md lg:grid-cols-3">
                                     <span className="group bg-background relative aspect-video h-auto w-full overflow-hidden rounded-md border p-0">
                                         <img

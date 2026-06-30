@@ -99,7 +99,7 @@ class CourseController extends Controller implements HasMiddleware
 
         Course::create($validated);
 
-        return redirect()->route('courses.index')->with('success', 'Course created successfully!');
+        return redirect()->back()->with('success', 'Course created successfully!');
     }
 
     /**
@@ -107,8 +107,9 @@ class CourseController extends Controller implements HasMiddleware
      */
     public function show(Course $course)
     {
-        return Inertia::render('admin/courses/Show', [
-            'course' => $course
+        return Inertia::render('admin/courses/Create', [
+            'editData' => $course,
+            'readOnly' => true,
         ]);
     }
 
@@ -117,8 +118,9 @@ class CourseController extends Controller implements HasMiddleware
      */
     public function edit(Course $course)
     {
-        return Inertia::render('admin/courses/Edit', [
-            'course' => $course
+        return Inertia::render('admin/courses/Create', [
+            'editData' => $course,
+            'readOnly' => false,
         ]);
     }
 
@@ -164,7 +166,7 @@ class CourseController extends Controller implements HasMiddleware
         }
         $course->update($validated);
 
-        return redirect()->route('courses.index')->with('success', 'Course updated successfully!');
+        return redirect()->back()->with('success', 'Course updated successfully!');
     }
 
     public function update_status(Request $request, Course $course)

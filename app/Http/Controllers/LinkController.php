@@ -60,7 +60,9 @@ class LinkController extends Controller implements HasMiddleware
      */
     public function create()
     {
-        return Inertia::render('admin/links/Create');
+        return Inertia::render('admin/links/Create', [
+            'types' => Type::where(['status' => 'active', 'type_of' => 'link'])->orderBy('id', 'desc')->get(),
+        ]);
     }
 
     /**
@@ -106,7 +108,11 @@ class LinkController extends Controller implements HasMiddleware
      */
     public function show(Link $link)
     {
-        //
+        return Inertia::render('admin/links/Create', [
+            'editData' => $link,
+            'readOnly' => true,
+            'types' => Type::where(['status' => 'active', 'type_of' => 'link'])->orderBy('id', 'desc')->get(),
+        ]);
     }
 
     /**
@@ -114,7 +120,11 @@ class LinkController extends Controller implements HasMiddleware
      */
     public function edit(Link $link)
     {
-        //
+        return Inertia::render('admin/links/Create', [
+            'editData' => $link,
+            'readOnly' => false,
+            'types' => Type::where(['status' => 'active', 'type_of' => 'link'])->orderBy('id', 'desc')->get(),
+        ]);
     }
 
     /**
