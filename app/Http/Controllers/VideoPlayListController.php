@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\ImageHelper;
 use App\Models\VideoPlayList;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 use Illuminate\Routing\Controllers\Middleware;
@@ -87,18 +88,20 @@ class VideoPlayListController extends Controller implements HasMiddleware
             }
         }
 
-        if ($image_file) {
-            try {
-                $created_image_name = ImageHelper::uploadAndResizeImage($image_file, 'assets/images/video_play_lists', 600);
-                $validated['image'] = $created_image_name;
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
-            }
+        try {
+            DB::transaction(function () use ($validated, $image_file) {
+                if ($image_file) {
+                    $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/video_play_lists', 600);
+                    $validated['image'] = $created_image_name;
+                }
+
+                VideoPlayList::create($validated);
+            });
+
+            return redirect()->back()->with('success', 'Video play list created successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to create video play list: ' . $e->getMessage());
         }
-
-        VideoPlayList::create($validated);
-
-        return redirect()->route('video_play_lists.index')->with('success', 'Video play list created successfully!');
     }
 
     /**
@@ -106,8 +109,9 @@ class VideoPlayListController extends Controller implements HasMiddleware
      */
     public function show(VideoPlayList $video_play_list)
     {
-        return Inertia::render('admin/video_play_lists/Show', [
-            'videoPlayList' => $video_play_list
+        return Inertia::render('admin/video_play_lists/Create', [
+            'editData' => $video_play_list,
+            'readOnly' => true,
         ]);
     }
 
@@ -117,8 +121,8 @@ class VideoPlayListController extends Controller implements HasMiddleware
      */
     public function edit(VideoPlayList $video_play_list)
     {
-        return Inertia::render('admin/video_play_lists/Edit', [
-            'videoPlayList' => $video_play_list
+        return Inertia::render('admin/video_play_lists/Create', [
+            'editData' => $video_play_list
         ]);
     }
 
@@ -148,22 +152,26 @@ class VideoPlayListController extends Controller implements HasMiddleware
             }
         }
 
-        if ($image_file) {
-            try {
-                $created_image_name = ImageHelper::uploadAndResizeImage($image_file, 'assets/images/video_play_lists', 600);
-                $validated['image'] = $created_image_name;
+        try {
+            DB::transaction(function () use ($validated, $image_file, $video_play_list) {
+                if ($image_file) {
+                    $created_image_name = ImageHelper::uploadAndResizeImageWebp($image_file, 'assets/images/video_play_lists', 600);
+                    $validated['image'] = $created_image_name;
 
-                if ($video_play_list->image && $created_image_name) {
-                    ImageHelper::deleteImage($video_play_list->image, 'assets/images/video_play_lists');
+                    if ($video_play_list->image && $created_image_name) {
+                        ImageHelper::deleteImage($video_play_list->image, 'assets/images/video_play_lists');
+                    }
                 }
-            } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Failed to upload image: ' . $e->getMessage());
-            }
-        }
-        $video_play_list->update($validated);
+                
+                $video_play_list->update($validated);
+            });
 
-        return redirect()->route('video_play_lists.index')->with('success', 'Video play list updated successfully!');
+            return redirect()->back()->with('success', 'Video play list updated successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to update video play list: ' . $e->getMessage());
+        }
     }
+    
     public function update_status(Request $request, VideoPlayList $video_play_list)
     {
         $request->validate([
@@ -183,12 +191,14 @@ class VideoPlayListController extends Controller implements HasMiddleware
      */
     public function destroy(VideoPlayList $video_play_list)
     {
-        // Delete image if exists
-        if ($video_play_list->image) {
-            ImageHelper::deleteImage($video_play_list->image, 'assets/images/video_play_lists');
-        }
-        $video_play_list->delete();
+        try {
+            DB::transaction(function () use ($video_play_list) {
+                $video_play_list->delete();
+            });
 
-        return redirect()->route('video_play_lists.index')->with('success', 'Video play list deleted successfully!');
+            return redirect()->route('video_play_lists.index')->with('success', 'Video play list deleted successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to delete video play list: ' . $e->getMessage());
+        }
     }
 }
