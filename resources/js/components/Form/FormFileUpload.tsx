@@ -10,6 +10,7 @@ interface FormFileUploadProps {
     label: string;
     error?: string;
     requred?: boolean;
+    disabled?: boolean;
     files: File[] | null;
     setFiles: (value: File[] | null) => void;
     dropzoneOptions?: {
@@ -17,11 +18,12 @@ interface FormFileUploadProps {
         maxSize?: number;
         multiple?: boolean;
         accept?: Record<string, string[]>;
+        disabled?: boolean;
     };
     className?: string;
 }
 
-const FormFileUpload: React.FC<FormFileUploadProps> = ({ id, label, error, files, setFiles, dropzoneOptions, className = '', requred = false }) => {
+const FormFileUpload: React.FC<FormFileUploadProps> = ({ id, label, error, files, setFiles, dropzoneOptions, className = '', requred = false, disabled = false }) => {
     const defaultDropzone = {
         maxFiles: 1,
         maxSize: 1024 * 1024 * 4,
@@ -29,10 +31,10 @@ const FormFileUpload: React.FC<FormFileUploadProps> = ({ id, label, error, files
         accept: { 'image/jpeg': ['.jpeg', '.jpg'], 'image/png': ['.png'], 'image/gif': ['.gif'], 'image/webp': ['.webp'], 'image/svg+xml': ['.svg'] },
     };
 
-    const finalDropzoneOptions = { ...defaultDropzone, ...dropzoneOptions };
+    const finalDropzoneOptions = { ...defaultDropzone, ...dropzoneOptions, disabled: disabled || dropzoneOptions?.disabled };
     const { t } = useTranslation();
     return (
-        <div className="grid content-start gap-2">
+        <div className={`grid content-start gap-2 ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
             <FormLabel id={id} label={label} required={requred} />
             <FileUploader
                 value={files}

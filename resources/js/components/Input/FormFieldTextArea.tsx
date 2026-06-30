@@ -18,6 +18,7 @@ interface FormFieldTextAreaProps {
     containerClassName?: string;
     required?: boolean;
     description?: string;
+    disabled?: boolean;
 }
 
 export const FormFieldTextArea: React.FC<FormFieldTextAreaProps> = ({
@@ -32,6 +33,7 @@ export const FormFieldTextArea: React.FC<FormFieldTextAreaProps> = ({
     containerClassName,
     required = false,
     description,
+    disabled = false,
 }) => {
     const { t } = useTranslation();
     return (
@@ -40,6 +42,7 @@ export const FormFieldTextArea: React.FC<FormFieldTextAreaProps> = ({
             <Textarea
                 id={id}
                 name={name}
+                disabled={disabled}
                 placeholder={placeholder ? t(placeholder) : t(label)}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}

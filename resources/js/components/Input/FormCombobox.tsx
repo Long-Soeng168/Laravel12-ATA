@@ -20,6 +20,7 @@ interface FormComboboxProps {
     comboboxClassName?: string;
     description?: string;
     disable?: boolean;
+    disabled?: boolean;
 }
 
 export const FormCombobox: React.FC<FormComboboxProps> = ({
@@ -37,13 +38,14 @@ export const FormCombobox: React.FC<FormComboboxProps> = ({
     comboboxClassName,
     description,
     disable = false,
+    disabled = false,
 }) => {
     const { t } = useTranslation();
     return (
         <div className={`grid content-start gap-2 ${className || ''}`}>
             <FormLabel id={id} label={label} required={required} />
             <ComboboxSelect
-                disable={disable}
+                disable={disabled || disable}
                 options={options}
                 value={value}
                 className={comboboxClassName}

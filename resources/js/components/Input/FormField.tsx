@@ -20,6 +20,7 @@ interface FormFieldProps {
     containerClassName?: string;
     required?: boolean;
     disable?: boolean;
+    disabled?: boolean;
 }
 
 export const FormField: React.FC<FormFieldProps> = ({
@@ -36,13 +37,14 @@ export const FormField: React.FC<FormFieldProps> = ({
     containerClassName,
     required = false,
     disable = false,
+    disabled = false,
 }) => {
     const { t } = useTranslation();
     return (
         <div className={cn('grid content-start gap-2', containerClassName)}>
             <FormLabel id={id} label={label} required={required} />
             <Input
-                disabled={disable}
+                disabled={disabled || disable}
                 type={type}
                 id={id}
                 name={name}
