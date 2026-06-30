@@ -100,8 +100,11 @@ class PlaylistPurchaseController extends Controller implements HasMiddleware
      */
     public function show(PlaylistPurchase $playlist_purchase)
     {
-        return Inertia::render('admin/playlist_purchases/Show', [
-            'video' => $playlist_purchase
+        return Inertia::render('admin/playlist_purchases/Create', [
+            'editData' => $playlist_purchase,
+            'readOnly' => true,
+            'playlists' => VideoPlayList::where('status', 'active')->orderBy('id', 'desc')->get(),
+            'users' => User::orderBy('id', 'desc')->get(),
         ]);
     }
 
@@ -114,6 +117,7 @@ class PlaylistPurchaseController extends Controller implements HasMiddleware
         return Inertia::render('admin/playlist_purchases/Create', [
             'editData' => $playlist_purchase,
             'playlists' => VideoPlayList::where('status', 'active')->orderBy('id', 'desc')->get(),
+            'users' => User::orderBy('id', 'desc')->get(),
         ]);
     }
 
@@ -121,7 +125,7 @@ class PlaylistPurchaseController extends Controller implements HasMiddleware
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, PlaylistPurchase $purchase)
+    public function update(Request $request, PlaylistPurchase $playlist_purchase)
     {
         $validated = $request->validate([
             'playlist_id' => 'required|exists:video_play_lists,id',
@@ -132,9 +136,9 @@ class PlaylistPurchaseController extends Controller implements HasMiddleware
 
         $validated['updated_by'] = $request->user()->id;
 
-        $purchase->update($validated);
+        $playlist_purchase->update($validated);
 
-        return redirect()->route('playlist_purchases.index')->with('success', 'Purchase updated successfully!');
+        return redirect()->back()->with('success', 'Purchase updated successfully!');
     }
 
     public function update_status(Request $request, PlaylistPurchase $playlist_purchase)
@@ -148,31 +152,14 @@ class PlaylistPurchaseController extends Controller implements HasMiddleware
 
         return redirect()->back()->with('success', 'Status updated successfully!');
     }
-    public function playlist_purchases_free_status(Request $request, PlaylistPurchase $playlist_purchase)
-    {
-        $request->validate([
-            'status' => 'required|string|in:free,subscribe',
-        ]);
-        $playlist_purchase->update([
-            'is_free' => $request->status == 'free',
-        ]);
-
-        return redirect()->back()->with('success', 'Status updated successfully!');
-    }
+    
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(PlaylistPurchase $playlist_purchase)
     {
-        // Delete image if exists
-        if ($playlist_purchase->image) {
-            ImageHelper::deleteImage($playlist_purchase->image, 'assets/images/playlist_purchases');
-        }
-        if ($playlist_purchase->file_name) {
-            FileHelper::deleteFile($playlist_purchase->file_name, 'assets/files/playlist_purchases');
-        }
         $playlist_purchase->delete();
 
-        return redirect()->route('playlist_purchases.index')->with('success', 'Video deleted successfully!');
+        return redirect()->back()->with('success', 'Purchase deleted successfully!');
     }
 }

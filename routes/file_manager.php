@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\File;
 
 Route::middleware('auth')->group(function () {
     // Project Route
-    // Route::resource('api/file_manager/files', FileController::class);
-    // Route::resource('api/file_manager/folders', FolderController::class);
+    Route::resource('api/file_manager/files', FileController::class);
+    Route::resource('api/file_manager/folders', FolderController::class);
 
     // Route::get('/r2', [R2FileController::class, 'index']);
     // Route::post('/r2/upload', [R2FileController::class, 'upload']);
