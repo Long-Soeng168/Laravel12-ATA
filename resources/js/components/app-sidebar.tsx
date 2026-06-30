@@ -140,12 +140,6 @@ export function AppSidebar() {
                     icon: FilePenLineIcon,
                     url: '/admin/garage_posts',
                 },
-                {
-                    title: t('Provinces'),
-                    permission: 'garage view',
-                    icon: MapPinIcon,
-                    url: '/admin/provinces',
-                },
             ],
         },
         {
@@ -373,6 +367,12 @@ export function AppSidebar() {
             permission: 'application_info view',
             url: '/admin/application_info',
             icon: InfoIcon,
+        },
+        {
+            title: t('Provinces'),
+            permission: 'garage view',
+            url: '/admin/provinces',
+            icon: MapPinIcon,
         },
         // {
         //     title: t('Types'),

@@ -1,5 +1,4 @@
 import DeleteButton from '@/components/delete-button';
-import MyImageGallery from '@/components/my-image-gallery';
 import MyNoData from '@/components/my-no-data';
 import MyUpdateStatusButton from '@/components/my-update-status-button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -58,12 +57,12 @@ const MyTableData = () => {
                             </TableHead>
                             <TableHead onClick={() => handleSort('short_description')}>
                                 <span className="flex cursor-pointer items-center">
-                                    <ArrowUpDown size={16} /> {t('Short description')}
+                                    <ArrowUpDown size={16} /> {t('Short Description')}
                                 </span>
                             </TableHead>
                             <TableHead onClick={() => handleSort('short_description_kh')}>
                                 <span className="flex cursor-pointer items-center">
-                                    <ArrowUpDown size={16} /> {t('Short description Khmer')}
+                                    <ArrowUpDown size={16} /> {t('Short Description Khmer')}
                                 </span>
                             </TableHead>
                             <TableHead onClick={() => handleSort('status')}>

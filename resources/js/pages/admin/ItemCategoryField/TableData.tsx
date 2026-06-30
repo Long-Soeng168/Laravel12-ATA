@@ -38,7 +38,7 @@ const TableData = () => {
                                 className="table-row"
                                 key={item.id}
                                 // Double click to manage options for this specific field
-                                onDoubleClick={() => router.visit(`/admin/item-category-field-options?field_id=${item.id}`)}
+                                onDoubleClick={() => item.options_count > 0 ? router.visit(`/admin/item-category-field-options?field_id=${item.id}`) : {}}
                             >
                                 <TableCellText value={item.id} />
 

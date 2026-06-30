@@ -476,7 +476,7 @@ export default function Create() {
                                 <FormMessage>{errors.video_file && <div>{errors.video_file}</div>}</FormMessage>
                                 {editData?.video_file && (
                                     <div className="mt-4 p-1">
-                                        <FormDescription className="mb-2">Uploaded Video.</FormDescription>
+                                        <FormDescription className="mb-2">{t('Uploaded Video.')}</FormDescription>
                                         <div className="grid w-full grid-cols-2 gap-2 rounded-md lg:grid-cols-3">
                                             <span
                                                 className="bg-background h-full w-full overflow-hidden rounded-md border p-0" // Removed aspect-video, added h-40
@@ -490,12 +490,12 @@ export default function Create() {
                                                     >
                                                         <source src={`${editData?.video_url}`} />
                                                     </video>
-                                                    {/* <div className="bg-opacity-50 absolute right-0 bottom-0 left-0 bg-black p-1 text-xs text-white">
-                                                        {editData?.video_file}
-                                                    </div> */}
                                                 </div>
                                             </span>
                                         </div>
+                                        <p>
+                                            {t('File')}: {editData?.video_file}
+                                        </p>
                                     </div>
                                 )}
                             </FormItem>

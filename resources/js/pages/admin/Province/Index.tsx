@@ -3,24 +3,22 @@ import NewItemButton from '@/components/Button/NewItemButton';
 import RefreshButton from '@/components/Button/RefreshButton';
 import PaginationTabs from '@/components/Pagination/PaginationTabs';
 import TableDataSearch from '@/components/Search/TableDataSearch';
+import useTranslation from '@/hooks/use-translation';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { usePage } from '@inertiajs/react';
 import TableData from './TableData';
 
 const Index = () => {
+    const { t } = useTranslation();
+
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Dashboard', href: '/dashboard' },
+        { title: t('Dashboard'), href: '/dashboard' },
         {
-            title: 'Garages',
-            href: '/admin/garages',
-        },
-        {
-            title: 'Provinces',
+            title: t('Provinces'),
             href: '/admin/provinces',
         },
     ];
-    const { filteredCategory } = usePage<any>().props;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <>
