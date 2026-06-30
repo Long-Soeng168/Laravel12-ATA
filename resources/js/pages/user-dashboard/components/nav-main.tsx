@@ -19,6 +19,14 @@ export function NavMainUser({ items = [] }: { items: NavItem[] }) {
     const { t } = useTranslation();
     const page = usePage();
     const hasRole = useRole();
+
+    const isUrlActive = (targetUrl?: string, currentUrl?: string) => {
+        if (!targetUrl || !currentUrl || targetUrl === '') return false;
+        if (currentUrl === targetUrl) return true;
+        if (currentUrl.startsWith(targetUrl + '/')) return true;
+        if (currentUrl.startsWith(targetUrl + '?')) return true;
+        return false;
+    };
     return (
         <SidebarGroup className="px-2 py-0">
             <SidebarGroupLabel>{t('Menu')}</SidebarGroupLabel>
@@ -30,7 +38,10 @@ export function NavMainUser({ items = [] }: { items: NavItem[] }) {
                         <Collapsible
                             key={item.title}
                             asChild
-                            defaultOpen={item.url === page.url || item.subItems?.some((sub) => sub.url === page.url) || page.url.startsWith(item.url)}
+                            defaultOpen={
+                                isUrlActive(item.url, page.url) ||
+                                item.subItems?.some((sub) => isUrlActive(sub.url, page.url))
+                            }
                             className="group/collapsible"
                         >
                             <SidebarMenuItem>
@@ -63,7 +74,7 @@ export function NavMainUser({ items = [] }: { items: NavItem[] }) {
                                             if (!hasRole(subItem.permission)) return null;
                                             return (
                                                 <SidebarMenuSubItem key={subItem.title}>
-                                                    <SidebarMenuSubButton isActive={subItem.url === page.url} asChild>
+                                                    <SidebarMenuSubButton isActive={isUrlActive(subItem.url, page.url)} asChild>
                                                         {subItem.external_url && subItem.url == '' ? (
                                                             <a href={subItem.external_url} target="_blank">
                                                                 {subItem.icon && <subItem.icon className="stroke-primary" />}
@@ -85,7 +96,7 @@ export function NavMainUser({ items = [] }: { items: NavItem[] }) {
                         </Collapsible>
                     ) : (
                         <SidebarMenuItem key={item.title}>
-                            <SidebarMenuButton asChild isActive={item.url === page.url} tooltip={{ children: item.title }}>
+                            <SidebarMenuButton asChild isActive={isUrlActive(item.url, page.url)} tooltip={{ children: item.title }}>
                                 {item.external_url && item.url == '' ? (
                                     <a href={item.external_url} target="_blank">
                                         {item.icon && <item.icon />}
