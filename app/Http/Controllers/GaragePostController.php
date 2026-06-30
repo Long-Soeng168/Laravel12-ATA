@@ -28,7 +28,7 @@ class GaragePostController extends Controller implements HasMiddleware
             new Middleware('permission:garage view', only: ['index', 'show']),
             new Middleware('permission:garage create', only: ['create']),
             new Middleware('permission:garage update', only: ['edit', 'update_status']),
-            new Middleware('permission:garage delete', only: ['destroy', 'destroy_image']),
+            new Middleware('permission:garage delete', only: ['destroy']),
         ];
     }
 
@@ -117,7 +117,7 @@ class GaragePostController extends Controller implements HasMiddleware
         }
 
         // Authorization: Prevent normal users from creating posts for other people's garages
-        if ($user->garage_id !== $garage->id || !$user->hasAnyPermission('garage create')) {
+        if ($validated['garage_id'] && !$user->hasAnyPermission('garage create')) {
             abort(403, 'You do not have permission to create a post for this garage.');
         }
 
@@ -267,7 +267,7 @@ class GaragePostController extends Controller implements HasMiddleware
 
         // Authorization Check: Prevent normal users from editing posts they don't own
         // or moving posts to a garage they don't own.
-        if ($user->garage_id !== $garage->id || !$user->hasAnyPermission('garage update')) {
+        if ($user->garage_id !== $garage->id && !$user->hasAnyPermission('garage update')) {
             abort(403, 'You do not have permission to update this post.');
         }
 
@@ -355,12 +355,24 @@ class GaragePostController extends Controller implements HasMiddleware
      */
     public function destroy(GaragePost $garage_post)
     {
+        $user = Auth::user();
+
+        // Authorization Check: 
+        // Abort ONLY IF they are NOT from this garage AND they DO NOT have admin permission.
+        if ($user->garage_id !== $garage_post->garage_id && !$user->hasAnyPermission('garage update')) {
+            abort(403, 'You do not have permission to delete this post.');
+        }
+
+        // Delete associated physical images
         if (count($garage_post->images) > 0) {
             foreach ($garage_post->images as $image) {
                 ImageHelper::deleteImage($image->image, 'assets/images/garage_posts');
             }
         }
+
+        // Delete the database record (this will also delete the image records if you have cascading deletes set up)
         $garage_post->delete();
+
         return redirect()->back()->with('success', 'Post deleted successfully.');
     }
 
@@ -383,15 +395,25 @@ class GaragePostController extends Controller implements HasMiddleware
 
     public function destroy_image(GaragePostImage $image)
     {
-        // Debugging (Check if model is found)
-        if (!$image) {
-            return redirect()->back()->with('error', 'Image not found.');
+        $user = Auth::user();
+
+        // Failsafe: Ensure the post relationship exists before checking garage_id
+        if (!$image->post) {
+            abort(404, 'Parent post not found.');
         }
 
-        // Call helper function to delete image
+        $garageId = $image->post->garage_id;
+
+        // Authorization Check: 
+        // Abort ONLY IF they are NOT from this garage AND they DO NOT have admin permission.
+        if ($user->garage_id !== $garageId && !$user->hasAnyPermission('garage update')) {
+            abort(403, 'You do not have permission to delete this image.');
+        }
+
+        // Delete the physical file via helper
         ImageHelper::deleteImage($image->image, 'assets/images/garage_posts');
 
-        // Delete from DB
+        // Delete the database record
         $image->delete();
 
         return redirect()->back()->with('success', 'Image deleted successfully.');

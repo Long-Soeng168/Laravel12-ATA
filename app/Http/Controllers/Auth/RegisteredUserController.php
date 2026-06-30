@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Validation\Rule;
 
 class RegisteredUserController extends Controller
 {
@@ -33,7 +34,12 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
-            'phone' => 'required|string|max:14',
+            'phone' => [
+                'required',
+                'string',
+                'regex:/^0\d{7,14}$/',
+                Rule::unique('users')
+            ],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 

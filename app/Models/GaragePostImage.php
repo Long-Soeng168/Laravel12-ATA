@@ -10,4 +10,9 @@ class GaragePostImage extends Model
     /** @use HasFactory<\Database\Factories\GaragePostImageFactory> */
     use HasFactory;
     protected $guarded = [];
+
+    public function post()
+    {
+        return $this->belongsTo(GaragePost::class, 'post_id', 'id');
+    }
 }

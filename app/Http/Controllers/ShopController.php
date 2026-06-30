@@ -234,8 +234,12 @@ class ShopController extends Controller implements HasMiddleware
 
             $shop->categories()->sync($categoryCodes);
 
+            $owner->update([
+                'shop_id' => $shop->id,
+            ]);
+
             Item::where('user_id', $owner->id)->update([
-                'shop_id' => $owner->id
+                'shop_id' => $shop->id
             ]);
         });
 

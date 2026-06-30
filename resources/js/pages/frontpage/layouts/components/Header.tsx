@@ -112,7 +112,7 @@ export default function Header() {
                         <div className="bg-border h-3.5 w-px"></div>
                         <Link
                             prefetch
-                            href={auth?.user?.id ? '/profile' : '/login'}
+                            href={'/profile'}
                             className="bg-primary text-primary-foreground hover:bg-primary/90 flex cursor-pointer items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors sm:px-3.5 sm:py-2 sm:text-sm"
                         >
                             <User className="h-3.5 w-3.5 max-[455px]:hidden" />

@@ -218,7 +218,7 @@ export default function CreateForm() {
                         placeholder={t('Name')}
                         containerClassName="md:col-span-2"
                     />
-                    <div className="space-y-4">
+                    <div className="space-y-4 md:col-span-2">
                         {/* Primary Phone and Add Button Row */}
                         <div className="flex flex-1 items-start gap-4">
                             <div className="flex-1">

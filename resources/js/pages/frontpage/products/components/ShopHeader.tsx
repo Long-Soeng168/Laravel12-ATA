@@ -175,7 +175,7 @@ const ShopHeader = () => {
                                       : 'Welcome! You are currently viewing your own profile.'}
                             </span>
                         </div>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap justify-center gap-2">
                             <Link
                                 href="/create-product" // <-- Update this to your actual create post route
                                 className="bg-true-primary hover:bg-true-primary dark:bg-true-primary dark:hover:bg-true-primary inline-flex shrink-0 items-center justify-center gap-1.5 rounded px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors"
