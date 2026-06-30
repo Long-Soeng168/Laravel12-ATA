@@ -234,8 +234,8 @@ class ShopController extends Controller implements HasMiddleware
 
             $shop->categories()->sync($categoryCodes);
 
-            $owner->update([
-                'shop_id' => $shop->id,
+            Item::where('user_id', $owner->id)->update([
+                'shop_id' => $owner->id
             ]);
         });
 
@@ -291,7 +291,7 @@ class ShopController extends Controller implements HasMiddleware
         if (!$request->boolean('is_user_create_or_edit_shop') && !$hasPermission) {
             abort(403, 'Cannot Update Shop.');
         }
-        
+
         // 2. Format Dates and Meta
         if (!empty($validated['expired_at'])) {
             $validated['expired_at'] = Carbon::parse($validated['expired_at'])
