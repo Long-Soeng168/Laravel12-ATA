@@ -26,7 +26,7 @@ const ProductCard = ({ item }: ProductCardProps) => {
     }
 
     // --- Specs Logic ---
-    let shortSpecs: string[] = [];
+    const shortSpecs: string[] = [];
     const rawDisplayAttrs = item?.display_attributes;
 
     if (rawDisplayAttrs && typeof rawDisplayAttrs === 'object') {

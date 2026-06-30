@@ -1,41 +1,38 @@
-import MyAddNewButton from '@/components/my-add-new-button';
-import { MyPagination } from '@/components/my-pagination';
-import { MyRefreshButton } from '@/components/my-refresh-button';
-import { MySearchTableData } from '@/components/my-search-table-data';
-import usePermission from '@/hooks/use-permission';
+import NewItemButton from '@/components/Button/NewItemButton';
+import RefreshButton from '@/components/Button/RefreshButton';
+import PaginationTabs from '@/components/Pagination/PaginationTabs';
+import TableDataSearch from '@/components/Search/TableDataSearch';
+import useTranslation from '@/hooks/use-translation';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { MyFilterButton } from './components/my-filter-button';
-import MyTableData from './components/my-table-data';
-import useTranslation from '@/hooks/use-translation';
+import TableData from './components/TableData';
 
 const Index = () => {
-    const {t} = useTranslation();
+    const { t } = useTranslation();
+
     const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: t('Banners'),
-            href: '/admin/banners',
-        },
+        { title: t('Dashboard'), href: '/dashboard' },
+        { title: t('Banners'), href: '#' },
     ];
-    const hasPermission = usePermission();
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <div className="flex max-w-[100vw] flex-wrap items-center justify-end gap-2">
-                <div className="flex max-w-[100vw] flex-wrap items-center justify-start gap-2 max-lg:w-full lg:flex-1">
-                    <MySearchTableData />
-                    <MyFilterButton />
-                    <MyRefreshButton />
-                    <span className="flex-1"></span>
-                    {/* <MyExportButton />
-                    <MyImportButton /> */}
+            <div className="flex flex-wrap items-center justify-between gap-2 px-2 py-6">
+                <div className="flex w-full gap-2 md:w-auto">
+                    <TableDataSearch placeholder={t('Search banners...')} />
+                    <RefreshButton />
+                </div>
 
-                    {hasPermission('banner create') && <MyAddNewButton url="/admin/banners/create" type="link" />}
+                <div className="flex w-full justify-end md:w-auto">
+                    <NewItemButton url="/admin/banners/create" permission="banner create" />
                 </div>
             </div>
-            <div className="h-2" />
-            <MyTableData />
-            <MyPagination />
+
+            <TableData />
+
+            <div className="mt-4">
+                <PaginationTabs />
+            </div>
         </AppLayout>
     );
 };

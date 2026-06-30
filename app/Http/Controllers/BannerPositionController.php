@@ -56,6 +56,14 @@ class BannerPositionController extends Controller implements HasMiddleware
     }
 
     /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        return Inertia::render('admin/banner_positions/Create');
+    }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -106,6 +114,27 @@ class BannerPositionController extends Controller implements HasMiddleware
         BannerPosition::create($validated);
 
         return redirect()->back()->with('success', 'Page position created successfully!');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(BannerPosition $bannerPosition)
+    {
+        return Inertia::render('admin/banner_positions/Create', [
+            'editData' => $bannerPosition,
+            'readOnly' => true,
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(BannerPosition $bannerPosition)
+    {
+        return Inertia::render('admin/banner_positions/Create', [
+            'editData' => $bannerPosition,
+        ]);
     }
 
     /**
