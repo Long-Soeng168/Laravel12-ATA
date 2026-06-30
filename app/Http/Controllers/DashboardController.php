@@ -21,9 +21,6 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $totalPostViews = ItemDailyView::query()->sum('view_counts');
-
-
         $item_counts = Item::count();
         $item_counts = Item::count();
         $post_counts = Post::count();
@@ -41,7 +38,6 @@ class DashboardController extends Controller
             'featureDatas' => [
                 'item_counts' => $item_counts,
                 'post_counts' => $post_counts,
-                'totalPostViews' => $totalPostViews,
                 'page_counts' => $page_counts,
                 'link_counts' => $link_counts,
                 'banner_counts' => $banner_counts,
