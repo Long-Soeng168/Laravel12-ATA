@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateDtcRequest;
 use App\Models\Dtc;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
 
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -71,12 +72,14 @@ class DtcController extends Controller implements HasMiddleware
             'short_description_kh' => 'nullable|string|max:2000',
         ]);
 
-        $validated['created_by'] = $request->user()->id;
-        $validated['updated_by'] = $request->user()->id;
+        DB::transaction(function () use ($request, $validated) {
+            $validated['created_by'] = $request->user()->id;
+            $validated['updated_by'] = $request->user()->id;
 
-        Dtc::create($validated);
+            Dtc::create($validated);
+        });
 
-        return redirect()->route('dtcs.index')->with('success', 'Dtc created successfully!');
+        return redirect()->back()->with('success', 'Dtc created successfully!');
     }
 
     /**
@@ -84,8 +87,9 @@ class DtcController extends Controller implements HasMiddleware
      */
     public function show(Dtc $dtc)
     {
-        return Inertia::render('admin/dtcs/Show', [
-            'dtc' => $dtc
+        return Inertia::render('admin/dtcs/Create', [
+            'editData' => $dtc,
+            'readOnly' => true,
         ]);
     }
 
@@ -94,8 +98,8 @@ class DtcController extends Controller implements HasMiddleware
      */
     public function edit(Dtc $dtc)
     {
-        return Inertia::render('admin/dtcs/Edit', [
-            'dtc' => $dtc
+        return Inertia::render('admin/dtcs/Create', [
+            'editData' => $dtc,
         ]);
     }
 
@@ -109,11 +113,13 @@ class DtcController extends Controller implements HasMiddleware
             'short_description' => 'nullable|string|max:2000',
             'short_description_kh' => 'nullable|string|max:2000',
         ]);
-        $validated['updated_by'] = $request->user()->id;
+        
+        DB::transaction(function () use ($request, $validated, $dtc) {
+            $validated['updated_by'] = $request->user()->id;
+            $dtc->update($validated);
+        });
 
-        $dtc->update($validated);
-
-        return redirect()->route('dtcs.index')->with('success', 'Dtc updated successfully!');
+        return redirect()->back()->with('success', 'Dtc updated successfully!');
     }
 
     public function update_status(Request $request, Dtc $dtc)
@@ -133,8 +139,10 @@ class DtcController extends Controller implements HasMiddleware
      */
     public function destroy(Dtc $dtc)
     {
-        $dtc->delete();
+        DB::transaction(function () use ($dtc) {
+            $dtc->delete();
+        });
 
-        return redirect()->route('dtcs.index')->with('success', 'Dtc deleted successfully!');
+        return redirect()->back()->with('success', 'Dtc deleted successfully!');
     }
 }
