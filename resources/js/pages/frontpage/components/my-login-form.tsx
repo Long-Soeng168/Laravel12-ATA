@@ -31,12 +31,12 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
             <form onSubmit={handleSubmit}>
                 <div className="flex flex-col gap-6">
                     <div className="grid gap-2">
-                        <Label htmlFor="email">{currentLocale === 'kh' ? 'អ៊ីមែល' : 'Email'}</Label>
+                        <Label htmlFor="email">{currentLocale === 'kh' ? 'អ៊ីមែល ឬលេខទូរស័ព្ទ' : 'Email or Phone'}</Label>
                         <Input
                             className="bg-background h-11 rounded-xs dark:border-white/10 dark:bg-white/5"
                             id="email"
-                            type="email"
-                            placeholder="m@example.com"
+                            type="text"
+                            placeholder={currentLocale === 'kh' ? 'm@example.com ឬ 012345678' : 'm@example.com or 012345678'}
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
                             disabled={processing}

@@ -89,9 +89,9 @@ const SectionCards = () => {
                 )} */}
             </div>
 
-            <hr className="mt-6" />
+            <hr className="mt-6 hidden" />
 
-            <div className="my-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="my-6 hidden grid-cols-1 gap-4 sm:grid-cols-2">
                 {!hasRole('Shop') && (
                     <Link
                         prefetch

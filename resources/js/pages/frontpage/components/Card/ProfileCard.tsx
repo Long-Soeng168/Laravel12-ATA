@@ -43,10 +43,6 @@ const ProfileCard = () => {
                                     alt={user?.name || 'Student Avatar'}
                                     className="h-full w-full object-cover"
                                 />
-                            ) : user?.gender === 'female' && user?.student_id ? (
-                                <img src="/assets/icons/avatars/student_female.png" alt="Female Avatar" className="h-full w-full object-cover" />
-                            ) : user?.gender === 'male' && user?.student_id ? (
-                                <img src="/assets/icons/avatars/student_male.png" alt="Male Avatar" className="h-full w-full object-cover" />
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center p-4">
                                     <img src="/assets/icons/avatars/user.png" alt="User Avatar" className="h-full w-full object-cover" />
@@ -66,7 +62,7 @@ const ProfileCard = () => {
 
                             <div className="flex flex-wrap items-center">
                                 <p className="flex text-base font-semibold tracking-wide text-gray-600 capitalize dark:text-gray-400">
-                                    {t(user?.gender) || 'N/A'}
+                                    {t(user?.gender) || ''}
                                 </p>
                             </div>
                         </div>
