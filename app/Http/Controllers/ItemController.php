@@ -671,12 +671,11 @@ class ItemController extends Controller implements HasMiddleware
     public function item_view_counts(Request $request)
     {
         $search = $request->input('search', '');
-        $sortBy = $request->input('sortBy', 'view_date');
+        $sortBy = $request->input('sortBy', 'total_views');
         $sortDirection = $request->input('sortDirection', 'desc');
         $status = $request->input('status');
         $from_date = $request->input('from_date', null);
         $to_date = $request->input('to_date', null);
-
 
         $from_date = $from_date
             ? Carbon::parse($from_date)->setTimezone('Asia/Bangkok')->startOfDay()->toDateString()
@@ -687,9 +686,7 @@ class ItemController extends Controller implements HasMiddleware
 
         $query = ItemDailyView::query();
 
-
         if ($from_date) {
-            // dd($from_date);
             $query->where('view_date', '>=', $from_date);
         }
 
@@ -698,11 +695,10 @@ class ItemController extends Controller implements HasMiddleware
         }
 
         if ($status) {
-            $query->where('status', $status);
+            $query->whereHas('item', function($q) use($status) {
+                $q->where('status', $status);
+            });
         }
-        $query->orderBy($sortBy, $sortDirection);
-
-        $query->with('item');
 
         if ($search) {
             $query->whereHas('item', function ($subQuery) use ($search) {
@@ -710,14 +706,51 @@ class ItemController extends Controller implements HasMiddleware
                     ->orWhere('id', 'LIKE', "%{$search}%");
             });
         }
-        // Clone the query for total views calculation
-        $totalViews = (clone $query)->sum('view_counts');
 
-        $tableData = $query->paginate(perPage: 10)->onEachSide(1);
+        // Clone the query for total views calculation
+        $baseQuery = clone $query;
+        $totalViews = $baseQuery->sum('view_counts');
+        
+        // Calculate Daily Trends for the charts (sum views grouped by view_date)
+        $dailyTrends = (clone $baseQuery)
+            ->selectRaw('view_date, sum(view_counts) as total_views')
+            ->groupBy('view_date')
+            ->orderBy('view_date', 'asc')
+            ->get();
+
+        // Calculate Grouped Table Data by Item ID
+        $groupedQuery = (clone $query)
+            ->selectRaw('item_id, sum(view_counts) as total_views')
+            ->groupBy('item_id');
+
+        // Sorting logic
+        if ($sortBy === 'total_views') {
+            $groupedQuery->orderBy('total_views', $sortDirection);
+        } else if ($sortBy === 'id' || $sortBy === 'item_id') {
+            $groupedQuery->orderBy('item_id', $sortDirection);
+        } else {
+             $groupedQuery->orderBy('total_views', 'desc');
+        }
+
+        $groupedQuery->with(['item' => function ($q) {
+            $q->with('shop', 'category', 'images');
+        }]);
+
+        $tableData = $groupedQuery->paginate(perPage: 10)->onEachSide(1);
+
+        // Find the top item
+        $topItemRecord = (clone $query)
+            ->selectRaw('item_id, sum(view_counts) as total_views')
+            ->groupBy('item_id')
+            ->orderBy('total_views', 'desc')
+            ->with('item')
+            ->first();
 
         return Inertia::render('admin/items/ItemViewCount', [
             'tableData' => $tableData,
-            'totalViews' => $totalViews,
+            'totalViews' => (int) $totalViews,
+            'dailyTrends' => $dailyTrends,
+            'topItem' => $topItemRecord,
             'from_date' => $from_date,
             'to_date' => $to_date,
         ]);

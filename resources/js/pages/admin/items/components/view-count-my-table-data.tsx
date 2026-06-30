@@ -9,9 +9,9 @@ import { ArrowUpDown, ScanEyeIcon } from 'lucide-react';
 import { useState } from 'react';
 
 const ViewCountMyTableData = () => {
-    const { t } = useTranslation();
+    const { t, currentLocale } = useTranslation();
 
-    const { tableData } = usePage().props;
+    const { tableData } = usePage().props as any;
     const queryParams = new URLSearchParams(window.location.search);
     const currentPath = window.location.pathname; // Get dynamic path
 
@@ -34,7 +34,7 @@ const ViewCountMyTableData = () => {
 
     return (
         <>
-            <ScrollArea className="w-full rounded-md border">
+            <ScrollArea className="w-full rounded-md">
                 <MyImageGallery
                     imagePath="/assets/images/items/"
                     selectedImages={selectedImages}
@@ -44,15 +44,14 @@ const ViewCountMyTableData = () => {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[50px]">{t('Item ID')}</TableHead>
-                            <TableHead className="text-left">{t('Action')}</TableHead>
-                            <TableHead onClick={() => handleSort('view_date')}>
+                            <TableHead className="w-[50px]">{currentLocale === 'kh' ? 'លេខសម្គាល់ទំនិញ' : 'Item ID'}</TableHead>
+                            <TableHead className="text-left">{currentLocale === 'kh' ? 'សកម្មភាព' : 'Action'}</TableHead>
+                            <TableHead className="text-left">{currentLocale === 'kh' ? 'ទំនិញ' : 'Item'}</TableHead>
+                            <TableHead onClick={() => handleSort('total_views')}>
                                 <span className="flex cursor-pointer items-center">
-                                    <ArrowUpDown size={16} /> {t('View Date')}
+                                    <ArrowUpDown size={16} /> {currentLocale === 'kh' ? 'ចំនួនអ្នកមើលសរុប' : 'Total Views'}
                                 </span>
                             </TableHead>
-                            <TableHead className="text-left">{t('Item')}</TableHead>
-                            <TableHead className="text-left"> {t('View Counts')}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -65,23 +64,18 @@ const ViewCountMyTableData = () => {
                                 <TableCell>
                                     <span className="flex h-full items-center justify-start">
                                         <Link href={`/admin/items/${item.item_id}`}>
-                                            <MyTooltipButton title={t('Show Item')} side="bottom" variant="ghost">
+                                            <MyTooltipButton title={currentLocale === 'kh' ? 'បង្ហាញទំនិញ' : 'Show Item'} side="bottom" variant="ghost">
                                                 <ScanEyeIcon />
                                             </MyTooltipButton>
                                         </Link>
                                     </span>
                                 </TableCell>
-                                <TableCell className="whitespace-nowrap">
-                                    {item.view_date
-                                        ? new Date(item.view_date).toLocaleDateString('en-UK', {
-                                              year: 'numeric',
-                                              month: 'long',
-                                              day: 'numeric',
-                                          })
-                                        : '---'}
-                                </TableCell>
                                 <TableCell>{item.item?.name || '---'}</TableCell>
-                                <TableCell>{item.view_counts || '---'}</TableCell>
+                                <TableCell>
+                                    <div className="font-bold text-primary bg-primary/10 inline-block px-2 py-1 rounded-md">
+                                        {item.total_views ? parseInt(item.total_views).toLocaleString() : '---'}
+                                    </div>
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
