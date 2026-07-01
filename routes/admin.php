@@ -150,6 +150,8 @@ Route::middleware('auth')->group(function () {
     Route::post('admin/videos/{video}/update', [VideoController::class, 'update']);
     Route::post('admin/videos/{video}/update_status', [VideoController::class, 'update_status']);
     Route::post('admin/videos_free_status/{video}/update_status', [VideoController::class, 'videos_free_status']);
+    Route::get('admin/video_view_counts', [VideoController::class, 'video_view_counts']);
+    Route::get('admin/video_view_counts/export', [VideoController::class, 'video_view_counts_export']);
 
     // Playlist Purchase Route
     Route::resource('admin/playlist_purchases', PlaylistPurchaseController::class);

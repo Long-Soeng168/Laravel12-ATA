@@ -26,4 +26,9 @@ class Video extends Model
     {
         return $this->belongsTo(User::class, 'updated_by', 'id');
     }
+
+    public function dailyViews()
+    {
+        return $this->hasMany(VideoDailyView::class, 'video_id', 'id');
+    }
 }

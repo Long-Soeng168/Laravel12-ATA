@@ -44,7 +44,6 @@ class VideoController extends Controller implements HasMiddleware
             });
         }
 
-        $query->orderBy('id', 'desc');
         // $query->orderBy('playlist_code');
         $query->orderBy($sortBy, $sortDirection);
 
@@ -304,5 +303,115 @@ class VideoController extends Controller implements HasMiddleware
         $video->delete();
 
         return redirect()->route('videos.index')->with('success', 'Video deleted successfully!');
+    }
+
+    public function video_view_counts(Request $request)
+    {
+        $search = $request->input('search', '');
+        $sortBy = $request->input('sortBy', 'total_views');
+        $sortDirection = $request->input('sortDirection', 'desc');
+        $status = $request->input('status');
+        $from_date = $request->input('from_date', null);
+        $to_date = $request->input('to_date', null);
+
+        $from_date = $from_date
+            ? \Carbon\Carbon::parse($from_date)->setTimezone('Asia/Bangkok')->startOfDay()->toDateString()
+            : \Carbon\Carbon::now()->setTimezone('Asia/Bangkok')->startOfYear()->toDateString();
+        $to_date = $to_date
+            ? \Carbon\Carbon::parse($to_date)->setTimezone('Asia/Bangkok')->endOfDay()->toDateString()
+            : now()->endOfDay()->toDateString();
+
+        $query = \App\Models\VideoDailyView::query();
+
+        if ($from_date) {
+            $query->where('view_date', '>=', $from_date);
+        }
+
+        if ($to_date) {
+            $query->where('view_date', '<=', $to_date);
+        }
+
+        if ($status) {
+            $query->whereHas('video', function($q) use($status) {
+                $q->where('status', $status);
+            });
+        }
+
+        if ($search) {
+            $query->whereHas('video', function ($subQuery) use ($search) {
+                $subQuery->where('title', 'LIKE', "%{$search}%")
+                    ->orWhere('id', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Clone the query for total views calculation
+        $baseQuery = clone $query;
+        $totalViews = $baseQuery->sum('view_counts');
+        
+        // Calculate Daily Trends for the charts (sum views grouped by view_date)
+        $dailyTrends = (clone $baseQuery)
+            ->selectRaw('view_date, sum(view_counts) as total_views')
+            ->groupBy('view_date')
+            ->orderBy('view_date', 'asc')
+            ->get();
+
+        // Calculate Grouped Table Data by Video ID
+        $groupedQuery = (clone $query)
+            ->selectRaw('video_id, sum(view_counts) as total_views')
+            ->groupBy('video_id');
+
+        // Sorting logic
+        if ($sortBy === 'total_views') {
+            $groupedQuery->orderBy('total_views', $sortDirection);
+        } else if ($sortBy === 'id' || $sortBy === 'video_id') {
+            $groupedQuery->orderBy('video_id', $sortDirection);
+        } else {
+             $groupedQuery->orderBy('total_views', 'desc');
+        }
+
+        $groupedQuery->with('video');
+
+        $tableData = $groupedQuery->paginate(perPage: 10)->onEachSide(1);
+
+        // Find the top video
+        $topVideoRecord = (clone $query)
+            ->selectRaw('video_id, sum(view_counts) as total_views')
+            ->groupBy('video_id')
+            ->orderBy('total_views', 'desc')
+            ->with('video')
+            ->first();
+
+        return Inertia::render('admin/videos/VideoViewCount', [
+            'tableData' => $tableData,
+            'totalViews' => (int) $totalViews,
+            'dailyTrends' => $dailyTrends,
+            'topVideo' => $topVideoRecord,
+            'from_date' => $from_date,
+            'to_date' => $to_date,
+        ]);
+    }
+
+    public function video_view_counts_export(Request $request)
+    {
+        $from_date = $request->input('from_date', null);
+        $to_date = $request->input('to_date', null);
+
+        $from_date = $from_date
+            ? \Carbon\Carbon::parse($from_date)->setTimezone('Asia/Bangkok')->startOfDay()->toDateString()
+            : \Carbon\Carbon::now()->setTimezone('Asia/Bangkok')->startOfYear()->toDateString();
+        $to_date = $to_date
+            ? \Carbon\Carbon::parse($to_date)->setTimezone('Asia/Bangkok')->endOfDay()->toDateString()
+            : now()->endOfDay()->toDateString();
+
+        $filters = [
+            'search' => $request->input('search', ''),
+            'status' => $request->input('status'),
+            'sortBy' => $request->input('sortBy', 'view_date'),
+            'sortDirection' => $request->input('sortDirection', 'desc'),
+            'from_date' => $from_date,
+            'to_date' => $to_date,
+        ];
+
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\VideoDailyViewExport($filters), 'video_views.xlsx');
     }
 }

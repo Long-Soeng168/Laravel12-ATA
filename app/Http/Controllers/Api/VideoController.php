@@ -90,11 +90,16 @@ class VideoController extends Controller
                 $status = 'need_purchase';
             }
 
-            $videoUrl = $disk->temporaryUrl(
-                'Videos/Testing/video1.mp4',
-                now()->addMinutes(60) // expire time
-            );
-
+            if ($status !== 'can_watch') {
+                $videoUrl = null;
+            } elseif ($item->video_file) {
+                $videoUrl = $disk->temporaryUrl(
+                    $item->video_file,
+                    now()->addMinutes(60)
+                );
+            } else {
+                $videoUrl = null;
+            }
 
             return [
                 'user' => $userPlaylists,
@@ -104,8 +109,7 @@ class VideoController extends Controller
                 'image_url' =>  env('APP_URL') . '/assets/images/videos/thumb/' . $item->image,
                 'description' => $item->short_description, // or $item->short_description_kh
                 'video_name' => $item->video_file,
-                'video_url' => env('APP_URL') . '/assets/files/videos/' . $item->video_file,
-                // 'video_url' => $videoUrl,
+                'video_url' => $videoUrl,
                 'playlist_id' => $playlist->id ?? null,
                 'playlist_code' => $item->playlist_code ?? null,
                 'status' => $status, //can_watch, need_login, need_purchase
@@ -125,23 +129,59 @@ class VideoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Video $video)
+    public function show(Request $request, Video $video)
     {
         // Increment views_count
         $video->increment('total_view_counts');
 
+        $date = now()->toDateString();
+        $view = \App\Models\VideoDailyView::firstOrCreate(
+            ['video_id' => $video->id, 'view_date' => $date],
+            ['view_counts' => 0]
+        );
+        $view->increment('view_counts');
+
         // Return video in old key format
         $playlistId = optional(VideoPlayList::where('code', $video->playlist_code)->first())->id;
 
+        $user = null;
+        $header = $request->header('Authorization');
+
+        if ($header && str_starts_with($header, 'Bearer ')) {
+            $token = substr($header, 7);
+
+            $accessToken = PersonalAccessToken::findToken($token);
+            if ($accessToken) {
+                $user = $accessToken->tokenable;
+            }
+        }
+
+        $userPlaylists = [];
+        if ($user) {
+            $userPlaylists = PlaylistPurchase::where('user_id', $user->id)->where('status', 'completed')->get()->pluck('playlist_id')->toArray();
+        }
+
+        if ($video->is_free) {
+            $status = 'can_watch';
+        } elseif (empty($user)) {
+            $status = 'need_login';
+        } elseif (in_array($playlistId ?? 0, $userPlaylists)) {
+            $status = 'can_watch';
+        } else {
+            $status = 'need_purchase';
+        }
+
         $disk = Storage::disk('s3');
-        $videoUrl = $disk->temporaryUrl(
-            'Videos/Testing/video1.mp4',
-            now()->addMinutes(60) // expire time
-        );
-        $videoUrl = $disk->temporaryUrl(
-            'Videos/Testing' . $video->video_file,
-            now()->addMinutes(60) // expire time
-        );
+        if ($status !== 'can_watch') {
+            $videoUrl = null;
+        } elseif ($video->video_file) {
+            $videoUrl = $disk->temporaryUrl(
+                $video->video_file,
+                now()->addMinutes(60)
+            );
+        } else {
+            $videoUrl = null;
+        }
 
         $formattedVideo = [
             'id' => $video->id,
@@ -153,7 +193,7 @@ class VideoController extends Controller
             // 'video_url' => 'https://atech-auto.com/assets/files/videos/' . $video->video_file,
             'video_url' => $videoUrl,
             'playlist_id' => $playlistId,
-            'status' => $video->status,
+            'status' => $status,
             'views_count' => $video->total_view_counts,
             'is_free' => $video->is_free,
             'created_at' => $video->created_at,
