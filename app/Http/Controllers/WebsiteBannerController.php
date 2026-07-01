@@ -66,8 +66,8 @@ class WebsiteBannerController extends Controller implements HasMiddleware
     {
         $validated = $request->validate([
             'type' => 'required|string|in:hero_slide,mini_banner',
-            'title_1' => 'nullable|string|max:255',
-            'title_1_kh' => 'nullable|string|max:255',
+            'title_1' => 'required|string|max:255',
+            'title_1_kh' => 'required|string|max:255',
             'title_2' => 'nullable|string|max:255',
             'title_2_kh' => 'nullable|string|max:255',
             'description' => 'nullable|string',
@@ -75,11 +75,11 @@ class WebsiteBannerController extends Controller implements HasMiddleware
             'btn_text' => 'nullable|string|max:100',
             'btn_text_kh' => 'nullable|string|max:100',
             'btn_link' => 'nullable|string|max:255',
-            'background_color' => 'nullable|string|max:20',
-            'foreground_color' => 'nullable|string|max:20',
+            'background_color' => 'required|string|max:20',
+            'foreground_color' => 'required|string|max:20',
             'sort_order' => 'nullable|integer',
             'status' => 'nullable|string|in:active,inactive',
-            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
+            'image_file' => 'required|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',
         ]);
 
         $validated['created_by'] = $request->user()->id;
@@ -130,8 +130,8 @@ class WebsiteBannerController extends Controller implements HasMiddleware
     {
         $validated = $request->validate([
             'type' => 'required|string|in:hero_slide,mini_banner',
-            'title_1' => 'nullable|string|max:255',
-            'title_1_kh' => 'nullable|string|max:255',
+            'title_1' => 'required|string|max:255',
+            'title_1_kh' => 'required|string|max:255',
             'title_2' => 'nullable|string|max:255',
             'title_2_kh' => 'nullable|string|max:255',
             'description' => 'nullable|string',
@@ -139,8 +139,8 @@ class WebsiteBannerController extends Controller implements HasMiddleware
             'btn_text' => 'nullable|string|max:100',
             'btn_text_kh' => 'nullable|string|max:100',
             'btn_link' => 'nullable|string|max:255',
-            'background_color' => 'nullable|string|max:20',
-            'foreground_color' => 'nullable|string|max:20',
+            'background_color' => 'required|string|max:20',
+            'foreground_color' => 'required|string|max:20',
             'sort_order' => 'nullable|integer',
             'status' => 'nullable|string|in:active,inactive',
             'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp,svg|max:2048',

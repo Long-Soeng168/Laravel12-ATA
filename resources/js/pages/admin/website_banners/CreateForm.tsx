@@ -134,16 +134,14 @@ export default function CreateForm({
                         error={errors.title_1_kh}
                         disabled={readOnly}
                     />
-                    {data.type === 'hero_slide' && (
-                        <FormField
-                            name="title_2_kh"
-                            label={t('Title Line 2 Khmer')}
-                            value={data.title_2_kh}
-                            onChange={(val) => setData('title_2_kh', val)}
-                            error={errors.title_2_kh}
-                            disabled={readOnly}
-                        />
-                    )}
+                    <FormField
+                        name="title_2_kh"
+                        label={t('Title Line 2 Khmer')}
+                        value={data.title_2_kh}
+                        onChange={(val) => setData('title_2_kh', val)}
+                        error={errors.title_2_kh}
+                        disabled={readOnly}
+                    />
                     <FormFieldTextArea
                         id="description_kh"
                         name="description_kh"
@@ -172,16 +170,14 @@ export default function CreateForm({
                         error={errors.title_1}
                         disabled={readOnly}
                     />
-                    {data.type === 'hero_slide' && (
-                        <FormField
-                            name="title_2"
-                            label={t('Title Line 2')}
-                            value={data.title_2}
-                            onChange={(val) => setData('title_2', val)}
-                            error={errors.title_2}
-                            disabled={readOnly}
-                        />
-                    )}
+                    <FormField
+                        name="title_2"
+                        label={t('Title Line 2')}
+                        value={data.title_2}
+                        onChange={(val) => setData('title_2', val)}
+                        error={errors.title_2}
+                        disabled={readOnly}
+                    />
                     <FormFieldTextArea
                         id="description"
                         name="description"
