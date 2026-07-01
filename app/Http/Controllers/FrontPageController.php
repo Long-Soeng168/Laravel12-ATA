@@ -132,7 +132,7 @@ class FrontPageController extends Controller
             'website_banners'   => $website_banners,
         ]);
     }
-    
+
     public function garages(Request $request)
     {
         $search = $request->input('search', '');
@@ -254,7 +254,7 @@ class FrontPageController extends Controller
         ]);
     }
 
-    
+
 
 
     public function online_trainings(Request $request)
@@ -324,7 +324,7 @@ class FrontPageController extends Controller
     {
         $privacies = Page::with('children')->where('code', 'PRIVACY-POLICY-PAGE')->where('status', 'active')->orderBy('order_index')->first();
         // return $privacies;
-        return Inertia::render("frontpage/Privacy", [
+        return Inertia::render("frontpage/privacy/Index", [
             'privacies' => $privacies,
         ]);
     }
@@ -338,46 +338,18 @@ class FrontPageController extends Controller
     }
     public function about()
     {
-        $about = Page::with('children')->where('code', 'ABOUT-ATA-AUTO')->where('status', 'active')->orderBy('order_index')->first();
-        $whyChooseUs = Page::with('children')->where('code', 'WHY-CHOOSE-US')->where('status', 'active')->orderBy('order_index')->first();
-        $buildForEveryone = Page::with('children')->where('code', 'BUILD-FOR-EVERYONE')->where('status', 'active')->orderBy('order_index')->first();
-        $getInTouch = Page::with('children')->where('code', 'GET-IN-TOUCH')->where('status', 'active')->orderBy('order_index')->first();
-        $privacyPolicy = Page::with('children')->where('code', 'PRIVACY-POLICY')->where('status', 'active')->orderBy('order_index')->first();
-        $getStartedNow = Page::with('children')->where('code', 'GET-STARTED-NOW')->where('status', 'active')->orderBy('order_index')->first();
-        // return $about;
-        return Inertia::render("frontpage/About", [
-            "about" => $about,
-            "whyChooseUs" => $whyChooseUs,
-            "buildForEveryone" => $buildForEveryone,
-            "getInTouch" => $getInTouch,
-            "privacyPolicy" => $privacyPolicy,
-            "getStartedNow" => $getStartedNow,
-        ]);
+        return Inertia::render("frontpage/about/Index", []);
     }
     public function about_webview()
     {
-        $about = Page::with('children')->where('code', 'ABOUT-ATA-AUTO')->where('status', 'active')->orderBy('order_index')->first();
-        $whyChooseUs = Page::with('children')->where('code', 'WHY-CHOOSE-US')->where('status', 'active')->orderBy('order_index')->first();
-        $buildForEveryone = Page::with('children')->where('code', 'BUILD-FOR-EVERYONE')->where('status', 'active')->orderBy('order_index')->first();
-        $getInTouch = Page::with('children')->where('code', 'GET-IN-TOUCH')->where('status', 'active')->orderBy('order_index')->first();
-        $privacyPolicy = Page::with('children')->where('code', 'PRIVACY-POLICY')->where('status', 'active')->orderBy('order_index')->first();
-        $getStartedNow = Page::with('children')->where('code', 'GET-STARTED-NOW')->where('status', 'active')->orderBy('order_index')->first();
-        // return $about;
-        return Inertia::render("frontpage/web_view/AboutWebView", [
-            "about" => $about,
-            "whyChooseUs" => $whyChooseUs,
-            "buildForEveryone" => $buildForEveryone,
-            "getInTouch" => $getInTouch,
-            "privacyPolicy" => $privacyPolicy,
-            "getStartedNow" => $getStartedNow,
-        ]);
+        return Inertia::render("frontpage/web_view/AboutWebView", []);
     }
 
     public function contact()
     {
         $contactPage = Page::with('images')->where('position_code', 'CONTACT')->where('status', 'active')->orderBy('order_index')->first();
 
-        return Inertia::render("frontpage/Contact", [
+        return Inertia::render("frontpage/contact/Index", [
             "contactPage" => $contactPage
         ]);
     }

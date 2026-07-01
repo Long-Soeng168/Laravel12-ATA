@@ -1,14 +1,13 @@
 import useTranslation from '@/hooks/use-translation';
 import { usePage } from '@inertiajs/react';
 import { Mail, MapPin } from 'lucide-react';
-import FrontPageLayout from './layouts/frontpage-layout';
 
-export default function ContactPage() {
+export default function ContactContent() {
     const { t, currentLocale } = useTranslation();
     const { application_info, links } = usePage<any>().props;
 
     return (
-        <FrontPageLayout>
+        <>
             <div className="section-container mt-8 pb-12">
                 {/* Header Section */}
                 <section className="mb-16 flex flex-col items-center text-center">
@@ -76,6 +75,6 @@ export default function ContactPage() {
                     )}
                 </div>
             </div>
-        </FrontPageLayout>
+        </>
     );
 }

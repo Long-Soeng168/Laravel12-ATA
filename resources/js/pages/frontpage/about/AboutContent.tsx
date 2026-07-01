@@ -13,7 +13,6 @@ import {
     Smartphone,
     type LucideIcon,
 } from 'lucide-react';
-import FrontPageLayout from './layouts/frontpage-layout';
 
 const FeatureCard = ({ icon: Icon, title, desc }: { icon: LucideIcon; title: string; desc: string }) => (
     <div className="bg-card border-border flex flex-col items-center gap-4 border p-8 text-center transition-colors duration-200 hover:border-[#FF6D00]">
@@ -25,12 +24,12 @@ const FeatureCard = ({ icon: Icon, title, desc }: { icon: LucideIcon; title: str
     </div>
 );
 
-export default function AboutPage() {
+export default function AboutContent() {
     const { t, currentLocale } = useTranslation();
     const isKh = currentLocale === 'kh';
 
     return (
-        <FrontPageLayout>
+        <>
             <div className="section-container mt-8 pb-12">
                 {/* Hero Section */}
                 <section className="mb-20 flex flex-col items-center text-center">
@@ -249,6 +248,6 @@ export default function AboutPage() {
                     </div>
                 </section>
             </div>
-        </FrontPageLayout>
+        </>
     );
 }

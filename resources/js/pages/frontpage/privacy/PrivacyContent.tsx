@@ -1,13 +1,12 @@
 import useTranslation from '@/hooks/use-translation';
 import { Head, usePage } from '@inertiajs/react';
-import FrontPageLayout from './layouts/frontpage-layout';
 
-const Privacy = () => {
+const PrivacyContent = () => {
     const { privacies } = usePage<any>().props;
     const { t, currentLocale } = useTranslation();
 
     return (
-        <FrontPageLayout>
+        <>
             <Head>
                 <title>Privacy Policy | Your Data Protection Commitment</title>
                 <meta
@@ -68,8 +67,8 @@ const Privacy = () => {
                     </section>
                 )} */}
             </div>
-        </FrontPageLayout>
+        </>
     );
 };
 
-export default Privacy;
+export default PrivacyContent;
