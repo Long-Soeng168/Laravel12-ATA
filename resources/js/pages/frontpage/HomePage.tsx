@@ -9,13 +9,16 @@ import FrontPageLayout from './layouts/frontpage-layout';
 import LatestProductsSections from './products/components/ProductsSections';
 
 export default function HomePage() {
-    const { highlight_products, latest_products } = usePage<any>().props;
+    const { highlight_products, latest_products, website_banners } = usePage<any>().props;
+
+    const heroSlides = website_banners?.filter((b: any) => b.type === 'hero_slide') || [];
+    const miniBanners = website_banners?.filter((b: any) => b.type === 'mini_banner') || [];
 
     return (
         <FrontPageLayout>
             <div className="section-container flex-grow pb-8 max-md:px-0 md:pt-4">
                 {/* Full-Width Background Slideshow Hero Section */}
-                <SlideHeroSection />
+                <SlideHeroSection slides={heroSlides} />
             </div>
             <div className="section-container flex-grow pb-8">
                 <div className="animate-in fade-in space-y-12 duration-300">
@@ -38,7 +41,7 @@ export default function HomePage() {
                     </section>
 
                     {/* Dynamic App Exclusive Banners */}
-                    <MiniHeroSection />
+                    <MiniHeroSection banners={miniBanners} />
 
                     {/* Latest Products */}
                     <section>

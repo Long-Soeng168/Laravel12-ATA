@@ -301,6 +301,12 @@ export function AppSidebar() {
             ],
         },
         {
+            title: t('Website Banners'),
+            permission: 'banner view',
+            url: '/admin/website_banners',
+            icon: GalleryThumbnailsIcon,
+        },
+        {
             title: t('Users'),
             permission: 'user view',
             url: '/admin/users',

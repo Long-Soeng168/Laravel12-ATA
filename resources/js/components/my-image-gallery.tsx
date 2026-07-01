@@ -23,7 +23,7 @@ const MyImageGallery = ({
     isOpenViewImages: boolean;
     setIsOpenViewImages: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-    const images = selectedImages?.map((imageObject: { image: string }) => ({ src: `${imagePath}${imageObject.image}` }));
+    const images = selectedImages?.map((imageObject: { image: string }) => ({ src: imageObject.image?.startsWith('/') ? imageObject.image : `${imagePath}${imageObject.image}` }));
     console.log(images);
     return (
         <div>

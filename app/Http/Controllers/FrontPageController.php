@@ -18,6 +18,7 @@ use App\Models\PostCategory;
 use App\Models\Province;
 use App\Models\Shop;
 use App\Models\VideoPlayList;
+use App\Models\WebsiteBanner;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -123,9 +124,12 @@ class FrontPageController extends Controller
         //     'latest_products'   => $latest_products,
         //     'highlight_products'   => $highlight_products,
         // ];
+        $website_banners = WebsiteBanner::where('status', 'active')->orderBy('sort_order', 'asc')->get();
+
         return Inertia::render("frontpage/HomePage", [
             'latest_products'   => $latest_products,
             'highlight_products'   => $highlight_products,
+            'website_banners'   => $website_banners,
         ]);
     }
     

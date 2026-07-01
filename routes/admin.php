@@ -269,6 +269,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('admin/banners/remove_image/{banner}', [BannerController::class, 'remove_banner_image']);
     Route::delete('admin/banners/images/{image}', [BannerController::class, 'destroy_image']);
 
+    // Website Banner Route
+    Route::resource('admin/website_banners', \App\Http\Controllers\WebsiteBannerController::class);
+    Route::post('admin/website_banners/{website_banner}/update', [\App\Http\Controllers\WebsiteBannerController::class, 'update']);
+    Route::post('admin/website_banners/{website_banner}/update_status', [\App\Http\Controllers\WebsiteBannerController::class, 'update_status']);
+    Route::delete('admin/website_banners/remove_image/{website_banner}', [\App\Http\Controllers\WebsiteBannerController::class, 'remove_image']);
+
     // Heading Route
     Route::resource('admin/headings', HeadingController::class);
     Route::post('admin/headings/{heading}/update', [HeadingController::class, 'update']);
